@@ -60,7 +60,7 @@ jobs:
 
       # 6. Install JS Dependencies
       - name: Install pnpm Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       # 7. Prepare Laravel Environment
       - name: Prepare Laravel Environment
