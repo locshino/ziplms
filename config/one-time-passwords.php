@@ -6,7 +6,6 @@ return [
      */
     'default_expires_in_minutes' => (int) env('OTP_EXPIRES_IN_MINUTES', 2),
 
-
     /*
      * When this setting is active, we'll delete all previous one-time passwords for
      * a user when generating a new one

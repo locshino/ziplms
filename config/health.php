@@ -58,7 +58,7 @@ return [
         'throttle_notifications_key' => 'health:latestNotificationSentAt:',
 
         'mail' => [
-            'to' =>  env('HEALTH_NOTIFICATION_EMAIL_TO', 'your@example.com'),
+            'to' => env('HEALTH_NOTIFICATION_EMAIL_TO', 'your@example.com'),
 
             'from' => [
                 'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),

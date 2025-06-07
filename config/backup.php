@@ -253,7 +253,7 @@ return [
     'monitor_backups' => [
         [
             'name' => env('APP_NAME', 'laravel-backup'),
-             'disks' => explode(',', env('BACKUP_MONITOR_DISKS', 'local')),
+            'disks' => explode(',', env('BACKUP_MONITOR_DISKS', 'local')),
             'health_checks' => [
                 \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumAgeInDays::class => (int) env('BACKUP_MONITOR_MAX_AGE_DAYS', 1),
                 \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumStorageInMegabytes::class => (int) env('BACKUP_MONITOR_MAX_STORAGE_MB', 5000),
