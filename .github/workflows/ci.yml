@@ -5,9 +5,9 @@ name: ZipLMS CI
 # Controls when the workflow will run
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: ["main", "develop"]
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: ["main", "develop"]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -26,7 +26,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3' # Or your project's PHP version
+          php-version: "8.3" # Or your project's PHP version
           extensions: mbstring, xml, dom, curl, fileinfo, pdo, pdo_mysql, bcmath, zip
           tools: composer:v2
           coverage: none
@@ -40,8 +40,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x' # Or your project's Node.js version
-          cache: 'pnpm'
+          node-version: "20.x" # Or your project's Node.js version
+          cache: "pnpm"
 
       # 4. Cache Composer dependencies
       - name: Cache Composer packages
@@ -59,7 +59,7 @@ jobs:
 
       # 6. Install JS Dependencies
       - name: Install pnpm Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --no-workspaces
 
       # 7. Prepare Laravel Environment
       - name: Prepare Laravel Environment
