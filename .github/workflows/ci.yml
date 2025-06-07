@@ -1,0 +1,80 @@
+# GitHub Actions CI Workflow for ZipLMS
+
+name: ZipLMS CI
+
+# Controls when the workflow will run
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "laravel"
+  laravel:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # 1. Checkout repository code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Setup PHP with extensions
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3' # Or your project's PHP version
+          extensions: mbstring, xml, dom, curl, fileinfo, pdo, pdo_mysql, bcmath, zip
+          tools: composer:v2
+          coverage: none
+
+      # 3. Setup Node.js and pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8 # Or your desired pnpm version
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x' # Or your project's Node.js version
+          cache: 'pnpm'
+
+      # 4. Cache Composer dependencies
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      # 5. Install PHP Dependencies
+      - name: Install Composer Dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      # 6. Install JS Dependencies
+      - name: Install pnpm Dependencies
+        run: pnpm install --frozen-lockfile
+
+      # 7. Prepare Laravel Environment
+      - name: Prepare Laravel Environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      # 8. Build Frontend Assets
+      - name: Build Frontend Assets
+        run: pnpm build
+
+      # 9. Run Laravel Pint (Code Style Check)
+      - name: Run Laravel Pint
+        run: ./vendor/bin/pint --test
+
+      # 10. Run Tests with PHPUnit
+      - name: Run Tests
+        run: php artisan test
