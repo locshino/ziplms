@@ -1,4 +1,5 @@
 # GitHub Actions CI Workflow for ZipLMS
+# File: .github/workflows/ci.yml
 
 name: ZipLMS CI
 
@@ -59,7 +60,7 @@ jobs:
 
       # 6. Install JS Dependencies
       - name: Install pnpm Dependencies
-        run: pnpm install --frozen-lockfile --no-workspaces
+        run: pnpm install --frozen-lockfile --workspace-root
 
       # 7. Prepare Laravel Environment
       - name: Prepare Laravel Environment
