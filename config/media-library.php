@@ -24,7 +24,7 @@ return [
      * This queue will be used to generate derived and responsive images.
      * Leave empty to use the default queue.
      */
-    'queue_name' => env('MEDIA_QUEUE')  ?? env('MEDIA_QUEUE_NAME', 'media'),
+    'queue_name' => env('MEDIA_QUEUE') ?? env('MEDIA_QUEUE_NAME', 'media'),
 
     /*
      * By default all conversions will be performed on a queue.
@@ -72,7 +72,6 @@ return [
      * When enabled, Media Library pro will generate thumbnails for uploaded file.
      */
     'generate_thumbnails_for_temporary_uploads' => env('MEDIA_PRO_GENERATE_THUMBNAILS_FOR_TEMPORARY_UPLOADS', true),
-
 
     /*
      * This is the class that is responsible for naming generated files.

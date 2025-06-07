@@ -61,7 +61,7 @@ return [
     'cache' => [
         'enabled' => env('SETTINGS_CACHE_ENABLED', true),
         'store' => env('SETTINGS_CACHE_STORE', 'database'), // 'database' or 'redis'
-        'prefix' => env('SETTINGS_CACHE_PREFIX', \Illuminate\Support\Str::slug(env('APP_NAME', 'ZipLMS'), '_') . '_settings_cache_'),
+        'prefix' => env('SETTINGS_CACHE_PREFIX', \Illuminate\Support\Str::slug(env('APP_NAME', 'ZipLMS'), '_').'_settings_cache_'),
         'ttl' => env('SETTINGS_CACHE_TTL', 60 * 60 * 24), // 1 day
     ],
 
