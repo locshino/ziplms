@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-         Schema::create('attendance', function (Blueprint $table) {
+        Schema::create('attendance', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('schedule_id'); // FK to schedules table
             $table->uuid('user_id'); // FK to users table

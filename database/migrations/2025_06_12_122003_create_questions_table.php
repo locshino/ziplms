@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-         Schema::create('questions', function (Blueprint $table) {
+        Schema::create('questions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('organization_id')->nullable(); // FK to organizations table
             $table->json('question_text'); // Nội dung câu hỏi (hỗ trợ đa ngôn ngữ).

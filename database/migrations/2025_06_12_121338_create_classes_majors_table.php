@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-          Schema::create('classes_majors', function (Blueprint $table) {
+        Schema::create('classes_majors', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('organization_id'); // FK to organizations table
             $table->json('name'); // Tên (Lớp 10A1, Ngành CNTT, Khoa Toán) (hỗ trợ đa ngôn ngữ).

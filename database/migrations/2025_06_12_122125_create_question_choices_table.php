@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-         Schema::create('question_choices', function (Blueprint $table) {
+        Schema::create('question_choices', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('question_id'); // FK to questions table
             $table->json('choice_text'); // Nội dung lựa chọn (hỗ trợ đa ngôn ngữ).

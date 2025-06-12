@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-       Schema::create('user_class_major_enrollments', function (Blueprint $table) {
+        Schema::create('user_class_major_enrollments', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('user_id'); // FK to users table
             $table->uuid('class_major_id'); // FK to classes_majors table

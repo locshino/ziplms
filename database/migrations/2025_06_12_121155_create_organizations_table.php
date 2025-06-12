@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-         Schema::create('organizations', function (Blueprint $table) {
+        Schema::create('organizations', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->json('name'); // Tên tổ chức (hỗ trợ đa ngôn ngữ).
             $table->string('slug')->unique()->nullable(); // Chuỗi định danh duy nhất, thân thiện URL.

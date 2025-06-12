@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-         Schema::create('assignment_grades', function (Blueprint $table) {
+        Schema::create('assignment_grades', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('submission_id')->unique(); // FK to assignment_submissions table
             $table->decimal('grade')->nullable();
