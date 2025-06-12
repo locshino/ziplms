@@ -15,7 +15,7 @@ return new class extends Migration
             $table->json('origin_properties')->nullable();
 
             $table->dateTime('expires_at');
-            $table->morphs('authenticatable');
+            $table->morphs('authenticatable', 'otp_authenticatable_index');
 
             $table->timestamps();
         });
