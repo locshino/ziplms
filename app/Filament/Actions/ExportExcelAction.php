@@ -10,33 +10,26 @@ use Maatwebsite\Excel\Facades\Excel;
  *
  * Hành động Filament để xuất dữ liệu ra file Excel.
  * Cho phép cấu hình lớp export và tên file xuất.
- *
- * @package App\Filament\Actions
  */
 class ExportExcelAction extends Action
 {
     /**
      * Lớp export sử dụng bởi Maatwebsite Excel (ví dụ: App\Exports\ProductExport).
-     *
-     * @var string
      */
     protected string $exportClass;
 
     /**
      * Tên file kết quả khi xuất (bao gồm đuôi .xlsx).
-     *
-     * @var string
      */
     protected string $fileName = 'export.xlsx';
 
     /**
      * Tạo instance của action với tên tùy chọn.
      *
-     * @param string $name Tên action (mặc định 'exportExcel').
-     * @return static
+     * @param  string  $name  Tên action (mặc định 'exportExcel').
      */
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public static function make(?string $name = null): static
     {
@@ -49,7 +42,7 @@ class ExportExcelAction extends Action
     /**
      * Thiết lập lớp export sẽ được sử dụng để tạo file Excel.
      *
-     * @param string $exportClass Tên đầy đủ của lớp export.
+     * @param  string  $exportClass  Tên đầy đủ của lớp export.
      * @return $this
      */
     public function exportClass(string $exportClass): self
@@ -62,7 +55,7 @@ class ExportExcelAction extends Action
     /**
      * Thiết lập tên file xuất ra (ví dụ 'products.xlsx').
      *
-     * @param string $fileName Tên file bao gồm phần mở rộng.
+     * @param  string  $fileName  Tên file bao gồm phần mở rộng.
      * @return $this
      */
     public function fileName(string $fileName): self
@@ -76,8 +69,6 @@ class ExportExcelAction extends Action
      * Thiết lập cấu hình cơ bản cho action:
      * - Label, icon
      * - Logic xuất file bằng Maatwebsite Excel
-     *
-     * @return void
      */
     protected function setUp(): void
     {
