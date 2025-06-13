@@ -40,16 +40,14 @@ class DatabaseSeeder extends Seeder
             AttendanceSeeder::class,
             EventSeeder::class,
 
-            // --- Notifications & Communication ---
-            NotificationSeeder::class, // For the 'notifications' table
-            NotificationSeeder::class, // If SystemNotification is a distinct concept/table
-            UserNotificationSeeder::class,
+            // --- Communication ---
             ContactMessageSeeder::class,
 
-            // --- Gamification & Miscellaneous ---
+            // --- Gamification ---
             BadgeSeeder::class,
             UserBadgeSeeder::class,
-            NewsletterSubscriberSeeder::class,
+
+            // --- Import Management ---
             UserImportBatchSeeder::class,
         ]);
     }
