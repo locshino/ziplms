@@ -75,7 +75,7 @@ return new class extends Migration
             $primaryColumns = [
                 $pivotPermission,
                 $columnNames['model_morph_key'],
-                'model_type'
+                'model_type',
             ];
 
             if ($teams) {
@@ -105,7 +105,7 @@ return new class extends Migration
             $primaryColumns = [
                 $pivotRole,
                 $columnNames['model_morph_key'],
-                'model_type'
+                'model_type',
             ];
 
             if ($teams) {
