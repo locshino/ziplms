@@ -18,7 +18,7 @@ return new class extends Migration
             $table->boolean('is_correct')->default(false);
             $table->unsignedInteger('choice_order')->default(0);
             $table->timestamps();
-
+            $table->index('question_id');
             $table->foreign('question_id')->references('id')->on('questions')->onDelete('cascade');
         });
     }

@@ -20,7 +20,8 @@ return new class extends Migration
             // $table->string('status', 50)->nullable(); // (Managed by spatie/laravel-model-states)
             // Files will be handled by spatie/laravel-medialibrary
             $table->timestamps();
-
+            $table->index('assignment_id');
+            $table->index('user_id');
             $table->foreign('assignment_id')->references('id')->on('assignments')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });

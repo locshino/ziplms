@@ -19,7 +19,7 @@ return new class extends Migration
             $table->uuid('graded_by')->nullable(); // FK to users table
             $table->timestamp('graded_at')->nullable();
             $table->timestamps();
-
+            $table->index('graded_by');
             $table->foreign('submission_id')->references('id')->on('assignment_submissions')->onDelete('cascade');
             $table->foreign('graded_by')->references('id')->on('users')->onDelete('set null');
         });

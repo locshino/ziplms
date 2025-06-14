@@ -25,10 +25,11 @@ return new class extends Migration
             // $table->string('status', 50)->nullable(); // (Managed by spatie/laravel-model-states)
             $table->timestamps();
             $table->softDeletes();
-
+            $table->index('assigned_teacher_id');
+            $table->index('created_by');
+            $table->index('start_time', 's_start_time_idx');
             $table->foreign('assigned_teacher_id')->references('id')->on('users')->onDelete('set null');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
-            $table->index('start_time', 'schedules_start_time_index');
         });
     }
 

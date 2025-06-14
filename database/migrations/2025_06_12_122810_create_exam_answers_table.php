@@ -25,7 +25,11 @@ return new class extends Migration
             $table->timestamp('graded_at')->nullable();
             $table->uuid('graded_by')->nullable(); // FK to users table
             $table->timestamps();
-
+            $table->index('exam_attempt_id');
+            $table->index('exam_question_id');
+            $table->index('question_id');
+            $table->index('selected_choice_id');
+            $table->index('graded_by');
             $table->foreign('exam_attempt_id')->references('id')->on('exam_attempts')->onDelete('cascade');
             $table->foreign('exam_question_id')->references('id')->on('exam_questions')->onDelete('cascade');
             $table->foreign('question_id')->references('id')->on('questions')->onDelete('cascade');

@@ -20,7 +20,9 @@ return new class extends Migration
             $table->uuid('created_by')->nullable(); // FK to users table
             $table->timestamps();
             $table->softDeletes();
-
+            $table->index('organization_id');
+            $table->index('created_by');
+            $table->index('question_type');
             $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('set null');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
             $table->index('question_type', 'questions_question_type_index');
