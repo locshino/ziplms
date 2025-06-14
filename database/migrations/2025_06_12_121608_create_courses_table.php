@@ -25,11 +25,14 @@ return new class extends Migration
             // $table->string('status', 50)->nullable(); // (Managed by spatie/laravel-model-states)
             $table->timestamps();
             $table->softDeletes();
-
+            $table->index('organization_id');
+            $table->index('parent_id');
+            $table->index('created_by');
+            $table->index('code');
             $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('set null');
             $table->foreign('parent_id')->references('id')->on('courses')->onDelete('set null');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
-            $table->index('code', 'courses_code_index');
+
         });
     }
 

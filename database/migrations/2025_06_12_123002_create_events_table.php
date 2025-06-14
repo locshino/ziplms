@@ -23,10 +23,11 @@ return new class extends Migration
             // $table->string('status', 50)->nullable(); // (Managed by spatie/laravel-model-states)
             $table->timestamps();
             $table->softDeletes();
-
+            $table->index('organization_id');
+            $table->index('created_by');
+            $table->index('start_time', 'ev_start_time_idx');
             $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('set null');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
-            $table->index('start_time', 'events_start_time_index');
         });
     }
 

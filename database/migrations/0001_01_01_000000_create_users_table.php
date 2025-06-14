@@ -30,9 +30,10 @@ return new class extends Migration
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();
-
+            $table->index('organization_id');
             $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('set null');
             $table->unique(['organization_id', 'code'], 'users_code_organization_unique'); // Mã unique trong tổ chức
+
         });
 
     }

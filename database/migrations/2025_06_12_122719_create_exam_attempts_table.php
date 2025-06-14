@@ -23,7 +23,8 @@ return new class extends Migration
             $table->json('feedback')->nullable(); // Phản hồi chung (hỗ trợ đa ngôn ngữ).
             // $table->string('status', 50)->nullable(); // (Managed by spatie/laravel-model-states)
             $table->timestamps();
-
+            $table->index('exam_id');
+            $table->index('user_id');
             $table->foreign('exam_id')->references('id')->on('exams')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });

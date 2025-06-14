@@ -21,11 +21,13 @@ return new class extends Migration
             $table->uuid('parent_id')->nullable(); // FK to classes_majors table (self-referencing)
             $table->timestamps();
             $table->softDeletes();
-
+            $table->index('organization_id');
+            $table->index('parent_id');
+            $table->index('type');
+            $table->index('code');
             $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('cascade');
             $table->foreign('parent_id')->references('id')->on('classes_majors')->onDelete('cascade');
-            $table->index('type', 'classes_majors_type_index');
-            $table->index('code', 'classes_majors_code_index');
+
         });
 
     }

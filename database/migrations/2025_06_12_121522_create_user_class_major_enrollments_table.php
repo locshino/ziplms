@@ -19,10 +19,13 @@ return new class extends Migration
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->timestamps();
-
+            $table->index('user_id');
+            $table->index('class_major_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('class_major_id')->references('id')->on('classes_majors')->onDelete('cascade');
+
             $table->unique(['user_id', 'class_major_id', 'enrollment_type'], 'user_class_major_enrollment_unique');
+
         });
     }
 

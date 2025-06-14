@@ -18,7 +18,8 @@ return new class extends Migration
             $table->string('role_in_course')->nullable(); // Ví dụ: 'instructor', 'teaching_assistant', 'marker'.
             $table->timestamp('assigned_at')->useCurrent();
             $table->timestamps();
-
+            $table->index('user_id');
+            $table->index('course_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
             $table->unique(['user_id', 'course_id', 'role_in_course'], 'user_course_role_unique');

@@ -24,7 +24,8 @@ return new class extends Migration
             $table->json('error_log')->nullable(); // Log các lỗi chi tiết.
             // $table->string('status', 50)->nullable(); // (Managed by spatie/laravel-model-states)
             $table->timestamps();
-
+            $table->index('organization_id');
+            $table->index('uploaded_by_user_id');
             $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('set null');
             $table->foreign('uploaded_by_user_id')->references('id')->on('users')->onDelete('cascade');
         });

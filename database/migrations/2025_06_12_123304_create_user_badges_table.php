@@ -17,7 +17,8 @@ return new class extends Migration
             $table->uuid('badge_id'); // FK to badges table
             $table->timestamp('awarded_at')->useCurrent();
             $table->timestamps();
-
+            $table->index('user_id');
+            $table->index('badge_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('badge_id')->references('id')->on('badges')->onDelete('cascade');
             $table->unique(['user_id', 'badge_id'], 'user_badges_user_badge_unique');

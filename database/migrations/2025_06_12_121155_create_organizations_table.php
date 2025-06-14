@@ -23,6 +23,7 @@ return new class extends Migration
             // $table->string('status', 50)->nullable(); // (Managed by spatie/laravel-model-states)
             $table->timestamps();
             $table->softDeletes(); // Hỗ trợ soft delete.
+
         });
     }
 

@@ -20,7 +20,8 @@ return new class extends Migration
             // Files will be handled by spatie/laravel-medialibrary and associated with this model
             $table->timestamps();
             $table->softDeletes();
-
+            $table->index('lecture_id');
+            $table->index('uploaded_by');
             $table->foreign('lecture_id')->references('id')->on('lectures')->onDelete('cascade');
             $table->foreign('uploaded_by')->references('id')->on('users')->onDelete('set null');
         });
