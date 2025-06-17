@@ -2,6 +2,12 @@
 
 return [
     /*
+     * The name of the database table that will be used to store one-time passwords.
+     * You can change this if you want to use a different table name.
+     */
+    'table_name' => 'one_time_passwords',
+
+    /*
      * one-time passwords should be consumed within this number of minutes
      */
     'default_expires_in_minutes' => (int) env('OTP_EXPIRES_IN_MINUTES', 2),
@@ -42,7 +48,7 @@ return [
      * The Livewire component will redirect successfully authenticated users
      * to this URL.
      */
-    'redirect_successful_authentication_to' => env('OTP_REDIRECT_TO', '/dashboard'),
+    'redirect_successful_authentication_to' => env('OTP_REDIRECT_TO', '/'),
 
     /*
      * These values are used to rate limit the number of attempts
