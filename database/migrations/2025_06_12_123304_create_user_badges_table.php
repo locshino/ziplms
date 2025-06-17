@@ -24,7 +24,7 @@ return new class extends Migration
             $table->index('badge_id');
             $table->unique([
                 'user_id',
-                'badge_id'
+                'badge_id',
             ], 'user_badges_user_badge_unique');
 
             $table->foreign('user_id')->references('id')

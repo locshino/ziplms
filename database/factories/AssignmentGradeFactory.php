@@ -12,8 +12,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class AssignmentGradeFactory extends Factory
 {
-    use Concerns\HasFakesTranslations,
-        Concerns\HasAssignsRandomOrNewModel;
+    use Concerns\HasAssignsRandomOrNewModel,
+        Concerns\HasFakesTranslations;
 
     protected $model = AssignmentGrade::class;
 

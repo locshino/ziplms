@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-
 class Badge extends Base\Model
 {
     protected $casts = [

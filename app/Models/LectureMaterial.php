@@ -4,8 +4,8 @@ namespace App\Models;
 
 use App\Enums\AttachmentType;
 use Spatie\MediaLibrary\HasMedia;
-use Spatie\Translatable\HasTranslations;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Translatable\HasTranslations;
 
 class LectureMaterial extends Base\Model implements HasMedia
 {

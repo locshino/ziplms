@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\Course;
-use App\Models\User;
-use Illuminate\Support\Collection;
 use App\Models\CourseEnrollment;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 
 class CourseEnrollmentSeeder extends Seeder
 {
@@ -20,10 +20,11 @@ class CourseEnrollmentSeeder extends Seeder
 
         if ($userIds->isEmpty() || $courseIds->isEmpty()) {
             $this->command->info('Skipping CourseEnrollmentSeeder: No users or courses found.');
+
             return;
         }
 
-        $possibleEnrollments = new Collection();
+        $possibleEnrollments = new Collection;
         foreach ($userIds as $userId) {
             foreach ($courseIds as $courseId) {
                 $possibleEnrollments->push(['user_id' => $userId, 'course_id' => $courseId]);
@@ -35,6 +36,7 @@ class CourseEnrollmentSeeder extends Seeder
 
         if ($enrollmentsToCreate->isEmpty()) {
             $this->command->info('No unique course enrollments to create.');
+
             return;
         }
 
@@ -46,6 +48,6 @@ class CourseEnrollmentSeeder extends Seeder
             ]);
         });
 
-        $this->command->info('Created ' . $enrollmentsToCreate->count() . ' unique course enrollments.');
+        $this->command->info('Created '.$enrollmentsToCreate->count().' unique course enrollments.');
     }
 }

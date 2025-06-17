@@ -12,8 +12,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class LectureMaterialFactory extends Factory
 {
-    use Concerns\HasFakesTranslations,
-        Concerns\HasAssignsRandomOrNewModel;
+    use Concerns\HasAssignsRandomOrNewModel,
+        Concerns\HasFakesTranslations;
 
     protected $model = LectureMaterial::class;
 

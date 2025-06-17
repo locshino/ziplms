@@ -18,7 +18,7 @@ return new class extends Migration
             $table->json('description')->nullable(); // Mô tả (hỗ trợ đa ngôn ngữ).
             // $table->string('image_path')->nullable(); // (Managed by spatie/laravel-medialibrary)
             $table->json('criteria_description')->nullable(); // Mô tả điều kiện (hỗ trợ đa ngôn ngữ).
-            
+
             $table->timestamps();
             $table->softDeletes();
 

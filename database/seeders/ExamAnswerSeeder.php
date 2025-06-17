@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\ExamAnswer;
 use Illuminate\Database\Seeder;
 
 class ExamAnswerSeeder extends Seeder

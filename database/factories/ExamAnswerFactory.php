@@ -37,6 +37,7 @@ class ExamAnswerFactory extends Factory
             'question_id' => function (array $attributes) {
                 // Derive question_id from exam_question_id if available
                 $eq = ExamQuestion::find($attributes['exam_question_id'] ?? null);
+
                 return $eq ? $eq->question_id : $this->assignRandomOrNewModel(Question::class);
             },
             'answer_text' => null,
@@ -54,19 +55,25 @@ class ExamAnswerFactory extends Factory
     {
         return $this->afterCreating(function (ExamAnswer $examAnswer) {
             $examQuestion = $examAnswer->examQuestion;
-            if (!$examQuestion) {
+            if (! $examQuestion) {
                 $examQuestion = ExamQuestion::find($examAnswer->exam_question_id);
-                if (!$examQuestion) return;
+                if (! $examQuestion) {
+                    return;
+                }
             }
 
             $question = $examQuestion->question;
-            if (!$question) {
+            if (! $question) {
                 $question = Question::find($examAnswer->question_id);
-                if (!$question) return;
+                if (! $question) {
+                    return;
+                }
             }
 
             $questionTypeTag = $question->tagsWithType(QuestionType::key())->first();
-            if (!$questionTypeTag) return;
+            if (! $questionTypeTag) {
+                return;
+            }
 
             $questionType = QuestionType::tryFrom($questionTypeTag->name);
 
@@ -82,7 +89,9 @@ class ExamAnswerFactory extends Factory
                         $selectedChoice = $choices->random();
                         $examAnswer->selected_choice_id = $selectedChoice->id;
                         $isCorrect = $selectedChoice->is_correct;
-                        if ($isCorrect) $pointsEarned = $maxPoints;
+                        if ($isCorrect) {
+                            $pointsEarned = $maxPoints;
+                        }
                     }
                     break;
 
@@ -92,9 +101,11 @@ class ExamAnswerFactory extends Factory
                         $numToSelect = fake()->numberBetween(1, min(4, $choices->count())); // Select up to 4 or total choices
                         $selectedChoicesCollection = $choices->random($numToSelect);
                         $examAnswer->chosen_option_ids = $selectedChoicesCollection->pluck('id')->toArray();
-                        $isCorrect = $selectedChoicesCollection->every(fn(QuestionChoice $choice) => $choice->is_correct) &&
+                        $isCorrect = $selectedChoicesCollection->every(fn (QuestionChoice $choice) => $choice->is_correct) &&
                             $choices->where('is_correct', true)->count() === $selectedChoicesCollection->where('is_correct', true)->count();
-                        if ($isCorrect) $pointsEarned = $maxPoints;
+                        if ($isCorrect) {
+                            $pointsEarned = $maxPoints;
+                        }
                     }
                     break;
 
@@ -108,7 +119,7 @@ class ExamAnswerFactory extends Factory
             }
 
             $examAnswer->is_correct = $isCorrect;
-            if (!in_array($questionType, [QuestionType::Essay, QuestionType::ShortAnswer])) {
+            if (! in_array($questionType, [QuestionType::Essay, QuestionType::ShortAnswer])) {
                 $examAnswer->points_earned = $pointsEarned;
             }
 

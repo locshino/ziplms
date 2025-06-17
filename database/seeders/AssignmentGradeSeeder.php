@@ -21,6 +21,7 @@ class AssignmentGradeSeeder extends Seeder
 
         if ($submissionsWithoutGrades->isEmpty()) {
             $this->command->info('No assignment submissions found without grades to seed.');
+
             return;
         }
 
@@ -28,6 +29,6 @@ class AssignmentGradeSeeder extends Seeder
             AssignmentGrade::factory()->create(['submission_id' => $submission->id]);
         });
 
-        $this->command->info('Created ' . $submissionsWithoutGrades->count() . ' assignment grades for submissions without existing grades.');
+        $this->command->info('Created '.$submissionsWithoutGrades->count().' assignment grades for submissions without existing grades.');
     }
 }

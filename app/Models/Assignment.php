@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use App\States\Status;
-use Spatie\Translatable\HasTranslations;
 use Spatie\ModelStates\HasStates;
 use Spatie\Tags\HasTags;
+use Spatie\Translatable\HasTranslations;
 
 class Assignment extends Base\Model
 {

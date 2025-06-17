@@ -42,7 +42,7 @@ trait HasFakesTranslations
             default => throw new \InvalidArgumentException("Invalid faker method: {$fakerMethod}"),
         };
 
-        return $this->makeTranslations(fn(Faker $faker) => $faker->{$fakerMethod}(...$args), $locales);
+        return $this->makeTranslations(fn (Faker $faker) => $faker->{$fakerMethod}(...$args), $locales);
     }
 
     // CÁC PHƯƠNG THỨC CỤ THỂ DỄ GỌI HƠN
@@ -81,7 +81,7 @@ trait HasFakesTranslations
             ->mapWithKeys(function ($locale) use ($prefixesByLocale, $baseText) {
                 $prefix = $prefixesByLocale[$locale] ?? '';
 
-                return [$locale => $prefix . $baseText];
+                return [$locale => $prefix.$baseText];
             })
             ->toArray();
     }
@@ -94,7 +94,7 @@ trait HasFakesTranslations
         $locales = $locales ?? $this->translationLocales;
 
         return collect($locales)
-            ->mapWithKeys(fn($locale) => [$locale => $translations[$locale] ?? null])
+            ->mapWithKeys(fn ($locale) => [$locale => $translations[$locale] ?? null])
             ->filter() // bỏ các bản dịch null nếu không đủ locale
             ->toArray();
     }

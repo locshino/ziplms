@@ -5,8 +5,8 @@ namespace Database\Seeders;
 use App\Enums\QuestionType;
 use App\Models\Question;
 use App\Models\QuestionChoice;
-use Illuminate\Database\Seeder;
 use Database\Factories\Concerns\HasFakesTranslations;
+use Illuminate\Database\Seeder;
 
 class QuestionSeeder extends Seeder
 {
@@ -26,7 +26,7 @@ class QuestionSeeder extends Seeder
 
                 $questionTypeTag = $question->tagsWithType(QuestionType::key())->first();
 
-                if (!$questionTypeTag) {
+                if (! $questionTypeTag) {
                     throw new \Exception("Missing QuestionType tag for question {$question->id}");
                 }
 
@@ -59,7 +59,7 @@ class QuestionSeeder extends Seeder
                                 'en' => 'False',
                                 'vi' => 'Sai',
                             ]),
-                            'is_correct' => !$correctIsTrue,
+                            'is_correct' => ! $correctIsTrue,
                         ]);
                     },
 

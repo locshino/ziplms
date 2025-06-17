@@ -4,7 +4,6 @@ namespace App\Models;
 
 class ImportBatch extends Base\Model
 {
-
     protected $casts = [
         'error_log' => 'json',
     ];

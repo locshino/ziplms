@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Assignment;
 use App\Models\Course;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -12,8 +11,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class AssignmentFactory extends Factory
 {
-    use Concerns\HasFakesTranslations,
-        Concerns\HasAssignsRandomOrNewModel;
+    use Concerns\HasAssignsRandomOrNewModel,
+        Concerns\HasFakesTranslations;
 
     protected $model = Assignment::class;
 

@@ -28,7 +28,7 @@ return new class extends Migration
             $table->index('marked_by');
             $table->unique([
                 'schedule_id',
-                'user_id'
+                'user_id',
             ], 'attendance_schedule_user_unique');
 
             $table->foreign('schedule_id')->references('id')

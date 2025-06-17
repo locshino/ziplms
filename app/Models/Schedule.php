@@ -4,7 +4,6 @@ namespace App\Models;
 
 class Schedule extends Base\Model
 {
-
     protected $casts = [
         'title' => 'json',
         'description' => 'json',

@@ -5,8 +5,8 @@ namespace App\Enums;
 enum ExamShowResultsType: string
 {
     use Concerns\HasEnumValues,
-        Concerns\HasOptions,
-        Concerns\HasKeyType;
+        Concerns\HasKeyType,
+        Concerns\HasOptions;
 
     case IMMEDIATELY = 'immediately';
     case AFTER_EXAM_END_TIME = 'after_exam_end_time';

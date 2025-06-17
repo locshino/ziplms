@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('course_id'); // FK to courses table
             $table->json('title'); // Tiêu đề (hỗ trợ đa ngôn ngữ).
             $table->json('instructions')->nullable(); // Hướng dẫn (hỗ trợ đa ngôn ngữ).
-            // $table->string('assignment_type'); // Managed by plugin filament-spatie-tags 
+            // $table->string('assignment_type'); // Managed by plugin filament-spatie-tags
             $table->decimal('max_score')->nullable();
             $table->boolean('allow_late_submissions')->default(false);
             $table->uuid('created_by')->nullable(); // FK to users table

@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Models\Course;
 use App\Models\CourseEnrollment;
 use App\Models\User;
-use App\States;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -13,8 +12,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class CourseEnrollmentFactory extends Factory
 {
-    use Concerns\HasFakesStatus,
-        Concerns\HasAssignsRandomOrNewModel;
+    use Concerns\HasAssignsRandomOrNewModel,
+        Concerns\HasFakesStatus;
 
     protected $model = CourseEnrollment::class;
 

@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\ExamAnswer;
-use App\Models\ExamQuestion;
 use App\Models\ExamAttempt;
+use App\Models\ExamQuestion;
 use Illuminate\Database\Seeder;
 
 class ExamAttemptSeeder extends Seeder
@@ -19,8 +19,9 @@ class ExamAttemptSeeder extends Seeder
             ->create()
             ->each(function (ExamAttempt $attempt) {
                 $exam = $attempt->exam;
-                if (!$exam) {
+                if (! $exam) {
                     $this->command->warn("ExamAttempt ID {$attempt->id} does not have an associated Exam. Skipping answer generation.");
+
                     return;
                 }
 

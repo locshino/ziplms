@@ -13,8 +13,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class ExamAttemptFactory extends Factory
 {
     use Concerns\HasAssignsRandomOrNewModel,
-        Concerns\HasFakesTranslations,
-        Concerns\HasFakesStatus;
+        Concerns\HasFakesStatus,
+        Concerns\HasFakesTranslations;
 
     protected $model = ExamAttempt::class;
 

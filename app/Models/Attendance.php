@@ -2,10 +2,8 @@
 
 namespace App\Models;
 
-
 class Attendance extends Base\Model
 {
-
     protected $casts = ['notes' => 'json'];
 
     public function schedule()

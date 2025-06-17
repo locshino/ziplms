@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\Exam;
-use App\Models\Question;
 use App\Models\ExamQuestion;
-use Illuminate\Support\Collection;
+use App\Models\Question;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 
 class ExamQuestionSeeder extends Seeder
 {
@@ -20,10 +20,11 @@ class ExamQuestionSeeder extends Seeder
 
         if ($examIds->isEmpty() || $questionIds->isEmpty()) {
             $this->command->info('Skipping ExamQuestionSeeder: No exams or questions found.');
+
             return;
         }
 
-        $possibleExamQuestions = new Collection();
+        $possibleExamQuestions = new Collection;
         foreach ($examIds as $examId) {
             foreach ($questionIds as $questionId) {
                 $possibleExamQuestions->push(['exam_id' => $examId, 'question_id' => $questionId]);
@@ -35,6 +36,7 @@ class ExamQuestionSeeder extends Seeder
 
         if ($examQuestionsToCreate->isEmpty()) {
             $this->command->info('No unique exam-question pairs to create.');
+
             return;
         }
 
@@ -45,6 +47,6 @@ class ExamQuestionSeeder extends Seeder
             ]);
         });
 
-        $this->command->info('Created ' . $examQuestionsToCreate->count() . ' unique exam questions.');
+        $this->command->info('Created '.$examQuestionsToCreate->count().' unique exam questions.');
     }
 }

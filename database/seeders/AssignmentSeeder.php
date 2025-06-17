@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Assignment;
 use App\Enums\AssignmentType;
+use App\Models\Assignment;
 use Illuminate\Database\Seeder;
 
 class AssignmentSeeder extends Seeder

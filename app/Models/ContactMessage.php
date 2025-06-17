@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-
 class ContactMessage extends Base\Model
 {
     protected $casts = [

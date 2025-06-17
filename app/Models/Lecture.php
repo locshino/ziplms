@@ -28,7 +28,7 @@ class Lecture extends Base\Model
         'description',
         'duration_estimate',
         'created_by',
-        'status'
+        'status',
     ];
 
     public function course()

@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Spatie\Translatable\HasTranslations;
 use Spatie\Tags\HasTags;
+use Spatie\Translatable\HasTranslations;
 
 class Question extends Base\Model
 {

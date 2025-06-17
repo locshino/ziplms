@@ -12,9 +12,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class LectureFactory extends Factory
 {
-    use Concerns\HasFakesStatus,
-        Concerns\HasFakesTranslations,
-        Concerns\HasAssignsRandomOrNewModel;
+    use Concerns\HasAssignsRandomOrNewModel,
+        Concerns\HasFakesStatus,
+        Concerns\HasFakesTranslations;
 
     protected $model = Lecture::class;
 

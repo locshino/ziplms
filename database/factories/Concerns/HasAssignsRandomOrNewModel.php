@@ -11,12 +11,11 @@ trait HasAssignsRandomOrNewModel
      * or create a new one using its factory.
      *
      * @param  string  $modelClass  Fully qualified class name of the Eloquent model.
-     * @param  string  $column      Column to retrieve (default 'id').
-     * @return mixed
+     * @param  string  $column  Column to retrieve (default 'id').
      */
     protected function assignRandomOrNewModel(string $modelClass, string $column = 'id'): mixed
     {
-        if (!class_exists($modelClass) || !is_subclass_of($modelClass, Model::class)) {
+        if (! class_exists($modelClass) || ! is_subclass_of($modelClass, Model::class)) {
             throw new \InvalidArgumentException("{$modelClass} is not a valid Eloquent model.");
         }
 

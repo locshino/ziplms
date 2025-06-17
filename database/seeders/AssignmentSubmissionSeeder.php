@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 use App\Enums\AssignmentType;
 use App\Models\AssignmentSubmission;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Log;
 
 class AssignmentSubmissionSeeder extends Seeder
 {
@@ -23,6 +23,7 @@ class AssignmentSubmissionSeeder extends Seeder
                 $sampleFiles = $this->getSampleFiles();
                 if (empty($sampleFiles)) {
                     $this->command->warn("No sample files available to attach to submission ID: {$submission->id}.");
+
                     return;
                 }
 
@@ -36,7 +37,7 @@ class AssignmentSubmissionSeeder extends Seeder
                         ->setName($selectedFile['name'])
                         ->toMediaCollection(AssignmentType::key());
                 } catch (\Exception $e) {
-                    Log::error("Failed to add media from URL {$selectedFile['url']} for submission ID {$submission->id}: " . $e->getMessage());
+                    Log::error("Failed to add media from URL {$selectedFile['url']} for submission ID {$submission->id}: ".$e->getMessage());
                     $this->command->warn("Could not add media from URL: {$selectedFile['url']} for submission ID: {$submission->id}. Error: {$e->getMessage()}");
                 }
             });
