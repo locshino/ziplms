@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
-class Schedule extends Model
+class Schedule extends Base\Model
 {
-    use HasFactory, SoftDeletes;
 
-    protected $casts = ['title' => 'json', 'description' => 'json', 'start_time' => 'datetime', 'end_time' => 'datetime'];
+    protected $casts = [
+        'title' => 'json',
+        'description' => 'json',
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
+    ];
 
     public function schedulable()
     {

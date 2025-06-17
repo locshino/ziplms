@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-
-class UserImportBatch extends Model
+class ImportBatch extends Base\Model
 {
-    use HasFactory;
 
-    protected $casts = ['error_log' => 'json'];
+    protected $casts = [
+        'error_log' => 'json',
+    ];
 
     public function organization()
     {

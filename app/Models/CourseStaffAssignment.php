@@ -2,11 +2,20 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Tags\HasTags;
 
-class CourseStaffAssignment extends Model
+class CourseStaffAssignment extends Base\Model
 {
-    use HasFactory;
+    use HasTags;
+
+    protected $casts = [
+        'assigned_at' => 'datetime',
+    ];
+
+    protected $fillable = [
+        'user_id',
+        'course_id',
+    ];
 
     public function user()
     {

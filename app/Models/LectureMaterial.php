@@ -2,14 +2,41 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Enums\AttachmentType;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\Translatable\HasTranslations;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class LectureMaterial extends Model
+class LectureMaterial extends Base\Model implements HasMedia
 {
-    use HasFactory, SoftDeletes;
+    use HasTranslations,
+        InteractsWithMedia;
 
-    protected $casts = ['name' => 'json', 'description' => 'json'];
+    protected $casts = [
+        'name' => 'json',
+        'description' => 'json',
+        'video_links' => 'json',
+    ];
+
+    public array $translatable = [
+        'name',
+        'description',
+    ];
+
+    protected $fillable = [
+        'lecture_id',
+        'name',
+        'description',
+        'uploaded_by',
+    ];
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection(AttachmentType::key())
+            ->useDisk('public')
+            ->acceptsMimeTypes(AttachmentType::values())
+            ->withResponsiveImages();
+    }
 
     public function lecture()
     {

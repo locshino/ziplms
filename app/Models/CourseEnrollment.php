@@ -2,13 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\States\Status;
+use Spatie\ModelStates\HasStates;
 
-class CourseEnrollment extends Model
+class CourseEnrollment extends Base\Model
 {
-    use HasFactory;
+    use HasStates;
 
-    protected $casts = ['completed_at' => 'datetime'];
+    protected $casts = [
+        'completed_at' => 'datetime',
+        'status' => Status::class,
+    ];
+
+    protected $fillable = [
+        'user_id',
+        'course_id',
+        'final_grade',
+        'status',
+    ];
 
     public function user()
     {

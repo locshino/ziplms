@@ -19,7 +19,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Allow mass assignment for all models
-        \Illuminate\Database\Eloquent\Model::unguard();
+        //
     }
 }

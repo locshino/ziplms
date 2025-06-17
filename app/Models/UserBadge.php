@@ -2,12 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-
-class UserBadge extends Model
+class UserBadge extends Base\Model
 {
-    use HasFactory;
-
     public function user()
     {
         return $this->belongsTo(User::class);

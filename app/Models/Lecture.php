@@ -2,14 +2,34 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\States\Status;
+use Spatie\ModelStates\HasStates;
+use Spatie\Translatable\HasTranslations;
 
-class Lecture extends Model
+class Lecture extends Base\Model
 {
-    use HasFactory, SoftDeletes;
+    use HasStates,
+        HasTranslations;
 
-    protected $casts = ['title' => 'json', 'description' => 'json'];
+    protected $casts = [
+        'title' => 'json',
+        'description' => 'json',
+        'status' => Status::class,
+    ];
+
+    public $translatable = [
+        'title',
+        'description',
+    ];
+
+    protected $fillable = [
+        'course_id',
+        'title',
+        'description',
+        'duration_estimate',
+        'created_by',
+        'status'
+    ];
 
     public function course()
     {

@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-
-class ExamQuestion extends Model
+class ExamQuestion extends Base\Model
 {
-    use HasFactory;
+    protected $fillable = [
+        'exam_id',
+        'question_id',
+        'question_order',
+        'points',
+    ];
 
     public function exam()
     {

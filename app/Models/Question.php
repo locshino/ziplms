@@ -2,14 +2,30 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Translatable\HasTranslations;
+use Spatie\Tags\HasTags;
 
-class Question extends Model
+class Question extends Base\Model
 {
-    use HasFactory, SoftDeletes;
+    use HasTags,
+        HasTranslations;
 
-    protected $casts = ['question_text' => 'json', 'explanation' => 'json'];
+    protected $casts = [
+        'question_text' => 'json',
+        'explanation' => 'json',
+    ];
+
+    public $translatable = [
+        'question_text',
+        'explanation',
+    ];
+
+    protected $fillable = [
+        'organization_id',
+        'question_text',
+        'explanation',
+        'created_by',
+    ];
 
     public function organization()
     {

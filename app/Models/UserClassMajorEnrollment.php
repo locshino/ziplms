@@ -2,15 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Tags\HasTags;
 
-class UserClassMajorEnrollment extends Model
+class UserClassMajorEnrollment extends Base\Model
 {
-    use HasFactory;
+    use HasTags;
 
-    protected $table = 'user_class_major_enrollments';
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
+    ];
 
-    protected $casts = ['start_date' => 'date', 'end_date' => 'date'];
+    protected $fillable = [
+        'user_id',
+        'class_major_id',
+        'start_date',
+        'end_date',
+    ];
 
     public function user()
     {
