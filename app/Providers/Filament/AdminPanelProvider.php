@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use Afsakar\FilamentOtpLogin\FilamentOtpLoginPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -9,6 +10,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\SpatieLaravelTranslatablePlugin;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -32,28 +34,57 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
-            ->pages([
-                Pages\Dashboard::class,
-                \App\Filament\Pages\ManageGeneralSettings::class,
-            ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
-            ])
-            ->middleware([
-                EncryptCookies::class,
-                AddQueuedCookiesToResponse::class,
-                StartSession::class,
-                AuthenticateSession::class,
-                ShareErrorsFromSession::class,
-                VerifyCsrfToken::class,
-                SubstituteBindings::class,
-                DisableBladeIconComponents::class,
-                DispatchServingFilamentEvent::class,
-            ])
-            ->authMiddleware([
-                Authenticate::class,
-            ]);
+            ->pages($this->pages())
+            ->widgets($this->widgets())
+            ->middleware($this->middleware())
+            ->authMiddleware($this->authMiddleware())
+            ->plugins($this->plugins());
+    }
+
+    protected function middleware(): array
+    {
+        return [
+            EncryptCookies::class,
+            AddQueuedCookiesToResponse::class,
+            StartSession::class,
+            AuthenticateSession::class,
+            ShareErrorsFromSession::class,
+            VerifyCsrfToken::class,
+            SubstituteBindings::class,
+            DisableBladeIconComponents::class,
+            DispatchServingFilamentEvent::class,
+        ];
+    }
+
+    protected function authMiddleware(): array
+    {
+        return [
+            Authenticate::class,
+        ];
+    }
+
+    protected function pages(): array
+    {
+        return [
+            Pages\Dashboard::class,
+            \App\Filament\Pages\ManageGeneralSettings::class,
+        ];
+    }
+
+    protected function widgets(): array
+    {
+        return [
+            Widgets\AccountWidget::class,
+            Widgets\FilamentInfoWidget::class,
+        ];
+    }
+
+    protected function plugins(): array
+    {
+        return [
+            FilamentOtpLoginPlugin::make(),
+            SpatieLaravelTranslatablePlugin::make(),
+        ];
     }
 }
