@@ -2,13 +2,37 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\States\Status;
+use Spatie\ModelStates\HasStates;
+use Spatie\Translatable\HasTranslations;
 
-class ExamAttempt extends Model
+class ExamAttempt extends Base\Model
 {
-    use HasFactory;
+    use HasStates,
+        HasTranslations;
 
-    protected $casts = ['started_at' => 'datetime', 'completed_at' => 'datetime', 'feedback' => 'json'];
+    protected $casts = [
+        'started_at' => 'datetime',
+        'completed_at' => 'datetime',
+        'feedback' => 'json',
+        'status' => Status::class,
+    ];
+
+    public $translatable = [
+        'feedback',
+    ];
+
+    protected $fillable = [
+        'exam_id',
+        'user_id',
+        'attempt_number',
+        'score',
+        'time_spent_seconds',
+        'feedback',
+        'status',
+        'started_at',
+        'completed_at',
+    ];
 
     public function exam()
     {

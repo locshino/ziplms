@@ -15,13 +15,19 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('submission_id')->unique(); // FK to assignment_submissions table
             $table->decimal('grade')->nullable();
-            $table->json('feedback')->nullable(); // Phản hồi (hỗ trợ đa ngôn ngữ).
+            $table->json('feedback')->nullable(); // Multilingual feedback
             $table->uuid('graded_by')->nullable(); // FK to users table
+
             $table->timestamp('graded_at')->nullable();
             $table->timestamps();
+            $table->softDeletes();
+
             $table->index('graded_by');
-            $table->foreign('submission_id')->references('id')->on('assignment_submissions')->onDelete('cascade');
-            $table->foreign('graded_by')->references('id')->on('users')->onDelete('set null');
+
+            $table->foreign('submission_id')->references('id')
+                ->on('assignment_submissions')->onDelete('cascade');
+            $table->foreign('graded_by')->references('id')
+                ->on('users')->onDelete('set null');
         });
     }
 

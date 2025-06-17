@@ -2,14 +2,44 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\States\Status;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\ModelStates\HasStates;
+use Spatie\Translatable\HasTranslations;
 
-class Course extends Model
+class Course extends Base\Model
 {
-    use HasFactory, SoftDeletes;
+    use HasStates,
+        HasTranslations,
+        InteractsWithMedia; // For image_path
 
-    protected $casts = ['name' => 'json', 'description' => 'json', 'start_date' => 'date', 'end_date' => 'date'];
+    protected $casts = [
+        'description' => 'json',
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'status' => Status::class,
+    ];
+
+    public array $translatable = [
+        'name',
+        'description',
+    ];
+
+    protected $fillable = [
+        'name',
+        'description',
+        'start_date',
+        'end_date',
+        'status',
+        'organization_id',
+        'parent_id',
+        'created_by',
+    ];
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('image')->singleFile();
+    }
 
     public function organization()
     {

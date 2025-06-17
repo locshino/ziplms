@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Badge;
+use App\Models\User;
 use App\Models\UserBadge;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -10,11 +12,17 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class UserBadgeFactory extends Factory
 {
+    use Concerns\HasAssignsRandomOrNewModel;
+
     protected $model = UserBadge::class;
 
     public function definition(): array
     {
         // Để trống vì user_id và badge_id sẽ được cung cấp bởi Seeder.
-        return [];
+        return [
+            'user_id' => $this->assignRandomOrNewModel(User::class),
+            'badge_id' => $this->assignRandomOrNewModel(Badge::class),
+            'awarded_at' => fake()->dateTimeBetween('-1 year', 'now'),
+        ];
     }
 }

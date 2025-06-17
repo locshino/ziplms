@@ -2,14 +2,29 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\States\Status;
+use Spatie\ModelStates\HasStates;
+use Spatie\Tags\HasTags;
+use Spatie\Translatable\HasTranslations;
 
-class Assignment extends Model
+class Assignment extends Base\Model
 {
-    use HasFactory, SoftDeletes;
+    use HasStates,
+        HasTags,
+        HasTranslations;
 
-    protected $casts = ['title' => 'json', 'instructions' => 'json', 'due_date' => 'datetime', 'allow_late_submissions' => 'boolean'];
+    protected $casts = [
+        'title' => 'json',
+        'instructions' => 'json',
+        'due_date' => 'datetime',
+        'allow_late_submissions' => 'boolean',
+        'status' => Status::class,
+    ];
+
+    public array $translatable = [
+        'title',
+        'instructions',
+    ];
 
     public function course()
     {

@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-
-class ContactMessage extends Model
+class ContactMessage extends Base\Model
 {
-    use HasFactory;
-
-    protected $casts = ['subject' => 'json', 'read_at' => 'datetime'];
+    protected $casts = [
+        'subject' => 'json',
+        'read_at' => 'datetime',
+    ];
 
     public function sender()
     {

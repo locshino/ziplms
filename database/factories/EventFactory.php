@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class EventFactory extends Factory
 {
+    use Concerns\HasAssignsRandomOrNewModel,
+        Concerns\HasFakesTranslations;
+
     protected $model = Event::class;
 
     /**
@@ -21,16 +24,14 @@ class EventFactory extends Factory
      */
     public function definition(): array
     {
-        $name = 'Sự kiện: '.fake()->bs;
-
         return [
-            'organization_id' => Organization::factory(),
-            'title' => ['vi' => $name, 'en' => 'Event: '.fake()->bs],
-            'description' => ['vi' => fake()->paragraph, 'en' => fake()->paragraph],
+            'organization_id' => $this->assignRandomOrNewModel(Organization::class),
+            'title' => $this->fakeSentenceTranslations(),
+            'description' => $this->fakeParagraphTranslations(),
             'start_time' => fake()->dateTimeBetween('+1 day', '+1 week'),
             'end_time' => fake()->dateTimeBetween('+1 week', '+2 weeks'),
             'location' => fake()->address,
-            'created_by' => User::factory(),
+            'created_by' => $this->assignRandomOrNewModel(User::class),
         ];
     }
 }

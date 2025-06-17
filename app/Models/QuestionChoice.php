@@ -2,13 +2,27 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Translatable\HasTranslations;
 
-class QuestionChoice extends Model
+class QuestionChoice extends Base\Model
 {
-    use HasFactory;
+    use HasTranslations;
 
-    protected $casts = ['choice_text' => 'json', 'is_correct' => 'boolean'];
+    protected $casts = [
+        'choice_text' => 'json',
+        'is_correct' => 'boolean',
+    ];
+
+    public $translatable = [
+        'choice_text',
+    ];
+
+    protected $fillable = [
+        'question_id',
+        'choice_text',
+        'is_correct',
+        'choice_order',
+    ];
 
     public function question()
     {

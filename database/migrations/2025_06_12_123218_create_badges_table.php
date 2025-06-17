@@ -18,9 +18,14 @@ return new class extends Migration
             $table->json('description')->nullable(); // Mô tả (hỗ trợ đa ngôn ngữ).
             // $table->string('image_path')->nullable(); // (Managed by spatie/laravel-medialibrary)
             $table->json('criteria_description')->nullable(); // Mô tả điều kiện (hỗ trợ đa ngôn ngữ).
+
             $table->timestamps();
+            $table->softDeletes();
+
             $table->index('organization_id');
-            $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('set null');
+
+            $table->foreign('organization_id')->references('id')
+                ->on('organizations')->onDelete('set null');
             // Consider unique key for (organization_id, name->'$.en') if name needs to be unique per org
         });
     }

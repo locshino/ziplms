@@ -2,12 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-
-class Attendance extends Model
+class Attendance extends Base\Model
 {
-    use HasFactory;
-
     protected $casts = ['notes' => 'json'];
 
     public function schedule()

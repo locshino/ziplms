@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\ExamAnswer;
 use Illuminate\Database\Seeder;
 
 class ExamAnswerSeeder extends Seeder
@@ -12,6 +11,8 @@ class ExamAnswerSeeder extends Seeder
      */
     public function run(): void
     {
-        ExamAnswer::factory()->count(50)->create();
+        // ExamAnswers are now seeded via ExamAttemptSeeder to ensure proper relationships
+        // and context-aware answer generation based on question type.
+        $this->command->info('ExamAnswerSeeder logic has been moved to ExamAttemptSeeder and is no longer run directly.');
     }
 }

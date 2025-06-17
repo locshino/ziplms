@@ -8,7 +8,9 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('one_time_passwords', function (Blueprint $table) {
+        $table_name = config('one-time-passwords.table_name') ?? 'one_time_passwords';
+
+        Schema::create($table_name, function (Blueprint $table) {
             $table->id();
 
             $table->string('password');
@@ -19,5 +21,11 @@ return new class extends Migration
 
             $table->timestamps();
         });
+    }
+
+    public function down()
+    {
+        $table_name = config('one-time-passwords.table_name') ?? 'one_time_passwords';
+        Schema::dropIfExists($table_name);
     }
 };

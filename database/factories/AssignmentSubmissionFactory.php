@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class AssignmentSubmissionFactory extends Factory
 {
+    use Concerns\HasAssignsRandomOrNewModel,
+        Concerns\HasFakesStatus;
+
     protected $model = AssignmentSubmission::class;
 
     /**
@@ -22,10 +25,11 @@ class AssignmentSubmissionFactory extends Factory
     public function definition(): array
     {
         return [
-            'assignment_id' => Assignment::factory(),
-            'user_id' => User::factory(),
-            'submission_text' => fake()->paragraph,
+            'assignment_id' => $this->assignRandomOrNewModel(Assignment::class),
+            'user_id' => $this->assignRandomOrNewModel(User::class),
+            'submission_text' => fake()->paragraph(),
             'submission_date' => now(),
+            'status' => $this->fakeStatus(),
         ];
     }
 }

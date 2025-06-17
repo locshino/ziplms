@@ -2,13 +2,28 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Translatable\HasTranslations;
 
-class AssignmentGrade extends Model
+class AssignmentGrade extends Base\Model
 {
-    use HasFactory;
+    use HasTranslations;
 
-    protected $casts = ['feedback' => 'json', 'graded_at' => 'datetime'];
+    protected $casts = [
+        'feedback' => 'json',
+        'graded_at' => 'datetime',
+    ];
+
+    public array $translatable = [
+        'feedback',
+    ];
+
+    protected $fillable = [
+        'submission_id',
+        'graded_by',
+        'grade',
+        'feedback',
+        'graded_at',
+    ];
 
     public function submission()
     {

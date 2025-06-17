@@ -2,14 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Tags\HasTags;
 
-class Organization extends Model
+class Organization extends Base\Model
 {
-    use HasFactory, SoftDeletes;
+    use HasTags;
 
-    protected $casts = ['name' => 'json', 'address' => 'json', 'settings' => 'json'];
+    protected $casts = [
+        'settings' => 'json',
+    ];
+
+    protected $fillable = [
+        'name',
+        'slug',
+        'address',
+        'settings',
+        'phone_number',
+    ];
 
     public function users()
     {
@@ -41,8 +50,8 @@ class Organization extends Model
         return $this->hasMany(Badge::class);
     }
 
-    public function userImportBatches()
+    public function importBatches()
     {
-        return $this->hasMany(UserImportBatch::class);
+        return $this->hasMany(ImportBatch::class);
     }
 }

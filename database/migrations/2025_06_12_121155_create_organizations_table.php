@@ -13,17 +13,16 @@ return new class extends Migration
     {
         Schema::create('organizations', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->json('name'); // Tên tổ chức (hỗ trợ đa ngôn ngữ).
-            $table->string('slug')->unique()->nullable(); // Chuỗi định danh duy nhất, thân thiện URL.
-            $table->string('type')->nullable(); // Ví dụ: 'high_school', 'college', 'university', 'training_center'.
-            $table->json('address')->nullable(); // Địa chỉ (hỗ trợ đa ngôn ngữ).
+            $table->string('name');
+            $table->string('slug')->unique()->nullable();
+            // $table->string('type'); // Managed by plugin filament-spatie-tags
+            $table->string('address')->nullable();
+            $table->json('settings')->nullable();
             $table->string('phone_number', 50)->nullable();
-            // $table->string('logo_path')->nullable(); // (Managed by spatie/laravel-medialibrary via spatie/laravel-settings)
-            $table->json('settings')->nullable(); // Các cài đặt riêng của tổ chức (hoặc dùng spatie/laravel-settings).
-            // $table->string('status', 50)->nullable(); // (Managed by spatie/laravel-model-states)
-            $table->timestamps();
-            $table->softDeletes(); // Hỗ trợ soft delete.
 
+            // Timestamps and soft deletes
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class CourseEnrollmentFactory extends Factory
 {
+    use Concerns\HasAssignsRandomOrNewModel,
+        Concerns\HasFakesStatus;
+
     protected $model = CourseEnrollment::class;
 
     /**
@@ -22,11 +25,12 @@ class CourseEnrollmentFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory(),
-            'course_id' => Course::factory(),
+            'user_id' => $this->assignRandomOrNewModel(User::class),
+            'course_id' => $this->assignRandomOrNewModel(Course::class),
             'enrollment_date' => now(),
             'final_grade' => fake()->optional()->randomFloat(1, 0, 10),
             'completed_at' => fake()->optional()->dateTime,
+            'status' => $this->fakeStatus(90), // 90% chance of being active
         ];
     }
 }

@@ -2,14 +2,49 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Enums\ExamShowResultsType;
+use App\States\Status;
+use Spatie\ModelStates\HasStates;
+use Spatie\Translatable\HasTranslations;
 
-class Exam extends Model
+class Exam extends Base\Model
 {
-    use HasFactory, SoftDeletes;
+    use HasStates,
+        HasTranslations;
 
-    protected $casts = ['title' => 'json', 'description' => 'json', 'start_time' => 'datetime', 'end_time' => 'datetime', 'shuffle_questions' => 'boolean', 'shuffle_answers' => 'boolean'];
+    protected $casts = [
+        'title' => 'json',
+        'description' => 'json',
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
+        'shuffle_questions' => 'boolean',
+        'shuffle_answers' => 'boolean',
+        'status' => Status::class,
+        'show_results_after' => ExamShowResultsType::class,
+    ];
+
+    public array $translatable = [
+        'title',
+        'description',
+    ];
+
+    protected $fillable = [
+        'course_id',
+        'lecture_id',
+        'title',
+        'description',
+        'start_time',
+        'end_time',
+        'duration_minutes',
+        'max_attempts',
+        'passing_score',
+        'shuffle_questions',
+        'shuffle_answers',
+        'show_results_after',
+        'created_by',
+        'status',
+        'results_visible_at',
+    ];
 
     public function course()
     {

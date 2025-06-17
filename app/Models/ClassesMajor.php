@@ -2,16 +2,31 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Tags\HasTags;
+use Spatie\Translatable\HasTranslations;
 
-class ClassesMajor extends Model
+class ClassesMajor extends Base\Model
 {
-    use HasFactory, SoftDeletes;
+    use HasTags,
+        HasTranslations;
 
-    protected $table = 'classes_majors';
+    protected $casts = [
+        'name' => 'json',
+        'description' => 'json',
+    ];
 
-    protected $casts = ['name' => 'json', 'description' => 'json'];
+    protected $fillable = [
+        'organization_id',
+        'name',
+        'code',
+        'description',
+        'parent_id',
+    ];
+
+    public array $translatable = [
+        'name',
+        'description',
+    ];
 
     public function organization()
     {
