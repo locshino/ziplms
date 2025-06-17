@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class AssignmentGradeFactory extends Factory
 {
+    use Concerns\HasFakesTranslations,
+        Concerns\HasAssignsRandomOrNewModel;
+
     protected $model = AssignmentGrade::class;
 
     /**
@@ -22,10 +25,10 @@ class AssignmentGradeFactory extends Factory
     public function definition(): array
     {
         return [
-            'submission_id' => AssignmentSubmission::factory(),
+            'submission_id' => $this->assignRandomOrNewModel(AssignmentSubmission::class),
             'grade' => fake()->randomFloat(1, 5, 10),
-            'feedback' => ['vi' => fake()->sentence, 'en' => fake()->sentence],
-            'graded_by' => User::factory(),
+            'feedback' => $this->fakeParagraphTranslations(),
+            'graded_by' => $this->assignRandomOrNewModel(User::class),
             'graded_at' => now(),
         ];
     }

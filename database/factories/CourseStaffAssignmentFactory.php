@@ -24,7 +24,6 @@ class CourseStaffAssignmentFactory extends Factory
         return [
             'user_id' => User::factory(),
             'course_id' => Course::factory(),
-            'role_in_course' => fake()->randomElement(['instructor', 'teaching_assistant', 'marker']),
             'assigned_at' => now(),
         ];
     }

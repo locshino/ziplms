@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\ExamShowResultsType;
 use App\Models\Course;
 use App\Models\Exam;
 use App\Models\Lecture;
@@ -13,6 +14,10 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ExamFactory extends Factory
 {
+    use Concerns\HasAssignsRandomOrNewModel,
+        Concerns\HasFakesStatus,
+        Concerns\HasFakesTranslations;
+
     protected $model = Exam::class;
 
     /**
@@ -22,13 +27,11 @@ class ExamFactory extends Factory
      */
     public function definition(): array
     {
-        $title = fake()->sentence(4);
-
         return [
-            'course_id' => fake()->optional(0.8, null)->passthrough(Course::factory()),
-            'lecture_id' => fake()->optional(0.5, null)->passthrough(Lecture::factory()),
-            'title' => ['vi' => 'Bài kiểm tra: '.$title, 'en' => 'Exam: '.$title],
-            'description' => ['vi' => fake()->paragraph, 'en' => fake()->paragraph],
+            'course_id' => $this->assignRandomOrNewModel(Course::class),
+            'lecture_id' => $this->assignRandomOrNewModel(Lecture::class),
+            'title' => $this->fakeSentenceTranslations(),
+            'description' => $this->fakeParagraphTranslations(),
             'start_time' => fake()->dateTimeBetween('+1 day', '+1 week'),
             'end_time' => fake()->dateTimeBetween('+1 week', '+2 weeks'),
             'duration_minutes' => fake()->randomElement([30, 45, 60, 90, 120]),
@@ -36,8 +39,9 @@ class ExamFactory extends Factory
             'passing_score' => fake()->randomFloat(1, 5, 10),
             'shuffle_questions' => fake()->boolean,
             'shuffle_answers' => fake()->boolean,
-            'show_results_after' => fake()->randomElement(['immediately', 'after_end_time', 'manual']),
-            'created_by' => User::factory(),
+            'show_results_after' => fake()->randomElement(ExamShowResultsType::values()),
+            'created_by' => $this->assignRandomOrNewModel(User::class),
+            'status' => $this->fakeStatus(),
         ];
     }
 }

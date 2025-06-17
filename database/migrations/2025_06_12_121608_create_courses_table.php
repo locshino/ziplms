@@ -14,25 +14,30 @@ return new class extends Migration
         Schema::create('courses', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('organization_id')->nullable(); // FK to organizations table
-            $table->json('name'); // Tên môn học (hỗ trợ đa ngôn ngữ).
-            $table->string('code')->nullable(); // Mã môn học (có thể unique trong tổ chức).
-            $table->json('description')->nullable(); // Mô tả (hỗ trợ đa ngôn ngữ).
+            $table->json('name'); // Multilingual name.
+            $table->string('code')->nullable();
+            $table->json('description')->nullable(); // Multilingual description.
             // $table->string('image_path')->nullable(); // (Managed by spatie/laravel-medialibrary)
             $table->uuid('parent_id')->nullable(); // FK to courses table (self-referencing)
             $table->uuid('created_by')->nullable(); // FK to users table
-            $table->date('start_date')->nullable(); // Ngày bắt đầu dự kiến của khóa học.
-            $table->date('end_date')->nullable(); // Ngày kết thúc dự kiến của khóa học.
-            // $table->string('status', 50)->nullable(); // (Managed by spatie/laravel-model-states)
+
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
+            $table->string('status')->default(App\States\Active::class);
             $table->timestamps();
             $table->softDeletes();
+
             $table->index('organization_id');
             $table->index('parent_id');
             $table->index('created_by');
             $table->index('code');
-            $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('set null');
-            $table->foreign('parent_id')->references('id')->on('courses')->onDelete('set null');
-            $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
 
+            $table->foreign('organization_id')->references('id')
+                ->on('organizations')->onDelete('set null');
+            $table->foreign('parent_id')->references('id')
+                ->on('courses')->onDelete('set null');
+            $table->foreign('created_by')->references('id')
+                ->on('users')->onDelete('set null');
         });
     }
 

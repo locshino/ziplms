@@ -2,16 +2,16 @@
 
 namespace Database\Seeders;
 
-use App\Models\UserImportBatch;
+use App\Models\ImportBatch;
 use Illuminate\Database\Seeder;
 
-class UserImportBatchSeeder extends Seeder
+class ImportBatchSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        UserImportBatch::factory()->count(3)->create();
+        ImportBatch::factory()->count(3)->create();
     }
 }

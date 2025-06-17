@@ -16,14 +16,20 @@ return new class extends Migration
             $table->uuid('assignment_id'); // FK to assignments table
             $table->uuid('user_id'); // FK to users table
             $table->text('submission_text')->nullable(); // Nếu nộp dạng text.
-            $table->timestamp('submission_date')->useCurrent();
-            // $table->string('status', 50)->nullable(); // (Managed by spatie/laravel-model-states)
+            $table->string('status')->default(App\States\Active::class);
             // Files will be handled by spatie/laravel-medialibrary
+
+            $table->timestamp('submission_date')->useCurrent();
             $table->timestamps();
+            $table->softDeletes();
+
             $table->index('assignment_id');
             $table->index('user_id');
-            $table->foreign('assignment_id')->references('id')->on('assignments')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
+            $table->foreign('assignment_id')->references('id')
+                ->on('assignments')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')
+                ->on('users')->onDelete('cascade');
         });
     }
 

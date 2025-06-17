@@ -2,17 +2,17 @@
 
 namespace Database\Factories;
 
+use App\Models\ImportBatch;
 use App\Models\Organization;
 use App\Models\User;
-use App\Models\UserImportBatch;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\UserImportBatch>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ImportBatch>
  */
-class UserImportBatchFactory extends Factory
+class ImportBatchFactory extends Factory
 {
-    protected $model = UserImportBatch::class;
+    protected $model = ImportBatch::class;
 
     /**
      * Define the model's default state.
@@ -25,6 +25,12 @@ class UserImportBatchFactory extends Factory
         $successfulImports = fake()->numberBetween(0, $totalRows);
         $failedImports = $totalRows - $successfulImports;
 
+        $error_log = null;
+        $isHasErrors = $failedImports > 0;
+        if ($isHasErrors) {
+            $error_log = json_encode(['errors' => [fake()->sentence]]);
+        }
+
         return [
             'organization_id' => Organization::factory(),
             'uploaded_by_user_id' => User::factory(),
@@ -34,7 +40,7 @@ class UserImportBatchFactory extends Factory
             'processed_rows' => $totalRows,
             'successful_imports' => $successfulImports,
             'failed_imports' => $failedImports,
-            'error_log' => $failedImports > 0 ? json_encode(['errors' => [fake()->sentence]]) : null,
+            'error_log' => $error_log,
         ];
     }
 }

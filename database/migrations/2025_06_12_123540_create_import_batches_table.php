@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_import_batches', function (Blueprint $table) {
+        Schema::create('import_batches', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('organization_id')->nullable(); // FK to organizations table
             $table->uuid('uploaded_by_user_id'); // FK to users table
@@ -22,6 +22,7 @@ return new class extends Migration
             $table->unsignedInteger('successful_imports')->default(0); // Số lượng nhập thành công.
             $table->unsignedInteger('failed_imports')->default(0); // Số lượng nhập thất bại.
             $table->json('error_log')->nullable(); // Log các lỗi chi tiết.
+            $table->string('error_report_path')->nullable(); // Đường dẫn lưu trữ báo cáo lỗi.
             // $table->string('status', 50)->nullable(); // (Managed by spatie/laravel-model-states)
             $table->timestamps();
             $table->index('organization_id');

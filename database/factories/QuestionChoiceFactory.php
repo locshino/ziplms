@@ -10,14 +10,14 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class QuestionChoiceFactory extends Factory
 {
+    use Concerns\HasFakesTranslations;
+
     protected $model = QuestionChoice::class;
 
     public function definition(): array
     {
-        $text = fake()->words(4, true);
-
         return [
-            'choice_text' => ['vi' => $text, 'en' => $text],
+            'choice_text' => $this->fakeWordsTranslations(),
             'is_correct' => false,
             'choice_order' => fake()->randomNumber(1),
         ];

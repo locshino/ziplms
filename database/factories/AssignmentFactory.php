@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class AssignmentFactory extends Factory
 {
+    use Concerns\HasFakesTranslations,
+        Concerns\HasAssignsRandomOrNewModel;
+
     protected $model = Assignment::class;
 
     /**
@@ -21,17 +24,13 @@ class AssignmentFactory extends Factory
      */
     public function definition(): array
     {
-        $title = fake()->sentence(3);
-
         return [
-            'course_id' => Course::factory(),
-            'title' => ['vi' => 'Bài tập: '.$title, 'en' => 'Assignment: '.$title],
-            'instructions' => ['vi' => fake()->paragraph, 'en' => fake()->paragraph],
-            'assignment_type' => fake()->randomElement(['file_submission', 'online_text', 'quiz']),
+            'course_id' => $this->assignRandomOrNewModel(Course::class),
+            'title' => $this->fakeSentenceTranslations(),
+            'instructions' => $this->fakeParagraphTranslations(),
             'max_score' => fake()->randomElement([10, 20, 50, 100]),
             'due_date' => fake()->dateTimeBetween('+1 week', '+1 month'),
             'allow_late_submissions' => fake()->boolean,
-            'created_by' => User::factory(),
         ];
     }
 }

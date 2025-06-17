@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Question;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -10,16 +11,15 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class QuestionFactory extends Factory
 {
+    use Concerns\HasFakesTranslations;
+
     protected $model = Question::class;
 
     public function definition(): array
     {
-        $text = fake()->sentence(12).'?';
-
         return [
-            'question_text' => ['vi' => $text, 'en' => $text],
-            'question_type' => fake()->randomElement(['mcq_single', 'mcq_multiple']),
-            'explanation' => ['vi' => 'Giải thích: '.fake()->sentence, 'en' => 'Explanation: '.fake()->sentence],
+            'question_text' => $this->fakeSentenceTranslations(),
+            'explanation' => $this->fakeParagraphTranslations(),
         ];
     }
 }

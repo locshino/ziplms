@@ -10,19 +10,20 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class CourseFactory extends Factory
 {
+    use Concerns\HasFakesStatus,
+        Concerns\HasFakesTranslations;
+
     protected $model = Course::class;
 
     public function definition(): array
     {
-        $vietnameseCatchPhrase = fake()->catchPhrase;
-        $englishCatchPhrase = fake()->catchPhrase;
-
         return [
-            'name' => ['vi' => 'Khóa học '.$vietnameseCatchPhrase, 'en' => 'Course '.$englishCatchPhrase],
+            'name' => $this->fakeSentenceTranslations(),
             'code' => strtoupper(fake()->unique()->bothify('??-###')),
-            'description' => ['vi' => fake()->paragraph, 'en' => fake()->paragraph],
+            'description' => $this->fakeParagraphTranslations(),
             'start_date' => fake()->dateTimeBetween('-1 month', '+1 month'),
             'end_date' => fake()->dateTimeBetween('+3 months', '+6 months'),
+            'status' => $this->fakeStatus(90),
         ];
     }
 }

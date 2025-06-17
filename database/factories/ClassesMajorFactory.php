@@ -20,15 +20,15 @@ class ClassesMajorFactory extends Factory
      */
     public function definition(): array
     {
-        $name = 'Lớp '.fake()->bothify('1#??');
+        $nameVi = 'Lớp '.fake()->bothify('1#??');
+        $nameEn = 'Class '.fake()->bothify('1#??');
 
         return [
             'organization_id' => Organization::factory(),
-            'name' => ['vi' => $name, 'en' => 'Class '.fake()->bothify('1#??')],
+            'name' => ['vi' => $nameVi, 'en' => $nameEn],
             'code' => strtoupper(fake()->unique()->bothify('CL-###')),
             'description' => ['vi' => fake()->sentence, 'en' => fake()->sentence],
-            'type' => fake()->randomElement(['class', 'major', 'department', 'grade_level']),
-            'parent_id' => null, // Or logic to pick an existing ClassesMajor
+            'parent_id' => null,
         ];
     }
 }

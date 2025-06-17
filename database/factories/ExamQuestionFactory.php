@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ExamQuestionFactory extends Factory
 {
+    use Concerns\HasAssignsRandomOrNewModel;
+
     protected $model = ExamQuestion::class;
 
     /**
@@ -21,10 +23,13 @@ class ExamQuestionFactory extends Factory
      */
     public function definition(): array
     {
+        $scoringScale = 10; // Define the scoring scale (Ex: 5, 10, 100, etc.)
+        $points = fake()->randomFloat(2, 0.5, 10.0) * $scoringScale / 10; // Random points between 0.5 and 10, adjusted by the scoring scale
+
         return [
-            'exam_id' => Exam::factory(),
-            'question_id' => Question::factory(),
-            'points' => fake()->randomFloat(2, 0.5, 5.0),
+            'exam_id' => $this->assignRandomOrNewModel(Exam::class),
+            'question_id' => $this->assignRandomOrNewModel(Question::class),
+            'points' => $points,
             'question_order' => fake()->numberBetween(1, 100),
         ];
     }

@@ -14,22 +14,26 @@ return new class extends Migration
         Schema::create('classes_majors', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('organization_id'); // FK to organizations table
-            $table->json('name'); // Tên (Lớp 10A1, Ngành CNTT, Khoa Toán) (hỗ trợ đa ngôn ngữ).
-            $table->string('code')->nullable(); // Mã định danh (nếu có).
-            $table->json('description')->nullable(); // Mô tả (hỗ trợ đa ngôn ngữ).
-            $table->string('type'); // Ví dụ: 'class', 'major', 'department', 'grade_level'.
+            $table->json('name'); // Multilingual description.
+            $table->string('code')->nullable();
+            $table->json('description')->nullable(); // Multilingual description.
+            // $table->string('type'); // Managed by plugin filament-spatie-tags
             $table->uuid('parent_id')->nullable(); // FK to classes_majors table (self-referencing)
+
             $table->timestamps();
             $table->softDeletes();
+
+            // Indexes and unique constraints
             $table->index('organization_id');
             $table->index('parent_id');
-            $table->index('type');
             $table->index('code');
-            $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('cascade');
-            $table->foreign('parent_id')->references('id')->on('classes_majors')->onDelete('cascade');
 
+            // Foreign key constraints
+            $table->foreign('organization_id')->references('id')
+                ->on('organizations')->onDelete('cascade');
+            $table->foreign('parent_id')->references('id')
+                ->on('classes_majors')->onDelete('cascade');
         });
-
     }
 
     /**

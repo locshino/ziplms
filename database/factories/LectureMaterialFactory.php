@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class LectureMaterialFactory extends Factory
 {
+    use Concerns\HasFakesTranslations,
+        Concerns\HasAssignsRandomOrNewModel;
+
     protected $model = LectureMaterial::class;
 
     /**
@@ -21,13 +24,33 @@ class LectureMaterialFactory extends Factory
      */
     public function definition(): array
     {
-        $name = fake()->words(3, true);
-
         return [
-            'lecture_id' => Lecture::factory(),
-            'name' => ['vi' => 'Tài liệu: '.$name, 'en' => 'Material: '.$name],
-            'description' => ['vi' => fake()->sentence, 'en' => fake()->sentence],
-            'uploaded_by' => User::factory(),
+            'lecture_id' => $this->assignRandomOrNewModel(Lecture::class),
+            'uploaded_by' => $this->assignRandomOrNewModel(User::class),
+            'name' => $this->fakeSentenceTranslations(),
+            'description' => $this->fakeParagraphTranslations(),
+            'video_links' => json_encode([
+                'youtube' => [
+                    [
+                        'title' => $this->fakeSentenceTranslations(),
+                        'url' => fake()->url(),
+                    ],
+                    [
+                        'title' => $this->fakeSentenceTranslations(),
+                        'url' => fake()->url(),
+                    ],
+                ],
+                'vimeo' => [
+                    [
+                        'title' => $this->fakeSentenceTranslations(),
+                        'url' => fake()->url(),
+                    ],
+                    [
+                        'title' => $this->fakeSentenceTranslations(),
+                        'url' => fake()->url(),
+                    ],
+                ],
+            ]),
         ];
     }
 }

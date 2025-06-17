@@ -8,24 +8,20 @@ return new class extends Migration
 {
     public function up()
     {
-        $table_name = config('one-time-passwords.table_name') ?? 'one_time_passwords';
+        $table_name = config('filament-otp-login.table_name') ?? 'filament_otp_login_codes';
 
         Schema::create($table_name, function (Blueprint $table) {
             $table->id();
-
-            $table->string('password');
-            $table->json('origin_properties')->nullable();
-
+            $table->string('code');
+            $table->string('email');
             $table->dateTime('expires_at');
-            $table->morphs('authenticatable', 'otp_authenticatable_index');
-
             $table->timestamps();
         });
     }
 
     public function down()
     {
-        $table_name = config('one-time-passwords.table_name') ?? 'one_time_passwords';
+        $table_name = config('filament-otp-login.table_name') ?? 'filament_otp_login_codes';
         Schema::dropIfExists($table_name);
     }
 };

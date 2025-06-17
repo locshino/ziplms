@@ -24,7 +24,6 @@ class UserClassMajorEnrollmentFactory extends Factory
         return [
             'user_id' => User::factory(),
             'class_major_id' => ClassesMajor::factory(),
-            'enrollment_type' => fake()->randomElement(['student', 'homeroom_teacher', 'subject_teacher', 'dean', 'member']),
             'start_date' => fake()->date(),
             'end_date' => fake()->optional()->date(),
         ];

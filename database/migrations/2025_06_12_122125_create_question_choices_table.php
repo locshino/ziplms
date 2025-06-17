@@ -14,12 +14,17 @@ return new class extends Migration
         Schema::create('question_choices', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('question_id'); // FK to questions table
-            $table->json('choice_text'); // Nội dung lựa chọn (hỗ trợ đa ngôn ngữ).
+            $table->json('choice_text'); // Multilingual choice text
             $table->boolean('is_correct')->default(false);
             $table->unsignedInteger('choice_order')->default(0);
+
             $table->timestamps();
+            $table->softDeletes();
+
             $table->index('question_id');
-            $table->foreign('question_id')->references('id')->on('questions')->onDelete('cascade');
+
+            $table->foreign('question_id')->references('id')
+                ->on('questions')->onDelete('cascade');
         });
     }
 

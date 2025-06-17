@@ -12,6 +12,10 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class LectureFactory extends Factory
 {
+    use Concerns\HasFakesStatus,
+        Concerns\HasFakesTranslations,
+        Concerns\HasAssignsRandomOrNewModel;
+
     protected $model = Lecture::class;
 
     /**
@@ -21,15 +25,14 @@ class LectureFactory extends Factory
      */
     public function definition(): array
     {
-        $title = fake()->sentence(3);
-
         return [
-            'course_id' => Course::factory(),
-            'title' => ['vi' => 'Bài giảng: '.$title, 'en' => 'Lecture: '.$title],
-            'description' => ['vi' => fake()->paragraph, 'en' => fake()->paragraph],
+            'course_id' => $this->assignRandomOrNewModel(Course::class),
+            'title' => $this->fakeSentenceTranslations(),
+            'description' => $this->fakeParagraphTranslations(),
             'lecture_order' => fake()->numberBetween(1, 20),
             'duration_estimate' => fake()->randomElement(['30 phút', '1 giờ', '90 phút', '2 giờ']),
-            'created_by' => User::factory(),
+            'created_by' => $this->assignRandomOrNewModel(User::class),
+            'status' => $this->fakeStatus(90), // 90% chance of being active
         ];
     }
 }

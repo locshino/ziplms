@@ -18,10 +18,9 @@ class OrganizationFactory extends Factory
         $name = fake()->company;
 
         return [
-            'name' => ['vi' => $name, 'en' => $name],
+            'name' => $name,
             'slug' => Str::slug($name),
-            'type' => fake()->randomElement(['university', 'high_school', 'training_center']),
-            'address' => ['vi' => fake()->address, 'en' => fake()->address],
+            'address' => fake()->address,
             'phone_number' => fake()->phoneNumber,
             'settings' => json_encode(['theme' => 'default']),
         ];
