@@ -5,6 +5,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 
+/**
+ * @property int $id
+ * @property string $code
+ * @property string $email
+ * @property string $expires_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OTPLogin newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OTPLogin newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OTPLogin query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OTPLogin whereCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OTPLogin whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OTPLogin whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OTPLogin whereExpiresAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OTPLogin whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OTPLogin whereUpdatedAt($value)
+ *
+ * @mixin \Eloquent
+ */
 class OTPLogin extends EloquentModel
 {
     use MassPrunable;
