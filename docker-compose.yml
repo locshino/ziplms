@@ -4,6 +4,7 @@ services:
             context: ./docker/${PHP_VERSION}
             dockerfile: Dockerfile
             args:
+                WWWUSER: "${WWWUSER}"
                 WWWGROUP: "${WWWGROUP}"
         image: sail-${PHP_VERSION}-app
         extra_hosts:
@@ -19,6 +20,7 @@ services:
             IGNITION_LOCAL_SITES_PATH: "${PWD}"
         volumes:
             - ".:/var/www/html"
+            - "sail-backups:/var/www/html/${BACKUP_DIRECTORY}"
         networks:
             - sail
         depends_on:
@@ -66,6 +68,45 @@ services:
             retries: 3
             timeout: 5s
 
+    worker-default:
+        image: sail-${PHP_VERSION}-app
+        command: "php artisan queue:work ${QUEUE_CONNECTION} --queue=${QUEUE_NAME} --sleep=3 --tries=3"
+        restart: unless-stopped
+        volumes:
+            - ".:/var/www/html"
+        networks:
+            - sail
+        depends_on:
+            - laravel
+            - mysql
+            - redis
+
+    worker-media:
+        image: sail-${PHP_VERSION}-app
+        command: "php artisan queue:work ${QUEUE_MEDIA_CONNECTION} --queue=${QUEUE_MEDIA_NAME} --sleep=3 --tries=3"
+        restart: unless-stopped
+        volumes:
+            - ".:/var/www/html"
+        networks:
+            - sail
+        depends_on:
+            - laravel
+            - mysql
+            - redis
+
+    worker-batch:
+        image: sail-${PHP_VERSION}-app
+        command: "php artisan queue:work ${QUEUE_BATCH_CONNECTION} --queue=${QUEUE_BATCH_NAME} --sleep=3 --tries=3"
+        restart: unless-stopped
+        volumes:
+            - ".:/var/www/html"
+        networks:
+            - sail
+        depends_on:
+            - laravel
+            - mysql
+            - redis
+
 networks:
     sail:
         driver: bridge
@@ -74,4 +115,6 @@ volumes:
     sail-mysql:
         driver: local
     sail-redis:
+        driver: local
+    sail-backups:
         driver: local
