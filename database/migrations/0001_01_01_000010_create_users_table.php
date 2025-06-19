@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('organization_id')->nullable(); // FK to organizations table
             $table->string('code')->nullable();
             $table->string('name');
             // $table->string('profile_picture_path')->nullable(); // (Managed by spatie/laravel-medialibrary)
@@ -31,16 +30,10 @@ return new class extends Migration
             $table->string('status')->default(App\States\Active::class);
 
             // Indexes and unique constraints
-            $table->index('organization_id');
             $table->index('status');
             $table->unique([
-                'organization_id',
                 'code',
-            ], 'users_code_organization_unique');
-
-            // Foreign key constraints
-            $table->foreign('organization_id')->references('id')
-                ->on('organizations')->onDelete('set null');
+            ], 'unique_code');
         });
     }
 
