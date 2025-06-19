@@ -48,7 +48,7 @@ class DatabaseSeeder extends Seeder
             UserBadgeSeeder::class,
 
             // --- Import Management ---
-            ImportBatchSeeder::class,
+            BatchSeeder::class,
         ]);
     }
 }

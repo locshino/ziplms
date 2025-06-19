@@ -18,13 +18,13 @@ return [
      * This queue connection will be used to generate derived and responsive images.
      * Leave empty to use the default queue connection.
      */
-    'queue_connection_name' => env('QUEUE_CONNECTION') ?? env('MEDIA_QUEUE_CONNECTION', 'sync'),
+    'queue_connection_name' => config('worker-queue.media.connection'),
 
     /*
      * This queue will be used to generate derived and responsive images.
      * Leave empty to use the default queue.
      */
-    'queue_name' => env('MEDIA_QUEUE') ?? env('MEDIA_QUEUE_NAME', 'media'),
+    'queue_name' => config('worker-queue.media.name'),
 
     /*
      * By default all conversions will be performed on a queue.

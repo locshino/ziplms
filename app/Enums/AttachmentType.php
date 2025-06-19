@@ -49,4 +49,39 @@ enum AttachmentType: string
     {
         return 'attachment-type';
     }
+
+    public function extension(): string
+    {
+        return match ($this) {
+            self::JPEG => 'jpg',
+            self::PNG => 'png',
+            self::GIF => 'gif',
+            self::PDF => 'pdf',
+            self::DOC => 'doc',
+            self::DOCX => 'docx',
+            self::XLS => 'xls',
+            self::XLSX => 'xlsx',
+            self::PPT => 'ppt',
+            self::PPTX => 'pptx',
+            self::MP4 => 'mp4',
+            self::WEBM => 'webm',
+        };
+    }
+
+    public static function fromMime(string $mime): ?self
+    {
+        return self::tryFrom($mime);
+    }
+
+    public function icon(): string
+    {
+        return match ($this->extension()) {
+            'pdf' => 'heroicon-o-document',
+            'doc', 'docx' => 'heroicon-o-document-text',
+            'xls', 'xlsx' => 'heroicon-o-table',
+            'jpg', 'jpeg', 'png', 'gif' => 'heroicon-o-photo',
+            'mp4', 'webm' => 'heroicon-o-video-camera',
+            default => 'heroicon-o-question-mark-circle',
+        };
+    }
 }
