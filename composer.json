@@ -2,16 +2,20 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "locshino/ziplms",
     "type": "project",
-    "description": "The official Laravel starter kit for Livewire.",
+    "description": "Ziplms - A Laravel-based Learning Management System",
     "keywords": [
         "laravel",
-        "framework"
+        "lms",
+        "learning-management-system",
+        "education",
+        "filament"
     ],
     "license": "MIT",
     "require": {
         "php": "^8.2",
         "afsakar/filament-otp-login": "^1.4",
         "bezhansalleh/filament-shield": "^3.3",
+        "eightynine/filament-excel-import": "^3.1",
         "erag/laravel-pwa": "^1.7",
         "filament/filament": "^3.3",
         "filament/spatie-laravel-media-library-plugin": "^3.3",
@@ -28,6 +32,7 @@
         "outerweb/filament-translatable-fields": "^2.1",
         "pxlrbt/filament-activity-log": "^1.1",
         "pxlrbt/filament-excel": "^2.4",
+        "shuvroroy/filament-spatie-laravel-backup": "^2.2",
         "spatie/laravel-activitylog": "^4.10",
         "spatie/laravel-backup": "^9.3",
         "spatie/laravel-data": "^4.15",
@@ -42,6 +47,7 @@
     },
     "require-dev": {
         "amnuts/opcache-gui": "*",
+        "barryvdh/laravel-ide-helper": "^3.5",
         "fakerphp/faker": "^1.23",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.22",
