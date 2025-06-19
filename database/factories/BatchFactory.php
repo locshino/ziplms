@@ -2,17 +2,19 @@
 
 namespace Database\Factories;
 
-use App\Models\ImportBatch;
+use App\Models\Batch;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ImportBatch>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Batch>
  */
-class ImportBatchFactory extends Factory
+class BatchFactory extends Factory
 {
-    protected $model = ImportBatch::class;
+    use Concerns\HasAssignsRandomOrNewModel;
+
+    protected $model = Batch::class;
 
     /**
      * Define the model's default state.
@@ -32,8 +34,8 @@ class ImportBatchFactory extends Factory
         }
 
         return [
-            'organization_id' => Organization::factory(),
-            'uploaded_by_user_id' => User::factory(),
+            'organization_id' => $this->assignRandomOrNewModel(Organization::class),
+            'uploaded_by_user_id' => $this->assignRandomOrNewModel(User::class),
             'original_file_name' => fake()->word.'.csv',
             'storage_path' => 'imports/'.fake()->uuid.'.csv',
             'total_rows' => $totalRows,

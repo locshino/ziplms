@@ -1,5 +1,6 @@
 <?php
 
+use App\States\Progress\Pending;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('import_batches', function (Blueprint $table) {
+        Schema::create('batches', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('organization_id')->nullable(); // FK to organizations table
             $table->uuid('uploaded_by_user_id'); // FK to users table
@@ -23,12 +24,18 @@ return new class extends Migration
             $table->unsignedInteger('failed_imports')->default(0); // Số lượng nhập thất bại.
             $table->json('error_log')->nullable(); // Log các lỗi chi tiết.
             $table->string('error_report_path')->nullable(); // Đường dẫn lưu trữ báo cáo lỗi.
-            // $table->string('status', 50)->nullable(); // (Managed by spatie/laravel-model-states)
+            $table->string('status')->default(Pending::class);
+
             $table->timestamps();
+            $table->softDeletes();
+
             $table->index('organization_id');
             $table->index('uploaded_by_user_id');
-            $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('set null');
-            $table->foreign('uploaded_by_user_id')->references('id')->on('users')->onDelete('cascade');
+
+            $table->foreign('organization_id')->references('id')
+                ->on('organizations')->onDelete('set null');
+            $table->foreign('uploaded_by_user_id')->references('id')
+                ->on('users')->onDelete('cascade');
         });
     }
 
@@ -37,6 +44,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_import_batches');
+        Schema::dropIfExists('batches');
     }
 };
