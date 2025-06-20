@@ -72,6 +72,9 @@ services:
         image: sail-${PHP_VERSION}-app
         command: "php artisan queue:work ${QUEUE_CONNECTION} --queue=${QUEUE_NAME} --sleep=3 --tries=3"
         restart: unless-stopped
+        environment:
+            WWWUSER: "${WWWUSER}"
+            LARAVEL_SAIL: 1
         volumes:
             - ".:/var/www/html"
         networks:
@@ -85,6 +88,9 @@ services:
         image: sail-${PHP_VERSION}-app
         command: "php artisan queue:work ${QUEUE_MEDIA_CONNECTION} --queue=${QUEUE_MEDIA_NAME} --sleep=3 --tries=3"
         restart: unless-stopped
+        environment:
+            WWWUSER: "${WWWUSER}"
+            LARAVEL_SAIL: 1
         volumes:
             - ".:/var/www/html"
         networks:
@@ -98,6 +104,9 @@ services:
         image: sail-${PHP_VERSION}-app
         command: "php artisan queue:work ${QUEUE_BATCH_CONNECTION} --queue=${QUEUE_BATCH_NAME} --sleep=3 --tries=3"
         restart: unless-stopped
+        environment:
+            WWWUSER: "${WWWUSER}"
+            LARAVEL_SAIL: 1
         volumes:
             - ".:/var/www/html"
         networks:
