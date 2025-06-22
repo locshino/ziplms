@@ -62,6 +62,20 @@ class Batch extends Base\Model
         'status' => ProgressStatus::class,
     ];
 
+    protected $fillable = [
+        'organization_id',
+        'uploaded_by_user_id',
+        'original_file_name',
+        'storage_path',
+        'total_rows',
+        'processed_rows',
+        'successful_imports',
+        'failed_imports',
+        'error_log',
+        'error_report_path',
+        'status',
+    ];
+
     public function organization()
     {
         return $this->belongsTo(Organization::class);
