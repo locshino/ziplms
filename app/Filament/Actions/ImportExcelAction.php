@@ -9,9 +9,7 @@ use EightyNine\ExcelImport\ExcelImportAction as BaseExcelImportAction;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Facades\Excel;
 
 /**
  * A powerful, reusable import action that extends EightyNine\ExcelImport\ExcelImportAction.
@@ -49,20 +47,18 @@ class ImportExcelAction extends BaseExcelImportAction
     {
         $static = parent::make($name);
 
-        // We leverage the base action's form and modal setup.
-        // The real magic happens by intercepting the process with the `processCollectionUsing()` method.
-
         /**
-         * Intercept the core import logic of the parent action after the collection is processed.
+         * Intercept the core import logic of the parent action *before* the collection is processed.
          *
-         * The `processCollectionUsing` method allows us to define a custom closure that runs
-         * after the library has successfully parsed the Excel file into a Laravel Collection.
-         * This gives us access to both the parsed data (which we will ignore) and the
-         * original form data, allowing us to take full control of the process.
+         * The `beforeImport` hook allows us to run custom logic after the form is submitted
+         * but before the package attempts to parse the Excel file. This is the perfect place
+         * to grab the uploaded file, create a batch record for tracking, and dispatch
+         * our own background job. We then gracefully halt the default import process.
          */
-        $static->processCollectionUsing(function (Collection $collection, array $data, self $action) {
+        $static->beforeImport(function (array $data, $livewire, self $action) {
             /** @var UploadedFile $file */
-            $file = $data['file'];
+            // The key for the file upload component from this package is 'upload'.
+            $file = $data['upload'];
             $importerClass = $action->getImporterClass();
 
             // Ensure that a target importer class has been configured.
@@ -74,26 +70,25 @@ class ImportExcelAction extends BaseExcelImportAction
                     ->danger()
                     ->send();
 
-                return; // Halt execution.
+                // Halt the import process
+                return false;
             }
 
-            // Step 1: Securely store the uploaded file in a persistent location for the background job.
+            // Step 1: Securely store the uploaded file for the background job.
             $path = $file->store('imports', 'local');
 
             // Step 2: Prepare the data payload for creating the Batch record.
-            // This includes default data and any extra data passed via withData().
             $batchData = array_merge([
-                'uploaded_by_user_id' => Filament::auth()->id(), // Use Filament's auth helper for context clarity.
+                'uploaded_by_user_id' => Filament::auth()->id(),
                 'original_file_name' => $file->getClientOriginalName(),
                 'storage_path' => $path,
                 'total_rows' => self::getRowCount($path),
             ], $action->getExtraData());
 
-            // Step 3: Create the Batch record in the database to track the import's lifecycle.
+            // Step 3: Create the Batch record in the database.
             $batch = Batch::create($batchData);
 
-            // Step 4: Dispatch our custom, queueable job to handle the heavy lifting in the background.
-            // This ensures the UI remains responsive for the user.
+            // Step 4: Dispatch our custom, queueable job.
             ProcessImportJob::dispatch(
                 importBatch: $batch,
                 importerClass: $importerClass,
@@ -102,20 +97,16 @@ class ImportExcelAction extends BaseExcelImportAction
                 ->onConnection(config('worker-queue.batch.connection', 'redis'))
                 ->onQueue(config('worker-queue.batch.name', 'ziplms_batches'));
 
-            // We ignore the `$collection` parameter because our custom Job will handle
-            // processing directly from the stored file. This ensures a consistent and
-            // robust background execution flow.
-
-            // Step 5: Provide immediate feedback to the user, confirming the process has started.
+            // Step 5: Manually send a success notification to the user.
             Notification::make()
                 ->title('Đã đưa vào hàng đợi!')
                 ->body('File của bạn đang được xử lý trong nền. Bạn sẽ nhận được thông báo khi hoàn tất.')
                 ->success()
                 ->send();
 
-            // By not returning anything, we prevent the parent
-            // BaseExcelImportAction from executing its own logic. We've successfully
-            // taken over the process.
+            // Step 6: Return false to gracefully stop the parent action's logic
+            // without throwing an unhandled exception.
+            return false;
         });
 
         return $static;
@@ -179,8 +170,6 @@ class ImportExcelAction extends BaseExcelImportAction
      */
     public function getExtraData(): array
     {
-        // Cast to array to ensure the return type hint is always satisfied,
-        // even if the evaluated closure returns a different type.
         return (array) $this->evaluate($this->extraData);
     }
 
@@ -193,7 +182,7 @@ class ImportExcelAction extends BaseExcelImportAction
     protected static function getRowCount(string $path): int
     {
         try {
-            $rows = Excel::toCollection(collect(), storage_path('app/'.$path))->first();
+            $rows = \Maatwebsite\Excel\Facades\Excel::toCollection(collect(), storage_path('app/'.$path))->first();
 
             // Ensure rows is not null and subtract 1 for the header row.
             return $rows ? (max(0, $rows->count() - 1)) : 0;

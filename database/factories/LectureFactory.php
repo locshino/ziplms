@@ -30,7 +30,11 @@ class LectureFactory extends Factory
             'title' => $this->fakeSentenceTranslations(),
             'description' => $this->fakeParagraphTranslations(),
             'lecture_order' => fake()->numberBetween(1, 20),
-            'duration_estimate' => fake()->randomElement(['30 phút', '1 giờ', '90 phút', '2 giờ']),
+            'duration_estimate' => fake()->randomElement([
+                null,
+                fake()->numberBetween(1, 60).' minutes',
+                fake()->numberBetween(1, 24).' hours',
+            ]),
             'created_by' => $this->assignRandomOrNewModel(User::class),
             'status' => $this->fakeStatus(90), // 90% chance of being active
         ];

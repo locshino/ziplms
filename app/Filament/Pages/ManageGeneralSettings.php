@@ -50,8 +50,8 @@ class ManageGeneralSettings extends SettingsPage
     }
 
     // This method will HIDE the page from navigation until setup is complete
-    public static function canAccess(): bool
-    {
-        return app(GeneralSettings::class)->is_setup_complete;
-    }
+    // public static function canAccess(): bool
+    // {
+    //     return app(GeneralSettings::class)->is_setup_complete;
+    // }
 }

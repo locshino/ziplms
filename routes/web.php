@@ -29,4 +29,4 @@ Route::middleware(['auth'])->group(function () {
 
 require __DIR__.'/auth.php';
 require __DIR__.'/web/opcache-gui.php';
-require __DIR__.'/web/download.php';
+require __DIR__.'/web/exports-download.php';

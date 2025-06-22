@@ -9,12 +9,15 @@ class DownloadController extends Controller
 {
     public function downloadExport(string $path, string $extension): StreamedResponse
     {
-        // Tái tạo lại đường dẫn file trong thư mục storage
-        $fullPath = "exports/{$path}.{$extension}";
+        // Tái tạo lại đường dẫn file trong thư mục storage, theo cách filament-excel lưu trữ
+        $fullPath = "filament-excel/{$path}.{$extension}";
+
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $storagePublicDisk */
+        $storagePublicDisk = Storage::disk('public');
 
         // Kiểm tra file tồn tại và trả về cho người dùng
-        abort_if(! Storage::disk('local')->exists($fullPath), 404);
+        abort_if(! $storagePublicDisk->exists($fullPath), 404);
 
-        return Storage::disk('local')->download($fullPath);
+        return $storagePublicDisk->download($fullPath);
     }
 }
