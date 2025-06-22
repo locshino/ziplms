@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use Afsakar\FilamentOtpLogin\FilamentOtpLoginPlugin;
+// use Afsakar\FilamentOtpLogin\Filament\Pages\Login as OtpLogin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -29,6 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            // ->login(OtpLogin::class)
             ->login()
             ->colors([
                 'primary' => Color::Amber,
@@ -70,6 +72,8 @@ class AdminPanelProvider extends PanelProvider
         return [
             Pages\Dashboard::class,
             \App\Filament\Pages\ManageGeneralSettings::class,
+            \App\Filament\Resources\UserResource\Pages\ListUsers::class,
+            //
         ];
     }
 
