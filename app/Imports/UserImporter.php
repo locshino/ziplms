@@ -26,8 +26,9 @@ class UserImporter extends ExcelImporter implements IsSmallImport
             $user->roleToAssignOnCreate = $this->roleToAssign;
         }
 
-        // Call the parent's success handler to centralize logic.
-        $this->onSuccess($user);
+        // Pass the batch context to the model so the 'created' event can track success.
+        // This property will not be persisted to the database.
+        $user->importBatch = $this->importBatch;
 
         return $user;
     }

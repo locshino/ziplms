@@ -24,7 +24,7 @@ class ExcelExport extends BasePxlrbtExport
      * Determines if the export should be queued by default.
      * Child classes can override this property to `false` for instant downloads.
      */
-    protected bool $shouldQueue = false;
+    protected bool $shouldQueue = true;
 
     /**
      * An initialization method that is called automatically.

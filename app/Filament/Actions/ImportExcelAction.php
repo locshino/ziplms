@@ -75,7 +75,7 @@ class ImportExcelAction extends BaseExcelImportAction
             }
 
             // Step 1: Securely store the uploaded file for the background job.
-            $path = $file->store('imports', 'local');
+            $path = $file->store('imports', 'filament-excel');
 
             // Step 2: Prepare the data payload for creating the Batch record.
             $batchData = array_merge([
@@ -93,9 +93,7 @@ class ImportExcelAction extends BaseExcelImportAction
                 importBatch: $batch,
                 importerClass: $importerClass,
                 roleToAssign: $action->getRoleToAssign(),
-            )
-                ->onConnection(config('worker-queue.batch.connection', 'redis'))
-                ->onQueue(config('worker-queue.batch.name', 'ziplms_batches'));
+            );
 
             // Step 5: Manually send a success notification to the user.
             Notification::make()
@@ -182,12 +180,12 @@ class ImportExcelAction extends BaseExcelImportAction
     protected static function getRowCount(string $path): int
     {
         try {
-            $rows = \Maatwebsite\Excel\Facades\Excel::toCollection(collect(), storage_path('app/'.$path))->first();
+            $rows = \Maatwebsite\Excel\Facades\Excel::toCollection(collect(), $path, 'filament-excel')->first();
 
             // Ensure rows is not null and subtract 1 for the header row.
             return $rows ? (max(0, $rows->count() - 1)) : 0;
         } catch (\Exception $e) {
-            Log::error("Could not read row count from file {$path}: ".$e->getMessage());
+            Log::error("Could not read row count from file {$path}: " . $e->getMessage());
 
             return 0; // Return 0 if the file is invalid or cannot be read.
         }

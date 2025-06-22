@@ -43,15 +43,24 @@ class FilamentExcelServiceProvider extends ServiceProvider
             $filenameWithoutExtension = $fileInfo['filename'];
             $extension = $fileInfo['extension'];
 
+            // Create a more user-friendly filename for the download.
+            // This regex removes the UUID prefix that filament-excel adds to avoid collisions.
+            $friendlyName = preg_replace('/^[a-f0-9]{8}-([a-f0-9]{4}-){3}[a-f0-9]{12}-/i', '', $filenameWithoutExtension);
+
+            // Sanitize the friendly name by replacing multiple spaces/hyphens with a single hyphen.
+            $friendlyName = preg_replace('/[\s-]+/', '-', $friendlyName);
+
             // 2. Generate a temporary signed URL pointing to our custom download route.
             // This URL is more secure and less likely to be blocked by a WAF.
             return URL::temporarySignedRoute(
                 'exports.download', // The name of our custom download route.
                 now()->addHours(2), // Set a custom expiration time for the link.
                 [
-                    // Pass the file parts as separate parameters.
+                    // The actual filename on disk (for finding the file).
                     'filename' => $filenameWithoutExtension,
                     'extension' => $extension,
+                    // The desired, clean filename for the user's download.
+                    'download_as' => $friendlyName . '.' . $extension,
                 ]
             );
         });
