@@ -60,7 +60,7 @@ class FilamentExcelServiceProvider extends ServiceProvider
                     'filename' => $filenameWithoutExtension,
                     'extension' => $extension,
                     // The desired, clean filename for the user's download.
-                    'download_as' => $friendlyName . '.' . $extension,
+                    'download_as' => $friendlyName.'.'.$extension,
                 ]
             );
         });

@@ -27,7 +27,7 @@ return new class extends Migration
             $table->unique([
                 'tag_id',
                 'taggable_id',
-                'taggable_type'
+                'taggable_type',
             ], 'taggables_unique');
         });
     }

@@ -16,8 +16,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Maatwebsite\Excel\Facades\Excel;
 use Throwable;
 
@@ -60,21 +60,21 @@ class ProcessImportJob implements ShouldQueue
 
             $failures = $importer->getFailures();
             $notificationTitle = 'Hoàn tất nhập liệu!';
-            $notificationBody = 'Quá trình nhập file "' . $this->importBatch->original_file_name . '" đã hoàn tất.';
+            $notificationBody = 'Quá trình nhập file "'.$this->importBatch->original_file_name.'" đã hoàn tất.';
 
             if (! empty($failures)) {
                 // If there are failures, transition to 'completed_with_errors'
                 $this->importBatch->status->transitionTo(DoneWithErrors::class);
 
                 // Generate and store an error report
-                $errorFileName = 'error_report_' . $this->importBatch->id . '.xlsx';
-                $errorFilePath = 'imports/failures/' . $errorFileName;
+                $errorFileName = 'error_report_'.$this->importBatch->id.'.xlsx';
+                $errorFilePath = 'imports/failures/'.$errorFileName;
                 Excel::store(new FailedRowsExport($failures), $errorFilePath, 'filament-excel');
 
                 $this->importBatch->update(['error_report_path' => $errorFilePath]);
 
                 $notificationTitle = 'Nhập liệu hoàn tất với một số lỗi';
-                $notificationBody .= ' Có ' . count($failures) . ' dòng bị lỗi.';
+                $notificationBody .= ' Có '.count($failures).' dòng bị lỗi.';
             } else {
                 // If everything is successful, transition to 'completed'
                 $this->importBatch->status->transitionTo(Done::class);
@@ -89,7 +89,7 @@ class ProcessImportJob implements ShouldQueue
                 // NOTE: This requires `php artisan storage:link` to be executed
                 // The error_report_path already contains the full relative path (e.g., 'imports/failures/error_report_id.xlsx')
                 $fileInfo = pathinfo($this->importBatch->error_report_path);
-                $filenameForParam = $fileInfo['dirname'] . '/' . $fileInfo['filename']; // e.g., 'imports/failures/error_report_123'
+                $filenameForParam = $fileInfo['dirname'].'/'.$fileInfo['filename']; // e.g., 'imports/failures/error_report_123'
                 $extensionForParam = $fileInfo['extension']; // e.g., 'xlsx'
 
                 $reportUrl = URL::temporarySignedRoute(
@@ -98,7 +98,7 @@ class ProcessImportJob implements ShouldQueue
                     [
                         'filename' => $filenameForParam, // Pass the path without extension
                         'extension' => $extensionForParam, // Pass the extension separately
-                        'download_as' => 'error_report_' . $this->importBatch->id . '.' . $extensionForParam, // User-friendly name
+                        'download_as' => 'error_report_'.$this->importBatch->id.'.'.$extensionForParam, // User-friendly name
                     ]
                 );
 
@@ -138,7 +138,7 @@ class ProcessImportJob implements ShouldQueue
         // Send a failure notification to the uploader
         Notification::make()
             ->title('Xử lý file thất bại!')
-            ->body('Đã có lỗi nghiêm trọng xảy ra khi xử lý file "' . $this->importBatch->original_file_name . '". Vui lòng liên hệ quản trị viên.')
+            ->body('Đã có lỗi nghiêm trọng xảy ra khi xử lý file "'.$this->importBatch->original_file_name.'". Vui lòng liên hệ quản trị viên.')
             ->danger()
             ->sendToDatabase($this->importBatch->uploader);
     }
