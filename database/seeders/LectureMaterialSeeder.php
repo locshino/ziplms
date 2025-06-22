@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\AttachmentType;
 use App\Models\LectureMaterial;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
@@ -41,7 +42,7 @@ class LectureMaterialSeeder extends Seeder
                             ->addMediaFromUrl($fileInfo['url'])
                             ->preservingOriginal() // Giữ tên file gốc nếu có thể
                             ->setName($fileInfo['name']) // Đặt tên media item
-                            ->toMediaCollection('attachments');
+                            ->toMediaCollection(AttachmentType::key());
                     } catch (\Exception $e) {
                         // Ghi log lỗi nếu không tải được file
                         Log::error("Failed to add media from URL {$fileInfo['url']}: ".$e->getMessage());
