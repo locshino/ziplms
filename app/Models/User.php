@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\States\Status;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\ModelStates\HasStates;
@@ -57,7 +59,7 @@ use Spatie\ModelStates\HasStates;
  *
  * @mixin \Eloquent
  */
-class User extends Base\AuthModel implements HasMedia
+class User extends Base\AuthModel implements FilamentUser, HasMedia
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasStates,
@@ -78,5 +80,30 @@ class User extends Base\AuthModel implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('profile_picture')->singleFile();
+    }
+
+    /**
+     * Determines if the user can access the given Filament panel.
+     * This method is the central point for Filament's authorization.
+     *
+     * @param  \Filament\Panel  $panel  The panel instance being accessed.
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        // This dynamic check allows access based on a role matching the panel's ID.
+        // For example:
+        // - To access the 'admin' panel (at /admin), the user must have the 'admin' role.
+        // - To access the 'teacher' panel (at /teacher), the user must have the 'teacher' role.
+        // return $this->hasRole($panel->getId());
+
+        // For more complex scenarios, you could use a match statement:
+        //
+        return match ($panel->getId()) {
+            'admin' => $this->hasRole('admin'),
+            'manager' => $this->hasRole(['manager', 'admin']), // A manager or admin can access manager panel
+            'teacher' => $this->hasAnyRole(['teacher', 'admin']), // A teacher or admin can access teacher panel
+            'student' => $this->hasRole('student'),
+            default => false,
+        };
     }
 }

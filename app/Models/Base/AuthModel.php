@@ -10,11 +10,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Spatie\OneTimePasswords\Models\Concerns\HasOneTimePasswords;
+use Spatie\Permission\Traits\HasRoles;
 
 abstract class AuthModel extends Authenticatable
 {
     use HasFactory,
         HasOneTimePasswords,
+        HasRoles,
         HasUuids,
         Notifiable,
         SoftDeletes;
