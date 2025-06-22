@@ -2,4 +2,5 @@
 !private/
 !public/
 !backups/
+!media-library/
 !.gitignore

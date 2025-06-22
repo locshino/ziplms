@@ -30,6 +30,7 @@
         "livewire/volt": "^1.7",
         "maatwebsite/excel": "^3.1",
         "outerweb/filament-translatable-fields": "^2.1",
+        "predis/predis": "^3.0",
         "pxlrbt/filament-activity-log": "^1.1",
         "pxlrbt/filament-excel": "^2.4",
         "shuvroroy/filament-spatie-laravel-backup": "^2.2",
@@ -88,6 +89,7 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
+            "npm run workers",
             "npx concurrently -c \"#93c5fd,#c4b5fd,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"npm run dev\" --names='server,queue,vite'"
         ],
         "optimize": [

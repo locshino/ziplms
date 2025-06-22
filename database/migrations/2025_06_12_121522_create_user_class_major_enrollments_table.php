@@ -23,18 +23,18 @@ return new class extends Migration
             $table->softDeletes();
 
             // Indexes and unique constraints
-            $table->index('user_id');
-            $table->index('class_major_id');
+            $table->index('user_id', 'u_c_m_e_user_id_index');
+            $table->index('class_major_id', 'u_c_m_e_class_major_id_index');
             $table->unique([
                 'user_id',
                 'class_major_id',
                 'deleted_at',
-            ], 'user_class_major_enrollment_unique');
+            ], 'u_c_m_e_unique');
 
             // Foreign key constraints
-            $table->foreign('user_id')->references('id')
+            $table->foreign('user_id', 'u_c_m_e_user_fk')->references('id')
                 ->on('users')->onDelete('cascade');
-            $table->foreign('class_major_id')->references('id')
+            $table->foreign('class_major_id', 'u_c_m_e_class_major_fk')->references('id')
                 ->on('classes_majors')->onDelete('cascade');
         });
     }

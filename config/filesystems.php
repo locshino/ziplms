@@ -64,6 +64,11 @@ return [
             'driver' => 'local',
             'root' => base_path(env('BACKUP_DIRECTORY', 'storage/app/backups')), // A dedicated folder for backups
         ],
+
+        'filament-excel' => [
+            'driver' => 'local',
+            'root' => storage_path('app/filament-excel'),
+        ],
     ],
 
     /*

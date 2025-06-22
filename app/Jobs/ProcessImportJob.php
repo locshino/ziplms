@@ -17,6 +17,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Maatwebsite\Excel\Facades\Excel;
 use Throwable;
 
@@ -37,7 +38,10 @@ class ProcessImportJob implements ShouldQueue
         public Batch $importBatch,
         public string $importerClass,
         public ?string $roleToAssign = null
-    ) {}
+    ) {
+        $this->onQueue(config('worker-queue.batch.name'));
+        $this->onConnection(config('worker-queue.batch.connection'));
+    }
 
     /**
      * Execute the job.
@@ -52,7 +56,7 @@ class ProcessImportJob implements ShouldQueue
             $importer = new $this->importerClass($this->importBatch, $this->roleToAssign);
 
             // Start the import process using Laravel Excel
-            Excel::import($importer, $this->importBatch->storage_path);
+            Excel::import($importer, $this->importBatch->storage_path, 'filament-excel');
 
             $failures = $importer->getFailures();
             $notificationTitle = 'Hoàn tất nhập liệu!';
@@ -65,7 +69,7 @@ class ProcessImportJob implements ShouldQueue
                 // Generate and store an error report
                 $errorFileName = 'error_report_'.$this->importBatch->id.'.xlsx';
                 $errorFilePath = 'imports/failures/'.$errorFileName;
-                Excel::store(new FailedRowsExport($failures), $errorFilePath, 'local');
+                Excel::store(new FailedRowsExport($failures), $errorFilePath, 'filament-excel');
 
                 $this->importBatch->update(['error_report_path' => $errorFilePath]);
 
@@ -75,17 +79,28 @@ class ProcessImportJob implements ShouldQueue
                 // If everything is successful, transition to 'completed'
                 $this->importBatch->status->transitionTo(Done::class);
             }
-
             // Prepare the success notification
             $notification = Notification::make()
                 ->title($notificationTitle)
                 ->body($notificationBody)
                 ->success();
-
             // If an error report exists, add a download button to the notification
             if ($this->importBatch->error_report_path) {
                 // NOTE: This requires `php artisan storage:link` to be executed
-                $reportUrl = Storage::disk('local')->url($this->importBatch->error_report_path);
+                // The error_report_path already contains the full relative path (e.g., 'imports/failures/error_report_id.xlsx')
+                $fileInfo = pathinfo($this->importBatch->error_report_path);
+                $filenameForParam = $fileInfo['dirname'].'/'.$fileInfo['filename']; // e.g., 'imports/failures/error_report_123'
+                $extensionForParam = $fileInfo['extension']; // e.g., 'xlsx'
+
+                $reportUrl = URL::temporarySignedRoute(
+                    'exports.download', // Re-use the existing download route
+                    now()->addHours(2), // Link valid for 2 hours
+                    [
+                        'filename' => $filenameForParam, // Pass the path without extension
+                        'extension' => $extensionForParam, // Pass the extension separately
+                        'download_as' => 'error_report_'.$this->importBatch->id.'.'.$extensionForParam, // User-friendly name
+                    ]
+                );
 
                 $notification->actions([
                     NotificationAction::make('download_report')

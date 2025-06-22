@@ -29,8 +29,8 @@ return new class extends Migration
         });
 
         Schema::connection($connection)->table($tableName, function (Blueprint $table) {
-            $table->index('created_at');
-            $table->index('batch');
+            $table->index('created_at', 'health_check_created_at_index');
+            $table->index('batch', 'health_check_batch_index');
         });
     }
 };

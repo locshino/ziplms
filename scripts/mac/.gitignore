@@ -1,0 +1,7 @@
+# Ignore everything in this directory by default
+*
+
+# But DO NOT ignore the following files:
+!start-workers.bat
+!start-workers.sh
+!.gitignore

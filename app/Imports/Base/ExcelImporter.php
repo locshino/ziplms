@@ -82,20 +82,6 @@ abstract class ExcelImporter implements SkipsOnFailure, ToModel, WithBatchInsert
     }
 
     /**
-     * A helper method to be called from the child's `model()` method upon
-     * successful model creation. This centralizes success-related logic.
-     *
-     * @param  \Illuminate\Database\Eloquent\Model  $model  The successfully created model.
-     */
-    public function onSuccess(Model $model): void
-    {
-        // This is a good place to centralize any logic that should run for every
-        // successfully imported row, like incrementing counters.
-        $this->importBatch->increment('successful_imports');
-        $this->importBatch->increment('processed_rows');
-    }
-
-    /**
      * Dynamically defines the number of models to be inserted in a single batch.
      */
     public function batchSize(): int
