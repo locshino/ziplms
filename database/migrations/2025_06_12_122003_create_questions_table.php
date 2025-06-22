@@ -24,7 +24,6 @@ return new class extends Migration
 
             $table->index('organization_id');
             $table->index('created_by');
-            $table->index('question_type');
 
             $table->foreign('organization_id')->references('id')
                 ->on('organizations')->onDelete('set null');
