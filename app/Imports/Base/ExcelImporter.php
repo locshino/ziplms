@@ -25,7 +25,7 @@ use Maatwebsite\Excel\Validators\Failure;
  * WithBatchInserts and WithChunkReading, making it suitable for very large files.
  * It also handles common logic like failure tracking and context management.
  */
-abstract class ExcelImport implements SkipsOnFailure, ToModel, WithBatchInserts, WithChunkReading, WithHeadingRow, WithValidation
+abstract class ExcelImporter implements SkipsOnFailure, ToModel, WithBatchInserts, WithChunkReading, WithHeadingRow, WithValidation
 {
     use SkipsFailures;
 
@@ -79,6 +79,20 @@ abstract class ExcelImport implements SkipsOnFailure, ToModel, WithBatchInserts,
         // The SkipsFailures trait already collects failures. We just need to update our batch.
         $this->importBatch->increment('failed_imports', count($failures));
         $this->importBatch->increment('processed_rows', count($failures));
+    }
+
+    /**
+     * A helper method to be called from the child's `model()` method upon
+     * successful model creation. This centralizes success-related logic.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model  $model  The successfully created model.
+     */
+    public function onSuccess(Model $model): void
+    {
+        // This is a good place to centralize any logic that should run for every
+        // successfully imported row, like incrementing counters.
+        $this->importBatch->increment('successful_imports');
+        $this->importBatch->increment('processed_rows');
     }
 
     /**
