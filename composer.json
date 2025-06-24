@@ -89,8 +89,7 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "npm run workers",
-            "npx concurrently -c \"#93c5fd,#c4b5fd,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"npm run dev\" --names='server,queue,vite'"
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fdba74\" \"php artisan serve\" \"npm run workers\" \"npm run dev\" --names='server,queue,vite'"
         ],
         "optimize": [
             "@php artisan optimize:clear",
