@@ -5,9 +5,11 @@ namespace App\Models;
 use App\States\Status;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Illuminate\Foundation\Auth\Access\Authorizable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\ModelStates\HasStates;
+
 
 /**
  * @property string $id
@@ -28,6 +30,10 @@ use Spatie\ModelStates\HasStates;
  * @property-read int|null $media_count
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Organization> $organizations
+ * @property-read int|null $organizations_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ClassesMajor> $classesMajors
+ * @property-read int|null $classes_majors_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\OneTimePasswords\Models\OneTimePassword> $oneTimePasswords
  * @property-read int|null $one_time_passwords_count
  *
@@ -59,11 +65,10 @@ use Spatie\ModelStates\HasStates;
  *
  * @mixin \Eloquent
  */
-class User extends Base\AuthModel implements FilamentUser, HasMedia
+ class User extends Base\AuthModel implements FilamentUser, HasMedia
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasStates,
-        InteractsWithMedia; // For profile_picture
+    use Authorizable, HasStates, InteractsWithMedia;
 
     /**
      * Get the attributes that should be cast.
@@ -77,6 +82,26 @@ class User extends Base\AuthModel implements FilamentUser, HasMedia
         ]);
     }
 
+    /**
+     * The organizations that the user belongs to.
+     */
+    public function organizations()
+    {
+        return $this->belongsToMany(Organization::class, 'organization_users', 'user_id', 'organization_id')
+            ->using(OrganizationUser::class)
+            ->withTimestamps();
+    }
+
+        /**
+     * The classes/majors that the user belongs to.
+     */
+    public function classesMajors()
+    {
+        return $this->belongsToMany(\App\Models\ClassesMajor::class, 'user_class_major_enrollments', 'user_id', 'class_major_id')
+            ->using(\App\Models\UserClassMajorEnrollment::class);
+    }
+
+    
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('profile_picture')->singleFile();
@@ -106,4 +131,5 @@ class User extends Base\AuthModel implements FilamentUser, HasMedia
             default => false,
         };
     }
+    
 }

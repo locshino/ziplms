@@ -103,7 +103,8 @@ class ClassesMajor extends Base\Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'user_class_major_enrollments', 'class_major_id', 'user_id');
+        return $this->belongsToMany(User::class, 'user_class_major_enrollments', 'class_major_id', 'user_id')
+            ->using(UserClassMajorEnrollment::class);
     }
 
     public function schedules()

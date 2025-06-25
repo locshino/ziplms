@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Resources\UserResource;
+use App\Enums\RoleEnum;
 use Afsakar\FilamentOtpLogin\FilamentOtpLoginPlugin;
 // use Afsakar\FilamentOtpLogin\Filament\Pages\Login as OtpLogin;
 use Filament\Http\Middleware\Authenticate;
@@ -13,6 +15,8 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\SpatieLaravelTranslatablePlugin;
 use Filament\Support\Colors\Color;
+use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationItem;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
