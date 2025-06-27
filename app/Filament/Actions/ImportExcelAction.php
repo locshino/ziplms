@@ -55,57 +55,57 @@ class ImportExcelAction extends BaseExcelImportAction
          * to grab the uploaded file, create a batch record for tracking, and dispatch
          * our own background job. We then gracefully halt the default import process.
          */
-        $static->beforeImport(function (array $data, $livewire, self $action) {
-            /** @var UploadedFile $file */
-            // The key for the file upload component from this package is 'upload'.
-            $file = $data['upload'];
-            $importerClass = $action->getImporterClass();
+        // $static->beforeImport(function (array $data, $livewire, self $action) {
+        //     /** @var UploadedFile $file */
+        //     // The key for the file upload component from this package is 'upload'.
+        //     $file = $data['upload'];
+        //     $importerClass = $action->getImporterClass();
 
-            // Ensure that a target importer class has been configured.
-            if (! $importerClass) {
-                Log::error('ImportAction Error: Importer class was not specified. Use the ->importer() method.');
-                Notification::make()
-                    ->title('Lỗi Cấu hình')
-                    ->body('Importer chưa được định nghĩa cho hành động này.')
-                    ->danger()
-                    ->send();
+        //     // Ensure that a target importer class has been configured.
+        //     if (! $importerClass) {
+        //         Log::error('ImportAction Error: Importer class was not specified. Use the ->importer() method.');
+        //         Notification::make()
+        //             ->title('Lỗi Cấu hình')
+        //             ->body('Importer chưa được định nghĩa cho hành động này.')
+        //             ->danger()
+        //             ->send();
 
-                // Halt the import process
-                return false;
-            }
+        //         // Halt the import process
+        //         return false;
+        //     }
 
-            // Step 1: Securely store the uploaded file for the background job.
-            $path = $file->store('imports', 'filament-excel');
+        //     // Step 1: Securely store the uploaded file for the background job.
+        //     $path = $file->store('imports', 'filament-excel');
 
-            // Step 2: Prepare the data payload for creating the Batch record.
-            $batchData = array_merge([
-                'uploaded_by_user_id' => Filament::auth()->id(),
-                'original_file_name' => $file->getClientOriginalName(),
-                'storage_path' => $path,
-                'total_rows' => self::getRowCount($path),
-            ], $action->getExtraData());
+        //     // Step 2: Prepare the data payload for creating the Batch record.
+        //     $batchData = array_merge([
+        //         'uploaded_by_user_id' => Filament::auth()->id(),
+        //         'original_file_name' => $file->getClientOriginalName(),
+        //         'storage_path' => $path,
+        //         'total_rows' => self::getRowCount($path),
+        //     ], $action->getExtraData());
 
-            // Step 3: Create the Batch record in the database.
-            $batch = Batch::create($batchData);
+        //     // Step 3: Create the Batch record in the database.
+        //     $batch = Batch::create($batchData);
 
-            // Step 4: Dispatch our custom, queueable job.
-            ProcessImportJob::dispatch(
-                importBatch: $batch,
-                importerClass: $importerClass,
-                roleToAssign: $action->getRoleToAssign(),
-            );
+        //     // Step 4: Dispatch our custom, queueable job.
+        //     ProcessImportJob::dispatch(
+        //         importBatch: $batch,
+        //         importerClass: $importerClass,
+        //         roleToAssign: $action->getRoleToAssign(),
+        //     );
 
-            // Step 5: Manually send a success notification to the user.
-            Notification::make()
-                ->title('Đã đưa vào hàng đợi!')
-                ->body('File của bạn đang được xử lý trong nền. Bạn sẽ nhận được thông báo khi hoàn tất.')
-                ->success()
-                ->send();
+        //     // Step 5: Manually send a success notification to the user.
+        //     Notification::make()
+        //         ->title('Đã đưa vào hàng đợi!')
+        //         ->body('File của bạn đang được xử lý trong nền. Bạn sẽ nhận được thông báo khi hoàn tất.')
+        //         ->success()
+        //         ->send();
 
-            // Step 6: Return false to gracefully stop the parent action's logic
-            // without throwing an unhandled exception.
-            return false;
-        });
+        //     // Step 6: Return false to gracefully stop the parent action's logic
+        //     // without throwing an unhandled exception.
+        //     return false;
+        // });
 
         return $static;
     }
@@ -185,7 +185,7 @@ class ImportExcelAction extends BaseExcelImportAction
             // Ensure rows is not null and subtract 1 for the header row.
             return $rows ? (max(0, $rows->count() - 1)) : 0;
         } catch (\Exception $e) {
-            Log::error("Could not read row count from file {$path}: ".$e->getMessage());
+            Log::error("Could not read row count from file {$path}: " . $e->getMessage());
 
             return 0; // Return 0 if the file is invalid or cannot be read.
         }

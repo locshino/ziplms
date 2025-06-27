@@ -17,17 +17,9 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Validators\Failure;
 
-/**
- * Abstract Base Importer Class.
- *
- * This class provides a standardized and high-performance structure for creating importers.
- * It integrates key Maatwebsite/Excel concerns for performance optimization, such as
- * WithBatchInserts and WithChunkReading, making it suitable for very large files.
- * It also handles common logic like failure tracking and context management.
- */
-abstract class ExcelImporter implements SkipsOnFailure, ToModel, WithBatchInserts, WithChunkReading, WithHeadingRow, WithValidation
+abstract class ExcelImporter implements ToModel, WithHeadingRow, WithValidation, WithBatchInserts, WithChunkReading, SkipsOnFailure
 {
-    use SkipsFailures;
+    use SkipsFailures; // This trait will automatically collect failures for us.
 
     /**
      * The current import batch instance.
@@ -74,7 +66,7 @@ abstract class ExcelImporter implements SkipsOnFailure, ToModel, WithBatchInsert
      * This method is automatically called by the SkipsOnFailure concern
      * when a row fails validation. We use it to update our batch progress.
      */
-    public function onFailure(Failure ...$failures): void
+    public function onFailure(Failure ...$failures)
     {
         // The SkipsFailures trait already collects failures. We just need to update our batch.
         $this->importBatch->increment('failed_imports', count($failures));
