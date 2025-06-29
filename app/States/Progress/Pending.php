@@ -6,12 +6,12 @@ class Pending extends ProgressStatus
 {
     public static string $name = 'pending';
 
-    public function label(): string
+    public static function label(): string
     {
         return 'Pending';
     }
 
-    public function color(): string
+    public static function color(): string
     {
         return 'info'; // For Filament badges
     }
