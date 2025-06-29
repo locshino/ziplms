@@ -9,15 +9,11 @@ trait Importable
     /**
      * The import batch context, temporarily attached to the model.
      * This property will not be persisted to the database.
-     *
-     * @var \App\Models\Batch|null
      */
     public ?Batch $importBatch = null;
 
     /**
      * The role to assign after creation, temporarily attached to the model.
-     *
-     * @var string|null
      */
     public ?string $roleToAssignOnCreate = null;
 

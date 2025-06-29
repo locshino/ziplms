@@ -16,7 +16,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Throwable;
 
@@ -25,6 +24,7 @@ class ProcessImportJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
+
     public int $timeout = 600;
 
     public function __construct(
@@ -50,20 +50,20 @@ class ProcessImportJob implements ShouldQueue
             $failures = $importer->failures();
 
             $notificationTitle = 'Hoàn tất nhập liệu!';
-            $notificationBody = 'Quá trình nhập file "' . $this->importBatch->original_file_name . '" đã hoàn tất.';
+            $notificationBody = 'Quá trình nhập file "'.$this->importBatch->original_file_name.'" đã hoàn tất.';
 
             if (count($failures) > 0) {
                 $this->importBatch->status->transitionTo(DoneWithErrors::class);
 
                 // Generate and store an error report
-                $errorFileName = 'error_report_' . $this->importBatch->id . '.xlsx';
-                $errorFilePath = 'imports/failures/' . $errorFileName;
+                $errorFileName = 'error_report_'.$this->importBatch->id.'.xlsx';
+                $errorFilePath = 'imports/failures/'.$errorFileName;
                 Excel::store(new FailedRowsExport($failures), $errorFilePath, 'local');
 
                 $this->importBatch->update(['error_report_path' => $errorFilePath]);
 
                 $notificationTitle = 'Nhập liệu hoàn tất với một số lỗi';
-                $notificationBody .= ' Có ' . count($failures) . ' dòng bị lỗi.';
+                $notificationBody .= ' Có '.count($failures).' dòng bị lỗi.';
             } else {
                 $this->importBatch->status->transitionTo(Done::class);
             }
@@ -111,7 +111,7 @@ class ProcessImportJob implements ShouldQueue
         // Send a failure notification
         Notification::make()
             ->title('Xử lý file thất bại!')
-            ->body('Đã có lỗi nghiêm trọng xảy ra khi xử lý file "' . $this->importBatch->original_file_name . '".')
+            ->body('Đã có lỗi nghiêm trọng xảy ra khi xử lý file "'.$this->importBatch->original_file_name.'".')
             ->danger()
             ->sendToDatabase($this->importBatch->uploader);
     }

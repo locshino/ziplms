@@ -185,7 +185,7 @@ class ImportExcelAction extends BaseExcelImportAction
             // Ensure rows is not null and subtract 1 for the header row.
             return $rows ? (max(0, $rows->count() - 1)) : 0;
         } catch (\Exception $e) {
-            Log::error("Could not read row count from file {$path}: " . $e->getMessage());
+            Log::error("Could not read row count from file {$path}: ".$e->getMessage());
 
             return 0; // Return 0 if the file is invalid or cannot be read.
         }
