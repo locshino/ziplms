@@ -63,8 +63,7 @@ class User extends Base\AuthModel implements FilamentUser, HasMedia
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasStates,
-        InteractsWithMedia, // For profile_picture
-        Concerns\Importable;
+        InteractsWithMedia; // For profile_picture
 
     /**
      * Get the attributes that should be cast.

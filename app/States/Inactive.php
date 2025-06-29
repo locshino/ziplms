@@ -6,12 +6,12 @@ class Inactive extends Status
 {
     public static string $name = 'inactive';
 
-    public function label(): string
+    public static function label(): string
     {
         return 'Inactive';
     }
 
-    public function color(): string
+    public static function color(): string
     {
         return 'danger'; // For Filament badges
     }
