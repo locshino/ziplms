@@ -37,32 +37,7 @@ class FilamentExcelServiceProvider extends ServiceProvider
     private function configureCustomExportUrl(): void
     {
         FilamentExport::createExportUrlUsing(function (array $export) {
-            // 1. Deconstruct the filename to separate the name and extension.
-            // This avoids putting a full file path in the URL parameters.
-            $fileInfo = pathinfo($export['filename']);
-            $filenameWithoutExtension = $fileInfo['filename'];
-            $extension = $fileInfo['extension'];
-
-            // Create a more user-friendly filename for the download.
-            // This regex removes the UUID prefix that filament-excel adds to avoid collisions.
-            $friendlyName = preg_replace('/^[a-f0-9]{8}-([a-f0-9]{4}-){3}[a-f0-9]{12}-/i', '', $filenameWithoutExtension);
-
-            // Sanitize the friendly name by replacing multiple spaces/hyphens with a single hyphen.
-            $friendlyName = preg_replace('/[\s-]+/', '-', $friendlyName);
-
-            // 2. Generate a temporary signed URL pointing to our custom download route.
-            // This URL is more secure and less likely to be blocked by a WAF.
-            return URL::temporarySignedRoute(
-                'exports.download', // The name of our custom download route.
-                now()->addHours(2), // Set a custom expiration time for the link.
-                [
-                    // The actual filename on disk (for finding the file).
-                    'filename' => $filenameWithoutExtension,
-                    'extension' => $extension,
-                    // The desired, clean filename for the user's download.
-                    'download_as' => $friendlyName.'.'.$extension,
-                ]
-            );
+            return \App\Support\FileDownloadHelper::generateWafFriendlySignedUrl(filePath: $export['filename'], isErrorReport: false);
         });
     }
 }

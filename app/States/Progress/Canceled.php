@@ -6,12 +6,12 @@ class Canceled extends ProgressStatus
 {
     public static string $name = 'canceled';
 
-    public function label(): string
+    public static function label(): string
     {
         return 'Canceled';
     }
 
-    public function color(): string
+    public static function color(): string
     {
         return 'secondary'; // For Filament badges
     }
