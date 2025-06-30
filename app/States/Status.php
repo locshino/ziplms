@@ -4,7 +4,7 @@ namespace App\States;
 
 use Spatie\ModelStates\State;
 use Spatie\ModelStates\StateConfig;
-use App\States\Course\Archived;
+
 abstract class Status extends State
 {
     // Define methods here that are available for all states.
@@ -20,17 +20,12 @@ abstract class Status extends State
             ->allowTransition(Inactive::class, Active::class)
             ->allowTransition(Active::class, Inactive::class);
     }
-    public static function getStates(): array
-{
-    return [
-        Active::class,
-        Inactive::class,
-        Archived::class,
-    ];
-}
 
-public static function getLabel(): string
-{
-    return 'Đang hoạt động';
-}
+    public static function getStates(): array
+    {
+        return [
+            Active::class,
+            Inactive::class,
+        ];
+    }
 }

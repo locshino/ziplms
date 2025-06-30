@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\States\Status;
+use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\ModelStates\HasStates;
+use Spatie\Tags\HasTags;
 use Spatie\Translatable\HasTranslations;
 
 /**
@@ -77,9 +79,10 @@ use Spatie\Translatable\HasTranslations;
  *
  * @mixin \Eloquent
  */
-class Course extends Base\Model
+class Course extends Base\Model implements HasMedia
 {
     use HasStates,
+        HasTags,
         HasTranslations,
         InteractsWithMedia; // For image_path
 
