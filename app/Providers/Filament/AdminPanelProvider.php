@@ -89,7 +89,8 @@ class AdminPanelProvider extends PanelProvider
     {
         return [
             FilamentOtpLoginPlugin::make(),
-            SpatieLaravelTranslatablePlugin::make(),
+            SpatieLaravelTranslatablePlugin::make()
+                ->defaultLocales(['vi', 'en']),
             FilamentSpatieLaravelBackupPlugin::make(),
         ];
     }
