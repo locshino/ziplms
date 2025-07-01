@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use Spatie\Translatable\HasTranslations;
 use Spatie\Tags\HasTags;
 
 /**
@@ -44,8 +44,9 @@ use Spatie\Tags\HasTags;
  */
 class UserClassMajorEnrollment extends Base\Model
 {
-    use HasTags;
-
+     use HasTags,
+        HasTranslations;
+public $translatable = ['name'];
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
