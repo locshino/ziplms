@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 /**
  * @property string $id
  * @property string $organization_id
@@ -30,13 +28,13 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  *
  * @mixin \Eloquent
  */
-class OrganizationUser extends Pivot
+class OrganizationUser extends Base\Model
 {
     protected $fillable = [
         'user_id',
         'organization_id',
     ];
-use HasUuids;
+    
     public function user()
     {
         return $this->belongsTo(User::class);

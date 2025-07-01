@@ -74,8 +74,7 @@ class Organization extends Base\Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'organization_users', 'organization_id', 'user_id')
-            ->using(OrganizationUser::class);
+        return $this->hasMany(User::class);
     }
 
     public function classesMajors()
