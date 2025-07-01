@@ -34,7 +34,6 @@ class OrganizationUser extends Base\Model
         'user_id',
         'organization_id',
     ];
-    
     public function user()
     {
         return $this->belongsTo(User::class);

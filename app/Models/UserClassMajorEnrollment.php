@@ -1,8 +1,6 @@
 <?php
 
 namespace App\Models;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 
 use Spatie\Tags\HasTags;
 
@@ -44,9 +42,9 @@ use Spatie\Tags\HasTags;
  *
  * @mixin \Eloquent
  */
-class UserClassMajorEnrollment extends Pivot
+class UserClassMajorEnrollment extends Base\Model
 {
-    use HasTags, HasUuids;
+    use HasTags;
 
     protected $casts = [
         'start_date' => 'date',

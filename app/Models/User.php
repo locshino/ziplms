@@ -130,7 +130,9 @@ class User extends Base\AuthModel implements FilamentUser, HasMedia
     public function classesMajors()
     {
         return $this->belongsToMany(\App\Models\ClassesMajor::class, 'user_class_major_enrollments', 'user_id', 'class_major_id')
-            ->using(\App\Models\UserClassMajorEnrollment::class);
+            ->withPivot('id', 'start_date', 'end_date')
+            ->withTimestamps()
+            ->wherePivotNull('deleted_at');
     }
 
 
