@@ -36,7 +36,7 @@ class ExamAnswer extends Base\Model
         'question_id',
         'graded_by',
         'selected_choice_id',
-        'answer_text', // This was the missing piece
+        'answer_text',
         'chosen_option_ids',
         'points_earned',
         'is_correct',
