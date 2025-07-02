@@ -39,7 +39,7 @@
         "spatie/laravel-data": "^4.15",
         "spatie/laravel-health": "^1.34",
         "spatie/laravel-medialibrary": "^11.13",
-        "spatie/laravel-model-states": "*",
+        "spatie/laravel-model-states": "^2.11",
         "spatie/laravel-one-time-passwords": "^1.0",
         "spatie/laravel-permission": "^6.19",
         "spatie/laravel-settings": "^3.4",
