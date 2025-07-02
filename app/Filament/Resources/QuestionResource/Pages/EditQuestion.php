@@ -19,9 +19,6 @@ class EditQuestion extends EditRecord
 
     /**
      * Tùy chỉnh dữ liệu trước khi đổ vào form.
-     *
-     * @param  array  $data
-     * @return array
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {

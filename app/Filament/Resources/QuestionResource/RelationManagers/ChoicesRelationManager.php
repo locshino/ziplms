@@ -11,7 +11,9 @@ use Filament\Tables\Table;
 class ChoicesRelationManager extends RelationManager
 {
     protected static string $relationship = 'choices';
+
     protected static ?string $label = 'Lựa chọn trả lời';
+
     protected static ?string $pluralLabel = 'Các lựa chọn trả lời';
 
     public function form(Form $form): Form
@@ -40,7 +42,7 @@ class ChoicesRelationManager extends RelationManager
                     ->label('Nội dung')
                     ->limit(60)
                     ->wrap()
-                    ->getStateUsing(fn($record): ?string => $record->getTranslation('choice_text', app()->getLocale())),
+                    ->getStateUsing(fn ($record): ?string => $record->getTranslation('choice_text', app()->getLocale())),
 
                 Tables\Columns\IconColumn::make('is_correct')
                     ->label('Đáp án đúng')

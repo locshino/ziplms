@@ -4,10 +4,10 @@ namespace App\Filament\Resources\ExamResource\Pages;
 
 use App\Enums\QuestionType;
 use App\Filament\Resources\ExamResource;
-use App\Models\Question;
 use App\Models\Exam;
-use App\Models\ExamAttempt;
 use App\Models\ExamAnswer;
+use App\Models\ExamAttempt;
+use App\Models\Question;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -16,21 +16,31 @@ use Livewire\Attributes\Locked;
 class TakeExam extends Page
 {
     protected static string $resource = ExamResource::class;
+
     protected static string $view = 'filament.resources.exam-resource.pages.take-exam';
+
     protected static string $routePath = '/{record}/take';
+
     protected static bool $shouldRegisterNavigation = false;
 
     #[Locked]
     public Exam $record;
+
     #[Locked]
     public ?ExamAttempt $attempt = null;
 
     public Collection $questions;
+
     public int $currentQuestionIndex = 0;
+
     public array $questionMeta = [];
+
     public array $mcqAnswers = [];
+
     public array $essayAnswers = [];
+
     public ?int $timeLeft = null;
+
     public bool $examStarted = false;
 
     public function mount(): void
@@ -40,7 +50,7 @@ class TakeExam extends Page
 
     public function getTitle(): string
     {
-        return $this->examStarted ? 'Đang làm bài: ' . $this->record->title : 'Bắt đầu: ' . $this->record->title;
+        return $this->examStarted ? 'Đang làm bài: '.$this->record->title : 'Bắt đầu: '.$this->record->title;
     }
 
     public function startExam(): void
@@ -100,13 +110,14 @@ class TakeExam extends Page
     public function getQuestionType(Question $question): ?QuestionType
     {
         $tag = $question->tagsWithType(QuestionType::key())->first();
+
         return $tag ? QuestionType::tryFrom($tag->name) : null;
     }
 
     public function submitExam(): void
     {
         // Thêm kiểm tra để ngăn việc nộp bài nhiều lần
-        if (!$this->attempt || $this->attempt->completed_at) {
+        if (! $this->attempt || $this->attempt->completed_at) {
             return;
         }
 

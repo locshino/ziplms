@@ -15,9 +15,13 @@ use Filament\Tables\Table;
 class ExamAttemptResource extends Resource
 {
     protected static ?string $model = ExamAttempt::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-document-check';
+
     protected static ?string $navigationGroup = 'Quản lý Đánh giá';
+
     protected static ?string $label = 'Lượt làm bài';
+
     protected static ?string $pluralLabel = 'Danh sách Lượt làm bài';
 
     public static function infolist(Infolist $infolist): Infolist
@@ -40,15 +44,15 @@ class ExamAttemptResource extends Resource
                             ->badge()
                             ->color('success')
                             // Tính điểm trực tiếp khi xem chi tiết
-                            ->getStateUsing(fn(ExamAttempt $record): ?float => $record->answers()->sum('points_earned')),
+                            ->getStateUsing(fn (ExamAttempt $record): ?float => $record->answers()->sum('points_earned')),
 
                         Components\TextEntry::make('status')
                             ->label('Trạng thái')
                             ->badge()
-                            ->color(fn(Status $state): string => $state->color()),
+                            ->color(fn (Status $state): string => $state->color()),
                         Components\TextEntry::make('time_spent_seconds')
                             ->label('Thời gian làm bài')
-                            ->formatStateUsing(fn(?int $state): string => $state ? gmdate('H:i:s', $state) : 'N/A'),
+                            ->formatStateUsing(fn (?int $state): string => $state ? gmdate('H:i:s', $state) : 'N/A'),
                     ]),
                 Components\Section::make('Thời gian')
                     ->columns(2)
@@ -75,10 +79,10 @@ class ExamAttemptResource extends Resource
                     // Sắp xếp sẽ không hoạt động đúng như mong đợi
                     ->sortable()
                     // Tính điểm trực tiếp trên bảng danh sách
-                    ->getStateUsing(fn(ExamAttempt $record): ?float => $record->answers()->sum('points_earned')),
+                    ->getStateUsing(fn (ExamAttempt $record): ?float => $record->answers()->sum('points_earned')),
 
                 Tables\Columns\TextColumn::make('status')->label('Trạng thái')->badge()
-                    ->color(fn(Status $state): string => $state->color()),
+                    ->color(fn (Status $state): string => $state->color()),
                 Tables\Columns\TextColumn::make('completed_at')->label('Ngày nộp bài')->dateTime('d/m/Y')->sortable(),
             ])
             ->actions([

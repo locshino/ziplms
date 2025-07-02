@@ -8,31 +8,33 @@ use App\Filament\Resources\QuestionResource\Pages;
 use App\Filament\Resources\QuestionResource\RelationManagers;
 use App\Models\Question;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Select; // Keep Select for organization_id
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Forms\Components\Repeater; // Import Repeater
-use Filament\Forms\Components\TextInput; // Import TextInput for choices
-use Filament\Forms\Components\Toggle; // Import Toggle for is_correct
-use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter; // <-- Import bộ lọc
-use Filament\Tables\Table;
+use Filament\Forms\Components\Section; // Keep Select for organization_id
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieTagsInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput; // Import Repeater
+use Filament\Forms\Components\Toggle; // Import TextInput for choices
+use Filament\Forms\Form; // Import Toggle for is_correct
+use Filament\Resources\Resource;
+use Filament\Tables;
+// <-- Import bộ lọc
 use Filament\Tables\Columns\SpatieTagsColumn;
-
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class QuestionResource extends Resource
 {
     protected static ?string $model = Question::class;
-    protected static ?string $navigationIcon = 'heroicon-o-question-mark-circle';
-    protected static ?string $navigationGroup = 'Quản lý Đánh giá';
-    protected static ?string $label = 'Câu hỏi';
-    protected static ?string $pluralLabel = 'Ngân hàng Câu hỏi';
 
+    protected static ?string $navigationIcon = 'heroicon-o-question-mark-circle';
+
+    protected static ?string $navigationGroup = 'Quản lý Đánh giá';
+
+    protected static ?string $label = 'Câu hỏi';
+
+    protected static ?string $pluralLabel = 'Ngân hàng Câu hỏi';
 
     public static function form(Form $form): Form
     {
@@ -45,7 +47,7 @@ class QuestionResource extends Resource
                             ->label('Nội dung câu hỏi')
                             ->required(),
                         RichEditor::make('explanation')
-                            ->label('Giải thích đáp án (nếu có)')
+                            ->label('Giải thích đáp án (nếu có)'),
                     ]),
                 Section::make('Thuộc tính')
                     ->columnSpan(1)
@@ -94,7 +96,6 @@ class QuestionResource extends Resource
                     ->label('Loại hình Tổ chức')
                     ->type('organization-type'), // Specify the tag type
 
-
                 // Cột 3: Hiển thị tên Tổ chức
                 TextColumn::make('organization.name')
                     ->label('Tổ chức')
@@ -116,10 +117,6 @@ class QuestionResource extends Resource
                     ->successNotificationTitle('Câu hỏi đã được xóa thành công.'),
             ]);
     }
-
-
-
-
 
     public static function getRelations(): array
     {

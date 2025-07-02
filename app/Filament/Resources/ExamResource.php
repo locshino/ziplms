@@ -14,14 +14,17 @@ use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Forms\Components\SpatieTagsInput;
 
 class ExamResource extends Resource
 {
     protected static ?string $model = Exam::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+
     protected static ?string $navigationGroup = 'Quản lý Đánh giá';
+
     protected static ?string $label = 'Bài kiểm tra';
+
     protected static ?string $pluralLabel = 'Danh sách Bài kiểm tra';
 
     public static function form(Form $form): Form
@@ -62,8 +65,8 @@ class ExamResource extends Resource
                         Forms\Components\Select::make('exam_type')
                             ->label('Loại bài kiểm tra')
                             ->options(
-                                collect(ExamType::cases())->mapWithKeys(fn($case) => [
-                                    $case->value => $case->label()
+                                collect(ExamType::cases())->mapWithKeys(fn ($case) => [
+                                    $case->value => $case->label(),
                                 ])->all()
                             )
                             ->required()->native(false),
@@ -77,8 +80,8 @@ class ExamResource extends Resource
                         Forms\Components\Select::make('show_results_after')
                             ->label('Hiển thị kết quả')
                             ->options(
-                                collect(ExamShowResultsType::cases())->mapWithKeys(fn($case) => [
-                                    $case->value => $case->label()
+                                collect(ExamShowResultsType::cases())->mapWithKeys(fn ($case) => [
+                                    $case->value => $case->label(),
                                 ])->all()
                             )
                             ->required()->native(false),
@@ -96,9 +99,9 @@ class ExamResource extends Resource
                 Tables\Columns\TextColumn::make('title')
                     ->label('Tiêu đề')
                     ->limit(40)
-                    ->getStateUsing(fn($record): ?string => $record->getTranslation('title', app()->getLocale()))
+                    ->getStateUsing(fn ($record): ?string => $record->getTranslation('title', app()->getLocale()))
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->where('title->' . app()->getLocale(), 'like', "%{$search}%");
+                        return $query->where('title->'.app()->getLocale(), 'like', "%{$search}%");
                     }),
                 Tables\Columns\TextColumn::make('exam_type')->label('Loại')->badge(), // <-- Thêm cột này để hiển thị
                 Tables\Columns\TextColumn::make('course.name')->label('Khóa học')->sortable(),
@@ -112,7 +115,7 @@ class ExamResource extends Resource
                     ->label('Làm bài')
                     ->icon('heroicon-o-pencil-square')
                     ->color('success') // Tạo URL đến trang làm bài
-                    ->url(fn(Exam $record): string => static::getUrl('take', ['record' => $record])),
+                    ->url(fn (Exam $record): string => static::getUrl('take', ['record' => $record])),
             ]);
     }
 

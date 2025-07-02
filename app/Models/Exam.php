@@ -141,6 +141,7 @@ class Exam extends Base\Model
             ->withPivot('points', 'question_order')
             ->withTimestamps();
     }
+
     public function attempts()
     {
         return $this->hasMany(ExamAttempt::class);

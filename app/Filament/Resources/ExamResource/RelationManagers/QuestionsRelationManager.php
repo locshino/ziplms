@@ -11,7 +11,9 @@ use Filament\Tables\Table;
 class QuestionsRelationManager extends RelationManager
 {
     protected static string $relationship = 'questions';
+
     protected static ?string $recordTitleAttribute = 'question_text';
+
     protected static ?string $label = 'Câu hỏi trong bài kiểm tra';
 
     public function table(Table $table): Table
@@ -22,7 +24,7 @@ class QuestionsRelationManager extends RelationManager
                     ->label('Nội dung câu hỏi')
                     ->limit(80)
                     ->wrap()
-                    ->getStateUsing(fn($record): ?string => $record->getTranslation('question_text', app()->getLocale())),
+                    ->getStateUsing(fn ($record): ?string => $record->getTranslation('question_text', app()->getLocale())),
 
                 // Các cột này đọc dữ liệu từ bảng trung gian (exam_questions)
                 Tables\Columns\TextColumn::make('points')->label('Điểm')->sortable(),
@@ -31,7 +33,7 @@ class QuestionsRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\AttachAction::make()
                     ->successNotificationTitle('Câu hỏi đã được thêm vào bài thi.')
-                    ->form(fn(Tables\Actions\AttachAction $action): array => [
+                    ->form(fn (Tables\Actions\AttachAction $action): array => [
                         $action->getRecordSelect(),
                         Forms\Components\TextInput::make('points')->label('Điểm')->numeric()->required()->default(1.00),
                         Forms\Components\TextInput::make('question_order')->label('Thứ tự')->numeric()->default(0),

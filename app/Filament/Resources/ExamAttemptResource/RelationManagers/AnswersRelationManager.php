@@ -7,14 +7,13 @@ use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class AnswersRelationManager extends RelationManager
 {
     protected static string $relationship = 'answers';
-    protected static ?string $label = 'Chi tiết bài làm';
 
+    protected static ?string $label = 'Chi tiết bài làm';
 
     public function form(Form $form): Form
     {
@@ -52,7 +51,7 @@ class AnswersRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('question.question_text')
                     ->label('Câu hỏi')
                     ->wrap()
-                    ->getStateUsing(fn(Model $record): ?string => $record->question?->getTranslation('question_text', app()->getLocale())),
+                    ->getStateUsing(fn (Model $record): ?string => $record->question?->getTranslation('question_text', app()->getLocale())),
 
                 Tables\Columns\TextColumn::make('student_answer')
                     ->label('Câu trả lời của HS')
@@ -76,17 +75,17 @@ class AnswersRelationManager extends RelationManager
                         }
 
                         // Nếu vẫn không có câu trả lời nào, hiển thị ký tự gạch ngang
-                        return !empty($answer) ? $answer : '—';
+                        return ! empty($answer) ? $answer : '—';
                     }),
 
                 Tables\Columns\IconColumn::make('is_correct')
                     ->label('Kết quả')
-                    ->icon(fn($state): string => match ($state) {
+                    ->icon(fn ($state): string => match ($state) {
                         true => 'heroicon-o-check-circle',
                         false => 'heroicon-o-x-circle',
                         null => 'heroicon-o-clock',
                     })
-                    ->color(fn($state): string => match ($state) {
+                    ->color(fn ($state): string => match ($state) {
                         true => 'success',
                         false => 'danger',
                         null => 'warning',
@@ -106,10 +105,12 @@ class AnswersRelationManager extends RelationManager
     {
         return false;
     }
+
     public function canDelete(Model $record): bool
     {
         return false;
     }
+
     public function canDeleteAny(): bool
     {
         return false;
