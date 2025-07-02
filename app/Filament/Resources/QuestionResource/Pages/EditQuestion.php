@@ -46,4 +46,9 @@ class EditQuestion extends EditRecord
 
         return $data;
     }
+
+    protected function getSavedNotificationTitle(): ?string
+    {
+        return 'Câu hỏi đã được cập nhật thành công.';
+    }
 }

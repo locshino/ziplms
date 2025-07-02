@@ -11,6 +11,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\SpatieTagsInput;
@@ -105,6 +106,13 @@ class ExamResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+
+                // THÊM NÚT MỚI TẠI ĐÂY
+                Action::make('take')
+                    ->label('Làm bài')
+                    ->icon('heroicon-o-pencil-square')
+                    ->color('success') // Tạo URL đến trang làm bài
+                    ->url(fn(Exam $record): string => static::getUrl('take', ['record' => $record])),
             ]);
     }
 
@@ -121,6 +129,7 @@ class ExamResource extends Resource
             'index' => Pages\ListExams::route('/'),
             'create' => Pages\CreateExam::route('/create'),
             'edit' => Pages\EditExam::route('/{record}/edit'),
+            'take' => Pages\TakeExam::route('/{record}/take'),
         ];
     }
 }

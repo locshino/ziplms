@@ -13,7 +13,8 @@ class EditExam extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+                ->successNotificationTitle('Bài thi đã được xóa thành công.'),
         ];
     }
 
@@ -33,5 +34,10 @@ class EditExam extends EditRecord
 
         // Trả về mảng data đã được chuẩn hóa
         return $data;
+    }
+
+    protected function getSavedNotificationTitle(): ?string
+    {
+        return 'Bài thi đã được cập nhật thành công.';
     }
 }

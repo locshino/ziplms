@@ -110,8 +110,10 @@ class QuestionResource extends Resource
                 // Để trống để không gây lỗi
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->successNotificationTitle('Câu hỏi đã được cập nhật thành công.'),
+                Tables\Actions\DeleteAction::make()
+                    ->successNotificationTitle('Câu hỏi đã được xóa thành công.'),
             ]);
     }
 

@@ -5,7 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ExamAttemptResource\Pages;
 use App\Filament\Resources\ExamAttemptResource\RelationManagers;
 use App\Models\ExamAttempt;
-use Filament\Forms\Form; // Vẫn cần Form cho các hành động khác (nếu có)
+use App\States\Status;
 use Filament\Infolists\Components;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
@@ -19,8 +19,6 @@ class ExamAttemptResource extends Resource
     protected static ?string $navigationGroup = 'Quản lý Đánh giá';
     protected static ?string $label = 'Lượt làm bài';
     protected static ?string $pluralLabel = 'Danh sách Lượt làm bài';
-
-    // BỎ phương thức form() cũ đi và thay bằng infolist()
 
     public static function infolist(Infolist $infolist): Infolist
     {
@@ -40,13 +38,16 @@ class ExamAttemptResource extends Resource
                         Components\TextEntry::make('score')
                             ->label('Điểm số')
                             ->badge()
-                            ->color('success'),
+                            ->color('success')
+                            // Tính điểm trực tiếp khi xem chi tiết
+                            ->getStateUsing(fn(ExamAttempt $record): ?float => $record->answers()->sum('points_earned')),
+
                         Components\TextEntry::make('status')
                             ->label('Trạng thái')
-                            ->badge(),
+                            ->badge()
+                            ->color(fn(Status $state): string => $state->color()),
                         Components\TextEntry::make('time_spent_seconds')
                             ->label('Thời gian làm bài')
-                            // Định dạng lại số giây thành Giờ:Phút:Giây
                             ->formatStateUsing(fn(?int $state): string => $state ? gmdate('H:i:s', $state) : 'N/A'),
                     ]),
                 Components\Section::make('Thời gian')
@@ -62,19 +63,28 @@ class ExamAttemptResource extends Resource
             ]);
     }
 
-
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('exam.title')->label('Bài kiểm tra')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('user.name')->label('Học sinh')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('score')->label('Điểm số')->sortable(),
-                Tables\Columns\TextColumn::make('status')->label('Trạng thái')->badge(),
+
+                Tables\Columns\TextColumn::make('score')
+                    ->label('Điểm số')
+                    // Sắp xếp sẽ không hoạt động đúng như mong đợi
+                    ->sortable()
+                    // Tính điểm trực tiếp trên bảng danh sách
+                    ->getStateUsing(fn(ExamAttempt $record): ?float => $record->answers()->sum('points_earned')),
+
+                Tables\Columns\TextColumn::make('status')->label('Trạng thái')->badge()
+                    ->color(fn(Status $state): string => $state->color()),
                 Tables\Columns\TextColumn::make('completed_at')->label('Ngày nộp bài')->dateTime('d/m/Y')->sortable(),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make()->label('Xem & Chấm bài'),
+                Tables\Actions\ViewAction::make()->label('Xem chi tiết'),
+                Tables\Actions\EditAction::make()->label('Chấm bài'),
+                Tables\Actions\DeleteAction::make()->label('Xóa'),
             ])
             ->bulkActions([]);
     }
@@ -96,6 +106,8 @@ class ExamAttemptResource extends Resource
         return [
             'index' => Pages\ListExamAttempts::route('/'),
             'view' => Pages\ViewExamAttempt::route('/{record}'),
+            'create' => Pages\CreateExamAttempt::route('/create'),
+            'edit' => Pages\EditExamAttempt::route('/{record}/edit'),
         ];
     }
 }

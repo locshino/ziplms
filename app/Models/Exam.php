@@ -136,9 +136,11 @@ class Exam extends Base\Model
 
     public function questions()
     {
-        return $this->belongsToMany(Question::class, 'exam_questions');
+        // trung gian exam_questions
+        return $this->belongsToMany(Question::class, 'exam_questions')
+            ->withPivot('points', 'question_order')
+            ->withTimestamps();
     }
-
     public function attempts()
     {
         return $this->hasMany(ExamAttempt::class);
