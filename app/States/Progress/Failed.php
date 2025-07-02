@@ -6,12 +6,12 @@ class Failed extends ProgressStatus
 {
     public static string $name = 'failed';
 
-    public function label(): string
+    public static function label(): string
     {
         return 'Failed';
     }
 
-    public function color(): string
+    public static function color(): string
     {
         return 'danger'; // For Filament badges
     }

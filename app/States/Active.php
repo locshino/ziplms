@@ -6,12 +6,12 @@ class Active extends Status
 {
     public static string $name = 'active';
 
-    public function label(): string
+    public static function label(): string
     {
         return 'Active';
     }
 
-    public function color(): string
+    public static function color(): string
     {
         return 'success'; // For Filament badges
     }

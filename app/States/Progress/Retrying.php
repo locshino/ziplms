@@ -6,12 +6,12 @@ class Retrying extends ProgressStatus
 {
     public static string $name = 'retrying';
 
-    public function label(): string
+    public static function label(): string
     {
         return 'Retrying';
     }
 
-    public function color(): string
+    public static function color(): string
     {
         return 'warning'; // For Filament badges
     }
