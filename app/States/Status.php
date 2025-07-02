@@ -20,4 +20,12 @@ abstract class Status extends State
             ->allowTransition(Inactive::class, Active::class)
             ->allowTransition(Active::class, Inactive::class);
     }
+
+    public static function getStates(): array
+    {
+        return [
+            Active::class,
+            Inactive::class,
+        ];
+    }
 }
