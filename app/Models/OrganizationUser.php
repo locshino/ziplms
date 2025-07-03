@@ -28,7 +28,7 @@ namespace App\Models;
  *
  * @mixin \Eloquent
  */
-class OrganizationUser extends Base\Model
+class OrganizationUser extends Base\Pivot
 {
     protected $fillable = [
         'user_id',
