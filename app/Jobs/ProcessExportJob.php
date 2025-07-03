@@ -2,9 +2,9 @@
 
 namespace App\Jobs;
 
-use Filament\Actions\Imports\Jobs\ImportCsv;
+use Filament\Actions\Exports\Jobs\PrepareCsvExport;
 
-class ProcessImportJob extends ImportCsv
+class ProcessExportJob extends PrepareCsvExport
 {
     /**
      * Get the name of the queue the job should be sent to.

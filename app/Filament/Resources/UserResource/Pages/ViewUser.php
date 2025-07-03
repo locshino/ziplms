@@ -4,8 +4,8 @@ namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Actions\Action; // <-- Thêm use statement này
+use Filament\Actions\Action;
+use Filament\Resources\Pages\ViewRecord; // <-- Thêm use statement này
 
 class ViewUser extends ViewRecord
 {

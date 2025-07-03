@@ -9,9 +9,9 @@ use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use Spatie\Permission\Traits\HasRoles;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\ModelStates\HasStates;
+use Spatie\Permission\Traits\HasRoles;
 
 /**
  * The User model represents a user in the system.
@@ -42,6 +42,7 @@ use Spatie\ModelStates\HasStates;
  * @property-read int|null $classes_majors_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\OneTimePasswords\Models\OneTimePassword> $oneTimePasswords
  * @property-read int|null $one_time_passwords_count
+ *
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
@@ -67,21 +68,25 @@ use Spatie\ModelStates\HasStates;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
+ *
  * @property-read \App\Models\UserClassMajorEnrollment|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Permission> $permissions
  * @property-read int|null $permissions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Role> $roles
  * @property-read int|null $roles_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User permission($permissions, $without = false)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User role($roles, $guard = null, $without = false)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutPermission($permissions)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutRole($roles, $guard = null)
+ *
  * @mixin \Eloquent
  */
 class User extends Base\AuthModel implements FilamentUser, HasMedia
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use Notifiable, Authorizable, HasStates, InteractsWithMedia, HasRoles;
+    use Authorizable, HasRoles, HasStates, InteractsWithMedia, Notifiable;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -96,6 +101,7 @@ class User extends Base\AuthModel implements FilamentUser, HasMedia
         'phone_number',
         'address',
     ];
+
     /**
      * Defines the attributes that should be cast to native types.
      * The 'status' attribute will be automatically cast to a Status::class object.
@@ -135,13 +141,10 @@ class User extends Base\AuthModel implements FilamentUser, HasMedia
             ->wherePivotNull('deleted_at');
     }
 
-
     /**
      * Registers media collections for the model.
      * This method defines the 'profile_picture' collection, which allows only a single file
      * and restricts accepted file types to images.
-     *
-     * @return void
      */
     public function registerMediaCollections(): void
     {
@@ -155,9 +158,6 @@ class User extends Base\AuthModel implements FilamentUser, HasMedia
      * Registers media conversions that will be created automatically.
      * This method will create a 'thumb' version (100x100px) from the original image
      * whenever a file is added to the collection.
-     *
-     * @param \Spatie\MediaLibrary\MediaCollections\Models\Media|null $media
-     * @return void
      */
     public function registerMediaConversions(?Media $media = null): void
     {
@@ -172,7 +172,6 @@ class User extends Base\AuthModel implements FilamentUser, HasMedia
      * This is the central authorization method for Filament panels.
      *
      * @param  \Filament\Panel  $panel  The panel instance being accessed.
-     * @return bool
      */
     public function canAccessPanel(Panel $panel): bool
     {
@@ -190,10 +189,11 @@ class User extends Base\AuthModel implements FilamentUser, HasMedia
             default => false,
         };
     }
+
     /**
      * Get the color associated with a user status.
      *
-     * @param string $state The status value.
+     * @param  string  $state  The status value.
      * @return string The color for Filament badge.
      */
     public static function getStatusColor(string $state): string
@@ -209,16 +209,14 @@ class User extends Base\AuthModel implements FilamentUser, HasMedia
 
     /**
      * Get the status options for the table filter.
-     *
-     * @return array
      */
     public static function getStatusOptions(): array
     {
         return [
-            'active'    => 'Active',
-            'pending'   => 'Pending',
-            'banned'    => 'Banned',
-            'inactive'  => 'Inactive',
+            'active' => 'Active',
+            'pending' => 'Pending',
+            'banned' => 'Banned',
+            'inactive' => 'Inactive',
         ];
     }
 }

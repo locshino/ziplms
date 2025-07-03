@@ -3,38 +3,37 @@
 namespace App\Filament\Resources;
 
 use App\Enums\RoleEnum;
-use App\Models\User;
-use App\Models\Role;
 use App\Exports\UsersExcelExport;
 use App\Filament\Actions\ExportExcelBulkAction;
 use App\Filament\Resources\UserResource\Pages;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rules\Password;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Role;
+use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\Section as FormSection;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Form;
 use Filament\Infolists;
+use Filament\Infolists\Components\Grid as InfolistGrid;
+use Filament\Infolists\Components\Section as InfolistSection;
+use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\Forms\Components\Grid as FormGroup;
-use Filament\Forms\Components\Section as FormSection;
-use Filament\Infolists\Components\Grid as InfolistGrid;
-use Filament\Infolists\Components\Section as InfolistSection;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
-
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
     public static function form(Form $form): Form
@@ -51,6 +50,7 @@ class UserResource extends Resource
             ->actions(static::getTableActions())
             ->bulkActions(static::getTableBulkActions());
     }
+
     public static function getPages(): array
     {
         return [
@@ -64,7 +64,7 @@ class UserResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->whereDoesntHave('roles', fn(Builder $query) => $query
+            ->whereDoesntHave('roles', fn (Builder $query) => $query
                 ->where('name', RoleEnum::Admin->value));
     }
 
@@ -87,9 +87,9 @@ class UserResource extends Resource
                     Forms\Components\TextInput::make('password')
                         ->label('Mật khẩu')
                         ->password()
-                        ->dehydrateStateUsing(fn(string $state): string => Hash::make($state))
-                        ->dehydrated(fn(?string $state): bool => filled($state))
-                        ->required(fn(string $operation): bool => $operation === 'create')
+                        ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
+                        ->dehydrated(fn (?string $state): bool => filled($state))
+                        ->required(fn (string $operation): bool => $operation === 'create')
                         ->rule(Password::defaults())
                         ->confirmed(),
                     Forms\Components\TextInput::make('password_confirmation')
@@ -112,7 +112,7 @@ class UserResource extends Resource
                         ->relationship(
                             name: 'roles',
                             titleAttribute: 'name',
-                            modifyQueryUsing: fn(Builder $query) => $query
+                            modifyQueryUsing: fn (Builder $query) => $query
                                 ->where('name', '!=', RoleEnum::Admin->value)
                         )
                         ->preload()
@@ -147,7 +147,7 @@ class UserResource extends Resource
                 ->label('Mã')
                 ->sortable()
                 ->default('Null')
-                ->color(fn($state): string => $state === 'Null' ? 'gray' : 'primary')
+                ->color(fn ($state): string => $state === 'Null' ? 'gray' : 'primary')
                 ->searchable(),
             Tables\Columns\TextColumn::make('name')
                 ->label('Tên')
@@ -167,11 +167,11 @@ class UserResource extends Resource
             Tables\Columns\TextColumn::make('roles.name')
                 ->label('Vai trò')
                 ->badge()
-                ->color(fn(string $state): string => RoleEnum::tryFrom($state)?->color() ?? 'gray'),
+                ->color(fn (string $state): string => RoleEnum::tryFrom($state)?->color() ?? 'gray'),
             Tables\Columns\TextColumn::make('status')
                 ->label('Trạng thái')
                 ->badge()
-                ->color(fn(string $state): string => User::getStatusColor($state))
+                ->color(fn (string $state): string => User::getStatusColor($state))
                 ->sortable()
                 ->searchable(),
             Tables\Columns\TextColumn::make('created_at')
@@ -188,7 +188,7 @@ class UserResource extends Resource
             SelectFilter::make('roles')
                 ->label('Vai trò')
                 ->relationship('roles', 'name')
-                ->options(fn() => Role::where('name', '!=', RoleEnum::Admin->value)->pluck('name', 'id'))
+                ->options(fn () => Role::where('name', '!=', RoleEnum::Admin->value)->pluck('name', 'id'))
                 ->multiple()
                 ->preload(),
             SelectFilter::make('organizations')
@@ -234,11 +234,11 @@ class UserResource extends Resource
                     ->before(function (Collection $records, Tables\Actions\DeleteBulkAction $action) {
                         $user = Auth::user();
 
-                        if (!$user instanceof User) {
+                        if (! $user instanceof User) {
                             return;
                         }
 
-                        if ($records->contains(fn(User $record) => !$user->can('delete', $record))) {
+                        if ($records->contains(fn (User $record) => ! $user->can('delete', $record))) {
                             Notification::make()->title('Không thể xóa')->body('Một hoặc nhiều người dùng được chọn không thể bị xóa.')->danger()->send();
                             $action->halt();
                         }
@@ -252,7 +252,7 @@ class UserResource extends Resource
             ]),
             ExportExcelBulkAction::make()
                 ->exports([
-                    UsersExcelExport::make()->withFilename('Users Export - ' . now()->format('Y-m-d')),
+                    UsersExcelExport::make()->withFilename('Users Export - '.now()->format('Y-m-d')),
                 ]),
         ];
     }
@@ -270,7 +270,7 @@ class UserResource extends Resource
                                 ->collection('profile_picture')
                                 ->circular()
                                 ->alignCenter()
-                                ->height(150) 
+                                ->height(150)
                                 ->columnSpanFull(),
                             TextEntry::make('name')
                                 ->label('Họ và tên')
@@ -317,7 +317,7 @@ class UserResource extends Resource
                                     TextEntry::make('status')
                                         ->label('Trạng thái')
                                         ->badge()
-                                        ->color(fn(string $state): string => static::$model::getStatusColor($state)),
+                                        ->color(fn (string $state): string => static::$model::getStatusColor($state)),
                                     TextEntry::make('email_verified_at')
                                         ->label('Ngày xác thực email')
                                         ->dateTime('d/m/Y H:i:s')
@@ -330,7 +330,7 @@ class UserResource extends Resource
                                         ->since(),
                                 ])->collapsible(),
                         ])->columnSpan(1),
-                                ])
+                ]),
             ]);
     }
 }

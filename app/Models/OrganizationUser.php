@@ -28,12 +28,13 @@ namespace App\Models;
  *
  * @mixin \Eloquent
  */
-class OrganizationUser extends Base\Model
+class OrganizationUser extends Base\Pivot
 {
     protected $fillable = [
         'user_id',
         'organization_id',
     ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

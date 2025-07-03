@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Organization;
 use App\Models\Role;
 use App\Models\User;
-use App\Models\Organization;
 use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
@@ -34,7 +34,6 @@ class UserSeeder extends Seeder
         if ($otherRoles->isEmpty()) {
             $this->command->warn('Không tìm thấy vai trò Manager, Teacher, hoặc Student. Sẽ tạo người dùng mà không có các vai trò này.');
         }
-
 
         if ($organizations->isEmpty()) {
             $this->command->warn('Không tìm thấy tổ chức nào. Sẽ tạo người dùng mà không có tổ chức.');

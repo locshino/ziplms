@@ -32,7 +32,7 @@ namespace App\Models;
  *
  * @mixin \Eloquent
  */
-class ExamQuestion extends Base\Model
+class ExamQuestion extends Base\Pivot
 {
     protected $fillable = [
         'exam_id',
