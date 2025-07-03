@@ -30,8 +30,14 @@ namespace App\Models;
  *
  * @mixin \Eloquent
  */
-class UserBadge extends Base\Model
+class UserBadge extends Base\Pivot
 {
+    protected $fillable = [
+        'user_id',
+        'badge_id',
+        'awarded_at',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
