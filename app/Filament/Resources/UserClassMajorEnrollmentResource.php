@@ -78,7 +78,7 @@ class UserClassMajorEnrollmentResource extends Resource
         ->searchable()
         ->sortable(),
 
-    Tables\Columns\TextColumn::make('user.modelHasRoles.role.name')
+    Tables\Columns\TextColumn::make('user.role_names_string')
         ->label('Vai trò')
         ->sortable(),
 

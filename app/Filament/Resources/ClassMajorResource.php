@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Actions\ExportAction;
+use App\Filament\Exports\ClassesMajorExporter;
 class ClassMajorResource extends Resource
 {
     use Translatable;
@@ -96,8 +98,13 @@ Forms\Components\Textarea::make('description')
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    
                 ]),
-            ]);
+            ])
+             ->headerActions([
+            ExportAction::make()
+                ->exporter(ClassesMajorExporter::class)
+        ]);;
     }
 
     public static function getRelations(): array

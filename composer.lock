@@ -2219,16 +2219,16 @@
         },
         {
             "name": "eightynine/filament-excel-import",
-            "version": "v3.1.10",
+            "version": "v3.1.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/eighty9nine/filament-excel-import.git",
-                "reference": "e4097eedec47ef75c96ae6b8e9ec11c4dbd75567"
+                "reference": "a8167515d8f6a946a96774ad8e93ad1f10b43f31"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/eighty9nine/filament-excel-import/zipball/e4097eedec47ef75c96ae6b8e9ec11c4dbd75567",
-                "reference": "e4097eedec47ef75c96ae6b8e9ec11c4dbd75567",
+                "url": "https://api.github.com/repos/eighty9nine/filament-excel-import/zipball/a8167515d8f6a946a96774ad8e93ad1f10b43f31",
+                "reference": "a8167515d8f6a946a96774ad8e93ad1f10b43f31",
                 "shasum": ""
             },
             "require": {
@@ -2289,7 +2289,7 @@
                 "issues": "https://github.com/eightynine/filament-excel-import/issues",
                 "source": "https://github.com/eightynine/filament-excel-import"
             },
-            "time": "2025-05-25T11:22:48+00:00"
+            "time": "2025-06-20T06:08:41+00:00"
         },
         {
             "name": "erag/laravel-pwa",

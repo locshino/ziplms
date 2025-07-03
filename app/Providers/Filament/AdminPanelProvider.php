@@ -42,10 +42,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets($this->widgets())
             ->middleware($this->middleware())
             ->authMiddleware($this->authMiddleware())
-            ->plugins($this->plugins())
-            ->plugin(SpatieLaravelTranslatablePlugin::make()
-           ->defaultLocales(['en', 'vi']),
-        );
+            ->plugins($this->plugins());
     }
 
     protected function middleware(): array

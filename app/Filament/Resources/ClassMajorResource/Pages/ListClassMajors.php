@@ -10,6 +10,7 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Actions\Action;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ClassesMajorExport;
+use Filament\Tables\Actions\ExportAction;
 class ListClassMajors extends ListRecords
 {
     use ListRecords\Concerns\Translatable;
@@ -21,14 +22,14 @@ class ListClassMajors extends ListRecords
         return [
             Actions\CreateAction::make(),
           
-             Action::make('export_excel')
-            ->label('Export Excel')
-            ->icon('heroicon-o-arrow-down-tray')
-            ->color('success') 
-            ->action(function () {
-                return Excel::download(new ClassesMajorExport, 'class_majors.xlsx');
-            }),
+          
             Actions\LocaleSwitcher::make(),
         ];
     }
+    protected function getTableActions(): array
+{
+    return [
+        ExportAction::make()->exporter(ClassesMajorExport::class), // ✅ đúng chỗ
+    ];
+}
 }
