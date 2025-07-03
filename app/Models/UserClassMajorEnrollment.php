@@ -42,7 +42,7 @@ use Spatie\Tags\HasTags;
  *
  * @mixin \Eloquent
  */
-class UserClassMajorEnrollment extends Base\Model
+class UserClassMajorEnrollment extends Base\Pivot
 {
     use HasTags;
 
