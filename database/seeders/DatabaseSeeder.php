@@ -49,9 +49,6 @@ class DatabaseSeeder extends Seeder
             // --- Gamification ---
             BadgeSeeder::class,
             UserBadgeSeeder::class,
-
-            // --- Import Management ---
-            BatchSeeder::class,
         ]);
     }
 }
