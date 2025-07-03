@@ -2,6 +2,8 @@
 
 namespace App\States\Exam;
 
+use App\States\Exam\Completed;
+use App\States\Exam\Started;
 use Spatie\ModelStates\State;
 use Spatie\ModelStates\StateConfig;
 
