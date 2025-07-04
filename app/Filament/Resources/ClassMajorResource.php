@@ -16,6 +16,8 @@ use Filament\Forms\Components\Select;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Actions\ExportAction;
 use App\Filament\Exports\ClassesMajorExporter;
+use App\Imports\ClassMajorImport; // ✅ Đảm bảo đúng tên class
+use EightyNine\FilamentExcelImport\Actions\ImportExcelAction;
 class ClassMajorResource extends Resource
 {
     use Translatable;
@@ -103,7 +105,8 @@ Forms\Components\Textarea::make('description')
             ])
              ->headerActions([
             ExportAction::make()
-                ->exporter(ClassesMajorExporter::class)
+                ->exporter(ClassesMajorExporter::class),
+            
         ]);;
     }
 

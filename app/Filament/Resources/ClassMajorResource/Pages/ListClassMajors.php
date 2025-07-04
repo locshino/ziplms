@@ -26,10 +26,5 @@ class ListClassMajors extends ListRecords
             Actions\LocaleSwitcher::make(),
         ];
     }
-    protected function getTableActions(): array
-{
-    return [
-        ExportAction::make()->exporter(ClassesMajorExport::class), // ✅ đúng chỗ
-    ];
-}
+   
 }

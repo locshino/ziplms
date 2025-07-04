@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Models;
-use Spatie\Translatable\HasTranslations;
 use Spatie\Tags\HasTags;
 
 /**
@@ -44,9 +43,7 @@ use Spatie\Tags\HasTags;
  */
 class UserClassMajorEnrollment extends Base\Pivot
 {
-     use HasTags,
-        HasTranslations;
-public $translatable = ['name'];
+     use HasTags;
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',

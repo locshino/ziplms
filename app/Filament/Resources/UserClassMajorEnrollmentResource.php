@@ -17,6 +17,8 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Filters\SelectFilter;
 use app\models\User;
 use App\Models\ClassesMajor;
+use App\Filament\Exports\UserClassMajorEnrollmentExporter;
+use Filament\Tables\Actions\ExportAction;
 
 class UserClassMajorEnrollmentResource extends Resource
 {
@@ -117,7 +119,13 @@ class UserClassMajorEnrollmentResource extends Resource
 ])
 ->actions([
                 Tables\Actions\ViewAction::make(),
-            ]) ;
+            ])
+             ->headerActions([
+            ExportAction::make()
+                ->exporter(UserClassMajorEnrollmentExporter::class),
+                
+
+        ]);
     }
 
     public static function getRelations(): array
