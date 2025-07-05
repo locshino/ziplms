@@ -13,108 +13,6 @@
 namespace App\Models{
     /**
      * @property string $id
-     * @property string $course_id
-     * @property array<array-key, mixed> $title
-     * @property array<array-key, mixed>|null $instructions
-     * @property string|null $max_score
-     * @property bool $allow_late_submissions
-     * @property string|null $created_by
-     * @property Status $status
-     * @property \Illuminate\Support\Carbon|null $due_date
-     * @property \Illuminate\Support\Carbon|null $created_at
-     * @property \Illuminate\Support\Carbon|null $updated_at
-     * @property \Illuminate\Support\Carbon|null $deleted_at
-     * @property-read \App\Models\Course $course
-     * @property-read \App\Models\User|null $creator
-     * @property \Illuminate\Database\Eloquent\Collection<int, \Spatie\Tags\Tag> $tags
-     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\AssignmentSubmission> $submissions
-     * @property-read int|null $submissions_count
-     * @property-read int|null $tags_count
-     * @property-read mixed $translations
-     *
-     * @method static \Database\Factories\AssignmentFactory factory($count = null, $state = [])
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment newModelQuery()
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment newQuery()
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment onlyTrashed()
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment orWhereNotState(string $column, $states)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment orWhereState(string $column, $states)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment query()
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereAllowLateSubmissions($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereCourseId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereCreatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereCreatedBy($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereDeletedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereDueDate($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereInstructions($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereJsonContainsLocale(string $column, string $locale, ?mixed $value, string $operand = '=')
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereJsonContainsLocales(string $column, array $locales, ?mixed $value, string $operand = '=')
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereLocale(string $column, string $locale)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereLocales(string $column, array $locales)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereMaxScore($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereNotState(string $column, $states)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereState(string $column, $states)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereStatus($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereTitle($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereUpdatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment withAllTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment withAllTagsOfAnyType($tags)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment withAnyTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment withAnyTagsOfAnyType($tags)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment withAnyTagsOfType(array|string $type)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment withTrashed()
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment withoutTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment withoutTrashed()
-     *
-     * @mixin \Eloquent
-     */
-    class Assignment extends \Eloquent {}
-}
-
-namespace App\Models{
-    /**
-     * @property string $id
-     * @property string $submission_id
-     * @property string|null $grade
-     * @property array<array-key, mixed>|null $feedback
-     * @property string|null $graded_by
-     * @property \Illuminate\Support\Carbon|null $graded_at
-     * @property \Illuminate\Support\Carbon|null $created_at
-     * @property \Illuminate\Support\Carbon|null $updated_at
-     * @property \Illuminate\Support\Carbon|null $deleted_at
-     * @property-read \App\Models\User|null $grader
-     * @property-read \App\Models\AssignmentSubmission $submission
-     * @property-read mixed $translations
-     *
-     * @method static \Database\Factories\AssignmentGradeFactory factory($count = null, $state = [])
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|AssignmentGrade newModelQuery()
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|AssignmentGrade newQuery()
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|AssignmentGrade onlyTrashed()
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|AssignmentGrade query()
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|AssignmentGrade whereCreatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|AssignmentGrade whereDeletedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|AssignmentGrade whereFeedback($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|AssignmentGrade whereGrade($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|AssignmentGrade whereGradedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|AssignmentGrade whereGradedBy($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|AssignmentGrade whereId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|AssignmentGrade whereJsonContainsLocale(string $column, string $locale, ?mixed $value, string $operand = '=')
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|AssignmentGrade whereJsonContainsLocales(string $column, array $locales, ?mixed $value, string $operand = '=')
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|AssignmentGrade whereLocale(string $column, string $locale)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|AssignmentGrade whereLocales(string $column, array $locales)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|AssignmentGrade whereSubmissionId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|AssignmentGrade whereUpdatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|AssignmentGrade withTrashed()
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|AssignmentGrade withoutTrashed()
-     *
-     * @mixin \Eloquent
-     */
-    class AssignmentGrade extends \Eloquent {}
-}
-
-namespace App\Models{
-    /**
-     * @property string $id
      * @property string $assignment_id
      * @property string $user_id
      * @property string|null $submission_text
@@ -223,8 +121,17 @@ namespace App\Models{
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge withoutTrashed()
      *
      * @mixin \Eloquent
+     *
+     * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
+     * @property-read int|null $media_count
+     * @property-read mixed $translations
+     *
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge whereJsonContainsLocale(string $column, string $locale, ?mixed $value, string $operand = '=')
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge whereJsonContainsLocales(string $column, array $locales, ?mixed $value, string $operand = '=')
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge whereLocale(string $column, string $locale)
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge whereLocales(string $column, array $locales)
      */
-    class Badge extends \Eloquent {}
+    class Badge extends \Eloquent implements \Spatie\MediaLibrary\HasMedia {}
 }
 
 namespace App\Models{
@@ -392,8 +299,18 @@ namespace App\Models{
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Course withoutTrashed()
      *
      * @mixin \Eloquent
+     *
+     * @property \Illuminate\Database\Eloquent\Collection<int, \Spatie\Tags\Tag> $tags
+     * @property-read int|null $tags_count
+     *
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Course withAllTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Course withAllTagsOfAnyType($tags)
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Course withAnyTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Course withAnyTagsOfAnyType($tags)
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Course withAnyTagsOfType(array|string $type)
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Course withoutTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
      */
-    class Course extends \Eloquent {}
+    class Course extends \Eloquent implements \Spatie\MediaLibrary\HasMedia {}
 }
 
 namespace App\Models{
@@ -1102,9 +1019,9 @@ namespace App\Models{
      * @property string|null $assigned_teacher_id
      * @property \Illuminate\Support\Carbon $start_time
      * @property \Illuminate\Support\Carbon $end_time
-     * @property string|null $location_type
      * @property string|null $location_details
      * @property string|null $created_by
+     * @property Status $status
      * @property \Illuminate\Support\Carbon|null $created_at
      * @property \Illuminate\Support\Carbon|null $updated_at
      * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -1113,11 +1030,16 @@ namespace App\Models{
      * @property-read int|null $attendances_count
      * @property-read \App\Models\User|null $creator
      * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $schedulable
+     * @property \Illuminate\Database\Eloquent\Collection<int, \Spatie\Tags\Tag> $tags
+     * @property-read int|null $tags_count
+     * @property-read mixed $translations
      *
      * @method static \Database\Factories\ScheduleFactory factory($count = null, $state = [])
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule onlyTrashed()
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule orWhereNotState(string $column, $states)
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule orWhereState(string $column, $states)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule query()
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereAssignedTeacherId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereCreatedAt($value)
@@ -1126,37 +1048,29 @@ namespace App\Models{
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereDescription($value)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereEndTime($value)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereLocationDetails($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereLocationType($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereSchedulableId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereSchedulableType($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereStartTime($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereTitle($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereUpdatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule withTrashed()
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule withoutTrashed()
-     *
-     * @mixin \Eloquent
-     *
-     * @property \App\States\Status $status
-     * @property \Illuminate\Database\Eloquent\Collection<int, \Spatie\Tags\Tag> $tags
-     * @property-read int|null $tags_count
-     * @property-read mixed $translations
-     *
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule orWhereNotState(string $column, $states)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule orWhereState(string $column, $states)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereJsonContainsLocale(string $column, string $locale, ?mixed $value, string $operand = '=')
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereJsonContainsLocales(string $column, array $locales, ?mixed $value, string $operand = '=')
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereLocale(string $column, string $locale)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereLocales(string $column, array $locales)
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereLocationDetails($value)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereNotState(string $column, $states)
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereSchedulableId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereSchedulableType($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereStartTime($value)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereState(string $column, $states)
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereStatus($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereTitle($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereUpdatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule withAllTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule withAllTagsOfAnyType($tags)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule withAnyTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule withAnyTagsOfAnyType($tags)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule withAnyTagsOfType(array|string $type)
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule withTrashed()
      * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule withoutTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule withoutTrashed()
+     *
+     * @mixin \Eloquent
      */
     class Schedule extends \Eloquent {}
 }
@@ -1183,6 +1097,10 @@ namespace App\Models{
      * @property-read int|null $notifications_count
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\OneTimePasswords\Models\OneTimePassword> $oneTimePasswords
      * @property-read int|null $one_time_passwords_count
+     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Permission> $permissions
+     * @property-read int|null $permissions_count
+     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Role> $roles
+     * @property-read int|null $roles_count
      *
      * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
      * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
@@ -1190,7 +1108,9 @@ namespace App\Models{
      * @method static \Illuminate\Database\Eloquent\Builder<static>|User onlyTrashed()
      * @method static \Illuminate\Database\Eloquent\Builder<static>|User orWhereNotState(string $column, $states)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|User orWhereState(string $column, $states)
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|User permission($permissions, $without = false)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|User query()
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|User role($roles, $guard = null, $without = false)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereAddress($value)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereCode($value)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereCreatedAt($value)
@@ -1208,19 +1128,11 @@ namespace App\Models{
      * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereStatus($value)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|User withTrashed()
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutPermission($permissions)
+     * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutRole($roles, $guard = null)
      * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
      *
      * @mixin \Eloquent
-     *
-     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Permission> $permissions
-     * @property-read int|null $permissions_count
-     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Role> $roles
-     * @property-read int|null $roles_count
-     *
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|User permission($permissions, $without = false)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|User role($roles, $guard = null, $without = false)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutPermission($permissions)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutRole($roles, $guard = null)
      */
     class User extends \Eloquent implements \Filament\Models\Contracts\FilamentUser, \Spatie\MediaLibrary\HasMedia {}
 }
