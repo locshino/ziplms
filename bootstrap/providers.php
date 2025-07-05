@@ -7,6 +7,7 @@ return [
     App\Providers\Filament\ManagerPanelProvider::class,
     App\Providers\Filament\StudentPanelProvider::class,
     App\Providers\Filament\TeacherPanelProvider::class,
+    App\Providers\LaravelHealthProvider::class,
     App\Providers\RepositoryServiceProvider::class,
     App\Providers\VoltServiceProvider::class,
 ];
