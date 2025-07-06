@@ -8,11 +8,21 @@ class Failed extends ProgressStatus
 
     public static function label(): string
     {
-        return 'Failed';
+        return __('states_progress-status.failed.label');
     }
 
     public static function color(): string
     {
-        return 'danger'; // For Filament badges
+        return 'danger';
+    }
+
+    public static function icon(): string
+    {
+        return 'heroicon-o-x-circle';
+    }
+
+    public static function description(): string
+    {
+        return __('states_progress-status.failed.description');
     }
 }

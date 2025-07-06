@@ -5,9 +5,9 @@ namespace App\Filament\Resources;
 use App\Enums\LocationType;
 use App\Enums\SchedulableType;
 use App\Filament\Exports\ScheduleExporter;
-use App\Filament\Imports\ScheduleImporter;
 use App\Filament\Resources\ScheduleResource\Pages;
 use App\Models\Schedule;
+use App\Repositories\Contracts\ScheduleRepositoryInterface;
 use App\States\Status;
 use Filament\Forms;
 use Filament\Forms\Components\SpatieTagsInput;
@@ -15,11 +15,10 @@ use Filament\Forms\Form;
 use Filament\Resources\Concerns\Translatable;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Actions\ImportAction;
 use Filament\Tables\Columns\SpatieTagsColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Spatie\Tags\Tag;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ScheduleResource extends Resource
 {
@@ -29,73 +28,75 @@ class ScheduleResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
 
-    protected static ?string $modelLabel = 'Lịch học';
+    // Use translation keys for model labels
+    public static function getModelLabel(): string
+    {
+        return __('schedule-resource.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('schedule-resource.model_label_plural');
+    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make()
+                Forms\Components\Section::make(__('schedule-resource.form.section.main'))
                     ->schema([
                         Forms\Components\MorphToSelect::make('schedulable')
-                            ->label('Associated With') // Related to
-                            ->types(
-                                collect(SchedulableType::cases())
-                                    ->map(
-                                        fn (SchedulableType $type) => Forms\Components\MorphToSelect\Type::make($type->getModelClass())
-                                            ->titleAttribute('name')
-                                    )
-                                    ->all()
-                            )
+                            ->label(__('schedule-resource.form.associated_with'))
+                            ->types(SchedulableType::getMorphToSelectTypes())
                             ->searchable()
                             ->required(),
 
                         Forms\Components\TextInput::make('title')
-                            ->label('Title')
+                            ->label(__('schedule-resource.form.title'))
                             ->required(),
                         Forms\Components\RichEditor::make('description')
-                            ->label('Description')
+                            ->label(__('schedule-resource.form.description'))
                             ->columnSpanFull(),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Time & Location')
+                Forms\Components\Section::make(__('schedule-resource.form.section.time_location'))
                     ->schema([
                         Forms\Components\DateTimePicker::make('start_time')
-                            ->label('Start Time')
+                            ->label(__('schedule-resource.form.start_time'))
                             ->required(),
 
                         Forms\Components\DateTimePicker::make('end_time')
-                            ->label('End Time')
-                            ->required(),
+                            ->label(__('schedule-resource.form.end_time'))
+                            ->required()
+                            ->after('start_time')
+                            ->validationMessages([
+                                'after' => __('schedule-resource.validation.end_time_after'),
+                            ]),
 
                         SpatieTagsInput::make('tags')
-                            ->label('Location Type')
-                            ->type(LocationType::key()) // Use the key from your enum
-                            ->suggestions(LocationType::values()) // Provide suggestions from the enum
-                            ->maxItems(1) // Ensure only one location type can be selected
-                            ->required(),
+                            ->label(__('schedule-resource.form.location_type'))
+                            ->type(LocationType::key())
+                            ->suggestions(LocationType::values())
+                            ->required()
+                            ->rules(['max:1']),
 
                         Forms\Components\TextInput::make('location_details')
-                            ->label('Location Details (Room, URL, etc.)')
-                            ->placeholder('e.g., Room A1, https://zoom.us/j/...')
+                            ->label(__('schedule-resource.form.location_details'))
+                            ->placeholder(__('schedule-resource.form.location_details_placeholder'))
                             ->columnSpanFull(),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Assignment & Status')
+                Forms\Components\Section::make(__('schedule-resource.form.section.assignment_status'))
                     ->schema([
                         Forms\Components\Select::make('assigned_teacher_id')
-                            ->label('Assigned Teacher')
+                            ->label(__('schedule-resource.form.assigned_teacher'))
                             ->relationship('assignedTeacher', 'name')
                             ->searchable()
                             ->preload(),
 
                         Forms\Components\Select::make('status')
-                            ->label('Status')
-                            ->options([
-                                'active' => 'Active',
-                                'inactive' => 'Inactive',
-                            ])
-                            ->default('active')
+                            ->label(__('schedule-resource.form.status'))
+                            ->options(Status::getOptions())
                             ->required(),
                     ])->columns(2),
             ]);
@@ -106,68 +107,80 @@ class ScheduleResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('title')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('schedulable.name')
-                    ->label('Associated With')
-                    ->searchable(),
+                    ->label(__('schedule-resource.form.title')) // Re-use form label
+                    ->searchable()
+                    ->limit(30)
+                    ->tooltip(fn(?string $state): ?string => $state),
+                Tables\Columns\TextColumn::make('schedulable')
+                    ->label(__('schedule-resource.table.associated_with'))
+                    ->getStateUsing(fn($record): ?string => app(ScheduleRepositoryInterface::class)->getSchedulableTitle($record))
+                    ->searchable(
+                        condition: ['name', 'title'],
+                        isIndividual: true
+                    )
+                    ->limit(30)
+                    ->tooltip(fn(?string $state): ?string => $state),
                 Tables\Columns\TextColumn::make('assignedTeacher.name')
-                    ->searchable(),
+                    ->label(__('schedule-resource.form.assigned_teacher')) // Re-use form label
+                    ->searchable(isIndividual: true)
+                    ->limit(30)
+                    ->tooltip(fn(?string $state): ?string => $state),
                 Tables\Columns\TextColumn::make('start_time')
+                    ->label(__('schedule-resource.form.start_time')) // Re-use form label
                     ->dateTime()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('end_time')
+                    ->label(__('schedule-resource.form.end_time')) // Re-use form label
                     ->dateTime()
                     ->sortable(),
                 SpatieTagsColumn::make('tags')
-                    ->label('Location Type')
+                    ->label(__('schedule-resource.table.location_type'))
                     ->type(LocationType::key()),
                 Tables\Columns\TextColumn::make('status')
-                    ->badge()
-                    ->color(fn (Status $state): string => $state->color()),
+                    ->label(__('schedule-resource.form.status')) // Re-use form label
+                    ->badge(),
             ])
             ->filters([
+                Tables\Filters\TrashedFilter::make(),
                 Tables\Filters\SelectFilter::make('tags')
-                    ->label('Filter by Location Type')
+                    ->label(__('schedule-resource.filters.location_type'))
                     ->multiple()
                     ->searchable()
-                    // 1. Manually get the options for the dropdown
                     ->options(LocationType::options())
-                    // 2. Define how to apply the filter to the main query
-                    ->query(function (Builder $query, array $data): Builder {
-                        // $data['values'] contains an array of selected tag names
-                        if (empty($data['values'])) {
-                            return $query;
-                        }
-
-                        // Use the scope provided by spatie/laravel-tags
-                        return $query->withAnyTags($data['values'], LocationType::key());
-                    }),
+                    ->query(fn(Builder $q, array $data): Builder => app(ScheduleRepositoryInterface::class)
+                        ->applyTagFilter($q, $data['values'] ?? [])),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ForceDeleteAction::make(),
+                Tables\Actions\RestoreAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    // If you use pxlrbt/filament-excel
                     Tables\Actions\ExportBulkAction::make()
                         ->exporter(ScheduleExporter::class),
                 ]),
             ])
             ->headerActions([
-                Tables\Actions\ExportAction::make()
-                    ->exporter(ScheduleExporter::class),
-                ImportAction::make()
-                    ->importer(ScheduleImporter::class),
+                //
             ]);
     }
 
     public static function getRelations(): array
     {
         return [
-            // Add relation managers here if needed, e.g., for Attendance
+            //
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
     }
 
     public static function getPages(): array

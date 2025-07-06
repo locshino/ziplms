@@ -44,7 +44,6 @@ class FilamentProgressbarPlugin implements Plugin
         $this->eventLag ??= $config['eventLag'];
         $this->restartDelay ??= $config['restartDelay'];
         $this->renderHook ??= $config['renderHook'];
-
     }
 
     public function getThemeCss(?string $theme = null): string
@@ -120,7 +119,7 @@ class FilamentProgressbarPlugin implements Plugin
             $themeCssPath = $this->getThemeCss('default');
         }
 
-        $paceJs = asset('js/pace/pace.js');
+        $paceJs = asset('js/pace/pace.min.js');
         $paceCss = asset($themeCssPath);
 
         FilamentView::registerRenderHook($this->renderHook, function () use ($paceJs, $paceCss) {

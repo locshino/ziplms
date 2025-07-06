@@ -31,8 +31,11 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            // ->login(OtpLogin::class)
+
             ->login()
+            ->passwordReset()
+            ->profile()
+
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -44,7 +47,8 @@ class AdminPanelProvider extends PanelProvider
             ->middleware($this->middleware())
             ->authMiddleware($this->authMiddleware())
             ->plugins($this->plugins())
-            ->databaseNotifications();
+            ->databaseNotifications()
+            ->sidebarCollapsibleOnDesktop();
     }
 
     protected function middleware(): array
