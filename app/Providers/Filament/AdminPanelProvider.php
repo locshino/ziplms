@@ -43,7 +43,8 @@ class AdminPanelProvider extends PanelProvider
             ->widgets($this->widgets())
             ->middleware($this->middleware())
             ->authMiddleware($this->authMiddleware())
-            ->plugins($this->plugins());
+            ->plugins($this->plugins())
+            ->databaseNotifications();
     }
 
     protected function middleware(): array
