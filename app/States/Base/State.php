@@ -71,7 +71,7 @@ abstract class State extends ModelStates implements HasColor, HasDescription, Ha
     public static function getOptions(): array
     {
         return collect(static::getStates())
-            ->mapWithKeys(fn(string $stateClass) => [
+            ->mapWithKeys(fn (string $stateClass) => [
                 // Use the static $name property as the key
                 $stateClass::$name => $stateClass::label(),
             ])
@@ -80,7 +80,7 @@ abstract class State extends ModelStates implements HasColor, HasDescription, Ha
 
     public static function defaultLabel(): string
     {
-        return __(static::getLangFile() . '.default.label');
+        return __(static::getLangFile().'.default.label');
     }
 
     public static function defaultColor(): string
@@ -95,7 +95,7 @@ abstract class State extends ModelStates implements HasColor, HasDescription, Ha
 
     public static function defaultDescription(): string
     {
-        return __(static::getLangFile() . '.default.description');
+        return __(static::getLangFile().'.default.description');
     }
 
     public static function getLangFile(): string

@@ -110,21 +110,21 @@ class ScheduleResource extends Resource
                     ->label(__('schedule-resource.form.title')) // Re-use form label
                     ->searchable()
                     ->limit(30)
-                    ->tooltip(fn(?string $state): ?string => $state),
+                    ->tooltip(fn (?string $state): ?string => $state),
                 Tables\Columns\TextColumn::make('schedulable')
                     ->label(__('schedule-resource.table.associated_with'))
-                    ->getStateUsing(fn($record): ?string => app(ScheduleRepositoryInterface::class)->getSchedulableTitle($record))
+                    ->getStateUsing(fn ($record): ?string => app(ScheduleRepositoryInterface::class)->getSchedulableTitle($record))
                     ->searchable(
                         condition: ['name', 'title'],
                         isIndividual: true
                     )
                     ->limit(30)
-                    ->tooltip(fn(?string $state): ?string => $state),
+                    ->tooltip(fn (?string $state): ?string => $state),
                 Tables\Columns\TextColumn::make('assignedTeacher.name')
                     ->label(__('schedule-resource.form.assigned_teacher')) // Re-use form label
                     ->searchable(isIndividual: true)
                     ->limit(30)
-                    ->tooltip(fn(?string $state): ?string => $state),
+                    ->tooltip(fn (?string $state): ?string => $state),
                 Tables\Columns\TextColumn::make('start_time')
                     ->label(__('schedule-resource.form.start_time')) // Re-use form label
                     ->dateTime()
@@ -147,7 +147,7 @@ class ScheduleResource extends Resource
                     ->multiple()
                     ->searchable()
                     ->options(LocationType::options())
-                    ->query(fn(Builder $q, array $data): Builder => app(ScheduleRepositoryInterface::class)
+                    ->query(fn (Builder $q, array $data): Builder => app(ScheduleRepositoryInterface::class)
                         ->applyTagFilter($q, $data['values'] ?? [])),
             ])
             ->actions([
