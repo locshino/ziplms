@@ -91,7 +91,7 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "npx concurrently -c \"#93c5fd,#c4b5fd,#fdba74\" \"php artisan serve\" \"npm run workers\" \"npm run dev\" --names='server,queue,vite'"
+            "pnpm run task start-dev"
         ],
         "optimize": [
             "@php artisan optimize:clear",

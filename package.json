@@ -4,9 +4,8 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "workers": "node scripts/start-workers.js",
+        "task": "node scripts/exec.js",
         "postinstall": "husky install",
-        "format": "node scripts/format.js",
         "prepare": "husky"
     },
     "dependencies": {
@@ -14,6 +13,7 @@
         "autoprefixer": "^10.4.21",
         "axios": "^1.9.0",
         "concurrently": "^9.1.2",
+        "dotenv": "^17.0.1",
         "laravel-vite-plugin": "^1.2.0",
         "tailwindcss": "^4.1.8",
         "vite": "^6.3.5"
