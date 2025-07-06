@@ -30,8 +30,5 @@
         "laravel-echo": "^2.1.6",
         "lint-staged": "^16.1.2",
         "pusher-js": "^8.4.0"
-    },
-    "lint-staged": {
-        "*.php": "php vendor/bin/pint"
     }
 }
