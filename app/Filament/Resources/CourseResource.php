@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Exports\CourseExporter;
+use App\Filament\Imports\CourseImporter;
 use App\Filament\Resources\CourseResource\Pages;
 use App\Models\Course;
 use App\States\Status;
@@ -10,15 +12,17 @@ use Filament\Forms\Form;
 use Filament\Resources\Concerns\Translatable;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table; // <--- 1. THÊM DÒNG NÀY
+use Filament\Tables\Actions\ExportAction;
+use Filament\Tables\Actions\ImportAction;
+use Filament\Tables\Table;
 
 class CourseResource extends Resource
 {
-    use Translatable; // <--- 2. THÊM DÒNG NÀY
+    use Translatable;
 
     protected static ?string $model = Course::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
 
     protected static ?string $modelLabel = 'Môn học';
 
@@ -30,50 +34,32 @@ class CourseResource extends Resource
                     ->schema([
                         Forms\Components\Section::make('Thông tin chung')
                             ->schema([
-                                // Tên (đa ngôn ngữ)
                                 Forms\Components\TextInput::make('name')
                                     ->label('Tên môn học')
                                     ->required(),
-                                // ->translatable(), // <-- Bỏ đi, không cần thiết
-
-                                // Mô tả (đa ngôn ngữ)
                                 Forms\Components\RichEditor::make('description')
                                     ->label('Mô tả chi tiết')
-                                    // ->translatable() // <-- Bỏ đi, không cần thiết
                                     ->columnSpanFull(),
-
-                                // Gắn thẻ
                                 Forms\Components\SpatieTagsInput::make('tags')
                                     ->label('Phân loại'),
                             ])
                             ->columns(2),
                     ])
                     ->columnSpan(['lg' => 2]),
-
-                // Cột phụ bên phải
                 Forms\Components\Group::make()
                     ->schema([
                         Forms\Components\Section::make('Trạng thái & Cấu hình')
                             ->schema([
                                 Forms\Components\SpatieMediaLibraryFileUpload::make('image')
                                     ->label('Ảnh đại diện')
-                                    ->collection('image')
-                                    ->disk('public') // Chỉ định rõ disk lưu trữ (dù là mặc định)
-                                    ->image() // Bật chế độ xem trước và chỉnh sửa ảnh
-                                    ->live() // Tải lên ngay lập tức, rất quan trọng cho form đa ngôn ngữ
-                                    ->reorderable() // Giúp ổn định trạng thái trong một số trường hợp phức tạp
-                                    ->maxSize(5120) // Tăng giới hạn kích thước tệp lên 5MB (5120 KB)
-                                    ->validationMessages([
-                                        'max' => 'Dung lượng ảnh không được vượt quá :max KB.',
-                                        'image' => 'Tệp tải lên phải là hình ảnh.',
-                                    ]),
+                                    ->collection('image'),
                                 Forms\Components\TextInput::make('code')
                                     ->label('Mã môn học')
                                     ->required()
                                     ->unique(ignoreRecord: true),
                                 Forms\Components\Select::make('status')
                                     ->label('Trạng thái')
-                                    ->options(collect(Status::getStates())->mapWithKeys(fn ($state) => [$state => $state::label()]))
+                                    ->options(collect(Status::getStates())->mapWithKeys(fn ($state) => [$state::$name => $state::label()]))
                                     ->required(),
                                 Forms\Components\Select::make('parent_id')
                                     ->label('Thuộc môn học cha')
@@ -105,64 +91,42 @@ class CourseResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\SpatieMediaLibraryImageColumn::make('image')
-                    ->label('Ảnh')
-                    ->collection('image')
-                    ->circular(),
+                    ->label('Ảnh')->collection('image')->circular(),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Tên môn học')
-                    ->searchable()
-                    ->sortable(),
-
-                // Cột Mã môn học
+                    ->label('Tên môn học')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('code')
-                    ->label('Mã')
-                    ->searchable(),
-
-                // Cột Trạng thái (hiển thị dạng badge)
+                    ->label('Mã')->searchable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label('Trạng thái')
                     ->badge()
-                    ->formatStateUsing(fn ($state) => $state::label()) // Lấy label từ class State
-                    ->color(fn ($state): string => match (true) {
-                        $state instanceof \App\States\Active => 'success',
-                        $state instanceof \App\States\Inactive => 'warning',
-
-                        default => 'info',
-                    }),
-
-                // Cột Thẻ (tags)
+                    ->formatStateUsing(fn ($state) => $state::label())
+                    ->color(fn ($state): string => $state->color()),
                 Tables\Columns\SpatieTagsColumn::make('tags')
                     ->label('Phân Loại'),
-
-                // Cột Tổ chức
                 Tables\Columns\TextColumn::make('organization.name')
-                    ->label('Tổ chức')
-                    ->sortable(),
-
-                // Cột Ngày cập nhật
+                    ->label('Tổ chức')->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Cập nhật lúc')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true), // Mặc định ẩn
+                    ->label('Cập nhật lúc')->dateTime('d/m/Y H:i')->sortable()->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                // Bộ lọc theo trạng thái
-                Tables\Filters\SelectFilter::make('status')
-                    ->label('Lọc theo trạng thái')
-                    ->options(collect(Status::getStates())->mapWithKeys(fn ($state) => [$state => $state::label()])),
-
-                // Bộ lọc theo tổ chức
-                Tables\Filters\SelectFilter::make('organization_id')
-                    ->label('Lọc theo tổ chức')
-                    ->relationship('organization', 'name')
-                    ->searchable(),
-
-                Tables\Filters\TrashedFilter::make(), // Bộ lọc cho SoftDeletes
+            ])
+            ->headerActions([
+                ExportAction::make()
+                    ->label('Xuất Excel')
+                    ->exporter(CourseExporter::class),
+                ImportAction::make()
+                    ->label('Nhập Excel')
+                    ->importer(CourseImporter::class),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->successNotification(
+                        \Filament\Notifications\Notification::make()
+                            ->success()
+                            ->title('Xóa môn học thành công')
+                            ->body('Môn học đã được xóa khỏi hệ thống.'),
+                    ),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -175,9 +139,7 @@ class CourseResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
