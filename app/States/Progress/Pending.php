@@ -8,11 +8,21 @@ class Pending extends ProgressStatus
 
     public static function label(): string
     {
-        return 'Pending';
+        return __('states_progress-status.pending.label');
     }
 
     public static function color(): string
     {
-        return 'info'; // For Filament badges
+        return 'info';
+    }
+
+    public static function icon(): string
+    {
+        return 'heroicon-o-clock';
+    }
+
+    public static function description(): string
+    {
+        return __('states_progress-status.pending.description');
     }
 }

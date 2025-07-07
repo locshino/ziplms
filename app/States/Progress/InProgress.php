@@ -8,11 +8,21 @@ class InProgress extends ProgressStatus
 
     public static function label(): string
     {
-        return 'In Progress';
+        return __('states_progress-status.in_progress.label');
     }
 
     public static function color(): string
     {
-        return 'warning'; // For Filament badges
+        return 'warning';
+    }
+
+    public static function icon(): string
+    {
+        return 'heroicon-o-arrow-path';
+    }
+
+    public static function description(): string
+    {
+        return __('states_progress-status.in_progress.description');
     }
 }

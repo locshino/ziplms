@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Translatable\HasTranslations;
+
 /**
  * @property string $id
  * @property string|null $organization_id
@@ -33,13 +37,34 @@ namespace App\Models;
  *
  * @mixin \Eloquent
  */
-class Badge extends Base\Model
+class Badge extends Base\Model implements HasMedia
 {
+    use HasTranslations,
+        InteractsWithMedia;
+
     protected $casts = [
         'name' => 'json',
         'description' => 'json',
         'criteria_description' => 'json',
     ];
+
+    public array $translatable = [
+        'name',
+        'description',
+        'criteria_description',
+    ];
+
+    protected $fillable = [
+        'name',
+        'description',
+        'criteria_description',
+        'organization_id',
+    ];
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('image_badge')->singleFile();
+    }
 
     public function organization()
     {

@@ -2,9 +2,14 @@
 
 namespace App\Providers;
 
+use App\Jobs\ProcessExportJob;
+use App\Jobs\ProcessImportJob;
+use Filament\Actions\Exports\Jobs\PrepareCsvExport as BaseExportJob;
+use Filament\Actions\Imports\Jobs\ImportCsv as BaseImportJob;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
-use pxlrbt\FilamentExcel\FilamentExport;
+
+// use pxlrbt\FilamentExcel\FilamentExport;
 
 class FilamentExcelServiceProvider extends ServiceProvider
 {
@@ -13,7 +18,8 @@ class FilamentExcelServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // No services need to be registered for this provider.
+        $this->app->bind(BaseImportJob::class, ProcessImportJob::class);
+        $this->app->bind(BaseExportJob::class, ProcessExportJob::class);
     }
 
     /**
@@ -24,7 +30,7 @@ class FilamentExcelServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->configureCustomExportUrl();
+        // $this->configureCustomExportUrl();
     }
 
     /**
@@ -36,8 +42,8 @@ class FilamentExcelServiceProvider extends ServiceProvider
      */
     private function configureCustomExportUrl(): void
     {
-        FilamentExport::createExportUrlUsing(function (array $export) {
-            return \App\Support\FileDownloadHelper::generateWafFriendlySignedUrl(filePath: $export['filename'], isErrorReport: false);
-        });
+        // FilamentExport::createExportUrlUsing(function (array $export) {
+        //     return \App\Support\FileDownloadHelper::generateWafFriendlySignedUrl(filePath: $export['filename'], isErrorReport: false);
+        // });
     }
 }
