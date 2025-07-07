@@ -3,7 +3,7 @@
 namespace App\Providers\Filament;
 
 use Afsakar\FilamentOtpLogin\FilamentOtpLoginPlugin;
-// use Afsakar\FilamentOtpLogin\Filament\Pages\Login as OtpLogin;
+use App\Filament\Plugins\FilamentProgressbarPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -12,7 +12,6 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\SpatieLaravelTranslatablePlugin;
-use Filament\Support\Colors\Color;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -21,6 +20,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use ShuvroRoy\FilamentSpatieLaravelBackup\FilamentSpatieLaravelBackupPlugin;
+use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -30,11 +30,11 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            // ->login(OtpLogin::class)
+
             ->login()
-            ->colors([
-                'primary' => Color::Amber,
-            ])
+            ->passwordReset()
+            ->profile()
+
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
@@ -42,7 +42,9 @@ class AdminPanelProvider extends PanelProvider
             ->widgets($this->widgets())
             ->middleware($this->middleware())
             ->authMiddleware($this->authMiddleware())
-            ->plugins($this->plugins());
+            ->plugins($this->plugins())
+            ->databaseNotifications()
+            ->sidebarCollapsibleOnDesktop();
     }
 
     protected function middleware(): array
@@ -72,7 +74,6 @@ class AdminPanelProvider extends PanelProvider
         return [
             Pages\Dashboard::class,
             \App\Filament\Pages\ManageGeneralSettings::class,
-            \App\Filament\Resources\UserResource\Pages\ListUsers::class,
             //
         ];
     }
@@ -92,6 +93,8 @@ class AdminPanelProvider extends PanelProvider
             SpatieLaravelTranslatablePlugin::make()
                 ->defaultLocales(['vi', 'en']),
             FilamentSpatieLaravelBackupPlugin::make(),
+            FilamentSpatieLaravelHealthPlugin::make(),
+            FilamentProgressbarPlugin::make(),
         ];
     }
 }

@@ -1,35 +1,34 @@
 {
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "build": "vite build",
-    "dev": "vite",
-    "workers": "node scripts/start-workers.js",
-    "postinstall": "husky install",
-    "format": "node scripts/format.js",
-    "prepare": "husky"
-  },
-  "dependencies": {
-    "@tailwindcss/vite": "^4.1.8",
-    "autoprefixer": "^10.4.21",
-    "axios": "^1.9.0",
-    "concurrently": "^9.1.2",
-    "laravel-vite-plugin": "^1.2.0",
-    "tailwindcss": "^4.1.8",
-    "vite": "^6.3.5"
-  },
-  "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "4.9.5",
-    "@tailwindcss/oxide-linux-x64-gnu": "^4.1.8",
-    "lightningcss-linux-x64-gnu": "^1.30.1"
-  },
-  "devDependencies": {
-    "cross-spawn": "^7.0.6",
-    "daisyui": "^5.0.43",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.1.2"
-  },
-  "lint-staged": {
-    "*.php": "php vendor/bin/pint"
-  }
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite",
+        "task": "node scripts/exec.js",
+        "postinstall": "husky install",
+        "prepare": "husky"
+    },
+    "dependencies": {
+        "@tailwindcss/vite": "^4.1.8",
+        "autoprefixer": "^10.4.21",
+        "axios": "^1.9.0",
+        "concurrently": "^9.1.2",
+        "dotenv": "^17.0.1",
+        "laravel-vite-plugin": "^1.2.0",
+        "tailwindcss": "^4.1.8",
+        "vite": "^6.3.5"
+    },
+    "optionalDependencies": {
+        "@rollup/rollup-linux-x64-gnu": "4.9.5",
+        "@tailwindcss/oxide-linux-x64-gnu": "^4.1.8",
+        "lightningcss-linux-x64-gnu": "^1.30.1"
+    },
+    "devDependencies": {
+        "cross-spawn": "^7.0.6",
+        "daisyui": "^5.0.43",
+        "husky": "^9.1.7",
+        "laravel-echo": "^2.1.6",
+        "lint-staged": "^16.1.2",
+        "pusher-js": "^8.4.0"
+    }
 }

@@ -8,11 +8,21 @@ class DoneWithErrors extends ProgressStatus
 
     public static function label(): string
     {
-        return 'Done with Errors';
+        return __('states_progress-status.done_with_errors.label');
     }
 
     public static function color(): string
     {
-        return 'warning'; // For Filament badges
+        return 'warning';
+    }
+
+    public static function icon(): string
+    {
+        return 'heroicon-o-exclamation-triangle';
+    }
+
+    public static function description(): string
+    {
+        return __('states_progress-status.done_with_errors.description');
     }
 }

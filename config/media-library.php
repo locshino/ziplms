@@ -18,13 +18,13 @@ return [
      * This queue connection will be used to generate derived and responsive images.
      * Leave empty to use the default queue connection.
      */
-    'queue_connection_name' => config('worker-queue.media.connection'),
+    'queue_connection_name' => env('QUEUE_MEDIA_CONNECTION', 'redis'),
 
     /*
      * This queue will be used to generate derived and responsive images.
      * Leave empty to use the default queue.
      */
-    'queue_name' => config('worker-queue.media.name'),
+    'queue_name' => env('QUEUE_MEDIA_NAME', 'ziplms_media'),
 
     /*
      * By default all conversions will be performed on a queue.
