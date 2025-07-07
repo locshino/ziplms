@@ -2,6 +2,7 @@
 
 return [
     App\Providers\AppServiceProvider::class,
+    App\Providers\FilamentColorProvider::class,
     App\Providers\FilamentExcelServiceProvider::class,
     App\Providers\Filament\AdminPanelProvider::class,
     App\Providers\Filament\ManagerPanelProvider::class,
