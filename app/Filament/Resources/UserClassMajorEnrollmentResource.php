@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Filament\Resources;
-use Filament\Resources\Concerns\Translatable;
+
 use App\Filament\Resources\UserClassMajorEnrollmentResource\Pages;
 use App\Filament\Resources\UserClassMajorEnrollmentResource\RelationManagers;
 use App\Models\UserClassMajorEnrollment;
@@ -19,10 +19,11 @@ use app\models\User;
 use App\Models\ClassesMajor;
 use App\Filament\Exports\UserClassMajorEnrollmentExporter;
 use Filament\Tables\Actions\ExportAction;
+use App\Models\Role;
 
 class UserClassMajorEnrollmentResource extends Resource
 {
-    use Translatable;
+    
     protected static ?string $model = UserClassMajorEnrollment::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -43,14 +44,13 @@ class UserClassMajorEnrollmentResource extends Resource
                     ->searchable()
                     ->required(),
 
-                Select::make('enrollment_type')
+                Select::make('role_id')
                     ->label('Vai trò')
                     ->required()
-                    ->options([
-                        'student' => 'Học sinh',
-                        'teacher' => 'Giáo viên',
-                        'staff' => 'Nhân viên',
-                    ]),
+                    ->options(
+                        fn() => Role::query()->select('id', 'name')
+                            ->pluck('name', 'id'),
+                    ),
 
                 DatePicker::make('start_date')
                     ->label('Ngày bắt đầu')

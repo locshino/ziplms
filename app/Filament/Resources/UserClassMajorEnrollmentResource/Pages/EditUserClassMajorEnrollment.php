@@ -8,7 +8,6 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditUserClassMajorEnrollment extends EditRecord
 {
-     use EditRecord\Concerns\Translatable;
 
     protected static string $resource = UserClassMajorEnrollmentResource::class;
 

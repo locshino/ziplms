@@ -12,7 +12,7 @@ use App\Filament\Exports\UserClassMajorEnrollmentExporter;
 
 class ListUserClassMajorEnrollments extends ListRecords
 {
-    use ListRecords\Concerns\Translatable;
+  
     protected static string $resource = UserClassMajorEnrollmentResource::class;
 
     protected function getHeaderActions(): array

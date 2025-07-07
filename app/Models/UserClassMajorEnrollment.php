@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Models;
-use Spatie\Tags\HasTags;
+use Spatie\Tags\HasTags;    
+use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Request;
 
 /**
  * @property string $id
@@ -65,4 +67,6 @@ class UserClassMajorEnrollment extends Base\Pivot
     {
         return $this->belongsTo(ClassesMajor::class, 'class_major_id');
     }
+
+
 }
