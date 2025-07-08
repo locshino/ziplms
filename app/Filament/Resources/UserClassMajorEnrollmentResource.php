@@ -20,6 +20,9 @@ use App\Models\ClassesMajor;
 use App\Filament\Exports\UserClassMajorEnrollmentExporter;
 use Filament\Tables\Actions\ExportAction;
 use App\Models\Role;
+use DeleteAction;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Auth;
 
 class UserClassMajorEnrollmentResource extends Resource
 {
@@ -105,6 +108,7 @@ class UserClassMajorEnrollmentResource extends Resource
         ->dateTime()
         ->sortable()
         ->toggleable(isToggledHiddenByDefault: true),
+  
             ])->filters([
     SelectFilter::make('class_major_id')
         ->label('Lọc theo đơn vị cấu trúc')
@@ -116,10 +120,34 @@ class UserClassMajorEnrollmentResource extends Resource
             }
             return $query;
         }),
+
 ])
 ->actions([
                 Tables\Actions\ViewAction::make(),
+                    Tables\Actions\DeleteAction::make()
+        ->using(function ($record) {
+        $user = $record->user;
+
+        if (!$user) {
+            Notification::make()
+                ->title('Lỗi')
+                ->body('Bản ghi không có người dùng liên kết.')
+                ->danger()
+                ->send();
+            return;
+        }
+        if ($user->id === Auth::id()) {
+            Notification::make()
+                ->title('Không thể xóa')
+                ->body('Bạn không thể xóa bản ghi của chính mình.')
+                ->danger()
+                ->send();
+            return;
+        }
+        $record->forceDelete();
+    }),
             ])
+          
              ->headerActions([
             ExportAction::make()
                 ->exporter(UserClassMajorEnrollmentExporter::class),
