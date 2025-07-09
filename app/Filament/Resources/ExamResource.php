@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\ExamShowResultsType;
-use App\Enums\ExamType; // Import ExamType Enum
 use App\Filament\Resources\ExamResource\Pages;
 use App\Filament\Resources\ExamResource\RelationManagers;
 use App\Models\Exam;
@@ -61,17 +59,6 @@ class ExamResource extends Resource
                 Forms\Components\Section::make('Cài đặt & Thuộc tính')
                     ->columnSpan(1)
                     ->schema([
-                        // --- THÊM TRƯỜNG MỚI TẠI ĐÂY ---
-                        Forms\Components\Select::make('exam_type')
-                            ->label('Loại bài kiểm tra')
-                            ->options(
-                                collect(ExamType::cases())->mapWithKeys(fn ($case) => [
-                                    $case->value => $case->label(),
-                                ])->all()
-                            )
-                            ->required()->native(false),
-                        // ------------------------------------
-
                         Forms\Components\DateTimePicker::make('start_time')->label('Thời gian bắt đầu'),
                         Forms\Components\DateTimePicker::make('end_time')->label('Thời gian kết thúc'),
                         Forms\Components\TextInput::make('duration_minutes')->label('Thời gian làm bài (phút)')->numeric()->required()->default(60),
@@ -80,7 +67,7 @@ class ExamResource extends Resource
                         Forms\Components\Select::make('show_results_after')
                             ->label('Hiển thị kết quả')
                             ->options(
-                                collect(ExamShowResultsType::cases())->mapWithKeys(fn ($case) => [
+                                collect(\App\Enums\ExamShowResultsType::cases())->mapWithKeys(fn($case) => [
                                     $case->value => $case->label(),
                                 ])->all()
                             )
@@ -99,11 +86,11 @@ class ExamResource extends Resource
                 Tables\Columns\TextColumn::make('title')
                     ->label('Tiêu đề')
                     ->limit(40)
-                    ->getStateUsing(fn ($record): ?string => $record->getTranslation('title', app()->getLocale()))
+                    ->getStateUsing(fn($record): ?string => $record->getTranslation('title', app()->getLocale()))
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->where('title->'.app()->getLocale(), 'like', "%{$search}%");
+                        return $query->where('title->' . app()->getLocale(), 'like', "%{$search}%");
                     }),
-                Tables\Columns\TextColumn::make('exam_type')->label('Loại')->badge(), // <-- Thêm cột này để hiển thị
+                // Đã xoá cột exam_type ở đây
                 Tables\Columns\TextColumn::make('course.name')->label('Khóa học')->sortable(),
                 Tables\Columns\TextColumn::make('status')->label('Trạng thái')->badge(),
             ])
@@ -115,7 +102,7 @@ class ExamResource extends Resource
                     ->label('Làm bài')
                     ->icon('heroicon-o-pencil-square')
                     ->color('success') // Tạo URL đến trang làm bài
-                    ->url(fn (Exam $record): string => static::getUrl('take', ['record' => $record])),
+                    ->url(fn(Exam $record): string => static::getUrl('take', ['record' => $record])),
             ]);
     }
 

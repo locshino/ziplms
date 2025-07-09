@@ -34,7 +34,7 @@ class QuestionResource extends Resource
 
     protected static ?string $label = 'Câu hỏi';
 
-    protected static ?string $pluralLabel = 'Ngân hàng Câu hỏi';
+    protected static ?string $pluralLabel = 'Danh Sách Câu hỏi';
 
     public static function form(Form $form): Form
     {
