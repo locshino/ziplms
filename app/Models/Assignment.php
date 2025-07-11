@@ -97,4 +97,8 @@ class Assignment extends Base\Model
     {
         return $this->hasMany(AssignmentSubmission::class);
     }
+    public function getTagsStringAttribute(): string
+{
+    return $this->tags->pluck('name')->join(', ');
+}
 }

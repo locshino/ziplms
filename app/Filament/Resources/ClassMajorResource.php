@@ -16,7 +16,7 @@ use Filament\Forms\Components\Select;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Actions\ExportAction;
 use App\Filament\Exports\ClassesMajorExporter;
-use App\Imports\ClassMajorImport; // ✅ Đảm bảo đúng tên class
+use App\Imports\ClassMajorImport; 
 use EightyNine\FilamentExcelImport\Actions\ImportExcelAction;
 class ClassMajorResource extends Resource
 {
