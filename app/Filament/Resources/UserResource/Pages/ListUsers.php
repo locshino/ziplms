@@ -3,12 +3,9 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Enums\RoleEnum;
-use App\Exports\OrganizationsSampleExport;
-use App\Exports\UsersSampleExport;
-use App\Filament\Actions\ImportExcelAction;
+use App\Filament\Exports\UserExporter;
+use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\UserResource;
-use App\Imports\OrganizationImporter;
-use App\Imports\UserImporter;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -37,32 +34,25 @@ class ListUsers extends ListRecords
                 ->icon('heroicon-m-plus')
                 ->button(),
 
+            Actions\ExportAction::make()
+                ->label('Xuất Excel')
+                ->exporter(UserExporter::class)
+                ->icon('heroicon-o-document-arrow-down'),
+
             Actions\ActionGroup::make([
-                ImportExcelAction::make('importStudents')
+                Actions\ImportAction::make('importStudents')
                     ->label('Nhập Học sinh')
                     ->importer(UserImporter::class)
-                    ->role(RoleEnum::Student->value)
-                    ->sampleExcel(
-                        sampleData: UsersSampleExport::sampleData(),
-                        fileName: 'students_sample.xlsx',
-                        exportClass: UsersSampleExport::class,
-                        sampleButtonLabel: 'Tải file mẫu'
-                    ),
-                ImportExcelAction::make('importTeachers')
+                    ->options(['role' => RoleEnum::Student->value]),
+
+                Actions\ImportAction::make('importTeachers')
                     ->label('Nhập Giáo viên')
                     ->importer(UserImporter::class)
-                    ->role(RoleEnum::Teacher->value)
-                    ->sampleExcel(
-                        sampleData: UsersSampleExport::sampleData(),
-                        fileName: 'teachers_sample.xlsx',
-                        exportClass: UsersSampleExport::class,
-                        sampleButtonLabel: 'Tải file mẫu'
-                    ),
-                ImportExcelAction::make('importOrganizations')
-                    ->label('Nhập Cơ sở')
-                    ->importer(OrganizationImporter::class)
-                    ->sampleExcel(sampleData: OrganizationsSampleExport::sampleData(), fileName: 'organizations_sample.xlsx', exportClass: OrganizationsSampleExport::class, sampleButtonLabel: 'Tải file mẫu'),
-            ])->label('Nhập từ Excel')->icon('heroicon-o-arrow-down-tray')->button()->color('success'),
+                    ->options(['role' => RoleEnum::Teacher->value]),
+            ])
+                ->label('Nhập từ CSV')
+                ->icon('heroicon-o-document-arrow-up')
+                ->button(),
         ];
     }
 }

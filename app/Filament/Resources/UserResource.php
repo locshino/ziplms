@@ -3,30 +3,30 @@
 namespace App\Filament\Resources;
 
 use App\Enums\RoleEnum;
-use App\Exports\UsersExcelExport;
-use App\Filament\Actions\ExportExcelBulkAction;
+use App\Filament\Exports\UserExporter;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\Role;
 use App\Models\User;
+use App\States\Status;
 use Filament\Forms;
 use Filament\Forms\Components\Section as FormSection;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Form;
 use Filament\Infolists;
-use Filament\Infolists\Components\Grid as InfolistGrid;
-use Filament\Infolists\Components\Section as InfolistSection;
+use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\ExportBulkAction;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
@@ -35,6 +35,8 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
+
+    protected static ?string $modelLabel = 'Người dùng';
 
     public static function form(Form $form): Form
     {
@@ -64,6 +66,13 @@ class UserResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->withCount([
+                'courses',
+                'courses as completed_courses_count' => function (Builder $query) {
+                    $query->where('course_enrollments.status', 'completed');
+                },
+            ])
+            ->with(['roles', 'organizations', 'classesMajors'])
             ->whereDoesntHave('roles', fn (Builder $query) => $query
                 ->where('name', RoleEnum::Admin->value));
     }
@@ -87,16 +96,33 @@ class UserResource extends Resource
                     Forms\Components\TextInput::make('password')
                         ->label('Mật khẩu')
                         ->password()
-                        ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
-                        ->dehydrated(fn (?string $state): bool => filled($state))
+                        ->revealable()
+                        ->rule(Password::min(8)->mixedCase()->numbers())
+                        ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                        ->dehydrated(fn ($state) => filled($state))
                         ->required(fn (string $operation): bool => $operation === 'create')
-                        ->rule(Password::defaults())
-                        ->confirmed(),
+                        ->visible(fn (string $operation): bool => $operation === 'create'),
+
                     Forms\Components\TextInput::make('password_confirmation')
                         ->label('Xác nhận mật khẩu')
                         ->password()
+                        ->revealable()
                         ->requiredWith('password')
-                        ->dehydrated(false),
+                        ->dehydrated(false)
+                        ->same('password')
+                        ->visible(fn (string $operation): bool => $operation === 'create'),
+                    Forms\Components\TextInput::make('code')
+                        ->label('Mã người dùng')
+                        ->required()
+                        ->maxLength(50)
+                        ->unique(ignoreRecord: true),
+                    Forms\Components\TextInput::make('phone_number')
+                        ->label('Số điện thoại')
+                        ->tel()
+                        ->maxLength(50),
+                    Forms\Components\TextInput::make('address')
+                        ->label('Địa chỉ')
+                        ->maxLength(255),
                     SpatieMediaLibraryFileUpload::make('profile_picture')
                         ->label('Ảnh')
                         ->collection('profile_picture')
@@ -121,6 +147,14 @@ class UserResource extends Resource
                             return $livewire instanceof Pages\CreateUser && filled($livewire->role);
                         })
                         ->dehydrated(false),
+                    Forms\Components\Select::make('status')
+                        ->label('Trạng thái')
+                        ->options(
+                            collect(Status::getStates())
+                                ->mapWithKeys(fn ($stateClass) => [$stateClass::$name => $stateClass::label()])
+                        )
+                        ->required()
+                        ->default(\App\States\Active::$name),
                     Forms\Components\Select::make('organizations')
                         ->label('Cơ sở')
                         ->relationship('organizations', 'name')
@@ -128,7 +162,7 @@ class UserResource extends Resource
                         ->preload()
                         ->searchable(),
                     Forms\Components\Select::make('classesMajors')
-                        ->label('Lớp / Chuyên ngành')
+                        ->label('Lớp')
                         ->relationship('classesMajors', 'name')
                         ->preload()
                         ->searchable(),
@@ -152,16 +186,18 @@ class UserResource extends Resource
             Tables\Columns\TextColumn::make('name')
                 ->label('Tên')
                 ->sortable()
-                ->searchable(),
+                ->searchable()
+                ->limit(15),
             Tables\Columns\TextColumn::make('email')
-                ->searchable(),
+                ->searchable()
+                ->limit(15),
             Tables\Columns\TextColumn::make('organizations.name')
                 ->label('Cơ sở')
                 ->badge()
                 ->limitList(1)
                 ->searchable(),
             Tables\Columns\TextColumn::make('classesMajors.name')
-                ->label('Lớp / Chuyên ngành')
+                ->label('Lớp')
                 ->badge()
                 ->searchable(),
             Tables\Columns\TextColumn::make('roles.name')
@@ -171,9 +207,9 @@ class UserResource extends Resource
             Tables\Columns\TextColumn::make('status')
                 ->label('Trạng thái')
                 ->badge()
-                ->color(fn (string $state): string => User::getStatusColor($state))
-                ->sortable()
-                ->searchable(),
+                ->formatStateUsing(fn (Status $state) => $state::label())
+                ->color(fn (Status $state) => $state->color()),
+
             Tables\Columns\TextColumn::make('created_at')
                 ->label('Ngày tạo')
                 ->dateTime()
@@ -198,14 +234,17 @@ class UserResource extends Resource
                 ->preload()
                 ->searchable(),
             SelectFilter::make('classesMajors')
-                ->label('Lớp / Chuyên ngành')
+                ->label('Lớp')
                 ->relationship('classesMajors', 'name')
                 ->multiple()
                 ->preload()
                 ->searchable(),
             SelectFilter::make('status')
                 ->label('Trạng thái')
-                ->options(User::getStatusOptions())
+                ->options(
+                    collect(Status::getStates())
+                        ->mapWithKeys(fn ($stateClass) => [$stateClass::$name => $stateClass::label()])
+                )
                 ->multiple()
                 ->preload(),
         ];
@@ -229,31 +268,19 @@ class UserResource extends Resource
     public static function getTableBulkActions(): array
     {
         return [
-            Tables\Actions\BulkActionGroup::make([
-                Tables\Actions\DeleteBulkAction::make()
-                    ->before(function (Collection $records, Tables\Actions\DeleteBulkAction $action) {
-                        $user = Auth::user();
-
-                        if (! $user instanceof User) {
-                            return;
-                        }
-
-                        if ($records->contains(fn (User $record) => ! $user->can('delete', $record))) {
-                            Notification::make()->title('Không thể xóa')->body('Một hoặc nhiều người dùng được chọn không thể bị xóa.')->danger()->send();
-                            $action->halt();
-                        }
-                    })
+            BulkActionGroup::make([
+                ExportBulkAction::make()
+                    ->label('Xuất mục đã chọn')
+                    ->exporter(UserExporter::class),
+                DeleteBulkAction::make()
+                    ->label('Chắc chắn xoá các mục đã chọn?')
                     ->successNotification(
                         Notification::make()
                             ->success()
-                            ->title('Xóa hàng loạt thành công')
-                            ->body('Các người dùng được chọn đã được xóa khỏi hệ thống.')
+                            ->title('Xóa thành công')
+                            ->body('Các người dùng đã được xóa khỏi hệ thống.')
                     ),
             ]),
-            ExportExcelBulkAction::make()
-                ->exports([
-                    UsersExcelExport::make()->withFilename('Users Export - '.now()->format('Y-m-d')),
-                ]),
         ];
     }
 
@@ -261,76 +288,104 @@ class UserResource extends Resource
     {
         return $infolist
             ->schema([
-                InfolistGrid::make(3)->schema([
+                Section::make('Thông tin người dùng')
+                    ->columns(2) // Thiết lập 2 cột cho section này
+                    ->schema([
+                        // === CỘT BÊN TRÁI ===
+                        Infolists\Components\Group::make()
+                            ->columnSpan(1) // Nhóm này chiếm 1 cột
+                            ->schema([
+                                SpatieMediaLibraryImageEntry::make('profile_picture')
+                                    ->collection('profile_picture')
+                                    ->circular()
+                                    ->height(120)
+                                    ->width(120)
+                                    ->alignCenter()
+                                    ->columnSpanFull(),
+                                TextEntry::make('name')
+                                    ->label(false) // Ẩn nhãn để tên hiển thị lớn hơn
+                                    ->size('2xl')
+                                    ->weight('bold')
+                                    ->alignCenter(),
+                                TextEntry::make('code')
+                                    ->label('Mã người dùng')
+                                    ->icon('heroicon-m-identification')
+                                    ->badge(),
+                                TextEntry::make('email')
+                                    ->label('Email')
+                                    ->icon('heroicon-m-envelope')
+                                    ->copyable(),
+                                TextEntry::make('phone_number')
+                                    ->label('Số điện thoại')
+                                    ->icon('heroicon-m-phone')
+                                    ->placeholder('Chưa cập nhật'),
+                            ]),
 
-                    InfolistSection::make('Thông tin chính')
-                        ->schema([
-                            SpatieMediaLibraryImageEntry::make('profile_picture')
-                                ->label('')
-                                ->collection('profile_picture')
-                                ->circular()
-                                ->alignCenter()
-                                ->height(150)
-                                ->columnSpanFull(),
-                            TextEntry::make('name')
-                                ->label('Họ và tên')
-                                ->icon('heroicon-o-user')
-                                ->size(TextEntry\TextEntrySize::Large)
-                                ->weight('bold'),
-                            TextEntry::make('email')
-                                ->label('Email')
-                                ->icon('heroicon-o-envelope')
-                                ->copyable(),
-                            TextEntry::make('phone_number')
-                                ->label('Số điện thoại')
-                                ->icon('heroicon-o-phone')
-                                ->placeholder('Chưa cập nhật'),
-                            TextEntry::make('code')
-                                ->label('Mã người dùng')
-                                ->placeholder('Chưa cập nhật'),
-                            TextEntry::make('address')
-                                ->label('Địa chỉ')
-                                ->icon('heroicon-o-map-pin')
-                                ->placeholder('Chưa cập nhật')
-                                ->columnSpanFull(),
-                        ])->columns(2)
-                        ->columnSpan(2),
+                        // === CỘT BÊN PHẢI ===
+                        Infolists\Components\Group::make()
+                            ->columnSpan(1) // Nhóm này chiếm 1 cột
+                            ->schema([
+                                TextEntry::make('address')
+                                    ->label('Địa chỉ')
+                                    ->icon('heroicon-m-map-pin')
+                                    ->placeholder('Chưa cập nhật'),
+                                TextEntry::make('roles.name')
+                                    ->label('Vai trò')
+                                    ->badge(),
+                                TextEntry::make('organizations.name')
+                                    ->label('Cơ sở')
+                                    ->badge()
+                                    ->listWithLineBreaks(), // Hiển thị nhiều cơ sở theo danh sách
+                                TextEntry::make('classesMajors.name')
+                                    ->label('Lớp')
+                                    ->badge(),
+                            ]),
+                    ]),
 
-                    Infolists\Components\Group::make()
-                        ->schema([
-                            InfolistSection::make('Phân loại & Vai trò')
-                                ->schema([
-                                    TextEntry::make('roles.name')
-                                        ->label('Vai trò')
-                                        ->badge(),
-                                    TextEntry::make('organizations.name')
-                                        ->label('Cơ sở')
-                                        ->badge()
-                                        ->listWithLineBreaks(),
-                                    TextEntry::make('classesMajors.name')
-                                        ->label('Lớp / Chuyên ngành')
-                                        ->badge()
-                                        ->listWithLineBreaks(),
-                                ])->collapsible(),
-                            InfolistSection::make('Trạng thái & Lịch sử')
-                                ->schema([
-                                    TextEntry::make('status')
-                                        ->label('Trạng thái')
-                                        ->badge()
-                                        ->color(fn (string $state): string => static::$model::getStatusColor($state)),
-                                    TextEntry::make('email_verified_at')
-                                        ->label('Ngày xác thực email')
-                                        ->dateTime('d/m/Y H:i:s')
-                                        ->placeholder('Chưa xác thực'),
-                                    TextEntry::make('created_at')
-                                        ->label('Ngày tạo')
-                                        ->dateTime('d/m/Y H:i:s'),
-                                    TextEntry::make('updated_at')
-                                        ->label('Cập nhật lần cuối')
-                                        ->since(),
-                                ])->collapsible(),
-                        ])->columnSpan(1),
-                ]),
+                Section::make('Thống kê học tập')
+                    ->columnSpanFull() // Chiếm toàn bộ chiều rộng
+                    ->columns(3)
+                    ->schema([
+                        TextEntry::make('courses_count')
+                            ->label('Số môn học đã đăng ký')
+                            ->icon('heroicon-o-academic-cap')
+                            ->size(TextEntry\TextEntrySize::Large),
+                        TextEntry::make('completed_courses_count')
+                            ->label('Số môn học đã hoàn thành')
+                            ->icon('heroicon-o-check-circle')
+                            ->size(TextEntry\TextEntrySize::Large),
+                        TextEntry::make('progress_percentage')
+                            ->label('Tiến độ học tập')
+                            ->icon('heroicon-o-presentation-chart-line')
+                            ->size(TextEntry\TextEntrySize::Large)
+                            ->color('primary')
+                            ->state(fn ($record): string => empty($record->courses_count)
+                                ? '0%'
+                                : round($record->completed_courses_count / $record->courses_count * 100).'%'),
+                    ]),
+
+                Section::make('Trạng thái & Lịch sử')
+                    ->columnSpanFull() // Chiếm toàn bộ chiều rộng
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('status')
+                            ->label('Trạng thái')
+                            ->badge()
+                            ->formatStateUsing(fn (Status $state) => $state::label())
+                            ->color(fn (Status $state) => $state->color()),
+                        TextEntry::make('email_verified_at')
+                            ->label('Đã xác thực')
+                            ->since()
+                            ->icon('heroicon-m-check-badge'),
+                        TextEntry::make('created_at')
+                            ->label('Tham gia')
+                            ->since()
+                            ->icon('heroicon-m-calendar-days'),
+                        TextEntry::make('updated_at')
+                            ->label('Cập nhật')
+                            ->since()
+                            ->icon('heroicon-m-arrow-path'),
+                    ]),
             ]);
     }
 }
