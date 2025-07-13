@@ -7,13 +7,17 @@ use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
 class EditAssignment extends EditRecord
-{
-    protected static string $resource = AssignmentResource::class;
-
+{ 
+     use EditRecord\Concerns\Translatable;
+ 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\LocaleSwitcher::make(),
+            // ...
         ];
     }
+    protected static string $resource = AssignmentResource::class;
+
+  
 }

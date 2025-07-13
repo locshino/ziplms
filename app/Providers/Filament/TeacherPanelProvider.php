@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Providers\Filament;
-
+use Filament\SpatieLaravelTranslatablePlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -51,6 +51,11 @@ class TeacherPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+            ])
+            ->plugins([
+    SpatieLaravelTranslatablePlugin::make()
+        ->defaultLocales(['vi', 'en']),
             ]);
+
     }
 }

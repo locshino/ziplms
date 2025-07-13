@@ -6,6 +6,7 @@ use App\States\Status;
 use Spatie\ModelStates\HasStates;
 use Spatie\Tags\HasTags;
 use Spatie\Translatable\HasTranslations;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @property string $id
@@ -82,7 +83,7 @@ class Assignment extends Base\Model
         'title',
         'instructions',
     ];
-
+protected $guarded = [];
     public function course()
     {
         return $this->belongsTo(Course::class);
@@ -99,6 +100,16 @@ class Assignment extends Base\Model
     }
     public function getTagsStringAttribute(): string
 {
-    return $this->tags->pluck('name')->join(', ');
+    return $this->tags ? $this->tags->pluck('name')->join(', '):"";
 }
+protected static function booted()
+{
+    static::creating(function ($model) {
+        if (auth()->check()) {
+            $model->created_by = auth()->id();
+        }
+    });
+}
+
+
 }
