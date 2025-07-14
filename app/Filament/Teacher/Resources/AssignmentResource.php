@@ -61,12 +61,12 @@ class AssignmentResource extends Resource
                 ->label('Cho phép nộp trễ'),
 
             Forms\Components\Select::make('status')
-                ->label('Trạng thái')
-                ->options([
+    ->label('Trạng thái')
+    ->options([
                     'active' => 'Tích cực',
                     'inactive' => 'Không hoạt động',
-                ])
-                ->required(),
+    ])
+    ->required(),
                 
            
 
@@ -92,8 +92,12 @@ public static function table(Table $table): Table
         BooleanColumn::make('allow_late_submissions')->label('Cho phép trễ'),
         TextColumn::make('creator.name')->label('Người tạo')->searchable(),
         TagsColumn::make('tags_string')->label('Thẻ'),
-        BadgeColumn::make('status')->label('Trạng thái')
+       BadgeColumn::make('status')
+    ->label('Trạng thái')
+    ->color(fn ($state) => $state::color()) 
+    ->formatStateUsing(fn ($state) => $state::label())
         ])
+
         ->filters([
             //
         ])
