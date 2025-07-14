@@ -23,7 +23,9 @@ use Filament\Tables\Columns\BooleanColumn;
 use Spatie\Tags\Tag;
 use Filament\Tables\Columns\TagsColumn;
 use Filament\Tables\Columns\BadgeColumn;
-
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Radio;
 
 
 class AssignmentResource extends Resource
@@ -46,9 +48,28 @@ class AssignmentResource extends Resource
                 ->label('Tiêu đề')
                 ->required(),
 
-            Forms\Components\Textarea::make('instructions')
-                ->label('Hướng dẫn')
-                ->required(),
+       Group::make([
+  Radio::make('instructions_type')
+    ->label('Loại đề bài')
+    ->options([
+        'text' => 'Nhập văn bản',
+        'file' => 'Tải file',
+    ])
+    ->reactive()
+    ->required(),
+
+    Textarea::make('instructions_text')
+        ->label('Nhập đề bài')
+        ->visible(fn ($get) => $get('instructions_type') === 'text'),
+
+    FileUpload::make('instructions_file')
+        ->label('Tệp đề bài')
+        ->disk('public')
+        ->directory('assignments')
+        ->visible(fn ($get) => $get('instructions_type') === 'file')
+        ->preserveFilenames()
+        ->acceptedFileTypes(['application/pdf', 'application/msword']),
+]),
 
             Forms\Components\TextInput::make('max_score')
                 ->numeric()
@@ -103,10 +124,13 @@ public static function table(Table $table): Table
         ])
         ->actions([
             Tables\Actions\EditAction::make(),
+             Tables\Actions\ViewAction::make(),
         ])
         ->bulkActions([
             Tables\Actions\BulkActionGroup::make([
                 Tables\Actions\DeleteBulkAction::make(),
+                
+            
             ]),
         ]);
 }
