@@ -92,11 +92,7 @@ public static function table(Table $table): Table
         BooleanColumn::make('allow_late_submissions')->label('Cho phép trễ'),
         TextColumn::make('creator.name')->label('Người tạo')->searchable(),
         TagsColumn::make('tags_string')->label('Thẻ'),
-        BadgeColumn::make('status')->label('Trạng thái')->colors([
-            'gray' => \App\States\Draft::class,
-            'success' => \App\States\Published::class,
-            'danger' => \App\States\Closed::class,
-        ])
+        BadgeColumn::make('status')->label('Trạng thái')
         ])
         ->filters([
             //
