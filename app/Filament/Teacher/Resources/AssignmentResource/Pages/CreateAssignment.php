@@ -18,4 +18,22 @@ class CreateAssignment extends CreateRecord
         ];
     }
     protected static string $resource = AssignmentResource::class;
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+
+        if ($data['instructions_type'] === 'file') {
+            $data['instructions'] = [
+                'file' => $data['instructions_file'] ?? null,
+            ];
+        } else {
+            $data['instructions'] = [
+               'text' => $data['instructions_text'] ?? null,
+
+            ];
+        }
+
+        unset($data['instructions_file'], $data['instructions_text'], $data['instructions_type']);
+
+        return $data;
+    }
 }

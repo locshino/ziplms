@@ -26,7 +26,8 @@ use Filament\Tables\Columns\BadgeColumn;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Radio;
-
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 
 class AssignmentResource extends Resource
 {
@@ -142,6 +143,43 @@ public static function table(Table $table): Table
             //
         ];
     }
+
+
+public static function infolist(Infolist $infolist): Infolist
+{
+    return $infolist->schema([
+        TextEntry::make('title')
+            ->label('Tiêu đề'),
+
+        TextEntry::make('instructions_text')
+            ->label('Đề bài (văn bản)')
+            ->default(function ($record) {
+                $vi = $record->getTranslation('instructions', 'vi');
+                return is_array($vi) ? ($vi['text'] ?? null) : $vi;
+            })
+            ->visible(function ($record) {
+                $vi = $record->getTranslation('instructions', 'vi');
+                return !empty(is_array($vi) ? ($vi['text'] ?? null) : $vi);
+            }),
+
+        TextEntry::make('instructions_file')
+            ->label('Tệp đính kèm')
+            ->url(function ($record) {
+                $vi = $record->getTranslation('instructions', 'vi');
+                $filePath = is_array($vi) ? ($vi['file'] ?? $vi['en'] ?? null) : null;
+                return $filePath ? asset('storage/' . $filePath) : null;
+            })
+            ->default(function ($record) {
+                $vi = $record->getTranslation('instructions', 'vi');
+                return is_array($vi) ? ($vi['file'] ?? $vi['en'] ?? null) : null;
+            })
+            ->openUrlInNewTab()
+            ->visible(function ($record) {
+                $vi = $record->getTranslation('instructions', 'vi');
+                return is_array($vi) && (!empty($vi['file'] ?? null) || !empty($vi['en'] ?? null));
+            }),
+    ]);
+}
 
     public static function getPages(): array
     {
