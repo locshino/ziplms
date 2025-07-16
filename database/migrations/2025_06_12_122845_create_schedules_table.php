@@ -19,10 +19,10 @@ return new class extends Migration
             $table->uuid('assigned_teacher_id')->nullable(); // FK to users table
             $table->dateTime('start_time');
             $table->dateTime('end_time');
-            $table->string('location_type')->nullable(); // Ví dụ: 'online', 'offline_room', 'virtual_classroom'.
+            // $table->string('location_type')->nullable(); // Managed by plugin filament-spatie-tags
             $table->text('location_details')->nullable(); // Chi tiết địa điểm/link họp.
             $table->uuid('created_by')->nullable(); // FK to users table
-            // $table->string('status', 50)->nullable(); // (Managed by spatie/laravel-model-states)
+            $table->string('status')->default(App\States\Active::class);
             $table->timestamps();
             $table->softDeletes();
 
