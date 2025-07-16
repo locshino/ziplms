@@ -31,6 +31,7 @@ use Filament\Infolists\Infolist;
 
 
 
+
 class AssignmentResource extends Resource
 {
     use Translatable;
