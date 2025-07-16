@@ -29,6 +29,8 @@ use Filament\Forms\Components\Radio;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 
+
+
 class AssignmentResource extends Resource
 {
     use Translatable;
@@ -180,6 +182,10 @@ public static function infolist(Infolist $infolist): Infolist
             }),
     ]);
 }
+
+
+
+
 
     public static function getPages(): array
     {
