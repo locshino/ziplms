@@ -5,18 +5,47 @@ namespace App\Enums;
 use App\Models\ClassesMajor;
 use App\Models\Course;
 use App\Models\Lecture;
-use Filament\Support\Contracts\HasColor;
-use Filament\Support\Contracts\HasDescription;
-use Filament\Support\Contracts\HasIcon;
-use Filament\Support\Contracts\HasLabel;
 
-enum SchedulableType: string implements HasColor, HasDescription, HasIcon, HasLabel
+enum SchedulableType: string implements Contracts\HasFilamentEnumStyle
 {
     use Concerns\HasEnumValues, Concerns\HasMorphToSelectTypes;
 
     case Course = 'course';
     case Lecture = 'lecture';
     case ClassesMajor = 'classes_major';
+
+    /**
+     * The single source of truth for model mapping.
+     */
+    private static function modelMap(): array
+    {
+        return [
+            self::Course->value => Course::class,
+            self::Lecture->value => Lecture::class,
+            self::ClassesMajor->value => ClassesMajor::class,
+        ];
+    }
+
+    /**
+     * Get the corresponding model class for the enum case.
+     */
+    public function getModelClass(): string
+    {
+        return self::modelMap()[$this->value];
+    }
+
+    /**
+     * Get the enum case from a model class string.
+     */
+    public static function fromModelClass(string $modelClass): self
+    {
+        $caseValue = array_search($modelClass, self::modelMap());
+
+        // The from() method is a built-in feature of PHP Backed Enums.
+        return self::from($caseValue);
+    }
+
+    // ... các hàm getLabel, getDescription, getIcon, getColor, getTitleColumn không thay đổi ...
 
     /**
      * Get the displayable label for the enum case.
@@ -43,7 +72,6 @@ enum SchedulableType: string implements HasColor, HasDescription, HasIcon, HasLa
             self::Course => 'heroicon-o-book-open',
             self::Lecture => 'heroicon-o-presentation-chart-line',
             self::ClassesMajor => 'heroicon-o-academic-cap',
-            default => 'heroicon-o-question-mark-circle',
         };
     }
 
@@ -57,20 +85,6 @@ enum SchedulableType: string implements HasColor, HasDescription, HasIcon, HasLa
             self::Lecture => 'success',
             self::ClassesMajor => 'warning',
             default => 'gray',
-        };
-    }
-
-    /**
-     * Get the corresponding model class for the type.
-     */
-    public function getModelClass(): string
-    {
-        return match ($this) {
-            self::Course => Course::class,
-            self::Lecture => Lecture::class,
-            self::ClassesMajor => ClassesMajor::class,
-            // A default is not strictly needed here if all cases are handled,
-            // but can be useful for robustness.
         };
     }
 

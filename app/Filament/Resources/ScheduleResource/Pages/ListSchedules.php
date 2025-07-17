@@ -5,12 +5,14 @@ namespace App\Filament\Resources\ScheduleResource\Pages;
 use App\Filament\Exports\ScheduleExporter;
 use App\Filament\Imports\ScheduleImporter;
 use App\Filament\Resources\ScheduleResource;
+use Asmit\ResizedColumn\HasResizableColumn;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
 class ListSchedules extends ListRecords
 {
-    use ListRecords\Concerns\Translatable;
+    use HasResizableColumn,
+        ListRecords\Concerns\Translatable;
 
     protected static string $resource = ScheduleResource::class;
 

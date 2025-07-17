@@ -16,3 +16,5 @@ Schedule::command('model:prune', [
         \App\Models\OTPLogin::class,
     ],
 ])->daily();
+
+Schedule::command('telescope:prune --hours=48')->daily();

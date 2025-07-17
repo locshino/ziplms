@@ -2,23 +2,23 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\LocationType;
 use App\Enums\SchedulableType;
 use App\Filament\Exports\ScheduleExporter;
 use App\Filament\Resources\ScheduleResource\Pages;
+use App\Models\Location;
 use App\Models\Schedule;
 use App\Repositories\Contracts\ScheduleRepositoryInterface;
 use App\States\Status;
 use Filament\Forms;
-use Filament\Forms\Components\SpatieTagsInput;
 use Filament\Forms\Form;
 use Filament\Resources\Concerns\Translatable;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Columns\SpatieTagsColumn;
 use Filament\Tables\Table;
+use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Swis\Filament\Activitylog;
 
 class ScheduleResource extends Resource
 {
@@ -28,7 +28,6 @@ class ScheduleResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
 
-    // Use translation keys for model labels
     public static function getModelLabel(): string
     {
         return __('schedule-resource.model_label');
@@ -54,7 +53,8 @@ class ScheduleResource extends Resource
                         Forms\Components\TextInput::make('title')
                             ->label(__('schedule-resource.form.title'))
                             ->required(),
-                        Forms\Components\RichEditor::make('description')
+
+                        TiptapEditor::make('description')
                             ->label(__('schedule-resource.form.description'))
                             ->columnSpanFull(),
                     ])->columns(2),
@@ -68,29 +68,27 @@ class ScheduleResource extends Resource
                         Forms\Components\DateTimePicker::make('end_time')
                             ->label(__('schedule-resource.form.end_time'))
                             ->required()
-                            ->after('start_time')
-                            ->validationMessages([
-                                'after' => __('schedule-resource.validation.end_time_after'),
-                            ]),
+                            ->after('start_time'),
 
-                        SpatieTagsInput::make('tags')
-                            ->label(__('schedule-resource.form.location_type'))
-                            ->type(LocationType::key())
-                            ->suggestions(LocationType::values())
-                            ->required()
-                            ->rules(['max:1']),
-
-                        Forms\Components\TextInput::make('location_details')
-                            ->label(__('schedule-resource.form.location_details'))
-                            ->placeholder(__('schedule-resource.form.location_details_placeholder'))
+                        // Changed from SpatieTagsInput to a relationship select
+                        Forms\Components\Select::make('location_id')
+                            ->label(__('schedule-resource.form.location'))
+                            ->relationship('location', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->required(),
+                            ])
                             ->columnSpanFull(),
                     ])->columns(2),
 
                 Forms\Components\Section::make(__('schedule-resource.form.section.assignment_status'))
                     ->schema([
-                        Forms\Components\Select::make('assigned_teacher_id')
-                            ->label(__('schedule-resource.form.assigned_teacher'))
-                            ->relationship('assignedTeacher', 'name')
+                        // Changed to assigned_id and relationship assignedTo
+                        Forms\Components\Select::make('assigned_id')
+                            ->label(__('schedule-resource.form.assigned_to'))
+                            ->relationship('assignedTo', 'name')
                             ->searchable()
                             ->preload(),
 
@@ -107,10 +105,11 @@ class ScheduleResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('title')
-                    ->label(__('schedule-resource.form.title')) // Re-use form label
+                    ->label(__('schedule-resource.form.title'))
                     ->searchable()
                     ->limit(30)
                     ->tooltip(fn (?string $state): ?string => $state),
+
                 Tables\Columns\TextColumn::make('schedulable')
                     ->label(__('schedule-resource.table.associated_with'))
                     ->getStateUsing(fn ($record): ?string => app(ScheduleRepositoryInterface::class)->getSchedulableTitle($record))
@@ -120,51 +119,63 @@ class ScheduleResource extends Resource
                     )
                     ->limit(30)
                     ->tooltip(fn (?string $state): ?string => $state),
-                Tables\Columns\TextColumn::make('assignedTeacher.name')
-                    ->label(__('schedule-resource.form.assigned_teacher')) // Re-use form label
-                    ->searchable(isIndividual: true)
-                    ->limit(30)
-                    ->tooltip(fn (?string $state): ?string => $state),
+
+                // Changed to assignedTo.name
+                Tables\Columns\TextColumn::make('assignedTo.name')
+                    ->label(__('schedule-resource.form.assigned_to'))
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+
+                // Added location column
+                Tables\Columns\TextColumn::make('location.name')
+                    ->label(__('schedule-resource.form.location'))
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+
                 Tables\Columns\TextColumn::make('start_time')
-                    ->label(__('schedule-resource.form.start_time')) // Re-use form label
+                    ->label(__('schedule-resource.form.start_time'))
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
+
                 Tables\Columns\TextColumn::make('end_time')
-                    ->label(__('schedule-resource.form.end_time')) // Re-use form label
+                    ->label(__('schedule-resource.form.end_time'))
                     ->dateTime()
-                    ->sortable(),
-                SpatieTagsColumn::make('tags')
-                    ->label(__('schedule-resource.table.location_type'))
-                    ->type(LocationType::key()),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('status')
-                    ->label(__('schedule-resource.form.status')) // Re-use form label
-                    ->badge(),
+                    ->label(__('schedule-resource.form.status'))
+                    ->badge()
+                    ->toggleable(),
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
-                Tables\Filters\SelectFilter::make('tags')
-                    ->label(__('schedule-resource.filters.location_type'))
+
+                // Added status filter
+                Tables\Filters\SelectFilter::make('status')
+                    ->label(__('schedule-resource.form.status'))
                     ->multiple()
-                    ->searchable()
-                    ->options(LocationType::options())
-                    ->query(fn (Builder $q, array $data): Builder => app(ScheduleRepositoryInterface::class)
-                        ->applyTagFilter($q, $data['values'] ?? [])),
+                    ->options(Status::getOptions()),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-                Tables\Actions\ForceDeleteAction::make(),
-                Tables\Actions\RestoreAction::make(),
+                Activitylog\Tables\Actions\ActivitylogAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
                     Tables\Actions\ExportBulkAction::make()
                         ->exporter(ScheduleExporter::class),
                 ]),
             ])
             ->headerActions([
-                //
+                Tables\Actions\CreateAction::make(),
             ]);
     }
 
@@ -188,6 +199,7 @@ class ScheduleResource extends Resource
         return [
             'index' => Pages\ListSchedules::route('/'),
             'create' => Pages\CreateSchedule::route('/create'),
+            'view' => Pages\ViewSchedule::route('/{record}'),
             'edit' => Pages\EditSchedule::route('/{record}/edit'),
         ];
     }
