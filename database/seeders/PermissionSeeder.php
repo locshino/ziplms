@@ -9,7 +9,7 @@ use App\Models\Role;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\PermissionRegistrar;
 
-class RoleAndPermissionSeeder extends Seeder
+class PermissionSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -19,29 +19,21 @@ class RoleAndPermissionSeeder extends Seeder
         // Reset cached roles and permissions
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Note: Make sure you have created the RoleEnum and HasEnumValues trait
-        // For example: enum RoleEnum: string { case Admin = 'admin'; ... }
-
-        // 1. Create permissions from PermissionEnum
+        // Create permissions from PermissionEnum
         foreach (PermissionEnum::cases() as $permission) {
             Permission::findOrCreate($permission->value, 'web');
         }
 
-        // 2. Create roles from RoleEnum
-        foreach (RoleEnum::cases() as $role) {
-            Role::findOrCreate($role->value, 'web');
-        }
+        $this->command->info('Permissions created successfully!');
 
-        $this->command->info('Roles and Permissions created successfully!');
-
-        // 3. Assign permissions to roles
+        // Assign permissions to roles
         $adminRole = Role::findByName(RoleEnum::Admin->value);
         $managerRole = Role::findByName(RoleEnum::Manager->value);
         $teacherRole = Role::findByName(RoleEnum::Teacher->value);
         $studentRole = Role::findByName(RoleEnum::Student->value);
 
         // --- Assign all permissions to Admin ---
-        $adminRole->givePermissionTo(Permission::all());
+        $adminRole->givePermissionTo(PermissionEnum::cases());
         $this->command->info('Admin permissions assigned.');
 
         // --- Assign permissions to Manager ---
@@ -120,15 +112,10 @@ class RoleAndPermissionSeeder extends Seeder
         $this->command->info('Teacher permissions assigned.');
 
         // --- Student Permissions ---
-        // Students typically have very few direct permissions.
-        // Their access is usually controlled by Policies (e.g., can this user view this specific course they are enrolled in?).
-        // We can grant some basic viewing rights if needed.
         $studentRole->givePermissionTo([
             PermissionEnum::ViewAnyCourses, // To see the course catalog
             PermissionEnum::ViewAnySchedules, // To see their own schedule
         ]);
         $this->command->info('Student permissions assigned.');
-
-        $this->command->info('All roles and permissions have been seeded successfully!');
     }
 }

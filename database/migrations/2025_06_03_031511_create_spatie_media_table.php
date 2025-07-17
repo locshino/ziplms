@@ -8,8 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('media', function (Blueprint $table) {
-            $table->id();
+        Schema::create(app(config('media-library.media_model'))->getTable(), function (Blueprint $table) {
+            $table->uuid('id')->primary();
 
             $table->uuidMorphs('model');
             $table->uuid()->nullable()->unique();
@@ -28,5 +28,10 @@ return new class extends Migration
 
             $table->nullableTimestamps();
         });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists(app(config('media-library.media_model'))->getTable());
     }
 };

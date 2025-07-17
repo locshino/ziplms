@@ -16,9 +16,10 @@ trait HasEnumTags
     protected function createEnumTags(string $enumClass): Collection
     {
         // Get the keys from the enum options and create/find tags with the enum's key as the type
-        $tagNames = collect($enumClass::options())->keys()->toArray();
+        $tagNames = $enumClass::values();
+        $tagClassName = config('tags.tag_model', Tag::class);
 
-        return Tag::findOrCreate($tagNames, $enumClass::key());
+        return $tagClassName::findOrCreate($tagNames, $enumClass::key());
     }
 
     /**
