@@ -17,21 +17,18 @@ return [
         'description' => 'Description',
         'start_time' => 'Start Time',
         'end_time' => 'End Time',
-        'location_type' => 'Location Type',
-        'location_details' => 'Location Details (Room, URL, etc.)',
-        'location_details_placeholder' => 'e.g., Room A1, https://zoom.us/j/...',
-        'assigned_teacher' => 'Assigned Teacher',
+        'location' => 'Location',
+        'assigned_to' => 'Assignee',
         'status' => 'Status',
     ],
 
     // Table
     'table' => [
         'associated_with' => 'Associated With',
-        'location_type' => 'Location Type',
     ],
 
-    // Filters
+    // Filters (can be added to if needed)
     'filters' => [
-        'location_type' => 'Filter by Location Type',
+        //
     ],
 ];

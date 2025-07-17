@@ -4,6 +4,16 @@ namespace App\Providers\Filament;
 
 use Afsakar\FilamentOtpLogin\FilamentOtpLoginPlugin;
 use App\Filament\Plugins\FilamentProgressbarPlugin;
+use Asmit\ResizedColumn\ResizedColumnPlugin;
+use Avexsoft\FilamentPurl\FilamentPurlPlugin;
+use Awcodes\LightSwitch\Enums\Alignment;
+use Awcodes\LightSwitch\LightSwitchPlugin;
+use Awcodes\Overlook\OverlookPlugin;
+use Awcodes\Overlook\Widgets\OverlookWidget;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use Boquizo\FilamentLogViewer\FilamentLogViewerPlugin;
+use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
+use Croustibat\FilamentJobsMonitor\FilamentJobsMonitorPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -13,14 +23,27 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\SpatieLaravelTranslatablePlugin;
 use Filament\Widgets;
+use FilamentWebpush\FilamentWebpushPlugin;
+use Hasnayeen\Themes\Http\Middleware\SetTheme;
+use Hasnayeen\Themes\ThemesPlugin;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use JaysonTemporas\TranslationOverrides\TranslationOverridesPlugin;
+use Jeffgreco13\FilamentBreezy\BreezyCore;
+use lockscreen\FilamentLockscreen\Http\Middleware\Locker;
+use lockscreen\FilamentLockscreen\Http\Middleware\LockerTimer;
+use lockscreen\FilamentLockscreen\Lockscreen;
+use pxlrbt\FilamentEnvironmentIndicator\EnvironmentIndicatorPlugin;
+use Rmsramos\Activitylog\ActivitylogPlugin;
 use ShuvroRoy\FilamentSpatieLaravelBackup\FilamentSpatieLaravelBackupPlugin;
 use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
+use TomatoPHP\FilamentPWA\FilamentPWAPlugin;
+use TomatoPHP\FilamentSettingsHub\FilamentSettingsHubPlugin;
+use Visualbuilder\EmailTemplates\EmailTemplatesPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -32,8 +55,6 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
 
             ->login()
-            ->passwordReset()
-            ->profile()
 
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -59,6 +80,8 @@ class AdminPanelProvider extends PanelProvider
             SubstituteBindings::class,
             DisableBladeIconComponents::class,
             DispatchServingFilamentEvent::class,
+            SetTheme::class,
+            LockerTimer::class,
         ];
     }
 
@@ -66,6 +89,7 @@ class AdminPanelProvider extends PanelProvider
     {
         return [
             Authenticate::class,
+            Locker::class,
         ];
     }
 
@@ -73,7 +97,7 @@ class AdminPanelProvider extends PanelProvider
     {
         return [
             Pages\Dashboard::class,
-            \App\Filament\Pages\ManageGeneralSettings::class,
+            // \App\Filament\Pages\TasksBoardBoardPage::class,
             //
         ];
     }
@@ -83,6 +107,7 @@ class AdminPanelProvider extends PanelProvider
         return [
             Widgets\AccountWidget::class,
             Widgets\FilamentInfoWidget::class,
+            OverlookWidget::class,
         ];
     }
 
@@ -92,9 +117,49 @@ class AdminPanelProvider extends PanelProvider
             FilamentOtpLoginPlugin::make(),
             SpatieLaravelTranslatablePlugin::make()
                 ->defaultLocales(['vi', 'en']),
+
             FilamentSpatieLaravelBackupPlugin::make(),
             FilamentSpatieLaravelHealthPlugin::make(),
-            FilamentProgressbarPlugin::make(),
+            // FilamentProgressbarPlugin::make(),
+
+            FilamentPurlPlugin::make(),
+            FilamentWebpushPlugin::make()
+                ->registerSubscriptionStatsWidget(true),
+            // FilamentLogViewerPlugin::make(),
+            // TranslationOverridesPlugin::make(),
+
+            BreezyCore::make()
+                ->myProfile(
+                    shouldRegisterUserMenu: true,
+                    hasAvatars: true
+                )
+                ->enableTwoFactorAuthentication(),
+
+            ResizedColumnPlugin::make()
+                ->preserveOnDB(),
+            FilamentPWAPlugin::make(),
+            LightSwitchPlugin::make()
+                ->position(Alignment::TopRight),
+
+            ThemesPlugin::make(),
+            FilamentSettingsHubPlugin::make()
+                ->allowShield()
+                ->allowSiteSettings()
+                ->allowSocialMenuSettings()
+                ->allowLocationSettings(),
+
+            FilamentShieldPlugin::make(),
+            ActivitylogPlugin::make(),
+            GlobalSearchModalPlugin::make(),
+            EnvironmentIndicatorPlugin::make()
+                ->visible(fn () => auth()->user()?->hasrole(\App\Enums\RoleEnum::Dev->value)),
+
+            OverlookPlugin::make()
+                ->alphabetical(),
+            FilamentJobsMonitorPlugin::make(),
+            EmailTemplatesPlugin::make(),
+
+            Lockscreen::make(),
         ];
     }
 }
