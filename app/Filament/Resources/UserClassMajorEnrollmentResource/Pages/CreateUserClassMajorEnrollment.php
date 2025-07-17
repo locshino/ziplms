@@ -3,13 +3,14 @@
 namespace App\Filament\Resources\UserClassMajorEnrollmentResource\Pages;
 
 use App\Filament\Resources\UserClassMajorEnrollmentResource;
-use Filament\Actions;
-use Filament\Resources\Pages\CreateRecord;
 use App\Models\Role;
+use Filament\Resources\Pages\CreateRecord;
+
 class CreateUserClassMajorEnrollment extends CreateRecord
 {
     protected static string $resource = UserClassMajorEnrollmentResource::class;
-        protected function afterCreate(): void
+
+    protected function afterCreate(): void
     {
         $roleId = $this->data['role_id'] ?? null; // Lấy role_id từ dữ liệu form
 
@@ -20,5 +21,4 @@ class CreateUserClassMajorEnrollment extends CreateRecord
             }
         }
     }
-
 }

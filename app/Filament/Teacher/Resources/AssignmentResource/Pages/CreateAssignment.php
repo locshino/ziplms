@@ -8,8 +8,8 @@ use Filament\Resources\Pages\CreateRecord;
 
 class CreateAssignment extends CreateRecord
 {
-      use CreateRecord\Concerns\Translatable;
- 
+    use CreateRecord\Concerns\Translatable;
+
     protected function getHeaderActions(): array
     {
         return [
@@ -17,7 +17,9 @@ class CreateAssignment extends CreateRecord
             // ...
         ];
     }
+
     protected static string $resource = AssignmentResource::class;
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
 
@@ -31,7 +33,7 @@ class CreateAssignment extends CreateRecord
             ];
         } else {
             $data['instructions'] = [
-               'text' => $data['instructions_text'] ?? null,
+                'text' => $data['instructions_text'] ?? null,
 
             ];
         }

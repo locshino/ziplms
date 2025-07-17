@@ -8,16 +8,15 @@ use Filament\Resources\Pages\ListRecords;
 
 class ListAssignments extends ListRecords
 {
-      use ListRecords\Concerns\Translatable;
- 
+    use ListRecords\Concerns\Translatable;
+
     protected function getHeaderActions(): array
     {
         return [
             Actions\LocaleSwitcher::make(),
-                   Actions\CreateAction::make(),
+            Actions\CreateAction::make(),
         ];
     }
-    protected static string $resource = AssignmentResource::class;
 
-   
+    protected static string $resource = AssignmentResource::class;
 }

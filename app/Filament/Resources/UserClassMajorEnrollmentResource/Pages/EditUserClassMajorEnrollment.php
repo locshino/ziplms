@@ -8,7 +8,6 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditUserClassMajorEnrollment extends EditRecord
 {
-
     protected static string $resource = UserClassMajorEnrollmentResource::class;
 
     protected function getHeaderActions(): array

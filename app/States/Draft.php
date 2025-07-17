@@ -1,4 +1,5 @@
 <?php
+
 // app/States/Draft.php
 
 namespace App\States;

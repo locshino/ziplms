@@ -2,31 +2,25 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Exports\UserClassMajorEnrollmentExporter;
 use App\Filament\Resources\UserClassMajorEnrollmentResource\Pages;
-use App\Filament\Resources\UserClassMajorEnrollmentResource\RelationManagers;
+use App\Models\Role;
+use app\models\User;
 use App\Models\UserClassMajorEnrollment;
-use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ExportAction;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\DatePicker;
-use Filament\Tables\Filters\SelectFilter;
-use app\models\User;
-use App\Models\ClassesMajor;
-use App\Filament\Exports\UserClassMajorEnrollmentExporter;
-use Filament\Tables\Actions\ExportAction;
-use App\Models\Role;
-use DeleteAction;
-use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 
 class UserClassMajorEnrollmentResource extends Resource
 {
-    
     protected static ?string $model = UserClassMajorEnrollment::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -35,7 +29,7 @@ class UserClassMajorEnrollmentResource extends Resource
     {
         return $form
             ->schema([
-              Select::make('user_id')
+                Select::make('user_id')
                     ->label('Người dùng')
                     ->relationship('user', 'name') // quan hệ model User
                     ->searchable()
@@ -51,7 +45,7 @@ class UserClassMajorEnrollmentResource extends Resource
                     ->label('Vai trò')
                     ->required()
                     ->options(
-                        fn() => Role::query()->select('id', 'name')
+                        fn () => Role::query()->select('id', 'name')
                             ->pluck('name', 'id'),
                     ),
 
@@ -69,91 +63,92 @@ class UserClassMajorEnrollmentResource extends Resource
     {
         return $table
             ->columns([
-                 Tables\Columns\TextColumn::make('id')
-        ->label('ID')
-        ->searchable(),
+                Tables\Columns\TextColumn::make('id')
+                    ->label('ID')
+                    ->searchable(),
 
-    Tables\Columns\TextColumn::make('user.name')
-        ->label('Người dùng')
-        ->searchable()
-        ->sortable(),
+                Tables\Columns\TextColumn::make('user.name')
+                    ->label('Người dùng')
+                    ->searchable()
+                    ->sortable(),
 
-    Tables\Columns\TextColumn::make('classMajor.name')
-        ->label('Đơn vị cấu trúc')
-        ->searchable()
-        ->sortable(),
+                Tables\Columns\TextColumn::make('classMajor.name')
+                    ->label('Đơn vị cấu trúc')
+                    ->searchable()
+                    ->sortable(),
 
-    Tables\Columns\TextColumn::make('user.role_names_string')
-        ->label('Vai trò')
-        ->sortable(),
+                Tables\Columns\TextColumn::make('user.role_names_string')
+                    ->label('Vai trò')
+                    ->sortable(),
 
-    Tables\Columns\TextColumn::make('start_date')
-        ->label('Ngày bắt đầu')
-        ->date()
-        ->sortable(),
+                Tables\Columns\TextColumn::make('start_date')
+                    ->label('Ngày bắt đầu')
+                    ->date()
+                    ->sortable(),
 
-    Tables\Columns\TextColumn::make('end_date')
-        ->label('Ngày kết thúc')
-        ->date()
-        ->sortable(),
+                Tables\Columns\TextColumn::make('end_date')
+                    ->label('Ngày kết thúc')
+                    ->date()
+                    ->sortable(),
 
-    Tables\Columns\TextColumn::make('created_at')
-        ->label('Tạo lúc')
-        ->dateTime()
-        ->sortable()
-        ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Tạo lúc')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
-    Tables\Columns\TextColumn::make('updated_at')
-        ->label('Cập nhật lúc')
-        ->dateTime()
-        ->sortable()
-        ->toggleable(isToggledHiddenByDefault: true),
-  
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Cập nhật lúc')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
             ])->filters([
-    SelectFilter::make('class_major_id')
-        ->label('Lọc theo đơn vị cấu trúc')
-        ->options(function () {
-            return \App\Models\ClassesMajor::query()->pluck('name', 'id');
-        })->query(function (Builder $query, array $data): Builder {
-            if (! empty($data['value'])) {
-                $query->where('class_major_id', $data['value']);
-            }
-            return $query;
-        }),
+                SelectFilter::make('class_major_id')
+                    ->label('Lọc theo đơn vị cấu trúc')
+                    ->options(function () {
+                        return \App\Models\ClassesMajor::query()->pluck('name', 'id');
+                    })->query(function (Builder $query, array $data): Builder {
+                        if (! empty($data['value'])) {
+                            $query->where('class_major_id', $data['value']);
+                        }
 
-])
-->actions([
-                Tables\Actions\ViewAction::make(),
-                    Tables\Actions\DeleteAction::make()
-        ->using(function ($record) {
-        $user = $record->user;
+                        return $query;
+                    }),
 
-        if (!$user) {
-            Notification::make()
-                ->title('Lỗi')
-                ->body('Bản ghi không có người dùng liên kết.')
-                ->danger()
-                ->send();
-            return;
-        }
-        if ($user->id === Auth::id()) {
-            Notification::make()
-                ->title('Không thể xóa')
-                ->body('Bạn không thể xóa bản ghi của chính mình.')
-                ->danger()
-                ->send();
-            return;
-        }
-        $record->forceDelete();
-    }),
             ])
-          
-             ->headerActions([
-            ExportAction::make()
-                ->exporter(UserClassMajorEnrollmentExporter::class),
-                
+            ->actions([
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->using(function ($record) {
+                        $user = $record->user;
 
-        ]);
+                        if (! $user) {
+                            Notification::make()
+                                ->title('Lỗi')
+                                ->body('Bản ghi không có người dùng liên kết.')
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+                        if ($user->id === Auth::id()) {
+                            Notification::make()
+                                ->title('Không thể xóa')
+                                ->body('Bạn không thể xóa bản ghi của chính mình.')
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+                        $record->forceDelete();
+                    }),
+            ])
+            ->headerActions([
+                    ExportAction::make()
+                        ->exporter(UserClassMajorEnrollmentExporter::class),
+
+            ]);
     }
 
     public static function getRelations(): array

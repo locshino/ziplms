@@ -1,27 +1,25 @@
 <?php
 
 namespace App\Filament\Resources;
-use Filament\Resources\Concerns\Translatable;
+
+use App\Filament\Exports\ClassesMajorExporter;
 use App\Filament\Resources\ClassMajorResource\Pages;
-use App\Filament\Resources\ClassMajorResource\RelationManagers;
-use App\Models\ClassesMajor; 
+use App\Models\ClassesMajor;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Resources\Concerns\Translatable;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ExportAction;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Forms\Components\Select;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Actions\ExportAction;
-use App\Filament\Exports\ClassesMajorExporter;
-use App\Imports\ClassMajorImport; 
-use EightyNine\FilamentExcelImport\Actions\ImportExcelAction;
+
 class ClassMajorResource extends Resource
 {
     use Translatable;
-    protected static ?string $model = ClassesMajor::class; 
+
+    protected static ?string $model = ClassesMajor::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -29,22 +27,17 @@ class ClassMajorResource extends Resource
     {
         return $form
             ->schema([
-                  Forms\Components\Select::make('organization_id')
+                Forms\Components\Select::make('organization_id')
                     ->relationship('organization', 'name')
                     ->label('Tổ chức')
                     ->required(),
 
-             
+                Forms\Components\TextInput::make('name')
+                    ->label('Tên đơn vị')
+                    ->required(),
 
-Forms\Components\TextInput::make('name')
-    ->label('Tên đơn vị')
-    ->required(),
-
-
-
-Forms\Components\Textarea::make('description')
-    ->label('Mô tả'),
-
+                Forms\Components\Textarea::make('description')
+                    ->label('Mô tả'),
 
                 Forms\Components\TextInput::make('code')
                     ->label('Mã đơn vị')
@@ -70,7 +63,7 @@ Forms\Components\Textarea::make('description')
 
                 Tables\Columns\TextColumn::make('code')
                     ->label('Mã'),
-  
+
                 Tables\Columns\TextColumn::make('parent.name')
                     ->label('Đơn vị Cha'),
 
@@ -78,36 +71,35 @@ Forms\Components\Textarea::make('description')
                     ->label('Tổ chức'),
             ])
             ->filters([
-              SelectFilter::make('parent_id')
-    ->label('Lọc theo loại')
-    ->options(fn () => ClassesMajor::query()
-        ->select('id','name')
-        ->pluck('name', 'id'))
+                SelectFilter::make('parent_id')
+                    ->label('Lọc theo loại')
+                    ->options(fn () => ClassesMajor::query()
+                        ->select('id', 'name')
+                        ->pluck('name', 'id'))
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (! empty($data['value'])) {
+                            $query->whereRaw('parent_id = ?', [$data['value']]);
+                        }
 
-    ->query(function (Builder $query, array $data): Builder {
-    if (! empty($data['value'])) {
-        $query->whereRaw("parent_id = ?", [$data['value']]);
-    }
-    return $query;
-})
+                        return $query;
+                    }),
 
-
-            ]) 
+            ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\ViewAction::make(),
-            ])
+                                    Tables\Actions\EditAction::make(),
+                                    Tables\Actions\ViewAction::make(),
+                                ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                    
-                ]),
-            ])
-             ->headerActions([
-            ExportAction::make()
-                ->exporter(ClassesMajorExporter::class),
-            
-        ]);;
+                                    Tables\Actions\BulkActionGroup::make([
+                                        Tables\Actions\DeleteBulkAction::make(),
+
+                                    ]),
+                                ])
+            ->headerActions([
+                                    ExportAction::make()
+                                        ->exporter(ClassesMajorExporter::class),
+
+                                ]);
     }
 
     public static function getRelations(): array

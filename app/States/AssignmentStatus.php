@@ -1,4 +1,5 @@
 <?php
+
 // app/States/AssignmentStatus.php
 
 namespace App\States;

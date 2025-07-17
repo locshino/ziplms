@@ -8,7 +8,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditClassMajor extends EditRecord
 {
-     use EditRecord\Concerns\Translatable;
+    use EditRecord\Concerns\Translatable;
+
     protected static string $resource = ClassMajorResource::class;
 
     protected function getHeaderActions(): array

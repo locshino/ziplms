@@ -5,11 +5,6 @@ namespace App\Filament\Resources\ClassMajorResource\Pages;
 use App\Filament\Resources\ClassMajorResource;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
-use Filament\Actions\Action;
-use Filament\Forms\Components\FileUpload;
-use Maatwebsite\Excel\Facades\Excel;
-
-
 
 class CreateClassMajor extends CreateRecord
 {
@@ -22,7 +17,6 @@ class CreateClassMajor extends CreateRecord
         return [
             Actions\LocaleSwitcher::make(),
 
-         
         ];
     }
 }

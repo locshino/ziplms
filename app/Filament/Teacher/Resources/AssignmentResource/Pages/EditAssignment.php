@@ -7,9 +7,9 @@ use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
 class EditAssignment extends EditRecord
-{ 
-     use EditRecord\Concerns\Translatable;
- 
+{
+    use EditRecord\Concerns\Translatable;
+
     protected function getHeaderActions(): array
     {
         return [
@@ -17,7 +17,6 @@ class EditAssignment extends EditRecord
             // ...
         ];
     }
-    protected static string $resource = AssignmentResource::class;
 
-  
+    protected static string $resource = AssignmentResource::class;
 }
