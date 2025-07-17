@@ -1,0 +1,127 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\ExamAttemptResource\Pages;
+use App\Filament\Resources\ExamAttemptResource\RelationManagers;
+use App\Models\ExamAttempt;
+use App\States\Exam\Status; // SỬA LỖI: Import đúng lớp Status của Exam
+use Filament\Infolists\Components;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Resources\Concerns\Translatable;
+
+class ExamAttemptResource extends Resource
+{
+    use Translatable;
+    protected static ?string $model = ExamAttempt::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-document-check';
+
+    protected static ?string $navigationGroup = 'Quản lý Đánh giá';
+
+    protected static ?string $label = 'Lượt làm bài';
+
+    protected static ?string $pluralLabel = 'Danh sách Lượt làm bài';
+
+    /**
+     * Tối ưu hóa truy vấn để tải trước tổng điểm.
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->withSum('answers', 'points_earned');
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Components\Section::make('Thông tin chung')
+                    ->columns(2)
+                    ->schema([
+                        Components\TextEntry::make('exam.title')
+                            ->label('Bài kiểm tra'),
+                        Components\TextEntry::make('user.name')
+                            ->label('Học sinh'),
+                    ]),
+                Components\Section::make('Kết quả')
+                    ->columns(3)
+                    ->schema([
+                        Components\TextEntry::make('answers_sum_points_earned')
+                            ->label('Điểm số')
+                            ->badge()
+                            ->color('success')
+                            ->numeric(),
+
+                        Components\TextEntry::make('status')
+                            ->label('Trạng thái')
+                            ->badge()
+                            // SỬA LỖI: Type hint $state bây giờ đã đúng
+                            ->color(fn(Status $state): string => $state->color()),
+
+                        Components\TextEntry::make('time_spent_seconds')
+                            ->label('Thời gian làm bài')
+                            ->formatStateUsing(fn(?int $state): string => $state ? gmdate('H:i:s', $state) : 'N/A'),
+                    ]),
+                Components\Section::make('Thời gian')
+                    ->columns(2)
+                    ->schema([
+                        Components\TextEntry::make('started_at')
+                            ->label('Bắt đầu lúc')
+                            ->dateTime('d/m/Y H:i:s'),
+                        Components\TextEntry::make('completed_at')
+                            ->label('Hoàn thành lúc')
+                            ->dateTime('d/m/Y H:i:s'),
+                    ]),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('exam.title')->label('Bài kiểm tra')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('user.name')->label('Học sinh')->searchable()->sortable(),
+
+                Tables\Columns\TextColumn::make('answers_sum_points_earned')
+                    ->label('Điểm số')
+                    ->sortable()
+                    ->numeric(),
+
+                Tables\Columns\TextColumn::make('status')->label('Trạng thái')->badge()
+                    ->color(fn(Status $state): string => $state->color()),
+                Tables\Columns\TextColumn::make('completed_at')->label('Ngày nộp bài')->dateTime('d/m/Y')->sortable(),
+            ])
+            ->actions([
+                Tables\Actions\ViewAction::make()->label('Xem chi tiết'),
+                Tables\Actions\EditAction::make()->label('Chấm bài'),
+                Tables\Actions\DeleteAction::make()->label('Xóa'),
+            ])
+            ->bulkActions([]);
+    }
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            RelationManagers\AnswersRelationManager::class,
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListExamAttempts::route('/'),
+            'view' => Pages\ViewExamAttempt::route('/{record}'),
+            'create' => Pages\CreateExamAttempt::route('/create'),
+            'edit' => Pages\EditExamAttempt::route('/{record}/edit'),
+        ];
+    }
+}
