@@ -1,80 +1,47 @@
-import os from "os";
-import path from "path";
-import { fileURLToPath } from "url";
-import spawn from "cross-spawn";
+import dotenv from "dotenv";
+import { spawn } from "cross-spawn";
+import config from "./config.js";
 
-// Resolve __dirname in ESM context
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Load environment variables from the path specified in config
+dotenv.config({ path: config.paths.env });
 
-// OS-specific configuration
-const platformScripts = {
-    win32: {
-        name: "Windows",
-        dir: "win",
-        file: "start-workers.bat",
-        options: { shell: true }, // Needed to run .bat files on Windows
-        preExecute: () => Promise.resolve(), // No pre-execution needed on Windows
-    },
-    default: {
-        name: "macOS/Linux",
-        dir: "mac",
-        file: "start-workers.sh",
-        options: { shell: "/bin/bash" },
-        preExecute: async (scriptPath) => {
-            return new Promise((resolve, reject) => {
-                const chmod = spawn("chmod", ["+x", scriptPath], {
-                    stdio: "inherit",
-                });
-                chmod.on("close", (code) => {
-                    code === 0 ? resolve() : reject(new Error("chmod failed"));
-                });
-            });
-        },
-    },
-};
+function executeWorker(workerConf) {
+    return new Promise((resolve, reject) => {
+        const { name, connection, queueEnvVar } = workerConf;
+        const queueName = process.env[queueEnvVar];
+        const prefix = `[${name}]`;
 
-/**
- * Main function to start worker scripts.
- */
-async function startWorkers() {
-    const platformKey = os.platform();
-    const config = platformScripts[platformKey] || platformScripts.default;
+        if (!queueName) {
+            return reject(new Error(`Queue name for '${name}' (${queueEnvVar}) is not defined in .env`));
+        }
+        console.log(`${prefix} Starting worker for queue: ${queueName}`);
+        const args = [
+            "artisan", "queue:work",
+            connection || process.env.QUEUE_CONNECTION,
+            `--queue=${queueName}`, "--sleep=3", "--tries=3",
+        ];
+        const workerProcess = spawn(config.executables.php, args, { cwd: config.paths.root });
 
-    console.log(`Platform detected: ${platformKey}`);
-    console.log(`Executing ${config.name} script...`);
+        workerProcess.stdout?.on("data", (data) => console.log(prefix, data.toString().trim()));
+        workerProcess.stderr?.on("data", (data) => console.error(prefix, data.toString().trim()));
+        workerProcess.on("error", (err) => reject(new Error(`Failed to start worker '${name}': ${err.message}`)));
+        workerProcess.on("exit", (code) => code === 0 ? resolve() : reject(new Error(`Worker '${name}' exited with code ${code}.`)));
+    });
+}
 
-    const scriptDir = path.join(__dirname, config.dir);
-    const scriptPath = path.join(scriptDir, config.file);
-    const execOptions = { cwd: scriptDir, stdio: "inherit", ...config.options };
-
+async function main() {
+    console.log("===================================================");
+    console.log("Starting ZipLMS Queue Workers...");
+    console.log("===================================================");
     try {
-        // Optional pre-execution step (e.g., chmod +x)
-        await config.preExecute(scriptPath);
-
-        // Execute the worker script
-        const subprocess = spawn(scriptPath, [], execOptions);
-
-        subprocess.on("exit", (code) => {
-            if (code === 0) {
-                console.log(
-                    "✅ Worker start commands dispatched successfully."
-                );
-            } else {
-                console.error(`❌ Worker script exited with code ${code}.`);
-                process.exit(code);
-            }
-        });
-
-        subprocess.on("error", (error) => {
-            console.error("❌ Failed to start workers:", error.message);
-            process.exit(1);
-        });
-    } catch (err) {
-        console.error("❌ Pre-execution failed:", err.message);
+        // Use the workers array from the config file
+        const workerPromises = config.workers.map(executeWorker);
+        await Promise.all(workerPromises);
+        console.log("✅ All workers have finished their tasks.");
+    } catch (error) {
+        console.error("\n❌ A worker has failed:", error.message);
         process.exit(1);
     }
 }
 
-// Execute
-startWorkers();
+main();

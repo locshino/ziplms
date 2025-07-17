@@ -8,11 +8,21 @@ class Retrying extends ProgressStatus
 
     public static function label(): string
     {
-        return 'Retrying';
+        return __('states_progress-status.retrying.label');
     }
 
     public static function color(): string
     {
-        return 'warning'; // For Filament badges
+        return 'warning';
+    }
+
+    public static function icon(): string
+    {
+        return 'heroicon-o-arrow-uturn-left';
+    }
+
+    public static function description(): string
+    {
+        return __('states_progress-status.retrying.description');
     }
 }

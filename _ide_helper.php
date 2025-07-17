@@ -2428,6 +2428,33 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
+         * Log a user into the application without firing the Login event.
+         *
+         * @param \Illuminate\Contracts\Auth\Authenticatable $user
+         * @return void 
+         * @static 
+         */
+        public static function quietLogin($user)
+        {
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
+            $instance->quietLogin($user);
+        }
+
+        /**
+         * Logout the user without updating remember_token
+         * and without firing the Logout event.
+         *
+         * @param void
+         * @return void 
+         * @static 
+         */
+        public static function quietLogout()
+        {
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
+            $instance->quietLogout();
+        }
+
+        /**
          * Get the currently authenticated user.
          *
          * @return \App\Models\User|null 
@@ -2435,7 +2462,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function user()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->user();
         }
 
@@ -2447,7 +2475,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function id()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->id();
         }
 
@@ -2460,7 +2489,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function once($credentials = [])
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->once($credentials);
         }
 
@@ -2473,7 +2503,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function onceUsingId($id)
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->onceUsingId($id);
         }
 
@@ -2486,7 +2517,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function validate($credentials = [])
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->validate($credentials);
         }
 
@@ -2501,7 +2533,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function basic($field = 'email', $extraConditions = [])
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->basic($field, $extraConditions);
         }
 
@@ -2516,7 +2549,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function onceBasic($field = 'email', $extraConditions = [])
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->onceBasic($field, $extraConditions);
         }
 
@@ -2530,7 +2564,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function attempt($credentials = [], $remember = false)
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->attempt($credentials, $remember);
         }
 
@@ -2545,7 +2580,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function attemptWhen($credentials = [], $callbacks = null, $remember = false)
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->attemptWhen($credentials, $callbacks, $remember);
         }
 
@@ -2559,7 +2595,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function loginUsingId($id, $remember = false)
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->loginUsingId($id, $remember);
         }
 
@@ -2573,7 +2610,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function login($user, $remember = false)
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             $instance->login($user, $remember);
         }
 
@@ -2585,7 +2623,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function logout()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             $instance->logout();
         }
 
@@ -2599,7 +2638,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function logoutCurrentDevice()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             $instance->logoutCurrentDevice();
         }
 
@@ -2615,7 +2655,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function logoutOtherDevices($password)
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->logoutOtherDevices($password);
         }
 
@@ -2628,7 +2669,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function attempting($callback)
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             $instance->attempting($callback);
         }
 
@@ -2640,7 +2682,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function getLastAttempted()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->getLastAttempted();
         }
 
@@ -2652,7 +2695,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function getName()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->getName();
         }
 
@@ -2664,7 +2708,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function getRecallerName()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->getRecallerName();
         }
 
@@ -2676,7 +2721,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function viaRemember()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->viaRemember();
         }
 
@@ -2684,12 +2730,13 @@ namespace Illuminate\Support\Facades {
          * Set the number of minutes the remember me cookie should be valid for.
          *
          * @param int $minutes
-         * @return \Illuminate\Auth\SessionGuard 
+         * @return \Lab404\Impersonate\Guard\SessionGuard 
          * @static 
          */
         public static function setRememberDuration($minutes)
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->setRememberDuration($minutes);
         }
 
@@ -2702,7 +2749,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function getCookieJar()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->getCookieJar();
         }
 
@@ -2715,7 +2763,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function setCookieJar($cookie)
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             $instance->setCookieJar($cookie);
         }
 
@@ -2727,7 +2776,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function getDispatcher()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->getDispatcher();
         }
 
@@ -2740,7 +2790,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function setDispatcher($events)
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             $instance->setDispatcher($events);
         }
 
@@ -2752,7 +2803,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function getSession()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->getSession();
         }
 
@@ -2764,7 +2816,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function getUser()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->getUser();
         }
 
@@ -2772,12 +2825,13 @@ namespace Illuminate\Support\Facades {
          * Set the current user.
          *
          * @param \Illuminate\Contracts\Auth\Authenticatable $user
-         * @return \Illuminate\Auth\SessionGuard 
+         * @return \Lab404\Impersonate\Guard\SessionGuard 
          * @static 
          */
         public static function setUser($user)
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->setUser($user);
         }
 
@@ -2789,7 +2843,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function getRequest()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->getRequest();
         }
 
@@ -2797,12 +2852,13 @@ namespace Illuminate\Support\Facades {
          * Set the current request instance.
          *
          * @param \Symfony\Component\HttpFoundation\Request $request
-         * @return \Illuminate\Auth\SessionGuard 
+         * @return \Lab404\Impersonate\Guard\SessionGuard 
          * @static 
          */
         public static function setRequest($request)
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->setRequest($request);
         }
 
@@ -2814,7 +2870,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function getTimebox()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->getTimebox();
         }
 
@@ -2827,7 +2884,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function authenticate()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->authenticate();
         }
 
@@ -2839,7 +2897,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function hasUser()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->hasUser();
         }
 
@@ -2851,7 +2910,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function check()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->check();
         }
 
@@ -2863,19 +2923,21 @@ namespace Illuminate\Support\Facades {
          */
         public static function guest()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->guest();
         }
 
         /**
          * Forget the current user.
          *
-         * @return \Illuminate\Auth\SessionGuard 
+         * @return \Lab404\Impersonate\Guard\SessionGuard 
          * @static 
          */
         public static function forgetUser()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->forgetUser();
         }
 
@@ -2887,7 +2949,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function getProvider()
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             return $instance->getProvider();
         }
 
@@ -2900,7 +2963,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function setProvider($provider)
         {
-            /** @var \Illuminate\Auth\SessionGuard $instance */
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            /** @var \Lab404\Impersonate\Guard\SessionGuard $instance */
             $instance->setProvider($provider);
         }
 
@@ -2915,7 +2979,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function macro($name, $macro)
         {
-            \Illuminate\Auth\SessionGuard::macro($name, $macro);
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            \Lab404\Impersonate\Guard\SessionGuard::macro($name, $macro);
         }
 
         /**
@@ -2929,7 +2994,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function mixin($mixin, $replace = true)
         {
-            \Illuminate\Auth\SessionGuard::mixin($mixin, $replace);
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            \Lab404\Impersonate\Guard\SessionGuard::mixin($mixin, $replace);
         }
 
         /**
@@ -2941,7 +3007,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function hasMacro($name)
         {
-            return \Illuminate\Auth\SessionGuard::hasMacro($name);
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            return \Lab404\Impersonate\Guard\SessionGuard::hasMacro($name);
         }
 
         /**
@@ -2952,7 +3019,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function flushMacros()
         {
-            \Illuminate\Auth\SessionGuard::flushMacros();
+            //Method inherited from \Illuminate\Auth\SessionGuard 
+            \Lab404\Impersonate\Guard\SessionGuard::flushMacros();
         }
 
             }
@@ -10533,6 +10601,40 @@ namespace Illuminate\Support\Facades {
      */
     class Lang {
         /**
+         * 
+         *
+         * @static 
+         */
+        public static function get($key, $replace = [], $locale = null, $fallback = true)
+        {
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
+            return $instance->get($key, $replace, $locale, $fallback);
+        }
+
+        /**
+         * Get all supported languages from the configuration.
+         *
+         * @return array<string, string> 
+         * @static 
+         */
+        public static function getSupportedLanguages()
+        {
+            return \JaysonTemporas\TranslationOverrides\Support\TenantTranslator::getSupportedLanguages();
+        }
+
+        /**
+         * Check if a locale is supported.
+         *
+         * @param string $locale
+         * @return bool 
+         * @static 
+         */
+        public static function isLocaleSupported($locale)
+        {
+            return \JaysonTemporas\TranslationOverrides\Support\TenantTranslator::isLocaleSupported($locale);
+        }
+
+        /**
          * Determine if a translation exists for a given locale.
          *
          * @param string $key
@@ -10542,7 +10644,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function hasForLocale($key, $locale = null)
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             return $instance->hasForLocale($key, $locale);
         }
 
@@ -10557,24 +10660,9 @@ namespace Illuminate\Support\Facades {
          */
         public static function has($key, $locale = null, $fallback = true)
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             return $instance->has($key, $locale, $fallback);
-        }
-
-        /**
-         * Get the translation for the given key.
-         *
-         * @param string $key
-         * @param array $replace
-         * @param string|null $locale
-         * @param bool $fallback
-         * @return string|array 
-         * @static 
-         */
-        public static function get($key, $replace = [], $locale = null, $fallback = true)
-        {
-            /** @var \Illuminate\Translation\Translator $instance */
-            return $instance->get($key, $replace, $locale, $fallback);
         }
 
         /**
@@ -10589,7 +10677,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function choice($key, $number, $replace = [], $locale = null)
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             return $instance->choice($key, $number, $replace, $locale);
         }
 
@@ -10604,7 +10693,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function addLines($lines, $locale, $namespace = '*')
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             $instance->addLines($lines, $locale, $namespace);
         }
 
@@ -10619,7 +10709,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function load($namespace, $group, $locale)
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             $instance->load($namespace, $group, $locale);
         }
 
@@ -10632,7 +10723,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function handleMissingKeysUsing($callback)
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             return $instance->handleMissingKeysUsing($callback);
         }
 
@@ -10646,7 +10738,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function addNamespace($namespace, $hint)
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             $instance->addNamespace($namespace, $hint);
         }
 
@@ -10659,7 +10752,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function addPath($path)
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             $instance->addPath($path);
         }
 
@@ -10672,7 +10766,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function addJsonPath($path)
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             $instance->addJsonPath($path);
         }
 
@@ -10685,7 +10780,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function parseKey($key)
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             return $instance->parseKey($key);
         }
 
@@ -10698,7 +10794,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function determineLocalesUsing($callback)
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             $instance->determineLocalesUsing($callback);
         }
 
@@ -10710,7 +10807,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function getSelector()
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             return $instance->getSelector();
         }
 
@@ -10723,7 +10821,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function setSelector($selector)
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             $instance->setSelector($selector);
         }
 
@@ -10735,7 +10834,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function getLoader()
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             return $instance->getLoader();
         }
 
@@ -10747,7 +10847,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function locale()
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             return $instance->locale();
         }
 
@@ -10759,7 +10860,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function getLocale()
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             return $instance->getLocale();
         }
 
@@ -10773,7 +10875,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function setLocale($locale)
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             $instance->setLocale($locale);
         }
 
@@ -10785,7 +10888,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function getFallback()
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             return $instance->getFallback();
         }
 
@@ -10798,7 +10902,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function setFallback($fallback)
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             $instance->setFallback($fallback);
         }
 
@@ -10811,7 +10916,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function setLoaded($loaded)
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             $instance->setLoaded($loaded);
         }
 
@@ -10825,7 +10931,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function stringable($class, $handler = null)
         {
-            /** @var \Illuminate\Translation\Translator $instance */
+            //Method inherited from \Illuminate\Translation\Translator 
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             $instance->stringable($class, $handler);
         }
 
@@ -10840,7 +10947,7 @@ namespace Illuminate\Support\Facades {
         public static function setParsedKey($key, $parsed)
         {
             //Method inherited from \Illuminate\Support\NamespacedItemResolver 
-            /** @var \Illuminate\Translation\Translator $instance */
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             $instance->setParsedKey($key, $parsed);
         }
 
@@ -10853,7 +10960,7 @@ namespace Illuminate\Support\Facades {
         public static function flushParsedKeys()
         {
             //Method inherited from \Illuminate\Support\NamespacedItemResolver 
-            /** @var \Illuminate\Translation\Translator $instance */
+            /** @var \JaysonTemporas\TranslationOverrides\Support\TenantTranslator $instance */
             $instance->flushParsedKeys();
         }
 
@@ -10868,7 +10975,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function macro($name, $macro)
         {
-            \Illuminate\Translation\Translator::macro($name, $macro);
+            //Method inherited from \Illuminate\Translation\Translator 
+            \JaysonTemporas\TranslationOverrides\Support\TenantTranslator::macro($name, $macro);
         }
 
         /**
@@ -10882,7 +10990,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function mixin($mixin, $replace = true)
         {
-            \Illuminate\Translation\Translator::mixin($mixin, $replace);
+            //Method inherited from \Illuminate\Translation\Translator 
+            \JaysonTemporas\TranslationOverrides\Support\TenantTranslator::mixin($mixin, $replace);
         }
 
         /**
@@ -10894,7 +11003,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function hasMacro($name)
         {
-            return \Illuminate\Translation\Translator::hasMacro($name);
+            //Method inherited from \Illuminate\Translation\Translator 
+            return \JaysonTemporas\TranslationOverrides\Support\TenantTranslator::hasMacro($name);
         }
 
         /**
@@ -10905,7 +11015,8 @@ namespace Illuminate\Support\Facades {
          */
         public static function flushMacros()
         {
-            \Illuminate\Translation\Translator::flushMacros();
+            //Method inherited from \Illuminate\Translation\Translator 
+            \JaysonTemporas\TranslationOverrides\Support\TenantTranslator::flushMacros();
         }
 
             }
@@ -23059,3802 +23170,13 @@ namespace BezhanSalleh\FilamentShield\Facades {
             }
     }
 
-namespace EightyNine\ExcelImport\Facades {
+namespace EightyNine\FilamentAdvancedWidget\Facades {
     /**
      * 
      *
-     * @see \EightyNine\ExcelImport\ExcelImportAction
+     * @see \EightyNine\FilamentAdvancedWidget\FilamentAdvancedWidget
      */
-    class ExcelImportAction {
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getLivewireCallMountedActionName()
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getLivewireCallMountedActionName();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getLivewireClickHandler()
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getLivewireClickHandler();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function shouldClearRecordAfter()
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->shouldClearRecordAfter();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function clearRecordAfter()
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->clearRecordAfter();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getInfolistName()
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getInfolistName();
-        }
-
-        /**
-         * 
-         *
-         * @param array<string, mixed> $parameters
-         * @static 
-         */
-        public static function call($parameters = [])
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->call($parameters);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function cancel($shouldRollBackDatabaseTransaction = false)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->cancel($shouldRollBackDatabaseTransaction);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function halt($shouldRollBackDatabaseTransaction = false)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->halt($shouldRollBackDatabaseTransaction);
-        }
-
-        /**
-         * 
-         *
-         * @deprecated Use `halt()` instead.
-         * @static 
-         */
-        public static function hold()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->hold();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function success()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->success();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function failure()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->failure();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function make($name = null)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            return \EightyNine\ExcelImport\ExcelImportAction::make($name);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isBadge()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isBadge();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function button()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->button();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isButton()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isButton();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function grouped()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->grouped();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function iconButton()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->iconButton();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isIconButton()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isIconButton();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function link()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->link();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isLink()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isLink();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function alpineClickHandler($handler)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->alpineClickHandler($handler);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getDefaultName()
-        {
-            return \EightyNine\ExcelImport\ExcelImportAction::getDefaultName();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getLivewireEventClickHandler()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getLivewireEventClickHandler();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getAlpineClickHandler()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getAlpineClickHandler();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function livewireTarget($target)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->livewireTarget($target);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getLivewireTarget()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getLivewireTarget();
-        }
-
-        /**
-         * 
-         *
-         * @deprecated Use `extraAttributes()` instead.
-         * @param array<mixed> $attributes
-         * @static 
-         */
-        public static function withAttributes($attributes)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->withAttributes($attributes);
-        }
-
-        /**
-         * 
-         *
-         * @param \Filament\Support\Components\view-string  | null  $view
-         * @param array<string, mixed>  | \Closure  $viewData
-         * @static 
-         */
-        public static function view($view, $viewData = [])
-        {
-            //Method inherited from \Filament\Support\Components\ViewComponent 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->view($view, $viewData);
-        }
-
-        /**
-         * 
-         *
-         * @param \Filament\Support\Components\view-string  | \Closure | null  $view
-         * @static 
-         */
-        public static function defaultView($view)
-        {
-            //Method inherited from \Filament\Support\Components\ViewComponent 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->defaultView($view);
-        }
-
-        /**
-         * 
-         *
-         * @param array<string, mixed>  | \Closure  $data
-         * @static 
-         */
-        public static function viewData($data)
-        {
-            //Method inherited from \Filament\Support\Components\ViewComponent 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->viewData($data);
-        }
-
-        /**
-         * 
-         *
-         * @return \Filament\Support\Components\view-string 
-         * @static 
-         */
-        public static function getView()
-        {
-            //Method inherited from \Filament\Support\Components\ViewComponent 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getView();
-        }
-
-        /**
-         * 
-         *
-         * @return \Filament\Support\Components\view-string | null
-         * @static 
-         */
-        public static function getDefaultView()
-        {
-            //Method inherited from \Filament\Support\Components\ViewComponent 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getDefaultView();
-        }
-
-        /**
-         * 
-         *
-         * @return array<string, mixed> 
-         * @static 
-         */
-        public static function getViewData()
-        {
-            //Method inherited from \Filament\Support\Components\ViewComponent 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getViewData();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function toHtml()
-        {
-            //Method inherited from \Filament\Support\Components\ViewComponent 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->toHtml();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function render()
-        {
-            //Method inherited from \Filament\Support\Components\ViewComponent 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->render();
-        }
-
-        /**
-         * Apply the callback if the given "value" is (or resolves to) truthy.
-         *
-         * @template TWhenParameter
-         * @template TWhenReturnType
-         * @param (\Closure($this): TWhenParameter)|TWhenParameter|null $value
-         * @param (callable($this, TWhenParameter): TWhenReturnType)|null $callback
-         * @param (callable($this, TWhenParameter): TWhenReturnType)|null $default
-         * @return $this|TWhenReturnType 
-         * @static 
-         */
-        public static function when($value = null, $callback = null, $default = null)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->when($value, $callback, $default);
-        }
-
-        /**
-         * Apply the callback if the given "value" is (or resolves to) falsy.
-         *
-         * @template TUnlessParameter
-         * @template TUnlessReturnType
-         * @param (\Closure($this): TUnlessParameter)|TUnlessParameter|null $value
-         * @param (callable($this, TUnlessParameter): TUnlessReturnType)|null $callback
-         * @param (callable($this, TUnlessParameter): TUnlessReturnType)|null $default
-         * @return $this|TUnlessReturnType 
-         * @static 
-         */
-        public static function unless($value = null, $callback = null, $default = null)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->unless($value, $callback, $default);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function configureUsing($modifyUsing, $during = null, $isImportant = false)
-        {
-            //Method inherited from \Filament\Support\Components\Component 
-            return \EightyNine\ExcelImport\ExcelImportAction::configureUsing($modifyUsing, $during, $isImportant);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function configure()
-        {
-            //Method inherited from \Filament\Support\Components\Component 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->configure();
-        }
-
-        /**
-         * 
-         *
-         * @template T
-         * @param T  | callable(): T  $value
-         * @param array<string, mixed> $namedInjections
-         * @param array<string, mixed> $typedInjections
-         * @return T 
-         * @static 
-         */
-        public static function evaluate($value, $namedInjections = [], $typedInjections = [])
-        {
-            //Method inherited from \Filament\Support\Components\Component 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->evaluate($value, $namedInjections, $typedInjections);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function macro($name, $macro)
-        {
-            //Method inherited from \Filament\Support\Components\Component 
-            return \EightyNine\ExcelImport\ExcelImportAction::macro($name, $macro);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function mixin($mixin, $replace = true)
-        {
-            //Method inherited from \Filament\Support\Components\Component 
-            return \EightyNine\ExcelImport\ExcelImportAction::mixin($mixin, $replace);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function flushMacros()
-        {
-            //Method inherited from \Filament\Support\Components\Component 
-            return \EightyNine\ExcelImport\ExcelImportAction::flushMacros();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function hasMacro($name)
-        {
-            //Method inherited from \Filament\Support\Components\Component 
-            return \EightyNine\ExcelImport\ExcelImportAction::hasMacro($name);
-        }
-
-        /**
-         * Call the given Closure with this instance then return the instance.
-         *
-         * @param (callable($this): mixed)|null $callback
-         * @return ($callback is null ? \Illuminate\Support\HigherOrderTapProxy : $this)
-         * @static 
-         */
-        public static function tap($callback = null)
-        {
-            //Method inherited from \Filament\Support\Components\Component 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->tap($callback);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function group($group)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->group($group);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getGroup()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getGroup();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getRootGroup()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getRootGroup();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function disabled($condition = true)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->disabled($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isDisabled()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isDisabled();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isEnabled()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isEnabled();
-        }
-
-        /**
-         * 
-         *
-         * @param \Filament\Actions\Model  | class-string | array<mixed> | null  $arguments
-         * @static 
-         */
-        public static function authorize($abilities, $arguments = null)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->authorize($abilities, $arguments);
-        }
-
-        /**
-         * 
-         *
-         * @param string  | BackedEnum | array<string>  $abilities
-         * @param \Filament\Actions\Model  | array<mixed> | null  $arguments
-         * @static 
-         */
-        public static function authorizeAny($abilities, $arguments = null)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->authorizeAny($abilities, $arguments);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function hidden($condition = true)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->hidden($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function visible($condition = true)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->visible($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isAuthorized()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isAuthorized();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isHidden()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isHidden();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isHiddenInGroup()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isHiddenInGroup();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isVisible()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isVisible();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function labeledFrom($breakpoint = null)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->labeledFrom($breakpoint);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getLabeledFromBreakpoint()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getLabeledFromBreakpoint();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function outlined($condition = true)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->outlined($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isOutlined()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isOutlined();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function callParent($handler)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->callParent($handler);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getParentActionCallLivewireClickHandler()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getParentActionCallLivewireClickHandler();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function close($condition = true)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->close($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function shouldClose()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->shouldClose();
-        }
-
-        /**
-         * 
-         *
-         * @param array<mixed>  | \Closure  $data
-         * @static 
-         */
-        public static function dispatch($event, $data = [])
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->dispatch($event, $data);
-        }
-
-        /**
-         * 
-         *
-         * @param array<int, mixed>  | \Closure  $data
-         * @static 
-         */
-        public static function dispatchSelf($event, $data = [])
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->dispatchSelf($event, $data);
-        }
-
-        /**
-         * 
-         *
-         * @param array<int, mixed>  | \Closure  $data
-         * @static 
-         */
-        public static function dispatchTo($component, $event, $data = [])
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->dispatchTo($component, $event, $data);
-        }
-
-        /**
-         * 
-         *
-         * @deprecated Use `dispatch()` instead.
-         * @param array<int, mixed>  | \Closure  $data
-         * @static 
-         */
-        public static function emit($event, $data = [])
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->emit($event, $data);
-        }
-
-        /**
-         * 
-         *
-         * @deprecated Use `dispatchSelf()` instead.
-         * @param array<int, mixed>  | \Closure  $data
-         * @static 
-         */
-        public static function emitSelf($event, $data = [])
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->emitSelf($event, $data);
-        }
-
-        /**
-         * 
-         *
-         * @deprecated Use `dispatchTo()` instead.
-         * @param array<int, mixed>  | \Closure  $data
-         * @static 
-         */
-        public static function emitTo($component, $event, $data = [])
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->emitTo($component, $event, $data);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getEvent()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getEvent();
-        }
-
-        /**
-         * 
-         *
-         * @param array<mixed>  | \Closure  $data
-         * @static 
-         */
-        public static function eventData($data)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->eventData($data);
-        }
-
-        /**
-         * 
-         *
-         * @return array<mixed> 
-         * @static 
-         */
-        public static function getEventData()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getEventData();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getDispatchDirection()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getDispatchDirection();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getDispatchToComponent()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getDispatchToComponent();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function openUrlInNewTab($condition = true)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->openUrlInNewTab($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function url($url, $shouldOpenInNewTab = false)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->url($url, $shouldOpenInNewTab);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getUrl()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getUrl();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function shouldOpenUrlInNewTab()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->shouldOpenUrlInNewTab();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function submit($form)
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->submit($form);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function canSubmitForm()
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->canSubmitForm();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getFormToSubmit()
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getFormToSubmit();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function formId($id)
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->formId($id);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getFormId()
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getFormId();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function action($action)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->action($action);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function livewireClickHandlerEnabled($condition = true)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->livewireClickHandlerEnabled($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getActionFunction()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getActionFunction();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isLivewireClickHandlerEnabled()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isLivewireClickHandlerEnabled();
-        }
-
-        /**
-         * 
-         *
-         * @param array<string, mixed>  | null  $arguments
-         * @static 
-         */
-        public static function arguments($arguments)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->arguments($arguments);
-        }
-
-        /**
-         * 
-         *
-         * @param array<string, mixed> $arguments
-         * @static 
-         */
-        public static function mergeArguments($arguments)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->mergeArguments($arguments);
-        }
-
-        /**
-         * 
-         *
-         * @return array<string, mixed> 
-         * @static 
-         */
-        public static function getArguments()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getArguments();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function resetArguments()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->resetArguments();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function hasArguments()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->hasArguments();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function groupedIcon($icon)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->groupedIcon($icon);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getGroupedIcon()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getGroupedIcon();
-        }
-
-        /**
-         * 
-         *
-         * @param string  | array<string> | \Closure | null  $bindings
-         * @static 
-         */
-        public static function keyBindings($bindings)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->keyBindings($bindings);
-        }
-
-        /**
-         * 
-         *
-         * @return array<string> | null
-         * @static 
-         */
-        public static function getKeyBindings()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getKeyBindings();
-        }
-
-        /**
-         * 
-         *
-         * @deprecated Use `hiddenLabel()` instead.
-         * @static 
-         */
-        public static function disableLabel($condition = true)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->disableLabel($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function hiddenLabel($condition = true)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->hiddenLabel($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function label($label)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->label($label);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function translateLabel($shouldTranslateLabel = true)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->translateLabel($shouldTranslateLabel);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getLabel()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getLabel();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isLabelHidden()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isLabelHidden();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function name($name)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->name($name);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getName()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getName();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function defaultSize($size)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->defaultSize($size);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function size($size)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->size($size);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getDefaultSize()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getDefaultSize();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getSize()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getSize();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function tooltip($tooltip)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->tooltip($tooltip);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getTooltip()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getTooltip();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function badge($badge = null)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->badge($badge);
-        }
-
-        /**
-         * 
-         *
-         * @deprecated Use `badge()` instead.
-         * @static 
-         */
-        public static function indicator($indicator)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->indicator($indicator);
-        }
-
-        /**
-         * 
-         *
-         * @param string  | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | \Closure | null  $color
-         * @static 
-         */
-        public static function badgeColor($color)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->badgeColor($color);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function badgeIcon($icon)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->badgeIcon($icon);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function badgeIconPosition($position)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->badgeIconPosition($position);
-        }
-
-        /**
-         * 
-         *
-         * @deprecated Use `badgeColor()` instead.
-         * @param string  | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | \Closure | null  $color
-         * @static 
-         */
-        public static function indicatorColor($color)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->indicatorColor($color);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getBadge()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getBadge();
-        }
-
-        /**
-         * 
-         *
-         * @return string | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | null
-         * @static 
-         */
-        public static function getBadgeColor()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getBadgeColor();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getBadgeIcon()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getBadgeIcon();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getBadgeIconPosition()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getBadgeIconPosition();
-        }
-
-        /**
-         * 
-         *
-         * @param string  | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | \Closure | null  $color
-         * @static 
-         */
-        public static function color($color)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->color($color);
-        }
-
-        /**
-         * 
-         *
-         * @param string  | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | \Closure | null  $color
-         * @static 
-         */
-        public static function defaultColor($color)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->defaultColor($color);
-        }
-
-        /**
-         * 
-         *
-         * @return string | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | null
-         * @static 
-         */
-        public static function getColor()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getColor();
-        }
-
-        /**
-         * 
-         *
-         * @param array<mixed>  | \Closure  $attributes
-         * @static 
-         */
-        public static function extraAttributes($attributes, $merge = false)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->extraAttributes($attributes, $merge);
-        }
-
-        /**
-         * 
-         *
-         * @return array<mixed> 
-         * @static 
-         */
-        public static function getExtraAttributes()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getExtraAttributes();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getExtraAttributeBag()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getExtraAttributeBag();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function icon($icon)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->icon($icon);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function iconPosition($position)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->iconPosition($position);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function iconSize($size)
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->iconSize($size);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getIcon()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getIcon();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getIconPosition()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getIconPosition();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getIconSize()
-        {
-            //Method inherited from \Filament\Actions\StaticAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getIconSize();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function livewire($livewire)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->livewire($livewire);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getLivewire()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getLivewire();
-        }
-
-        /**
-         * 
-         *
-         * @param array<string, mixed> $parameters
-         * @static 
-         */
-        public static function mount($parameters)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->mount($parameters);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function mountUsing($callback)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->mountUsing($callback);
-        }
-
-        /**
-         * 
-         *
-         * @param array<string, mixed>  | \Closure  $data
-         * @static 
-         */
-        public static function fillForm($data)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->fillForm($data);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getMountUsing()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getMountUsing();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function sendFailureNotification()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->sendFailureNotification();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function failureNotification($notification)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->failureNotification($notification);
-        }
-
-        /**
-         * 
-         *
-         * @deprecated Use `failureNotificationTitle()` instead.
-         * @static 
-         */
-        public static function failureNotificationMessage($message)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->failureNotificationMessage($message);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function failureNotificationTitle($title)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->failureNotificationTitle($title);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function sendSuccessNotification()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->sendSuccessNotification();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function successNotification($notification)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->successNotification($notification);
-        }
-
-        /**
-         * 
-         *
-         * @deprecated Use `successNotificationTitle()` instead.
-         * @static 
-         */
-        public static function successNotificationMessage($message)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->successNotificationMessage($message);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function successNotificationTitle($title)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->successNotificationTitle($title);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getSuccessNotificationTitle()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getSuccessNotificationTitle();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getFailureNotificationTitle()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getFailureNotificationTitle();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function closeModalByClickingAway($condition = true)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->closeModalByClickingAway($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function closeModalByEscaping($condition = true)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->closeModalByEscaping($condition);
-        }
-
-        /**
-         * 
-         *
-         * @deprecated Use `modalAlignment(Alignment::Center)` instead.
-         * @static 
-         */
-        public static function centerModal($condition = true)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->centerModal($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function modalAlignment($alignment = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalAlignment($alignment);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function modalCloseButton($condition = true)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalCloseButton($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function modalAutofocus($condition = true)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalAutofocus($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function modalIcon($icon = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalIcon($icon);
-        }
-
-        /**
-         * 
-         *
-         * @param string  | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | \Closure | null  $color
-         * @static 
-         */
-        public static function modalIconColor($color = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalIconColor($color);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function slideOver($condition = true)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->slideOver($condition);
-        }
-
-        /**
-         * 
-         *
-         * @deprecated Use `modalFooterActions()` instead.
-         * @param array<StaticAction>  | \Closure | null  $actions
-         * @static 
-         */
-        public static function modalActions($actions = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalActions($actions);
-        }
-
-        /**
-         * 
-         *
-         * @param array<StaticAction>  | \Closure | null  $actions
-         * @static 
-         */
-        public static function modalFooterActions($actions = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalFooterActions($actions);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function modalFooterActionsAlignment($alignment = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalFooterActionsAlignment($alignment);
-        }
-
-        /**
-         * 
-         *
-         * @deprecated Use `extraModalFooterActions()` instead.
-         * @param array<StaticAction>  | \Closure  $actions
-         * @static 
-         */
-        public static function extraModalActions($actions)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->extraModalActions($actions);
-        }
-
-        /**
-         * 
-         *
-         * @param array<StaticAction>  | \Closure  $actions
-         * @static 
-         */
-        public static function extraModalFooterActions($actions)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->extraModalFooterActions($actions);
-        }
-
-        /**
-         * 
-         *
-         * @param array<StaticAction | \Closure> $actions
-         * @static 
-         */
-        public static function registerModalActions($actions)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->registerModalActions($actions);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function modalSubmitAction($action = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalSubmitAction($action);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function modalCancelAction($action = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalCancelAction($action);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function modalSubmitActionLabel($label = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalSubmitActionLabel($label);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function modalCancelActionLabel($label = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalCancelActionLabel($label);
-        }
-
-        /**
-         * 
-         *
-         * @deprecated Use `modalSubmitActionLabel()` instead.
-         * @static 
-         */
-        public static function modalButton($label = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalButton($label);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function modalContent($content = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalContent($content);
-        }
-
-        /**
-         * 
-         *
-         * @deprecated Use `modalContentFooter()` instead.
-         * @static 
-         */
-        public static function modalFooter($footer = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalFooter($footer);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function modalContentFooter($footer = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalContentFooter($footer);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function modalHeading($heading = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalHeading($heading);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function modalDescription($description = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalDescription($description);
-        }
-
-        /**
-         * 
-         *
-         * @deprecated Use `modalDescription()` instead.
-         * @static 
-         */
-        public static function modalSubheading($subheading = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalSubheading($subheading);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function modalWidth($width = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalWidth($width);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function modal($condition = true)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modal($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function modalHidden($condition = true)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modalHidden($condition);
-        }
-
-        /**
-         * 
-         *
-         * @return array<string, StaticAction> 
-         * @static 
-         */
-        public static function getModalFooterActions()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getModalFooterActions();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getModalFooterActionsAlignment()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getModalFooterActionsAlignment();
-        }
-
-        /**
-         * 
-         *
-         * @return array<string, StaticAction> 
-         * @static 
-         */
-        public static function getModalActions()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getModalActions();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getModalAction($name)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getModalAction($name);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getMountableModalAction($name)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getMountableModalAction($name);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function prepareModalAction($action)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->prepareModalAction($action);
-        }
-
-        /**
-         * 
-         *
-         * @return array<StaticAction> 
-         * @static 
-         */
-        public static function getVisibleModalFooterActions()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getVisibleModalFooterActions();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getModalSubmitAction()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getModalSubmitAction();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getModalCancelAction()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getModalCancelAction();
-        }
-
-        /**
-         * 
-         *
-         * @return array<StaticAction> 
-         * @static 
-         */
-        public static function getExtraModalFooterActions()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getExtraModalFooterActions();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getModalAlignment()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getModalAlignment();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getModalSubmitActionLabel()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getModalSubmitActionLabel();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getModalCancelActionLabel()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getModalCancelActionLabel();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getModalContent()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getModalContent();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getModalContentFooter()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getModalContentFooter();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function hasModalContent()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->hasModalContent();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function hasModalContentFooter()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->hasModalContentFooter();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getCustomModalHeading()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getCustomModalHeading();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getModalHeading()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getModalHeading();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function hasCustomModalHeading()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->hasCustomModalHeading();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getModalDescription()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getModalDescription();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function hasModalDescription()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->hasModalDescription();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getModalWidth()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getModalWidth();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isModalFooterSticky()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isModalFooterSticky();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isModalHeaderSticky()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isModalHeaderSticky();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isModalSlideOver()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isModalSlideOver();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function shouldOpenModal($checkForFormUsing = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->shouldOpenModal($checkForFormUsing);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function hasModalCloseButton()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->hasModalCloseButton();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isModalClosedByClickingAway()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isModalClosedByClickingAway();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isModalClosedByEscaping()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isModalClosedByEscaping();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isModalAutofocused()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isModalAutofocused();
-        }
-
-        /**
-         * 
-         *
-         * @deprecated Use `makeModalSubmitAction()` instead.
-         * @param array<string, mixed>  | null  $arguments
-         * @static 
-         */
-        public static function makeExtraModalAction($name, $arguments = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->makeExtraModalAction($name, $arguments);
-        }
-
-        /**
-         * 
-         *
-         * @param array<string, mixed>  | null  $arguments
-         * @static 
-         */
-        public static function makeModalSubmitAction($name, $arguments = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->makeModalSubmitAction($name, $arguments);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function makeModalAction($name)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->makeModalAction($name);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getModalIcon()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getModalIcon();
-        }
-
-        /**
-         * 
-         *
-         * @return string | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | null
-         * @static 
-         */
-        public static function getModalIconColor()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getModalIconColor();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function stickyModalFooter($condition = true)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->stickyModalFooter($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function stickyModalHeader($condition = true)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->stickyModalHeader($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function dispatchFailureRedirect()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->dispatchFailureRedirect();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function dispatchSuccessRedirect()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->dispatchSuccessRedirect();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function redirect($url, $navigate = null)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->redirect($url, $navigate);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function failureRedirectUrl($url)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->failureRedirectUrl($url);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function successRedirectUrl($url)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->successRedirectUrl($url);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function requiresConfirmation($condition = true)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->requiresConfirmation($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function databaseTransaction($condition = true)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->databaseTransaction($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function hasDatabaseTransactions()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->hasDatabaseTransactions();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function beginDatabaseTransaction()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->beginDatabaseTransaction();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function commitDatabaseTransaction()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->commitDatabaseTransaction();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function rollBackDatabaseTransaction()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->rollBackDatabaseTransaction();
-        }
-
-        /**
-         * 
-         *
-         * @param array<mixed>  | \Closure  $attributes
-         * @static 
-         */
-        public static function extraModalWindowAttributes($attributes, $merge = false)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->extraModalWindowAttributes($attributes, $merge);
-        }
-
-        /**
-         * 
-         *
-         * @return array<mixed> 
-         * @static 
-         */
-        public static function getExtraModalWindowAttributes()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getExtraModalWindowAttributes();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getExtraModalWindowAttributeBag()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getExtraModalWindowAttributeBag();
-        }
-
-        /**
-         * 
-         *
-         * @deprecated Use `disabledForm() instead.
-         * @static 
-         */
-        public static function disableForm($condition = true)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->disableForm($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function disabledForm($condition = true)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->disabledForm($condition);
-        }
-
-        /**
-         * 
-         *
-         * @param array<Component>  | \Closure | null  $form
-         * @static 
-         */
-        public static function form($form)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->form($form);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getForm($form)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getForm($form);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function mutateFormDataUsing($callback)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->mutateFormDataUsing($callback);
-        }
-
-        /**
-         * 
-         *
-         * @param array<string, mixed> $data
-         * @static 
-         */
-        public static function formData($data, $shouldMutate = true)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->formData($data, $shouldMutate);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function resetFormData()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->resetFormData();
-        }
-
-        /**
-         * 
-         *
-         * @return array<string, mixed> 
-         * @static 
-         */
-        public static function getFormData()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getFormData();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isFormDisabled()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isFormDisabled();
-        }
-
-        /**
-         * 
-         *
-         * @param array<Component>  | \Closure | null  $infolist
-         * @static 
-         */
-        public static function infolist($infolist)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->infolist($infolist);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getInfolist()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getInfolist();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function before($callback)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->before($callback);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function after($callback)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->after($callback);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function beforeFormFilled($callback)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->beforeFormFilled($callback);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function afterFormFilled($callback)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->afterFormFilled($callback);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function beforeFormValidated($callback)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->beforeFormValidated($callback);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function afterFormValidated($callback)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->afterFormValidated($callback);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function callBefore()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->callBefore();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function callAfter()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->callAfter();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function callBeforeFormFilled()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->callBeforeFormFilled();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function callAfterFormFilled()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->callAfterFormFilled();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function callBeforeFormValidated()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->callBeforeFormValidated();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function callAfterFormValidated()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->callAfterFormValidated();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function cancelParentActions($toAction = true)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->cancelParentActions($toAction);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function shouldCancelAllParentActions()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->shouldCancelAllParentActions();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getParentActionToCancelTo()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getParentActionToCancelTo();
-        }
-
-        /**
-         * 
-         *
-         * @param array<Step>  | \Closure  $steps
-         * @static 
-         */
-        public static function steps($steps)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->steps($steps);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function startOnStep($startStep)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->startOnStep($startStep);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function skippableSteps($condition = true)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->skippableSteps($condition);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isWizard()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isWizard();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function isWizardSkippable()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->isWizardSkippable();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function modifyWizardUsing($callback)
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modifyWizardUsing($callback);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getWizardStartStep()
-        {
-            //Method inherited from \Filament\Actions\MountableAction 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getWizardStartStep();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function record($record)
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->record($record);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function model($model)
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->model($model);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function modelLabel($label)
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->modelLabel($label);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function pluralModelLabel($label)
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->pluralModelLabel($label);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function recordTitle($title)
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->recordTitle($title);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function recordTitleAttribute($attribute)
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->recordTitleAttribute($attribute);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getRecord()
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getRecord();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getRecordTitle($record = null)
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getRecordTitle($record);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getCustomRecordTitle($record = null)
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getCustomRecordTitle($record);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getCustomRecordTitleAttribute()
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getCustomRecordTitleAttribute();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function hasCustomRecordTitle()
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->hasCustomRecordTitle();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function hasCustomRecordTitleAttribute()
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->hasCustomRecordTitleAttribute();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function hasRecord()
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->hasRecord();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getModel()
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getModel();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getCustomModel()
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getCustomModel();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getModelLabel()
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getModelLabel();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getCustomModelLabel()
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getCustomModelLabel();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getPluralModelLabel()
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getPluralModelLabel();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function getCustomPluralModelLabel()
-        {
-            //Method inherited from \Filament\Actions\Action 
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->getCustomPluralModelLabel();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function use($class = null, ...$attributes)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->use($class, ...$attributes);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function table($table)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->table($table);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function acceptedFileTypes($types)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->acceptedFileTypes($types);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function storeFiles($storeFiles)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->storeFiles($storeFiles);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function processCollectionUsing($closure)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->processCollectionUsing($closure);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function additionalData($data)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->additionalData($data);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function customImportData($data)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->customImportData($data);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function beforeImport($closure)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->beforeImport($closure);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function afterImport($closure)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->afterImport($closure);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function downloadSampleExcelFile()
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->downloadSampleExcelFile();
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function setSampleFileName($name)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->setSampleFileName($name);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function setDefaultExportClass($class)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->setDefaultExportClass($class);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function setSampleData($data)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->setSampleData($data);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function setSampleButtonLabel($label)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->setSampleButtonLabel($label);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function setActionCustomisationClosure($customiseActionUsing)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->setActionCustomisationClosure($customiseActionUsing);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function sampleExcel($sampleData, $fileName = null, $exportClass = null, $sampleButtonLabel = null, $customiseActionUsing = null)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->sampleExcel($sampleData, $fileName, $exportClass, $sampleButtonLabel, $customiseActionUsing);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function sampleFileExcel($url, $sampleButtonLabel = null, $customiseActionUsing = null)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->sampleFileExcel($url, $sampleButtonLabel, $customiseActionUsing);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function mutateBeforeValidationUsing($closure, $shouldRetainBeforeValidationMutation = false)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->mutateBeforeValidationUsing($closure, $shouldRetainBeforeValidationMutation);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function mutateAfterValidationUsing($closure)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->mutateAfterValidationUsing($closure);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function validateUsing($rules)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->validateUsing($rules);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function uploadField($closure)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->uploadField($closure);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function beforeUploadField($fields)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->beforeUploadField($fields);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function afterUploadField($fields)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->afterUploadField($fields);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function disk($disk)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->disk($disk);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function visibility($visibility)
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->visibility($visibility);
-        }
-
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function validationRules()
-        {
-            /** @var \EightyNine\ExcelImport\ExcelImportAction $instance */
-            return $instance->validationRules();
-        }
-
+    class FilamentAdvancedWidget {
             }
     }
 
@@ -26956,6 +23278,621 @@ namespace EragLaravelPwa\Facades {
         {
             /** @var \EragLaravelPwa\Services\PWAService $instance */
             return $instance->update($manifestData);
+        }
+
+            }
+    }
+
+namespace Jeffgreco13\FilamentBreezy\Facades {
+    /**
+     * 
+     *
+     * @see \Jeffgreco13\FilamentBreezy\FilamentBreezy
+     */
+    class FilamentBreezy {
+            }
+    }
+
+namespace Jenssegers\Agent\Facades {
+    /**
+     * 
+     *
+     */
+    class Agent {
+        /**
+         * Get all detection rules. These rules include the additional
+         * platforms and browsers and utilities.
+         *
+         * @return array 
+         * @static 
+         */
+        public static function getDetectionRulesExtended()
+        {
+            return \Jenssegers\Agent\Agent::getDetectionRulesExtended();
+        }
+
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function getRules()
+        {
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->getRules();
+        }
+
+        /**
+         * 
+         *
+         * @return \Jaybizzle\CrawlerDetect\CrawlerDetect 
+         * @static 
+         */
+        public static function getCrawlerDetect()
+        {
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->getCrawlerDetect();
+        }
+
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function getBrowsers()
+        {
+            return \Jenssegers\Agent\Agent::getBrowsers();
+        }
+
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function getOperatingSystems()
+        {
+            return \Jenssegers\Agent\Agent::getOperatingSystems();
+        }
+
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function getPlatforms()
+        {
+            return \Jenssegers\Agent\Agent::getPlatforms();
+        }
+
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function getDesktopDevices()
+        {
+            return \Jenssegers\Agent\Agent::getDesktopDevices();
+        }
+
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function getProperties()
+        {
+            return \Jenssegers\Agent\Agent::getProperties();
+        }
+
+        /**
+         * Get accept languages.
+         *
+         * @param string $acceptLanguage
+         * @return array 
+         * @static 
+         */
+        public static function languages($acceptLanguage = null)
+        {
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->languages($acceptLanguage);
+        }
+
+        /**
+         * Get the browser name.
+         *
+         * @param string|null $userAgent
+         * @return string|bool 
+         * @static 
+         */
+        public static function browser($userAgent = null)
+        {
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->browser($userAgent);
+        }
+
+        /**
+         * Get the platform name.
+         *
+         * @param string|null $userAgent
+         * @return string|bool 
+         * @static 
+         */
+        public static function platform($userAgent = null)
+        {
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->platform($userAgent);
+        }
+
+        /**
+         * Get the device name.
+         *
+         * @param string|null $userAgent
+         * @return string|bool 
+         * @static 
+         */
+        public static function device($userAgent = null)
+        {
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->device($userAgent);
+        }
+
+        /**
+         * Check if the device is a desktop computer.
+         *
+         * @param string|null $userAgent deprecated
+         * @param array $httpHeaders deprecated
+         * @return bool 
+         * @static 
+         */
+        public static function isDesktop($userAgent = null, $httpHeaders = null)
+        {
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->isDesktop($userAgent, $httpHeaders);
+        }
+
+        /**
+         * Check if the device is a mobile phone.
+         *
+         * @param string|null $userAgent deprecated
+         * @param array $httpHeaders deprecated
+         * @return bool 
+         * @static 
+         */
+        public static function isPhone($userAgent = null, $httpHeaders = null)
+        {
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->isPhone($userAgent, $httpHeaders);
+        }
+
+        /**
+         * Get the robot name.
+         *
+         * @param string|null $userAgent
+         * @return string|bool 
+         * @static 
+         */
+        public static function robot($userAgent = null)
+        {
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->robot($userAgent);
+        }
+
+        /**
+         * Check if device is a robot.
+         *
+         * @param string|null $userAgent
+         * @return bool 
+         * @static 
+         */
+        public static function isRobot($userAgent = null)
+        {
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->isRobot($userAgent);
+        }
+
+        /**
+         * Get the device type
+         *
+         * @param null $userAgent
+         * @param null $httpHeaders
+         * @return string 
+         * @static 
+         */
+        public static function deviceType($userAgent = null, $httpHeaders = null)
+        {
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->deviceType($userAgent, $httpHeaders);
+        }
+
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function version($propertyName, $type = 'text')
+        {
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->version($propertyName, $type);
+        }
+
+        /**
+         * Get the current script version.
+         * 
+         * This is useful for the demo.php file,
+         * so people can check on what version they are testing
+         * for mobile devices.
+         *
+         * @return string The version number in semantic version format.
+         * @static 
+         */
+        public static function getScriptVersion()
+        {
+            //Method inherited from \Mobile_Detect 
+            return \Jenssegers\Agent\Agent::getScriptVersion();
+        }
+
+        /**
+         * Set the HTTP Headers. Must be PHP-flavored. This method will reset existing headers.
+         *
+         * @param array $httpHeaders The headers to set. If null, then using PHP's _SERVER to extract
+         *                           the headers. The default null is left for backwards compatibility.
+         * @static 
+         */
+        public static function setHttpHeaders($httpHeaders = null)
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->setHttpHeaders($httpHeaders);
+        }
+
+        /**
+         * Retrieves the HTTP headers.
+         *
+         * @return array 
+         * @static 
+         */
+        public static function getHttpHeaders()
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->getHttpHeaders();
+        }
+
+        /**
+         * Retrieves a particular header. If it doesn't exist, no exception/error is caused.
+         * 
+         * Simply null is returned.
+         *
+         * @param string $header The name of the header to retrieve. Can be HTTP compliant such as
+         *                       "User-Agent" or "X-Device-User-Agent" or can be php-esque with the
+         *                       all-caps, HTTP_ prefixed, underscore separated awesomeness.
+         * @return string|null The value of the header.
+         * @static 
+         */
+        public static function getHttpHeader($header)
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->getHttpHeader($header);
+        }
+
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function getMobileHeaders()
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->getMobileHeaders();
+        }
+
+        /**
+         * Get all possible HTTP headers that
+         * can contain the User-Agent string.
+         *
+         * @return array List of HTTP headers.
+         * @static 
+         */
+        public static function getUaHttpHeaders()
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->getUaHttpHeaders();
+        }
+
+        /**
+         * Set CloudFront headers
+         * http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/header-caching.html#header-caching-web-device
+         *
+         * @param array $cfHeaders List of HTTP headers
+         * @return boolean If there were CloudFront headers to be set
+         * @static 
+         */
+        public static function setCfHeaders($cfHeaders = null)
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->setCfHeaders($cfHeaders);
+        }
+
+        /**
+         * Retrieves the cloudfront headers.
+         *
+         * @return array 
+         * @static 
+         */
+        public static function getCfHeaders()
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->getCfHeaders();
+        }
+
+        /**
+         * Set the User-Agent to be used.
+         *
+         * @param string $userAgent The user agent string to set.
+         * @return string|null 
+         * @static 
+         */
+        public static function setUserAgent($userAgent = null)
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->setUserAgent($userAgent);
+        }
+
+        /**
+         * Retrieve the User-Agent.
+         *
+         * @return string|null The user agent if it's set.
+         * @static 
+         */
+        public static function getUserAgent()
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->getUserAgent();
+        }
+
+        /**
+         * Set the detection type. Must be one of self::DETECTION_TYPE_MOBILE or
+         * self::DETECTION_TYPE_EXTENDED. Otherwise, nothing is set.
+         *
+         * @deprecated since version 2.6.9
+         * @param string $type The type. Must be a self::DETECTION_TYPE_* constant. The default
+         *                     parameter is null which will default to self::DETECTION_TYPE_MOBILE.
+         * @static 
+         */
+        public static function setDetectionType($type = null)
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->setDetectionType($type);
+        }
+
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function getMatchingRegex()
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->getMatchingRegex();
+        }
+
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function getMatchesArray()
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->getMatchesArray();
+        }
+
+        /**
+         * Retrieve the list of known phone devices.
+         *
+         * @return array List of phone devices.
+         * @static 
+         */
+        public static function getPhoneDevices()
+        {
+            //Method inherited from \Mobile_Detect 
+            return \Jenssegers\Agent\Agent::getPhoneDevices();
+        }
+
+        /**
+         * Retrieve the list of known tablet devices.
+         *
+         * @return array List of tablet devices.
+         * @static 
+         */
+        public static function getTabletDevices()
+        {
+            //Method inherited from \Mobile_Detect 
+            return \Jenssegers\Agent\Agent::getTabletDevices();
+        }
+
+        /**
+         * Alias for getBrowsers() method.
+         *
+         * @return array List of user agents.
+         * @static 
+         */
+        public static function getUserAgents()
+        {
+            //Method inherited from \Mobile_Detect 
+            return \Jenssegers\Agent\Agent::getUserAgents();
+        }
+
+        /**
+         * Retrieve the list of known utilities.
+         *
+         * @return array List of utilities.
+         * @static 
+         */
+        public static function getUtilities()
+        {
+            //Method inherited from \Mobile_Detect 
+            return \Jenssegers\Agent\Agent::getUtilities();
+        }
+
+        /**
+         * Method gets the mobile detection rules. This method is used for the magic methods $detect->is*().
+         *
+         * @deprecated since version 2.6.9
+         * @return array All the rules (but not extended).
+         * @static 
+         */
+        public static function getMobileDetectionRules()
+        {
+            //Method inherited from \Mobile_Detect 
+            return \Jenssegers\Agent\Agent::getMobileDetectionRules();
+        }
+
+        /**
+         * Method gets the mobile detection rules + utilities.
+         * 
+         * The reason this is separate is because utilities rules
+         * don't necessary imply mobile. This method is used inside
+         * the new $detect->is('stuff') method.
+         *
+         * @deprecated since version 2.6.9
+         * @return array All the rules + extended.
+         * @static 
+         */
+        public static function getMobileDetectionRulesExtended()
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->getMobileDetectionRulesExtended();
+        }
+
+        /**
+         * Check the HTTP headers for signs of mobile.
+         * 
+         * This is the fastest mobile check possible; it's used
+         * inside isMobile() method.
+         *
+         * @return bool 
+         * @static 
+         */
+        public static function checkHttpHeadersForMobile()
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->checkHttpHeadersForMobile();
+        }
+
+        /**
+         * Check if the device is mobile.
+         * 
+         * Returns true if any type of mobile device detected, including special ones
+         *
+         * @param null $userAgent deprecated
+         * @param null $httpHeaders deprecated
+         * @return bool 
+         * @static 
+         */
+        public static function isMobile($userAgent = null, $httpHeaders = null)
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->isMobile($userAgent, $httpHeaders);
+        }
+
+        /**
+         * Check if the device is a tablet.
+         * 
+         * Return true if any type of tablet device is detected.
+         *
+         * @param string $userAgent deprecated
+         * @param array $httpHeaders deprecated
+         * @return bool 
+         * @static 
+         */
+        public static function isTablet($userAgent = null, $httpHeaders = null)
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->isTablet($userAgent, $httpHeaders);
+        }
+
+        /**
+         * This method checks for a certain property in the
+         * userAgent.
+         *
+         * @todo : The httpHeaders part is not yet used.
+         * @param string $key
+         * @param string $userAgent deprecated
+         * @param string $httpHeaders deprecated
+         * @return bool|int|null 
+         * @static 
+         */
+        public static function is($key, $userAgent = null, $httpHeaders = null)
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->is($key, $userAgent, $httpHeaders);
+        }
+
+        /**
+         * Some detection rules are relative (not standard),
+         * because of the diversity of devices, vendors and
+         * their conventions in representing the User-Agent or
+         * the HTTP headers.
+         * 
+         * This method will be used to check custom regexes against
+         * the User-Agent string.
+         *
+         * @param $regex
+         * @param string $userAgent
+         * @return bool 
+         * @todo : search in the HTTP headers too.
+         * @static 
+         */
+        public static function match($regex, $userAgent = null)
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->match($regex, $userAgent);
+        }
+
+        /**
+         * Prepare the version number.
+         *
+         * @todo Remove the error supression from str_replace() call.
+         * @param string $ver The string version, like "2.6.21.2152";
+         * @return float 
+         * @static 
+         */
+        public static function prepareVersionNo($ver)
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->prepareVersionNo($ver);
+        }
+
+        /**
+         * Retrieve the mobile grading, using self::MOBILE_GRADE_* constants.
+         *
+         * @deprecated This is no longer being maintained, it was an experiment at the time.
+         * @return string One of the self::MOBILE_GRADE_* constants.
+         * @static 
+         */
+        public static function mobileGrade()
+        {
+            //Method inherited from \Mobile_Detect 
+            /** @var \Jenssegers\Agent\Agent $instance */
+            return $instance->mobileGrade();
         }
 
             }
@@ -28198,6 +25135,39 @@ namespace Maatwebsite\Excel\Facades {
             }
     }
 
+namespace MarcelWeidum\ExpirationNoticePlugin\Facades {
+    /**
+     * 
+     *
+     * @see \MarcelWeidum\ExpirationNoticePlugin\ExpirationNotice
+     */
+    class ExpirationNoticePlugin {
+            }
+    }
+
+namespace Relaticle\Flowforge\Facades {
+    /**
+     * 
+     *
+     * @see \Relaticle\Flowforge\Flowforge
+     */
+    class Flowforge {
+        /**
+         * Create a new Kanban adapter for the given model.
+         *
+         * @param array<string, string> $statusValues
+         * @param array<string, string> $cardAttributes
+         * @static 
+         */
+        public static function createAdapter($model, $statusField = 'status', $statusValues = [], $titleAttribute = 'name', $descriptionAttribute = null, $cardAttributes = [])
+        {
+            /** @var \Relaticle\Flowforge\Flowforge $instance */
+            return $instance->createAdapter($model, $statusField, $statusValues, $titleAttribute, $descriptionAttribute, $cardAttributes);
+        }
+
+            }
+    }
+
 namespace Spatie\Health\Facades {
     /**
      * 
@@ -28315,6 +25285,81 @@ namespace Spatie\SignalAwareCommand\Facades {
         {
             /** @var \Spatie\SignalAwareCommand\Signal $instance */
             return $instance->clearHandlers($signal);
+        }
+
+            }
+    }
+
+namespace Swis\Filament\Activitylog\Facades {
+    /**
+     * 
+     *
+     */
+    class FilamentActivitylog {
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function attributeTableBuilder()
+        {
+            /** @var \Swis\Filament\Activitylog\FilamentActivitylogManager $instance */
+            return $instance->attributeTableBuilder();
+        }
+
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function registerAttributeTableValueFormatter($formatter, $priority = 0)
+        {
+            /** @var \Swis\Filament\Activitylog\FilamentActivitylogManager $instance */
+            return $instance->registerAttributeTableValueFormatter($formatter, $priority);
+        }
+
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function registerAttributeTableLabelProvider($provider, $priority = 0)
+        {
+            /** @var \Swis\Filament\Activitylog\FilamentActivitylogManager $instance */
+            return $instance->registerAttributeTableLabelProvider($provider, $priority);
+        }
+
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function entryContentManager()
+        {
+            /** @var \Swis\Filament\Activitylog\FilamentActivitylogManager $instance */
+            return $instance->entryContentManager();
+        }
+
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function registerEntryContentViewResolver($resolver, $priority = 0)
+        {
+            /** @var \Swis\Filament\Activitylog\FilamentActivitylogManager $instance */
+            return $instance->registerEntryContentViewResolver($resolver, $priority);
+        }
+
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function registerEntryContentEventViewResolver($event, $view, $priority = 0)
+        {
+            /** @var \Swis\Filament\Activitylog\FilamentActivitylogManager $instance */
+            return $instance->registerEntryContentEventViewResolver($event, $view, $priority);
         }
 
             }
@@ -28504,6 +25549,100 @@ namespace Illuminate\Http {
         public static function hasValidRelativeSignatureWhileIgnoring($ignoreQuery = [])
         {
             return \Illuminate\Http\Request::hasValidRelativeSignatureWhileIgnoring($ignoreQuery);
+        }
+
+            }
+    }
+
+namespace Illuminate\Routing {
+    /**
+     * 
+     *
+     * @mixin \Illuminate\Routing\RouteRegistrar
+     */
+    class Router {
+        /**
+         * 
+         *
+         * @see \Lab404\Impersonate\ImpersonateServiceProvider::registerRoutesMacro()
+         * @static 
+         */
+        public static function impersonate()
+        {
+            return \Illuminate\Routing\Router::impersonate();
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class Route {
+        /**
+         * 
+         *
+         * @see \Livewire\Features\SupportLazyLoading\SupportLazyLoading::registerRouteMacro()
+         * @param mixed $enabled
+         * @static 
+         */
+        public static function lazy($enabled = true)
+        {
+            return \Illuminate\Routing\Route::lazy($enabled);
+        }
+
+        /**
+         * 
+         *
+         * @see \Spatie\Permission\PermissionServiceProvider::registerMacroHelpers()
+         * @param mixed $roles
+         * @static 
+         */
+        public static function role($roles = [])
+        {
+            return \Illuminate\Routing\Route::role($roles);
+        }
+
+        /**
+         * 
+         *
+         * @see \Spatie\Permission\PermissionServiceProvider::registerMacroHelpers()
+         * @param mixed $permissions
+         * @static 
+         */
+        public static function permission($permissions = [])
+        {
+            return \Illuminate\Routing\Route::permission($permissions);
+        }
+
+            }
+    }
+
+namespace Illuminate\Database\Schema {
+    /**
+     * 
+     *
+     */
+    class Blueprint {
+        /**
+         * 
+         *
+         * @see \Kalnoy\Nestedset\NestedSetServiceProvider::register()
+         * @static 
+         */
+        public static function nestedSet()
+        {
+            return \Illuminate\Database\Schema\Blueprint::nestedSet();
+        }
+
+        /**
+         * 
+         *
+         * @see \Kalnoy\Nestedset\NestedSetServiceProvider::register()
+         * @static 
+         */
+        public static function dropNestedSet()
+        {
+            return \Illuminate\Database\Schema\Blueprint::dropNestedSet();
         }
 
             }
@@ -28845,6 +25984,1317 @@ namespace Illuminate\Database\Eloquent\Factories {
             }
     }
 
+namespace BezhanSalleh\FilamentLanguageSwitch {
+    /**
+     * 
+     *
+     */
+    class LanguageSwitch {
+            }
+    }
+
+namespace Filament\Support\Components {
+    /**
+     * 
+     *
+     */
+    class Component {
+            }
+    /**
+     * 
+     *
+     */
+    class ViewComponent {
+            }
+    }
+
+namespace Filament {
+    /**
+     * 
+     *
+     */
+    class Panel {
+            }
+    }
+
+namespace App\Filament\Resources\CourseResource\Pages {
+    /**
+     * 
+     *
+     */
+    class CreateCourse {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \App\Filament\Resources\CourseResource\Pages\CreateCourse::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class EditCourse {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \App\Filament\Resources\CourseResource\Pages\EditCourse::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class ListCourses {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \App\Filament\Resources\CourseResource\Pages\ListCourses::modal($name);
+        }
+
+            }
+    }
+
+namespace Filament\Resources\Pages {
+    /**
+     * 
+     *
+     * @property Form $form
+     */
+    class CreateRecord {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Resources\Pages\CreateRecord::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class Page {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Resources\Pages\Page::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     * @property Form $form
+     */
+    class EditRecord {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Resources\Pages\EditRecord::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class ListRecords {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Resources\Pages\ListRecords::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     * @property Form $form
+     */
+    class ViewRecord {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Resources\Pages\ViewRecord::modal($name);
+        }
+
+            }
+    }
+
+namespace Filament\Pages {
+    /**
+     * 
+     *
+     */
+    class Page {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Pages\Page::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class BasePage {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Pages\BasePage::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class Dashboard {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Pages\Dashboard::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     * @property ComponentContainer $form
+     */
+    class SettingsPage {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Pages\SettingsPage::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class SimplePage {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Pages\SimplePage::modal($name);
+        }
+
+            }
+    }
+
+namespace App\Filament\Resources\LocationResource\Pages {
+    /**
+     * 
+     *
+     */
+    class CreateLocation {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \App\Filament\Resources\LocationResource\Pages\CreateLocation::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class EditLocation {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \App\Filament\Resources\LocationResource\Pages\EditLocation::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class ListLocations {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \App\Filament\Resources\LocationResource\Pages\ListLocations::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class ViewLocation {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \App\Filament\Resources\LocationResource\Pages\ViewLocation::modal($name);
+        }
+
+            }
+    }
+
+namespace App\Filament\Resources\ScheduleResource\Pages {
+    /**
+     * 
+     *
+     */
+    class CreateSchedule {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \App\Filament\Resources\ScheduleResource\Pages\CreateSchedule::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class EditSchedule {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \App\Filament\Resources\ScheduleResource\Pages\EditSchedule::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class ListSchedules {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \App\Filament\Resources\ScheduleResource\Pages\ListSchedules::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class ViewSchedule {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \App\Filament\Resources\ScheduleResource\Pages\ViewSchedule::modal($name);
+        }
+
+            }
+    }
+
+namespace App\Filament\Resources\UserResource\Pages {
+    /**
+     * 
+     *
+     */
+    class CreateUser {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \App\Filament\Resources\UserResource\Pages\CreateUser::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class EditUser {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \App\Filament\Resources\UserResource\Pages\EditUser::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class ListUsers {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \App\Filament\Resources\UserResource\Pages\ListUsers::modal($name);
+        }
+
+            }
+    }
+
+namespace App\Filament\Pages {
+    /**
+     * 
+     *
+     */
+    class TasksBoardBoardPage {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \App\Filament\Pages\TasksBoardBoardPage::modal($name);
+        }
+
+            }
+    }
+
+namespace Relaticle\Flowforge\Filament\Pages {
+    /**
+     * 
+     *
+     */
+    class KanbanBoardPage {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Relaticle\Flowforge\Filament\Pages\KanbanBoardPage::modal($name);
+        }
+
+            }
+    }
+
+namespace Filament\Widgets {
+    /**
+     * 
+     *
+     */
+    class AccountWidget {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Widgets\AccountWidget::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class Widget {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Widgets\Widget::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class FilamentInfoWidget {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Widgets\FilamentInfoWidget::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class StatsOverviewWidget {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Widgets\StatsOverviewWidget::modal($name);
+        }
+
+            }
+    }
+
+namespace Awcodes\Overlook\Widgets {
+    /**
+     * 
+     *
+     */
+    class OverlookWidget {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Awcodes\Overlook\Widgets\OverlookWidget::modal($name);
+        }
+
+            }
+    }
+
+namespace ShuvroRoy\FilamentSpatieLaravelBackup\Pages {
+    /**
+     * 
+     *
+     */
+    class Backups {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \ShuvroRoy\FilamentSpatieLaravelBackup\Pages\Backups::modal($name);
+        }
+
+            }
+    }
+
+namespace ShuvroRoy\FilamentSpatieLaravelHealth\Pages {
+    /**
+     * 
+     *
+     */
+    class HealthCheckResults {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \ShuvroRoy\FilamentSpatieLaravelHealth\Pages\HealthCheckResults::modal($name);
+        }
+
+            }
+    }
+
+namespace Avexsoft\FilamentPurl\Filament\Resources\RedirectResource\Pages {
+    /**
+     * 
+     *
+     */
+    class CreateRedirect {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Avexsoft\FilamentPurl\Filament\Resources\RedirectResource\Pages\CreateRedirect::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class EditRedirect {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Avexsoft\FilamentPurl\Filament\Resources\RedirectResource\Pages\EditRedirect::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class ListRedirects {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Avexsoft\FilamentPurl\Filament\Resources\RedirectResource\Pages\ListRedirects::modal($name);
+        }
+
+            }
+    }
+
+namespace FilamentWebpush\Filament\Widgets {
+    /**
+     * 
+     *
+     */
+    class WebpushSubscriptionStats {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \FilamentWebpush\Filament\Widgets\WebpushSubscriptionStats::modal($name);
+        }
+
+            }
+    }
+
+namespace Jeffgreco13\FilamentBreezy\Pages {
+    /**
+     * 
+     *
+     */
+    class MyProfilePage {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Jeffgreco13\FilamentBreezy\Pages\MyProfilePage::modal($name);
+        }
+
+            }
+    }
+
+namespace TomatoPHP\FilamentPWA\Filament\Pages {
+    /**
+     * 
+     *
+     */
+    class PWASettingsPage {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \TomatoPHP\FilamentPWA\Filament\Pages\PWASettingsPage::modal($name);
+        }
+
+            }
+    }
+
+namespace TomatoPHP\FilamentSettingsHub\Pages {
+    /**
+     * 
+     *
+     */
+    class SiteSettings {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \TomatoPHP\FilamentSettingsHub\Pages\SiteSettings::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class SocialMenuSettings {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \TomatoPHP\FilamentSettingsHub\Pages\SocialMenuSettings::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class LocationSettings {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \TomatoPHP\FilamentSettingsHub\Pages\LocationSettings::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class SettingsHub {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \TomatoPHP\FilamentSettingsHub\Pages\SettingsHub::modal($name);
+        }
+
+            }
+    }
+
+namespace Hasnayeen\Themes\Filament\Pages {
+    /**
+     * 
+     *
+     */
+    class Themes {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Hasnayeen\Themes\Filament\Pages\Themes::modal($name);
+        }
+
+            }
+    }
+
+namespace Filament\Livewire {
+    /**
+     * 
+     *
+     */
+    class DatabaseNotifications {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Livewire\DatabaseNotifications::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class GlobalSearch {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Livewire\GlobalSearch::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class Notifications {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Livewire\Notifications::modal($name);
+        }
+
+            }
+    }
+
+namespace Filament\Notifications\Livewire {
+    /**
+     * 
+     *
+     */
+    class DatabaseNotifications {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Notifications\Livewire\DatabaseNotifications::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class Notifications {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Notifications\Livewire\Notifications::modal($name);
+        }
+
+            }
+    }
+
+namespace Filament\Pages\Auth {
+    /**
+     * 
+     *
+     * @property Form $form
+     */
+    class EditProfile {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Pages\Auth\EditProfile::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     * @property Form $form
+     */
+    class Login {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Filament\Pages\Auth\Login::modal($name);
+        }
+
+            }
+    }
+
+namespace Afsakar\FilamentOtpLogin\Filament\Pages {
+    /**
+     * 
+     *
+     */
+    class Login {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Afsakar\FilamentOtpLogin\Filament\Pages\Login::modal($name);
+        }
+
+            }
+    }
+
+namespace BezhanSalleh\FilamentShield\Resources\RoleResource\Pages {
+    /**
+     * 
+     *
+     */
+    class ListRoles {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \BezhanSalleh\FilamentShield\Resources\RoleResource\Pages\ListRoles::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class CreateRole {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \BezhanSalleh\FilamentShield\Resources\RoleResource\Pages\CreateRole::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class ViewRole {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \BezhanSalleh\FilamentShield\Resources\RoleResource\Pages\ViewRole::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class EditRole {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \BezhanSalleh\FilamentShield\Resources\RoleResource\Pages\EditRole::modal($name);
+        }
+
+            }
+    }
+
+namespace Rmsramos\Activitylog\Resources\ActivitylogResource\Pages {
+    /**
+     * 
+     *
+     */
+    class ListActivitylog {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Rmsramos\Activitylog\Resources\ActivitylogResource\Pages\ListActivitylog::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class ViewActivitylog {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Rmsramos\Activitylog\Resources\ActivitylogResource\Pages\ViewActivitylog::modal($name);
+        }
+
+            }
+    }
+
+namespace Croustibat\FilamentJobsMonitor\Resources\QueueMonitorResource\Pages {
+    /**
+     * 
+     *
+     */
+    class ListQueueMonitors {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Croustibat\FilamentJobsMonitor\Resources\QueueMonitorResource\Pages\ListQueueMonitors::modal($name);
+        }
+
+            }
+    }
+
+namespace Croustibat\FilamentJobsMonitor\Resources\QueueMonitorResource\Widgets {
+    /**
+     * 
+     *
+     */
+    class QueueStatsOverview {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Croustibat\FilamentJobsMonitor\Resources\QueueMonitorResource\Widgets\QueueStatsOverview::modal($name);
+        }
+
+            }
+    }
+
+namespace Visualbuilder\EmailTemplates\Resources\EmailTemplateResource\Pages {
+    /**
+     * 
+     *
+     */
+    class ListEmailTemplates {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Visualbuilder\EmailTemplates\Resources\EmailTemplateResource\Pages\ListEmailTemplates::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class CreateEmailTemplate {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Visualbuilder\EmailTemplates\Resources\EmailTemplateResource\Pages\CreateEmailTemplate::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class EditEmailTemplate {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Visualbuilder\EmailTemplates\Resources\EmailTemplateResource\Pages\EditEmailTemplate::modal($name);
+        }
+
+            }
+    }
+
+namespace Visualbuilder\EmailTemplates\Resources\EmailTemplateThemeResource\Pages {
+    /**
+     * 
+     *
+     */
+    class ListEmailTemplateThemes {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Visualbuilder\EmailTemplates\Resources\EmailTemplateThemeResource\Pages\ListEmailTemplateThemes::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class CreateEmailTemplateTheme {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Visualbuilder\EmailTemplates\Resources\EmailTemplateThemeResource\Pages\CreateEmailTemplateTheme::modal($name);
+        }
+
+            }
+    /**
+     * 
+     *
+     */
+    class EditEmailTemplateTheme {
+        /**
+         * 
+         *
+         * @see \Flux\FluxManager::bootModal()
+         * @param mixed $name
+         * @static 
+         */
+        public static function modal($name)
+        {
+            return \Visualbuilder\EmailTemplates\Resources\EmailTemplateThemeResource\Pages\EditEmailTemplateTheme::modal($name);
+        }
+
+            }
+    }
+
 namespace Spatie\MediaLibrary\MediaCollections\Models\Collections {
     /**
      * 
@@ -28936,6 +27386,42 @@ namespace Livewire\Features\SupportTesting {
      * @mixin \Illuminate\Testing\TestResponse
      */
     class Testable {
+        /**
+         * 
+         *
+         * @see \Dvarilek\FilamentTableSelect\Testing\TestsTableSelect::assertSelectionModalContains()
+         * @param array|string $content
+         * @param array|string $component
+         * @param array|string $name
+         * @param array $data
+         * @param array $arguments
+         * @param string $formName
+         * @return static 
+         * @static 
+         */
+        public static function assertSelectionModalContains($content, $component = 'products', $name = 'tableSelectionAction', $data = [], $arguments = [], $formName = 'form')
+        {
+            return \Livewire\Features\SupportTesting\Testable::assertSelectionModalContains($content, $component, $name, $data, $arguments, $formName);
+        }
+
+        /**
+         * 
+         *
+         * @see \Dvarilek\FilamentTableSelect\Testing\TestsTableSelect::assertSelectionModalDoesNotContains()
+         * @param array|string $content
+         * @param array|string $component
+         * @param array|string $name
+         * @param array $data
+         * @param array $arguments
+         * @param string $formName
+         * @return static 
+         * @static 
+         */
+        public static function assertSelectionModalDoesNotContains($content, $component = 'products', $name = 'tableSelectionAction', $data = [], $arguments = [], $formName = 'form')
+        {
+            return \Livewire\Features\SupportTesting\Testable::assertSelectionModalDoesNotContains($content, $component, $name, $data, $arguments, $formName);
+        }
+
         /**
          * 
          *
@@ -31755,536 +30241,6 @@ namespace Livewire\Features\SupportTesting {
             }
     }
 
-namespace Illuminate\Routing {
-    /**
-     * 
-     *
-     */
-    class Route {
-        /**
-         * 
-         *
-         * @see \Livewire\Features\SupportLazyLoading\SupportLazyLoading::registerRouteMacro()
-         * @param mixed $enabled
-         * @static 
-         */
-        public static function lazy($enabled = true)
-        {
-            return \Illuminate\Routing\Route::lazy($enabled);
-        }
-
-        /**
-         * 
-         *
-         * @see \Spatie\Permission\PermissionServiceProvider::registerMacroHelpers()
-         * @param mixed $roles
-         * @static 
-         */
-        public static function role($roles = [])
-        {
-            return \Illuminate\Routing\Route::role($roles);
-        }
-
-        /**
-         * 
-         *
-         * @see \Spatie\Permission\PermissionServiceProvider::registerMacroHelpers()
-         * @param mixed $permissions
-         * @static 
-         */
-        public static function permission($permissions = [])
-        {
-            return \Illuminate\Routing\Route::permission($permissions);
-        }
-
-            }
-    }
-
-namespace App\Filament\Resources\UserResource\Pages {
-    /**
-     * 
-     *
-     */
-    class CreateUser {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \App\Filament\Resources\UserResource\Pages\CreateUser::modal($name);
-        }
-
-            }
-    /**
-     * 
-     *
-     */
-    class EditUser {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \App\Filament\Resources\UserResource\Pages\EditUser::modal($name);
-        }
-
-            }
-    /**
-     * 
-     *
-     */
-    class ListUsers {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \App\Filament\Resources\UserResource\Pages\ListUsers::modal($name);
-        }
-
-            }
-    }
-
-namespace Filament\Resources\Pages {
-    /**
-     * 
-     *
-     * @property Form $form
-     */
-    class CreateRecord {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Filament\Resources\Pages\CreateRecord::modal($name);
-        }
-
-            }
-    /**
-     * 
-     *
-     */
-    class Page {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Filament\Resources\Pages\Page::modal($name);
-        }
-
-            }
-    /**
-     * 
-     *
-     * @property Form $form
-     */
-    class EditRecord {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Filament\Resources\Pages\EditRecord::modal($name);
-        }
-
-            }
-    /**
-     * 
-     *
-     */
-    class ListRecords {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Filament\Resources\Pages\ListRecords::modal($name);
-        }
-
-            }
-    }
-
-namespace Filament\Pages {
-    /**
-     * 
-     *
-     */
-    class Page {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Filament\Pages\Page::modal($name);
-        }
-
-            }
-    /**
-     * 
-     *
-     */
-    class BasePage {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Filament\Pages\BasePage::modal($name);
-        }
-
-            }
-    /**
-     * 
-     *
-     * @property ComponentContainer $form
-     */
-    class SettingsPage {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Filament\Pages\SettingsPage::modal($name);
-        }
-
-            }
-    /**
-     * 
-     *
-     */
-    class Dashboard {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Filament\Pages\Dashboard::modal($name);
-        }
-
-            }
-    /**
-     * 
-     *
-     */
-    class SimplePage {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Filament\Pages\SimplePage::modal($name);
-        }
-
-            }
-    }
-
-namespace App\Filament\Pages {
-    /**
-     * 
-     *
-     */
-    class ManageGeneralSettings {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \App\Filament\Pages\ManageGeneralSettings::modal($name);
-        }
-
-            }
-    }
-
-namespace Filament\Widgets {
-    /**
-     * 
-     *
-     */
-    class AccountWidget {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Filament\Widgets\AccountWidget::modal($name);
-        }
-
-            }
-    /**
-     * 
-     *
-     */
-    class Widget {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Filament\Widgets\Widget::modal($name);
-        }
-
-            }
-    /**
-     * 
-     *
-     */
-    class FilamentInfoWidget {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Filament\Widgets\FilamentInfoWidget::modal($name);
-        }
-
-            }
-    }
-
-namespace ShuvroRoy\FilamentSpatieLaravelBackup\Pages {
-    /**
-     * 
-     *
-     */
-    class Backups {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \ShuvroRoy\FilamentSpatieLaravelBackup\Pages\Backups::modal($name);
-        }
-
-            }
-    }
-
-namespace Filament\Livewire {
-    /**
-     * 
-     *
-     */
-    class DatabaseNotifications {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Filament\Livewire\DatabaseNotifications::modal($name);
-        }
-
-            }
-    /**
-     * 
-     *
-     */
-    class GlobalSearch {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Filament\Livewire\GlobalSearch::modal($name);
-        }
-
-            }
-    /**
-     * 
-     *
-     */
-    class Notifications {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Filament\Livewire\Notifications::modal($name);
-        }
-
-            }
-    }
-
-namespace Filament\Notifications\Livewire {
-    /**
-     * 
-     *
-     */
-    class DatabaseNotifications {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Filament\Notifications\Livewire\DatabaseNotifications::modal($name);
-        }
-
-            }
-    /**
-     * 
-     *
-     */
-    class Notifications {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Filament\Notifications\Livewire\Notifications::modal($name);
-        }
-
-            }
-    }
-
-namespace Filament\Pages\Auth {
-    /**
-     * 
-     *
-     * @property Form $form
-     */
-    class EditProfile {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Filament\Pages\Auth\EditProfile::modal($name);
-        }
-
-            }
-    /**
-     * 
-     *
-     * @property Form $form
-     */
-    class Login {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Filament\Pages\Auth\Login::modal($name);
-        }
-
-            }
-    }
-
-namespace Afsakar\FilamentOtpLogin\Filament\Pages {
-    /**
-     * 
-     *
-     */
-    class Login {
-        /**
-         * 
-         *
-         * @see \Flux\FluxManager::bootModal()
-         * @param mixed $name
-         * @static 
-         */
-        public static function modal($name)
-        {
-            return \Afsakar\FilamentOtpLogin\Filament\Pages\Login::modal($name);
-        }
-
-            }
-    }
-
 namespace Illuminate\View {
     /**
      * 
@@ -32459,6 +30415,72 @@ namespace Illuminate\Testing {
             return \Illuminate\Testing\TestResponse::assertDontSeeVolt($component);
         }
 
+            }
+    }
+
+namespace STS\FilamentImpersonate\Tables\Actions {
+    /**
+     * 
+     *
+     */
+    class Impersonate {
+            }
+    }
+
+namespace Filament\Tables\Actions {
+    /**
+     * 
+     *
+     */
+    class Action {
+            }
+    }
+
+namespace Filament\Actions {
+    /**
+     * 
+     *
+     */
+    class MountableAction {
+            }
+    /**
+     * 
+     *
+     */
+    class StaticAction {
+            }
+    }
+
+namespace Filament\Tables {
+    /**
+     * 
+     *
+     */
+    class Table {
+            }
+    }
+
+namespace Afsakar\LeafletMapPicker {
+    /**
+     * 
+     *
+     */
+    class LeafletMapPicker {
+            }
+    }
+
+namespace Filament\Forms\Components {
+    /**
+     * 
+     *
+     */
+    class Field {
+            }
+    /**
+     * 
+     *
+     */
+    class Component {
             }
     }
 
@@ -37816,23 +35838,23 @@ namespace  {
     class Vite extends \Illuminate\Support\Facades\Vite {}
     class EloquentSerialize extends \AnourValar\EloquentSerialize\Facades\EloquentSerializeFacade {}
     class FilamentShield extends \BezhanSalleh\FilamentShield\Facades\FilamentShield {}
-    class ExcelImportAction extends \EightyNine\ExcelImport\Facades\ExcelImportAction {}
+    class FilamentAdvancedWidget extends \EightyNine\FilamentAdvancedWidget\Facades\FilamentAdvancedWidget {}
     class Pwa extends \EragLaravelPwa\Facades\Pwa {}
+    class FilamentBreezy extends \Jeffgreco13\FilamentBreezy\Facades\FilamentBreezy {}
+    class Agent extends \Jenssegers\Agent\Facades\Agent {}
     class Octane extends \Laravel\Octane\Facades\Octane {}
     class Flux extends \Flux\Flux {}
     class Livewire extends \Livewire\Livewire {}
     class Excel extends \Maatwebsite\Excel\Facades\Excel {}
+    class ExpirationNoticePlugin extends \MarcelWeidum\ExpirationNoticePlugin\Facades\ExpirationNoticePlugin {}
+    class Flowforge extends \Relaticle\Flowforge\Facades\Flowforge {}
     class Health extends \Spatie\Health\Facades\Health {}
     class Signal extends \Spatie\SignalAwareCommand\Facades\Signal {}
+    class FilamentActivitylog extends \Swis\Filament\Activitylog\Facades\FilamentActivitylog {}
     class PWA extends \EragLaravelPwa\Facades\PWA {}
 }
 
 
-namespace Facades\Livewire\Features\SupportFileUploads {
-    /**
-     * @mixin \Livewire\Features\SupportFileUploads\GenerateSignedUploadUrl     */
-    class GenerateSignedUploadUrl extends \Livewire\Features\SupportFileUploads\GenerateSignedUploadUrl {}
-}
 
 
 

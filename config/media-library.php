@@ -18,13 +18,13 @@ return [
      * This queue connection will be used to generate derived and responsive images.
      * Leave empty to use the default queue connection.
      */
-    'queue_connection_name' => config('worker-queue.media.connection'),
+    'queue_connection_name' => env('QUEUE_MEDIA_CONNECTION', 'redis'),
 
     /*
      * This queue will be used to generate derived and responsive images.
      * Leave empty to use the default queue.
      */
-    'queue_name' => config('worker-queue.media.name'),
+    'queue_name' => env('QUEUE_MEDIA_NAME', 'ziplms_media'),
 
     /*
      * By default all conversions will be performed on a queue.
@@ -39,7 +39,7 @@ return [
     /*
      * The fully qualified class name of the media model.
      */
-    'media_model' => Spatie\MediaLibrary\MediaCollections\Models\Media::class,
+    'media_model' => \App\Models\SpatieMedia::class,
 
     /*
      * The fully qualified class name of the media observer.
@@ -176,7 +176,7 @@ return [
      * The path where to store temporary files while performing image conversions.
      * If set to null, storage_path('media-library/temp') will be used.
      */
-    'temporary_directory_path' => storage_path('app/media-library/temp'),
+    'temporary_directory_path' => storage_path('app/temporary/media-library'),
 
     /*
      * The engine that should perform the image conversions.

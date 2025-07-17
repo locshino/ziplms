@@ -16,24 +16,26 @@ return new class extends Migration
             $table->uuidMorphs('schedulable'); // Model liên quan (Course, Lecture, ClassesMajor).
             $table->json('title'); // Tiêu đề buổi học (hỗ trợ đa ngôn ngữ).
             $table->json('description')->nullable(); // Mô tả (hỗ trợ đa ngôn ngữ).
-            $table->uuid('assigned_teacher_id')->nullable(); // FK to users table
+            $table->uuid('assigned_id')->nullable(); // FK to users table
             $table->dateTime('start_time');
             $table->dateTime('end_time');
-            $table->string('location_type')->nullable(); // Ví dụ: 'online', 'offline_room', 'virtual_classroom'.
-            $table->text('location_details')->nullable(); // Chi tiết địa điểm/link họp.
+            $table->uuid('location_id')->nullable();
             $table->uuid('created_by')->nullable(); // FK to users table
-            // $table->string('status', 50)->nullable(); // (Managed by spatie/laravel-model-states)
+            $table->string('status');
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index('assigned_teacher_id');
-            $table->index('created_by');
-            $table->index('start_time', 's_start_time_idx');
+            $table->index('assigned_id', 'asg_idx');
+            $table->index('location_id', 'lct_idx');
+            $table->index('created_by', 'crt_b_idx');
+            $table->index('start_time', 'srt_tm_idx');
 
-            $table->foreign('assigned_teacher_id')->references('id')
+            $table->foreign('assigned_id')->references('id')
                 ->on('users')->onDelete('set null');
             $table->foreign('created_by')->references('id')
                 ->on('users')->onDelete('set null');
+            $table->foreign('location_id')->references('id')
+                ->on('locations')->onDelete('set null');
         });
     }
 

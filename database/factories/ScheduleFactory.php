@@ -2,8 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Course;
-use App\Models\Schedule; // Example schedulable
+use App\Enums\SchedulableType;
+use App\Models\Location;
+use App\Models\Schedule;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -12,6 +13,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ScheduleFactory extends Factory
 {
+    use Concerns\HasAssignsRandomOrNewModel,
+        Concerns\HasFakesTranslations;
+
     protected $model = Schedule::class;
 
     /**
@@ -21,21 +25,22 @@ class ScheduleFactory extends Factory
      */
     public function definition(): array
     {
-        // Example: Default to Course as schedulable. Adjust as needed.
-        $schedulable = Course::factory()->create();
-        $title = fake()->sentence(3);
+        // Lấy ngẫu nhiên một loại từ SchedulableType Enum
+        $schedulableTypeEnum = fake()->randomElement(SchedulableType::cases());
+        // Lấy class Model tương ứng
+        $schedulableModelClass = $schedulableTypeEnum->getModelClass();
+        $schedulableId = $this->assignRandomOrNewModel($schedulableModelClass);
 
         return [
-            'schedulable_id' => $schedulable->id,
-            'schedulable_type' => get_class($schedulable),
-            'title' => ['vi' => 'Lịch học: '.$title, 'en' => 'Schedule: '.$title],
-            'description' => ['vi' => fake()->paragraph, 'en' => fake()->paragraph],
-            'assigned_teacher_id' => User::factory(),
+            'schedulable_id' => $schedulableId,
+            'schedulable_type' => $schedulableModelClass,
+            'title' => $this->fakeSentenceTranslations(),
+            'description' => $this->fakeParagraphTranslations(),
+            'assigned_id' => $this->assignRandomOrNewModel(User::class),
             'start_time' => fake()->dateTimeBetween('+1 day', '+1 week'),
             'end_time' => fake()->dateTimeBetween('+1 week', '+2 weeks'),
-            'location_type' => fake()->randomElement(['online', 'offline_room', 'virtual_classroom']),
-            'location_details' => fake()->address,
-            'created_by' => User::factory(),
+            'location_id' => $this->assignRandomOrNewModel(Location::class),
+            'created_by' => $this->assignRandomOrNewModel(User::class),
         ];
     }
 }

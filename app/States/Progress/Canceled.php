@@ -8,11 +8,21 @@ class Canceled extends ProgressStatus
 
     public static function label(): string
     {
-        return 'Canceled';
+        return __('states_progress-status.canceled.label');
     }
 
     public static function color(): string
     {
-        return 'secondary'; // For Filament badges
+        return 'gray';
+    }
+
+    public static function icon(): string
+    {
+        return 'heroicon-o-minus-circle';
+    }
+
+    public static function description(): string
+    {
+        return __('states_progress-status.canceled.description');
     }
 }
