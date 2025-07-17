@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use App\States\Status;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\ModelStates\HasStates;
 use Spatie\Tags\HasTags;
 use Spatie\Translatable\HasTranslations;
@@ -67,6 +70,14 @@ use Spatie\Translatable\HasTranslations;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule withoutTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule withoutTrashed()
  *
+ * @property string|null $assigned_id
+ * @property string|null $location_id
+ * @property-read \App\Models\User|null $assignedTo
+ * @property-read \App\Models\Location|null $location
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereAssignedId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Schedule whereLocationId($value)
+ *
  * @mixin \Eloquent
  */
 class Schedule extends Base\Model
@@ -75,6 +86,11 @@ class Schedule extends Base\Model
         HasTags,
         HasTranslations;
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'title' => 'json',
         'description' => 'json',
@@ -83,39 +99,70 @@ class Schedule extends Base\Model
         'status' => Status::class,
     ];
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'schedulable_id',
         'schedulable_type',
         'title',
         'description',
-        'assigned_teacher_id',
+        'assigned_id',
         'start_time',
         'end_time',
-        'location_details',
+        'location_id',
         'created_by',
     ];
 
+    /**
+     * The attributes that are translatable.
+     *
+     * @var array<int, string>
+     */
     public $translatable = [
         'title',
         'description',
     ];
 
-    public function schedulable()
+    /**
+     * Get the parent schedulable model (Course, Lecture, etc.).
+     */
+    public function schedulable(): MorphTo
     {
         return $this->morphTo();
     }
 
-    public function assignedTeacher()
+    /**
+     * Get the user this schedule is assigned to.
+     */
+    public function assignedTo(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'assigned_teacher_id');
+        // Renamed from assignedTeacher and updated foreign key
+        return $this->belongsTo(User::class, 'assigned_id');
     }
 
-    public function creator()
+    /**
+     * Get the location of the schedule.
+     */
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class, 'location_id');
+    }
+
+    /**
+     * Get the user who created the schedule.
+     */
+    public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function attendances()
+    /**
+     * Get the attendances for the schedule.
+     */
+    public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
     }
