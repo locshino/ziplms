@@ -25,6 +25,10 @@ class CreateAssignment extends CreateRecord
             $data['instructions'] = [
                 'file' => $data['instructions_file'] ?? null,
             ];
+        } elseif ($data['instructions_type'] === 'url') {
+            $data['instructions'] = [
+                'url' => $data['instructions_url'] ?? null,
+            ];
         } else {
             $data['instructions'] = [
                'text' => $data['instructions_text'] ?? null,
@@ -32,7 +36,7 @@ class CreateAssignment extends CreateRecord
             ];
         }
 
-        unset($data['instructions_file'], $data['instructions_text'], $data['instructions_type']);
+        unset($data['instructions_file'], $data['instructions_text'], $data['instructions_type'], $data['instructions_url']);
 
         return $data;
     }

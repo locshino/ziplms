@@ -28,7 +28,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Radio;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
-
+use Illuminate\Support\Facades\Auth;
 
 
 
@@ -58,6 +58,7 @@ class AssignmentResource extends Resource
     ->options([
         'text' => 'Nhập văn bản',
         'file' => 'Tải file',
+        'url' => 'Liên kết',
     ])
     ->reactive()
     ->required(),
@@ -73,6 +74,12 @@ class AssignmentResource extends Resource
         ->visible(fn ($get) => $get('instructions_type') === 'file')
         ->preserveFilenames()
         ->acceptedFileTypes(['application/pdf', 'application/msword']),
+    TextInput::make('instructions_url')
+    ->label('Link đề bài')
+    ->url()
+    ->placeholder('https://...')
+    ->visible(fn ($get) => $get('instructions_type') === 'url')
+
 ]),
 
             Forms\Components\TextInput::make('max_score')
@@ -124,7 +131,10 @@ public static function table(Table $table): Table
         ])
 
         ->filters([
-            //
+            Tables\Filters\SelectFilter::make('course_id')
+    ->label('Lọc theo Khóa học')
+    ->relationship('course', 'name'),
+
         ])
         ->actions([
             Tables\Actions\EditAction::make(),
@@ -150,20 +160,34 @@ public static function table(Table $table): Table
 
 public static function infolist(Infolist $infolist): Infolist
 {
-    return $infolist->schema([
+    return $infolist->schema([ 
         TextEntry::make('title')
-            ->label('Tiêu đề'),
+            ->label('Tiêu đề')
+            ->columnSpanFull()
+    ->extraAttributes([
+        'class' => 'text-lg font-semibold !text-gray-600',
+    ])
+    ->icon('heroicon-o-document-text'),
+        TextEntry::make('creator.name')
+    ->label('Người giao bài')->icon('heroicon-o-user'),
 
-        TextEntry::make('instructions_text')
-            ->label('Đề bài (văn bản)')
-            ->default(function ($record) {
-                $vi = $record->getTranslation('instructions', 'vi');
-                return is_array($vi) ? ($vi['text'] ?? null) : $vi;
-            })
-            ->visible(function ($record) {
-                $vi = $record->getTranslation('instructions', 'vi');
-                return !empty(is_array($vi) ? ($vi['text'] ?? null) : $vi);
-            }),
+TextEntry::make('created_at')
+    ->label('Đã đăng vào')
+    ->dateTime('d/m/Y H:i')
+    ->icon('heroicon-o-calendar'),
+       
+       TextEntry::make('instructions_text')
+            ->label('Đề bài')
+            ->default(fn ($record) => optional($record->getTranslation('instructions', 'vi'))['text'] ?? null)
+            ->visible(fn ($record) => !empty(optional($record->getTranslation('instructions', 'vi'))['text'] ?? null)),
+
+            
+TextEntry::make('instructions_url')
+    ->label('Link đề bài')
+    ->url(fn ($record) => is_array($vi = $record->getTranslation('instructions', 'vi')) ? ($vi['url'] ?? null) : null)
+    ->default(fn ($record) => is_array($vi = $record->getTranslation('instructions', 'vi')) ? ($vi['url'] ?? null) : null)
+    ->openUrlInNewTab()
+    ->visible(fn ($record) => is_array($vi = $record->getTranslation('instructions', 'vi')) && !empty($vi['url'] ?? null)),
 
         TextEntry::make('instructions_file')
             ->label('Tệp đính kèm')
@@ -185,7 +209,16 @@ public static function infolist(Infolist $infolist): Infolist
 }
 
 
+public static function getEloquentQuery(): Builder
+{
+    $query = parent::getEloquentQuery();
 
+    if (auth()->user()?->hasRole('teacher')) {
+        $query->where('created_by', auth()->id());
+    }
+
+    return $query;
+}
 
 
     public static function getPages(): array

@@ -24,7 +24,8 @@ class TeacherPanelProvider extends PanelProvider
     {
         return $panel
             ->id('teacher')
-            ->path('teacher')
+            ->path('app')
+            
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -52,6 +53,7 @@ class TeacherPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            
             ->plugins([
     SpatieLaravelTranslatablePlugin::make()
         ->defaultLocales(['vi', 'en']),
