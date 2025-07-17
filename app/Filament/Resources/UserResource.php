@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Exports\UsersExcelExport;
-use App\Filament\Actions\ExportExcelBulkAction;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
 use Filament\Forms;
@@ -63,11 +61,6 @@ class UserResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
 
-                ExportExcelBulkAction::make()
-                    ->exports([
-                        UsersExcelExport::make()
-                            ->withFilename('Users Export - '.now()->format('Y-m-d')),
-                    ]),
             ]);
     }
 
