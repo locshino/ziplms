@@ -36,7 +36,7 @@ class LectureFactory extends Factory
                 fake()->numberBetween(1, 24).' hours',
             ]),
             'created_by' => $this->assignRandomOrNewModel(User::class),
-            'status' => $this->fakeStatus(90), // 90% chance of being active
+            'status' => $this->fakeStatus(),
         ];
     }
 }

@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use Jeffgreco13\FilamentBreezy\Traits\TwoFactorAuthenticatable;
+use NotificationChannels\WebPush\HasPushSubscriptions;
 use Spatie\OneTimePasswords\Models\Concerns\HasOneTimePasswords;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -16,10 +18,12 @@ abstract class AuthModel extends Authenticatable
 {
     use HasFactory,
         HasOneTimePasswords,
+        HasPushSubscriptions,
         HasRoles,
         HasUuids,
         Notifiable,
-        SoftDeletes;
+        SoftDeletes,
+        TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.

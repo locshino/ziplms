@@ -7,6 +7,7 @@ use Filament\Support\Contracts\HasDescription;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 use Spatie\ModelStates\State as ModelStates;
+use Spatie\ModelStates\StateConfig;
 
 abstract class State extends ModelStates implements HasColor, HasDescription, HasIcon, HasLabel
 {
@@ -62,6 +63,26 @@ abstract class State extends ModelStates implements HasColor, HasDescription, Ha
     abstract public static function getStates(): array;
 
     /**
+     * Attempt to create an instance of the state from a given name or instance.
+     * Returns null if the name does not match any known state or if the value is invalid.
+     *
+     * @param  string|self|null  $value  The name of the state or an instance of the state.
+     * @return static|null Returns an instance of the state if successful, null otherwise.
+     */
+    public static function tryFrom(string|self|null $value): ?self
+    {
+        if ($value instanceof self) {
+            return $value;
+        }
+
+        if (is_string($value) && isset(static::getStates()[$value])) {
+            return new static($value);
+        }
+
+        return null;
+    }
+
+    /**
      * Get all states as a key-value pair array for Filament Select options.
      * This emulates the behavior of HasOptions trait for Enums.
      * The key will be the state's static $name property.
@@ -78,6 +99,7 @@ abstract class State extends ModelStates implements HasColor, HasDescription, Ha
             ->toArray();
     }
 
+    // --- Default Values ---
     public static function defaultLabel(): string
     {
         return __(static::getLangFile().'.default.label');
@@ -98,8 +120,38 @@ abstract class State extends ModelStates implements HasColor, HasDescription, Ha
         return __(static::getLangFile().'.default.description');
     }
 
+    // --- Language File Handling ---
     public static function getLangFile(): string
     {
         return self::$langFile;
+    }
+
+    // --- Serialization Mapping ---
+    /**
+     * Map the stored name of a state to its corresponding class.
+     * This is required by spatie/laravel-model-states for serialization.
+     *
+     * @return array<string, class-string<self>>
+     */
+    public static function map(): array
+    {
+        return collect(self::getStates())
+            ->mapWithKeys(fn (string $stateClass) => [
+                $stateClass::$name => $stateClass,
+            ])
+            ->toArray();
+    }
+
+    /**
+     * Returns the base configuration for the state.
+     *
+     * This method overrides the parent class's config method to provide
+     * a specific configuration for the base state.
+     *
+     * @return StateConfig The base configuration for the state.
+     */
+    public static function baseConfig(): StateConfig
+    {
+        return parent::config();
     }
 }

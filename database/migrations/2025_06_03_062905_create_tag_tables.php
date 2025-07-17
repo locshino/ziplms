@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tags', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
 
             $table->json('name');
             $table->json('slug');
@@ -20,7 +20,7 @@ return new class extends Migration
         });
 
         Schema::create('taggables', function (Blueprint $table) {
-            $table->foreignId('tag_id')->constrained()->cascadeOnDelete();
+            $table->uuid('tag_id');
 
             $table->uuidMorphs('taggable');
 
@@ -29,6 +29,9 @@ return new class extends Migration
                 'taggable_id',
                 'taggable_type',
             ], 'taggables_unique');
+
+            $table->foreign('tag_id')->references('id')
+                ->on('tags')->onDelete('cascade');
         });
     }
 

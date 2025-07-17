@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\SchedulableType;
+use App\Models\Location;
 use App\Models\Schedule;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -32,13 +33,13 @@ class ScheduleFactory extends Factory
 
         return [
             'schedulable_id' => $schedulableId,
-            'schedulable_type' => $schedulableModelClass, // Eloquent sẽ tự động xử lý morph map
+            'schedulable_type' => $schedulableModelClass,
             'title' => $this->fakeSentenceTranslations(),
             'description' => $this->fakeParagraphTranslations(),
-            'assigned_teacher_id' => $this->assignRandomOrNewModel(User::class),
+            'assigned_id' => $this->assignRandomOrNewModel(User::class),
             'start_time' => fake()->dateTimeBetween('+1 day', '+1 week'),
             'end_time' => fake()->dateTimeBetween('+1 week', '+2 weeks'),
-            'location_details' => fake()->address,
+            'location_id' => $this->assignRandomOrNewModel(Location::class),
             'created_by' => $this->assignRandomOrNewModel(User::class),
         ];
     }

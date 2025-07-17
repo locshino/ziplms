@@ -2,8 +2,8 @@
 
 return [
     // General
-    'model_label' => 'Lịch học',
-    'model_label_plural' => 'Lịch học',
+    'model_label' => 'Lịch trình',
+    'model_label_plural' => 'Các lịch trình',
 
     // Form
     'form' => [
@@ -12,30 +12,23 @@ return [
             'time_location' => 'Thời gian & Địa điểm',
             'assignment_status' => 'Phân công & Trạng thái',
         ],
-        'associated_with' => 'Phân loại',
+        'associated_with' => 'Liên kết với',
         'title' => 'Tiêu đề',
         'description' => 'Mô tả',
         'start_time' => 'Thời gian bắt đầu',
         'end_time' => 'Thời gian kết thúc',
-        'location_type' => 'Địa điểm',
-        'location_details' => 'Chi tiết địa điểm (Phòng, URL,...)',
-        'location_details_placeholder' => 'VD: Phòng A1, https://zoom.us/j/...',
-        'assigned_teacher' => 'Giáo viên phụ trách',
+        'location' => 'Địa điểm',
+        'assigned_to' => 'Người thực hiện', // Đổi từ assigned_teacher
         'status' => 'Trạng thái',
     ],
 
     // Table
     'table' => [
-        'associated_with' => 'Phân loại',
-        'location_type' => 'Địa điểm',
+        'associated_with' => 'Liên kết với',
     ],
 
-    // Filters
+    // Filters (có thể thêm nếu cần)
     'filters' => [
-        'location_type' => 'Lọc theo loại địa điểm',
-    ],
-
-    'validation' => [
-        'end_time_after' => 'Thời gian kết thúc phải là một ngày sau thời gian bắt đầu.',
+        //
     ],
 ];

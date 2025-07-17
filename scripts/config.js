@@ -39,5 +39,10 @@ export default {
             connection: process.env.QUEUE_BATCH_CONNECTION,
             queueEnvVar: "QUEUE_BATCH_NAME",
         },
+        {
+            name: "exporter",
+            connection: process.env.QUEUE_EXPORTER_CONNECTION,
+            queueEnvVar: "QUEUE_EXPORTER_NAME",
+        },
     ],
 };

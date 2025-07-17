@@ -23,7 +23,7 @@ class CourseFactory extends Factory
             'description' => $this->fakeParagraphTranslations(),
             'start_date' => fake()->dateTimeBetween('-1 month', '+1 month'),
             'end_date' => fake()->dateTimeBetween('+3 months', '+6 months'),
-            'status' => $this->fakeStatus(90),
+            'status' => $this->fakeStatus(),
         ];
     }
 }
