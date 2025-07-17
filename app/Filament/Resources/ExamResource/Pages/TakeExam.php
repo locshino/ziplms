@@ -279,6 +279,8 @@ class TakeExam extends Page
     /**
      * Lưu tiến trình hiện tại vào cột 'feedback' của attempt.
      */
+    // app/Filament/Resources/ExamResource/Pages/TakeExam.php
+
     protected function saveStateToFeedback(): void
     {
         if ($this->attempt && $this->questions->isNotEmpty()) {
@@ -294,102 +296,105 @@ class TakeExam extends Page
                 ],
             ];
 
+
             $this->attempt->update(['feedback' => $feedbackData]);
         }
     }
-
     /**
      * Nộp bài và chấm điểm.
      */
-    public function submitExam(): void
-    {
-        if (!$this->attempt) {
-            return;
-        }
+    // app/Filament/Resources/ExamResource/Pages/TakeExam.php
 
-        $this->attempt = ExamAttempt::find($this->attempt->id);
-
-        if (!$this->attempt || get_class($this->attempt->status) !== InProgress::class) {
-            return;
-        }
-
-        $this->saveStateToFeedback(); // Lưu lần cuối trước khi nộp
-
-        $completedAt = now();
-        $totalScore = 0;
-
-        foreach ($this->questions as $question) {
-            $type = $this->getQuestionType($question)?->value;
-            $qId = $question->id;
-            $isCorrect = null;
-            $pointsEarned = 0;
-            $selectedChoiceId = null;
-            $chosenOptionIds = null;
-            $answerText = null;
-
-            switch ($type) {
-                case 'single_choice':
-                case 'true_false':
-                    $answerArray = ($type === 'single_choice') ? $this->singleChoiceAnswers : $this->trueFalseAnswers;
-                    $selectedChoiceId = $answerArray[$qId] ?? null;
-                    $correctChoice = $question->choices->where('is_correct', true)->first();
-                    if ($correctChoice && $selectedChoiceId == $correctChoice->id) {
-                        $isCorrect = true;
-                        $pointsEarned = $this->questionMeta[$qId]['points'] ?? 1;
-                        $totalScore += $pointsEarned;
-                    } else {
-                        $isCorrect = false;
-                    }
-                    break;
-
-                case 'multiple_choice':
-                    $selectedChoices = array_filter($this->multipleChoiceAnswers[$qId] ?? []);
-                    sort($selectedChoices);
-                    $correctChoices = $question->choices->where('is_correct', true)->pluck('id')->sort()->values()->all();
-                    if ($selectedChoices === $correctChoices) {
-                        $isCorrect = true;
-                        $pointsEarned = $this->questionMeta[$qId]['points'] ?? 1;
-                        $totalScore += $pointsEarned;
-                    } else {
-                        $isCorrect = false;
-                    }
-                    $chosenOptionIds = $selectedChoices;
-                    break;
-
-                case 'short_answer':
-                    $answerText = $this->shortAnswers[$qId] ?? null;
-                    $pointsEarned = null; // Cần chấm thủ công
-                    break;
-
-                case 'essay':
-                    $answerText = $this->essayAnswers[$qId] ?? null;
-                    $pointsEarned = null; // Cần chấm thủ công
-                    break;
-            }
-
-            ExamAnswer::create([
-                'exam_attempt_id' => $this->attempt->id,
-                'exam_question_id' => $this->questionMeta[$qId]['exam_question_id'],
-                'question_id' => $qId,
-                'selected_choice_id' => $selectedChoiceId,
-                'chosen_option_ids' => $chosenOptionIds,
-                'answer_text' => $answerText ? ['vi' => $answerText] : null,
-                'is_correct' => $isCorrect,
-                'points_earned' => $pointsEarned,
-            ]);
-        }
-
-        $timeSpent = $this->attempt->started_at->diffInSeconds($completedAt);
-
-        $this->attempt->score = $totalScore;
-        $this->attempt->completed_at = $completedAt;
-        $this->attempt->time_spent_seconds = $timeSpent;
-        $this->attempt->status->transitionTo(Completed::class);
-
-        Notification::make()->title('Nộp bài thành công!')->success()->send();
-        $this->redirect(static::$resource::getUrl('index'));
+  public function submitExam(): void
+{
+    if (!$this->attempt) {
+        return;
     }
 
+    $this->attempt = ExamAttempt::find($this->attempt->id);
+
+    if (!$this->attempt || get_class($this->attempt->status) !== InProgress::class) {
+        return;
+    }
+
+    $this->saveStateToFeedback(); // Lưu lần cuối trước khi nộp
+
+    $completedAt = now();
+    $totalScore = 0;
+
+    foreach ($this->questions as $question) {
+        $type = $this->getQuestionType($question)?->value;
+        $qId = $question->id;
+        
+        $answerData = [
+            'exam_attempt_id' => $this->attempt->id,
+            'exam_question_id' => $this->questionMeta[$qId]['exam_question_id'],
+            'question_id' => $qId,
+            'selected_choice_id' => null,
+            'chosen_option_ids' => null,
+            'answer_text' => null,
+            'is_correct' => false, // Mặc định là sai
+            'points_earned' => 0,
+        ];
+
+        switch ($type) {
+            case 'single_choice':
+            case 'true_false':
+                $selectedChoiceId = $this->singleChoiceAnswers[$qId] ?? null;
+                $answerData['selected_choice_id'] = $selectedChoiceId;
+
+                $correctChoice = $question->choices->where('is_correct', true)->first();
+                if ($correctChoice && $selectedChoiceId == $correctChoice->id) {
+                    $answerData['is_correct'] = true;
+                    $answerData['points_earned'] = $this->questionMeta[$qId]['points'] ?? 1;
+                    $totalScore += $answerData['points_earned'];
+                }
+                break;
+
+            case 'multiple_choice':
+                $selectedChoices = array_filter($this->multipleChoiceAnswers[$qId] ?? []);
+                sort($selectedChoices);
+                $answerData['chosen_option_ids'] = $selectedChoices;
+
+                $correctChoices = $question->choices->where('is_correct', true)->pluck('id')->sort()->values()->all();
+                if (!empty($selectedChoices) && $selectedChoices === $correctChoices) {
+                    $answerData['is_correct'] = true;
+                    $answerData['points_earned'] = $this->questionMeta[$qId]['points'] ?? 1;
+                    $totalScore += $answerData['points_earned'];
+                }
+                break;
+
+            case 'short_answer':
+                $answerText = $this->shortAnswers[$qId] ?? null;
+                if ($answerText) {
+                    $answerData['answer_text'] = ['vi' => $answerText];
+                }
+                $answerData['points_earned'] = null;
+                break;
+
+            case 'essay':
+                $answerText = $this->essayAnswers[$qId] ?? null;
+                if ($answerText) {
+                    $answerData['answer_text'] = ['vi' => $answerText];
+                }
+                $answerData['points_earned'] = null;
+                break;
+        }
+
+        // SỬA LỖI: Quay lại dùng create() để tự động tạo ID
+        ExamAnswer::create($answerData);
+    }
+
+    // Cập nhật lại lượt làm bài
+    $timeSpent = $this->attempt->started_at->diffInSeconds($completedAt);
+    $this->attempt->score = $totalScore;
+    $this->attempt->completed_at = $completedAt;
+    $this->attempt->time_spent_seconds = $timeSpent;
+    $this->attempt->status->transitionTo(Completed::class);
+
+    Notification::make()->title('Nộp bài thành công!')->success()->send();
+    $this->redirect(static::$resource::getUrl('index'));
+}
     public function nextQuestion(): void
     {
         if ($this->currentQuestionIndex < $this->questions->count() - 1) {

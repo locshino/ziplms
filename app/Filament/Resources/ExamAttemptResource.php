@@ -12,9 +12,11 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Resources\Concerns\Translatable;
 
 class ExamAttemptResource extends Resource
 {
+    use Translatable;
     protected static ?string $model = ExamAttempt::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-check';
@@ -90,7 +92,6 @@ class ExamAttemptResource extends Resource
                     ->numeric(),
 
                 Tables\Columns\TextColumn::make('status')->label('Trạng thái')->badge()
-                    // SỬA LỖI: Type hint $state bây giờ đã đúng
                     ->color(fn(Status $state): string => $state->color()),
                 Tables\Columns\TextColumn::make('completed_at')->label('Ngày nộp bài')->dateTime('d/m/Y')->sortable(),
             ])

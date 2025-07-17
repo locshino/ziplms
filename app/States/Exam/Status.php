@@ -1,9 +1,5 @@
 <?php
-// File: app/States/Exam/Status.php
-// ---------------------------------
-// File cấu hình chính cho các trạng thái.
-// Luồng chuyển đổi được định nghĩa ở đây:
-// Inactive <-> Active -> InProgress -> (Completed | Cancelled)
+
 
 namespace App\States\Exam;
 

@@ -7,6 +7,7 @@ use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder; // <-- Thêm import này
 use Illuminate\Database\Eloquent\Model;
 
 class AnswersRelationManager extends RelationManager
@@ -20,18 +21,15 @@ class AnswersRelationManager extends RelationManager
         // Form này dùng để chấm điểm câu tự luận
         return $form
             ->schema([
-                // SỬ DỤNG TABS ĐỂ TẠO GIAO DIỆN ĐA NGÔN NGỮ
                 Forms\Components\Tabs::make('FeedbackTranslations')
                     ->tabs([
                         Forms\Components\Tabs\Tab::make('Phản hồi (Tiếng Việt)')
                             ->schema([
-                                // Dùng dot notation để liên kết với key 'vi' trong cột JSON
                                 Forms\Components\Textarea::make('teacher_feedback.vi')
-                                    ->label(false), // Ẩn label vì đã có ở Tab
+                                    ->label(false),
                             ]),
                         Forms\Components\Tabs\Tab::make('Feedback (English)')
                             ->schema([
-                                // Dùng dot notation để liên kết với key 'en' trong cột JSON
                                 Forms\Components\Textarea::make('teacher_feedback.en')
                                     ->label(false),
                             ]),
@@ -47,45 +45,40 @@ class AnswersRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            // V THÊM DÒNG NÀY ĐỂ TẢI TRƯỚC DỮ LIỆU
+            ->modifyQueryUsing(fn(Builder $query) => $query->with(['question', 'selectedChoice']))
             ->columns([
                 Tables\Columns\TextColumn::make('question.question_text')
                     ->label('Câu hỏi')
-                    ->wrap()
-                    ->getStateUsing(fn (Model $record): ?string => $record->question?->getTranslation('question_text', app()->getLocale())),
+                    ->wrap(),
 
                 Tables\Columns\TextColumn::make('student_answer')
                     ->label('Câu trả lời của HS')
-                    ->wrap() // Cho phép xuống dòng nếu câu trả lời quá dài
+                    ->wrap()
                     ->getStateUsing(function (Model $record): string {
-                        // 1. Ưu tiên hiển thị câu trả lời trắc nghiệm (nếu có)
+                        // 1. Ưu tiên hiển thị câu trả lời trắc nghiệm
                         if ($record->selectedChoice) {
-                            return $record->selectedChoice->getTranslation('choice_text', app()->getLocale())
-                                ?? $record->selectedChoice->getTranslation('choice_text', 'vi') // Fallback về Tiếng Việt
-                                ?? '—';
+                            // Giờ đây $record->selectedChoice sẽ không còn là null
+                            return $record->selectedChoice->choice_text;
                         }
 
-                        // 2. Hiển thị câu trả lời tự luận
-                        // Dữ liệu của bạn: "answer_text" => ["vi" => "Nội dung câu trả lời."]
-                        // getTranslation sẽ tự động tìm key ngôn ngữ hiện tại (vd: 'vi') và lấy giá trị tương ứng.
-                        $answer = $record->getTranslation('answer_text', app()->getLocale());
-
-                        // Nếu không có bản dịch cho ngôn ngữ hiện tại, thử lấy bản dịch Tiếng Việt làm mặc định
-                        if (empty($answer)) {
-                            $answer = $record->getTranslation('answer_text', 'vi');
+                        // 2. Nếu không có, hiển thị câu trả lời tự luận
+                        if ($record->answer_text) {
+                            return $record->answer_text;
                         }
 
-                        // Nếu vẫn không có câu trả lời nào, hiển thị ký tự gạch ngang
-                        return ! empty($answer) ? $answer : '—';
+                        // 3. Nếu không có cả hai, hiển thị gạch ngang
+                        return '—';
                     }),
 
                 Tables\Columns\IconColumn::make('is_correct')
                     ->label('Kết quả')
-                    ->icon(fn ($state): string => match ($state) {
+                    ->icon(fn($state): string => match ($state) {
                         true => 'heroicon-o-check-circle',
                         false => 'heroicon-o-x-circle',
                         null => 'heroicon-o-clock',
                     })
-                    ->color(fn ($state): string => match ($state) {
+                    ->color(fn($state): string => match ($state) {
                         true => 'success',
                         false => 'danger',
                         null => 'warning',
@@ -94,7 +87,6 @@ class AnswersRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('points_earned')->label('Điểm nhận được')->placeholder('Chưa chấm'),
             ])
             ->actions([
-                // Bỏ mutateRecordDataUsing đi vì không cần nữa
                 Tables\Actions\EditAction::make()->label('Chấm điểm')->icon('heroicon-o-pencil-square')
                     ->successNotificationTitle('Điểm cho câu trả lời đã được cập nhật.'),
             ]);
