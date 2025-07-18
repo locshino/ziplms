@@ -5,7 +5,15 @@ namespace App\Enums\Concerns;
 trait HasKeyType
 {
     /**
-     * Get the key type for the enum.
+     * Returns the fully qualified class name of the enum.
+     * This is useful for providing a unique type for Spatie Tags.
+     *
+     * @return string The fully qualified class name (e.g., 'App\Enums\LocationType').
+     *
+     * @example $query->withAnyTags($tags, LocationType::key());
      */
-    abstract public static function key(): string;
+    public static function key(): string
+    {
+        return self::class;
+    }
 }

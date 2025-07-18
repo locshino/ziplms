@@ -30,7 +30,7 @@ class CourseEnrollmentFactory extends Factory
             'enrollment_date' => now(),
             'final_grade' => fake()->optional()->randomFloat(1, 0, 10),
             'completed_at' => fake()->optional()->dateTime,
-            'status' => $this->fakeStatus(90), // 90% chance of being active
+            'status' => $this->fakeStatus(),
         ];
     }
 }

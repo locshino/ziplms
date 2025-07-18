@@ -39,7 +39,7 @@ return [
     /*
      * The fully qualified class name of the media model.
      */
-    'media_model' => Spatie\MediaLibrary\MediaCollections\Models\Media::class,
+    'media_model' => \App\Models\SpatieMedia::class,
 
     /*
      * The fully qualified class name of the media observer.
@@ -176,7 +176,7 @@ return [
      * The path where to store temporary files while performing image conversions.
      * If set to null, storage_path('media-library/temp') will be used.
      */
-    'temporary_directory_path' => storage_path('app/media-library/temp'),
+    'temporary_directory_path' => storage_path('app/temporary/media-library'),
 
     /*
      * The engine that should perform the image conversions.

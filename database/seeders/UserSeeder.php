@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Organization;
+use App\Enums\RoleEnum;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -20,16 +20,16 @@ class UserSeeder extends Seeder
             'email' => 'admin@example.com',
             'password' => 'password', // Mật khẩu mặc định
         ]);
-        $adminUser->assignRole('admin');
+
+        $adminUserRoles = [
+            RoleEnum::Admin,
+            RoleEnum::Dev,
+        ];
+
+        $adminUser->assignRole($adminUserRoles);
 
         // 2. Lấy các vai trò khác để gán ngẫu nhiên
-        $otherRoles = Role::whereIn('name', [
-            'manager',
-            'teacher',
-            'student',
-        ])->get();
-
-        $organizations = Organization::all();
+        $otherRoles = Role::whereIn('name', RoleEnum::values(...$adminUserRoles))->get();
 
         if ($otherRoles->isEmpty()) {
             $this->command->warn('Không tìm thấy vai trò Manager, Teacher, hoặc Student. Sẽ tạo người dùng mà không có các vai trò này.');

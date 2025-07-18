@@ -8,11 +8,9 @@ use App\Models\Schedule;
 use App\Models\User;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
-use Filament\Actions\Imports\Importer;
-use Filament\Actions\Imports\Models\Import;
 use Filament\Facades\Filament;
 
-class ScheduleImporter extends Importer
+class ScheduleImporter extends Base\Importer
 {
     protected static ?string $model = Schedule::class;
 
@@ -61,17 +59,6 @@ class ScheduleImporter extends Importer
         // ]);
 
         return new Schedule;
-    }
-
-    public static function getCompletedNotificationBody(Import $import): string
-    {
-        $body = 'Your schedule import has completed and '.number_format($import->successful_rows).' '.str('row')->plural($import->successful_rows).' imported.';
-
-        if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' '.number_format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to import.';
-        }
-
-        return $body;
     }
 
     /**
