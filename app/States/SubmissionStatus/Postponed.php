@@ -6,9 +6,8 @@ class Postponed extends SubmissionStatus
 {
     public static string $name = 'postponed';
 
-
     public static function color(): string
     {
-        return 'warning'; 
+        return 'warning';
     }
 }

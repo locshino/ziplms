@@ -5,12 +5,10 @@ namespace App\Models;
 use App\Enums\AssignmentType;
 use App\Enums\AttachmentType;
 use App\States\Status;
+use App\States\SubmissionStatus\SubmissionStatus;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\ModelStates\HasStates;
-use App\States\SubmissionStatus\SubmissionStatus;
-
-
 
 /**use App\States\SubmissionStatus\SubmissionStatus;
 

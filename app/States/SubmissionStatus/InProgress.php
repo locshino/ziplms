@@ -5,6 +5,7 @@ namespace App\States\SubmissionStatus;
 class InProgress extends SubmissionStatus
 {
     public static $name = 'in_progress';
+
     public static function label(): string
     {
         return 'Đã lưu trữ';

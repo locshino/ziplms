@@ -19,7 +19,7 @@ return [
         'color' => 'green',
         'icon' => 'heroicon-o-play',
     ],
-      'submitted' => [
+    'submitted' => [
         'label' => 'Submitted',
         'description' => 'Student has submitted the assignment.',
         'color' => 'yellow',

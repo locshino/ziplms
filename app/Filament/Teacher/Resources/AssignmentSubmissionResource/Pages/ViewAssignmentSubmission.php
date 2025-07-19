@@ -2,15 +2,12 @@
 
 namespace App\Filament\Teacher\Resources\AssignmentSubmissionResource\Pages;
 
-
 use App\Filament\Teacher\Resources\AssignmentSubmissionResource;
-use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Pages\ViewRecord;
+
 // use Filament\SpatieMediaLibraryPlugin\Components\SpatieMediaLibraryEntry;
-use Filament\Infolists\Infolist;
-
-
 
 class ViewAssignmentSubmission extends ViewRecord
 {
@@ -24,7 +21,7 @@ class ViewAssignmentSubmission extends ViewRecord
     public function getInfolist(string $name): Infolists\Infolist
     {
         return Infolists\Infolist::make()
-        ->record($this->record)
+            ->record($this->record)
             ->schema([
                 TextEntry::make('user.name')
                     ->label('Người nộp'),
@@ -44,8 +41,7 @@ class ViewAssignmentSubmission extends ViewRecord
                 TextEntry::make('grade.grade')
                     ->label('Điểm')
                     ->placeholder('-')
-                    ->formatStateUsing(fn ($state) => $state !== null ? $state : 'Chưa chấm điểm')
-                    ,
+                    ->formatStateUsing(fn ($state) => $state !== null ? $state : 'Chưa chấm điểm'),
 
                 TextEntry::make('grade.feedback')
                     ->label('Phản hồi')
