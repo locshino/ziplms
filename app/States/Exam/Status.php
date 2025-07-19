@@ -1,17 +1,11 @@
 <?php
 
-
 namespace App\States\Exam;
 
 use Spatie\ModelStates\State;
 use Spatie\ModelStates\StateConfig;
 
 // Import các lớp trạng thái
-use App\States\Exam\Active;
-use App\States\Exam\Inactive;
-use App\States\Exam\InProgress;
-use App\States\Exam\Completed;
-use App\States\Exam\Cancelled;
 
 abstract class Status extends State
 {

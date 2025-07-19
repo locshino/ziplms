@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\States\Exam\Status;
-
 use Spatie\ModelStates\HasStates;
 use Spatie\Translatable\HasTranslations;
 

@@ -5,7 +5,6 @@ namespace App\Filament\Resources\ExamAttemptResource\Pages;
 use App\Filament\Resources\ExamAttemptResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-use ListRecords\Concerns\Translatable;
 
 class EditExamAttempt extends EditRecord
 {

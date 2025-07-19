@@ -46,7 +46,7 @@ class AnswersRelationManager extends RelationManager
     {
         return $table
             // V THÊM DÒNG NÀY ĐỂ TẢI TRƯỚC DỮ LIỆU
-            ->modifyQueryUsing(fn(Builder $query) => $query->with(['question', 'selectedChoice']))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['question', 'selectedChoice']))
             ->columns([
                 Tables\Columns\TextColumn::make('question.question_text')
                     ->label('Câu hỏi')
@@ -73,12 +73,12 @@ class AnswersRelationManager extends RelationManager
 
                 Tables\Columns\IconColumn::make('is_correct')
                     ->label('Kết quả')
-                    ->icon(fn($state): string => match ($state) {
+                    ->icon(fn ($state): string => match ($state) {
                         true => 'heroicon-o-check-circle',
                         false => 'heroicon-o-x-circle',
                         null => 'heroicon-o-clock',
                     })
-                    ->color(fn($state): string => match ($state) {
+                    ->color(fn ($state): string => match ($state) {
                         true => 'success',
                         false => 'danger',
                         null => 'warning',

@@ -8,15 +8,16 @@ use App\Models\ExamAttempt;
 use App\States\Exam\Status;
 use Filament\Infolists\Components;
 use Filament\Infolists\Infolist;
+use Filament\Resources\Concerns\Translatable;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Resources\Concerns\Translatable;
 
 class ExamAttemptResource extends Resource
 {
     use Translatable;
+
     protected static ?string $model = ExamAttempt::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-check';
@@ -66,11 +67,11 @@ class ExamAttemptResource extends Resource
                         Components\TextEntry::make('status')
                             ->label(__('exam-attempt-resource.infolist.field.status'))
                             ->badge()
-                            ->color(fn(Status $state): string => $state->color()),
+                            ->color(fn (Status $state): string => $state->color()),
 
                         Components\TextEntry::make('time_spent_seconds')
                             ->label(__('exam-attempt-resource.infolist.field.time_spent'))
-                            ->formatStateUsing(fn(?int $state): string => $state ? gmdate('H:i:s', $state) : 'N/A'),
+                            ->formatStateUsing(fn (?int $state): string => $state ? gmdate('H:i:s', $state) : 'N/A'),
                     ]),
                 Components\Section::make(__('exam-attempt-resource.infolist.section.timestamps'))
                     ->columns(2)
@@ -96,7 +97,7 @@ class ExamAttemptResource extends Resource
                     ->sortable()
                     ->numeric(),
                 Tables\Columns\TextColumn::make('status')->label(__('exam-attempt-resource.table.column.status'))->badge()
-                    ->color(fn(Status $state): string => $state->color()),
+                    ->color(fn (Status $state): string => $state->color()),
                 Tables\Columns\TextColumn::make('completed_at')->label(__('exam-attempt-resource.table.column.submission_date'))->dateTime('d/m/Y')->sortable(),
             ])
             ->actions([

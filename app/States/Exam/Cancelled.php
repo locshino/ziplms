@@ -2,8 +2,6 @@
 
 namespace App\States\Exam;
 
-use App\States\Exam\Status;
-
 class Cancelled extends Status
 {
     public static string $name = 'cancelled';

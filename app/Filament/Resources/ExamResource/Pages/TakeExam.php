@@ -1,4 +1,5 @@
 <?php
+
 // File: app/Filament/Resources/ExamResource/Pages/TakeExam.php
 // -----------------------------------------------------------
 // Logic hoàn chỉnh cho trang làm bài thi trong Filament.
@@ -24,8 +25,11 @@ use Livewire\Attributes\Locked;
 class TakeExam extends Page
 {
     protected static string $resource = ExamResource::class;
+
     protected static string $view = 'filament.resources.exam-resource.pages.take-exam';
+
     protected static string $routePath = '/{record}/take';
+
     protected static bool $shouldRegisterNavigation = false;
 
     #[Locked]
@@ -35,18 +39,26 @@ class TakeExam extends Page
     public ?ExamAttempt $attempt = null;
 
     public Collection $questions;
+
     public int $currentQuestionIndex = 0;
+
     public array $questionMeta = [];
 
     // Mảng lưu câu trả lời của người dùng
     public array $singleChoiceAnswers = [];
+
     public array $multipleChoiceAnswers = [];
+
     public array $trueFalseAnswers = [];
+
     public array $shortAnswers = [];
+
     public array $essayAnswers = [];
+
     public array $fillBlankAnswers = []; // [THÊM MỚI] Thuộc tính cho câu trả lời điền vào chỗ trống
 
     public ?int $timeLeft = null;
+
     public bool $examStarted = false;
 
     public function mount(): void
@@ -67,15 +79,16 @@ class TakeExam extends Page
 
     public function getTitle(): string
     {
-        return $this->examStarted ? 'Đang làm bài: ' . $this->record->title : 'Bắt đầu: ' . $this->record->title;
+        return $this->examStarted ? 'Đang làm bài: '.$this->record->title : 'Bắt đầu: '.$this->record->title;
     }
 
     public function continueExam(): void
     {
         $this->attempt = $this->incompleteAttempt();
 
-        if (!$this->attempt) {
+        if (! $this->attempt) {
             Notification::make()->title('Không tìm thấy bài làm dang dở!')->danger()->send();
+
             return;
         }
 
@@ -93,6 +106,7 @@ class TakeExam extends Page
 
         if ($feedbackData === null) {
             $this->invalidateOldAttempt('Dữ liệu bài làm cũ bị lỗi hoặc không hợp lệ.');
+
             return;
         }
 
@@ -100,6 +114,7 @@ class TakeExam extends Page
 
         if (empty($questionOrderIds)) {
             $this->invalidateOldAttempt('Dữ liệu bài làm cũ bị thiếu thông tin câu hỏi.');
+
             return;
         }
 
@@ -107,6 +122,7 @@ class TakeExam extends Page
 
         if ($this->questions->isEmpty()) {
             $this->invalidateOldAttempt('Tất cả câu hỏi trong bài thi đã bị xóa. Không thể tiếp tục.');
+
             return;
         }
 
@@ -146,6 +162,7 @@ class TakeExam extends Page
 
         if ($this->questions->isEmpty()) {
             Notification::make()->title('Bài thi này không có câu hỏi nào.')->warning()->send();
+
             return;
         }
 
@@ -185,7 +202,7 @@ class TakeExam extends Page
                 ->with('choices')->withPivot('id', 'points')
                 ->whereIn('questions.id', $questionOrderIds);
 
-            if (!$this->record->shuffle_questions) {
+            if (! $this->record->shuffle_questions) {
                 $query->orderBy('exam_questions.question_order');
             } else {
                 $orderedIds = implode("','", $questionOrderIds);
@@ -274,11 +291,11 @@ class TakeExam extends Page
 
     public function submitExam(): void
     {
-        if (!$this->attempt) {
+        if (! $this->attempt) {
             return;
         }
         $this->attempt = ExamAttempt::find($this->attempt->id);
-        if (!$this->attempt || get_class($this->attempt->status) !== InProgress::class) {
+        if (! $this->attempt || get_class($this->attempt->status) !== InProgress::class) {
             return;
         }
         $this->saveStateToFeedback();
@@ -318,7 +335,7 @@ class TakeExam extends Page
                     sort($selectedChoices);
                     $answerData['chosen_option_ids'] = $selectedChoices;
                     $correctChoices = $question->choices->where('is_correct', true)->pluck('id')->sort()->values()->all();
-                    if (!empty($selectedChoices) && $selectedChoices === $correctChoices) {
+                    if (! empty($selectedChoices) && $selectedChoices === $correctChoices) {
                         $answerData['is_correct'] = true;
                         $answerData['points_earned'] = $this->questionMeta[$qId]['points'] ?? 1;
                         $totalScore += $answerData['points_earned'];
@@ -341,8 +358,8 @@ class TakeExam extends Page
                 case 'fill_blank':
                     $userAnswers = array_map('trim', $this->fillBlankAnswers[$qId] ?? []);
                     $answerData['answer_text'] = ['vi' => implode('|', $userAnswers)];
-                    $correctAnswers = $question->choices->pluck('choice_text')->map(fn($text) => trim($text))->all();
-                    if (!empty($userAnswers) && $userAnswers === $correctAnswers) {
+                    $correctAnswers = $question->choices->pluck('choice_text')->map(fn ($text) => trim($text))->all();
+                    if (! empty($userAnswers) && $userAnswers === $correctAnswers) {
                         $answerData['is_correct'] = true;
                         $answerData['points_earned'] = $this->questionMeta[$qId]['points'] ?? 1;
                         $totalScore += $answerData['points_earned'];
@@ -389,6 +406,7 @@ class TakeExam extends Page
     public function getQuestionType(Question $question): ?QuestionType
     {
         $tag = $question->tagsWithType(QuestionType::key())->first();
+
         return $tag ? QuestionType::tryFrom($tag->name) : null;
     }
 }

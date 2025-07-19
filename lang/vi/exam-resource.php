@@ -46,7 +46,6 @@ return [
         ],
     ],
 
-
     'relation_manager' => [
         'questions' => [
             'label' => 'Câu hỏi trong bài thi',
