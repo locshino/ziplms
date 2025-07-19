@@ -5,7 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ExamAttemptResource\Pages;
 use App\Filament\Resources\ExamAttemptResource\RelationManagers;
 use App\Models\ExamAttempt;
-use App\States\Exam\Status; // SỬA LỖI: Import đúng lớp Status của Exam
+use App\States\Exam\Status;
 use Filament\Infolists\Components;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
@@ -21,15 +21,22 @@ class ExamAttemptResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-document-check';
 
-    protected static ?string $navigationGroup = 'Quản lý Đánh giá';
+    // [CẬP NHẬT] Sử dụng các phương thức get* để gọi file ngôn ngữ
+    public static function getNavigationGroup(): ?string
+    {
+        return __('exam-attempt-resource.navigation.group');
+    }
 
-    protected static ?string $label = 'Lượt làm bài';
+    public static function getModelLabel(): string
+    {
+        return __('exam-attempt-resource.navigation.label');
+    }
 
-    protected static ?string $pluralLabel = 'Danh sách Lượt làm bài';
+    public static function getPluralModelLabel(): string
+    {
+        return __('exam-attempt-resource.navigation.plural_label');
+    }
 
-    /**
-     * Tối ưu hóa truy vấn để tải trước tổng điểm.
-     */
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->withSum('answers', 'points_earned');
@@ -39,41 +46,40 @@ class ExamAttemptResource extends Resource
     {
         return $infolist
             ->schema([
-                Components\Section::make('Thông tin chung')
+                Components\Section::make(__('exam-attempt-resource.infolist.section.general_info'))
                     ->columns(2)
                     ->schema([
                         Components\TextEntry::make('exam.title')
-                            ->label('Bài kiểm tra'),
+                            ->label(__('exam-attempt-resource.infolist.field.exam_title')),
                         Components\TextEntry::make('user.name')
-                            ->label('Học sinh'),
+                            ->label(__('exam-attempt-resource.infolist.field.student_name')),
                     ]),
-                Components\Section::make('Kết quả')
+                Components\Section::make(__('exam-attempt-resource.infolist.section.results'))
                     ->columns(3)
                     ->schema([
                         Components\TextEntry::make('answers_sum_points_earned')
-                            ->label('Điểm số')
+                            ->label(__('exam-attempt-resource.infolist.field.score'))
                             ->badge()
                             ->color('success')
                             ->numeric(),
 
                         Components\TextEntry::make('status')
-                            ->label('Trạng thái')
+                            ->label(__('exam-attempt-resource.infolist.field.status'))
                             ->badge()
-                            // SỬA LỖI: Type hint $state bây giờ đã đúng
                             ->color(fn(Status $state): string => $state->color()),
 
                         Components\TextEntry::make('time_spent_seconds')
-                            ->label('Thời gian làm bài')
+                            ->label(__('exam-attempt-resource.infolist.field.time_spent'))
                             ->formatStateUsing(fn(?int $state): string => $state ? gmdate('H:i:s', $state) : 'N/A'),
                     ]),
-                Components\Section::make('Thời gian')
+                Components\Section::make(__('exam-attempt-resource.infolist.section.timestamps'))
                     ->columns(2)
                     ->schema([
                         Components\TextEntry::make('started_at')
-                            ->label('Bắt đầu lúc')
+                            ->label(__('exam-attempt-resource.infolist.field.started_at'))
                             ->dateTime('d/m/Y H:i:s'),
                         Components\TextEntry::make('completed_at')
-                            ->label('Hoàn thành lúc')
+                            ->label(__('exam-attempt-resource.infolist.field.completed_at'))
                             ->dateTime('d/m/Y H:i:s'),
                     ]),
             ]);
@@ -83,22 +89,20 @@ class ExamAttemptResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('exam.title')->label('Bài kiểm tra')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('user.name')->label('Học sinh')->searchable()->sortable(),
-
+                Tables\Columns\TextColumn::make('exam.title')->label(__('exam-attempt-resource.table.column.exam_title'))->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('user.name')->label(__('exam-attempt-resource.table.column.student_name'))->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('answers_sum_points_earned')
-                    ->label('Điểm số')
+                    ->label(__('exam-attempt-resource.table.column.score'))
                     ->sortable()
                     ->numeric(),
-
-                Tables\Columns\TextColumn::make('status')->label('Trạng thái')->badge()
+                Tables\Columns\TextColumn::make('status')->label(__('exam-attempt-resource.table.column.status'))->badge()
                     ->color(fn(Status $state): string => $state->color()),
-                Tables\Columns\TextColumn::make('completed_at')->label('Ngày nộp bài')->dateTime('d/m/Y')->sortable(),
+                Tables\Columns\TextColumn::make('completed_at')->label(__('exam-attempt-resource.table.column.submission_date'))->dateTime('d/m/Y')->sortable(),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make()->label('Xem chi tiết'),
-                Tables\Actions\EditAction::make()->label('Chấm bài'),
-                Tables\Actions\DeleteAction::make()->label('Xóa'),
+                Tables\Actions\ViewAction::make()->label(__('exam-attempt-resource.table.action.view_details')),
+                Tables\Actions\EditAction::make()->label(__('exam-attempt-resource.table.action.grade')),
+                Tables\Actions\DeleteAction::make()->label(__('exam-attempt-resource.table.action.delete')),
             ])
             ->bulkActions([]);
     }
@@ -120,7 +124,6 @@ class ExamAttemptResource extends Resource
         return [
             'index' => Pages\ListExamAttempts::route('/'),
             'view' => Pages\ViewExamAttempt::route('/{record}'),
-            'create' => Pages\CreateExamAttempt::route('/create'),
             'edit' => Pages\EditExamAttempt::route('/{record}/edit'),
         ];
     }

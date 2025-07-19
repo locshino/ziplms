@@ -2,26 +2,23 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\OrganizationType; // <-- Import Enum của Tổ chức
-use App\Enums\QuestionType;     // <-- Import Enum của Câu hỏi
+use App\Enums\OrganizationType;
+use App\Enums\QuestionType;
 use App\Filament\Resources\QuestionResource\Pages;
 use App\Filament\Resources\QuestionResource\RelationManagers;
 use App\Models\Question;
 use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Section; // Keep Select for organization_id
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\SpatieTagsInput;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput; // Import Repeater
-use Filament\Forms\Components\Toggle; // Import TextInput for choices
-use Filament\Forms\Form; // Import Toggle for is_correct
+use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-// <-- Import bộ lọc
 use Filament\Tables\Columns\SpatieTagsColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Table;
 
 class QuestionResource extends Resource
@@ -30,50 +27,87 @@ class QuestionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-question-mark-circle';
 
-    protected static ?string $navigationGroup = 'Quản lý Đánh giá';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('question-resource.navigation.group');
+    }
 
-    protected static ?string $label = 'Câu hỏi';
+    public static function getModelLabel(): string
+    {
+        return __('question-resource.navigation.label');
+    }
 
-    protected static ?string $pluralLabel = 'Danh Sách Câu hỏi';
+    public static function getPluralModelLabel(): string
+    {
+        return __('question-resource.navigation.plural_label');
+    }
 
     public static function form(Form $form): Form
     {
         return $form->schema([
             Grid::make(3)->schema([
-                Section::make('Chi tiết câu hỏi')
+                Section::make(__('question-resource.form.section.question_details'))
                     ->columnSpan(2)
                     ->schema([
                         Textarea::make('question_text')
-                            ->label('Nội dung câu hỏi')
+                            ->label(__('question-resource.form.field.question_text'))
                             ->required(),
                         RichEditor::make('explanation')
-                            ->label('Giải thích đáp án (nếu có)'),
+                            ->label(__('question-resource.form.field.explanation')),
                     ]),
-                Section::make('Thuộc tính')
+                Section::make(__('question-resource.form.section.attributes'))
                     ->columnSpan(1)
                     ->schema([
-                        // 1. Ô Chọn LOẠI CÂU HỎI
-                        SpatieTagsInput::make('question_type_tags') // Use SpatieTagsInput for tags
-                            ->label('Loại câu hỏi')
-                            ->type(QuestionType::key()) // Specify the tag type
+                        Select::make('question_type_tag')
+                            ->label(__('question-resource.form.field.question_type'))
                             ->required()
-                            ->suggestions(QuestionType::values()), // Optional: provide suggestions from enum values
+                            ->native(false)
+                            ->options(
+                                collect(QuestionType::cases())->mapWithKeys(fn($case) => [$case->value => $case->label()])
+                            )
+                            ->loadStateFromRelationshipsUsing(function (Select $component, ?Question $record) {
+                                if (!$record) {
+                                    return;
+                                }
+                                $tag = $record->tagsWithType(QuestionType::key())->first();
+                                if ($tag) {
+                                    $component->state($tag->name);
+                                }
+                            })
+                            ->saveRelationshipsUsing(function (Question $record, $state) {
+                                if ($state) {
+                                    $record->syncTagsWithType([$state], QuestionType::key());
+                                }
+                            }),
 
-                        // 2. Ô Chọn THẺ PHÂN LOẠI (Organization Type)
-                        SpatieTagsInput::make('organization_type_tags') // Use SpatieTagsInput for tags
-                            ->label('Thẻ phân loại')
-                            ->type(OrganizationType::key()) // Specify the tag type
-                            ->suggestions(OrganizationType::values()) // Optional: provide suggestions from enum values
-                            ->required(),
+                        Select::make('organization_type_tag')
+                            ->label(__('question-resource.form.field.classification_tags'))
+                            ->required()
+                            ->native(false)
+                            ->options(
+                                collect(OrganizationType::cases())->mapWithKeys(fn($case) => [$case->value => $case->label()])
+                            )
+                            ->loadStateFromRelationshipsUsing(function (Select $component, ?Question $record) {
+                                if (!$record) {
+                                    return;
+                                }
+                                $tag = $record->tagsWithType(OrganizationType::key())->first();
+                                if ($tag) {
+                                    $component->state($tag->name);
+                                }
+                            })
+                            ->saveRelationshipsUsing(function (Question $record, $state) {
+                                if ($state) {
+                                    $record->syncTagsWithType([$state], OrganizationType::key());
+                                }
+                            }),
 
-                        // 3. Ô Chọn TỔ CHỨC
                         Select::make('organization_id')
-                            ->label('Tổ chức')
+                            ->label(__('question-resource.form.field.organization'))
                             ->relationship('organization', 'name')
                             ->searchable()->preload()->required()->native(false),
                     ]),
             ]),
-
         ]);
     }
 
@@ -82,39 +116,56 @@ class QuestionResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('question_text')
-                    ->label('Nội dung câu hỏi')
+                    ->label(__('question-resource.table.column.question_text'))
                     ->limit(70)
                     ->searchable(),
-
-                // Cột 1: Hiển thị "Loại câu hỏi"
                 SpatieTagsColumn::make('question_tags')
-                    ->label('Loại câu hỏi')
-                    ->type('question-type'), // Specify the tag type
-
-                // CỘT 2: HIỂN THỊ "LOẠI HÌNH TỔ CHỨC" (ĐÃ SỬA)
+                    ->label(__('question-resource.table.column.question_type'))
+                    ->type(QuestionType::key()),
                 SpatieTagsColumn::make('organization_tags')
-                    ->label('Loại hình Tổ chức')
-                    ->type('organization-type'), // Specify the tag type
-
-                // Cột 3: Hiển thị tên Tổ chức
+                    ->label(__('question-resource.table.column.organization_type'))
+                    ->type(OrganizationType::key()),
                 TextColumn::make('organization.name')
-                    ->label('Tổ chức')
+                    ->label(__('question-resource.table.column.organization'))
                     ->sortable()
                     ->searchable(),
-
                 TextColumn::make('updated_at')
-                    ->label('Ngày cập nhật')
+                    ->label(__('question-resource.table.column.updated_at'))
                     ->dateTime('d/m/Y')
                     ->sortable(),
             ])
             ->filters([
-                // Để trống để không gây lỗi
+                // [SỬA LỖI] Viết lại toàn bộ khối filter
+                SelectFilter::make('question_type')
+                    ->label(__('question-resource.table.filter.question_type'))
+                    ->multiple()
+                    ->options(
+                        collect(QuestionType::cases())->mapWithKeys(fn($case) => [$case->value => $case->label()])->all()
+                    )
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['values'],
+                            fn(Builder $query, $tags) => $query->withAnyTags($tags, QuestionType::key())
+                        );
+                    }),
+                SelectFilter::make('organization_type')
+                    ->label(__('question-resource.table.filter.organization_type'))
+                    ->multiple()
+                    ->options(
+                        collect(OrganizationType::cases())->mapWithKeys(fn($case) => [$case->value => $case->label()])->all()
+                    )
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['values'],
+                            fn(Builder $query, $tags) => $query->withAnyTags($tags, OrganizationType::key())
+                        );
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
-                    ->successNotificationTitle('Câu hỏi đã được cập nhật thành công.'),
+                    ->successNotificationTitle(__('question-resource.notification.update_success')),
                 Tables\Actions\DeleteAction::make()
-                    ->successNotificationTitle('Câu hỏi đã được xóa thành công.'),
+                    ->successNotificationTitle(__('question-resource.notification.delete_success')),
             ]);
     }
 

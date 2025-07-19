@@ -10,6 +10,9 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -19,61 +22,71 @@ class ExamResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
 
-    protected static ?string $navigationGroup = 'Quản lý Đánh giá';
+    // [CẬP NHẬT] Sử dụng các phương thức get* để gọi file ngôn ngữ
+    public static function getNavigationGroup(): ?string
+    {
+        return __('exam-resource.navigation.group');
+    }
 
-    protected static ?string $label = 'Bài kiểm tra';
+    public static function getModelLabel(): string
+    {
+        return __('exam-resource.navigation.label');
+    }
 
-    protected static ?string $pluralLabel = 'Danh sách Bài kiểm tra';
+    public static function getPluralModelLabel(): string
+    {
+        return __('exam-resource.navigation.plural_label');
+    }
 
     public static function form(Form $form): Form
     {
         return $form->schema([
             Forms\Components\Grid::make(3)->schema([
                 // CỘT TRÁI (2/3) - NỘI DUNG CHÍNH
-                Forms\Components\Section::make('Nội dung đa ngôn ngữ')
+                Forms\Components\Section::make(__('exam-resource.form.section.main_content'))
                     ->columnSpan(2)
                     ->schema([
                         Forms\Components\Tabs::make('Translations')->tabs([
-                            Forms\Components\Tabs\Tab::make('Tiếng Việt')
+                            Forms\Components\Tabs\Tab::make(__('exam-resource.form.tab.vietnamese'))
                                 ->schema([
-                                    Forms\Components\TextInput::make('title.vi')->label('Tiêu đề')->required(),
-                                    Forms\Components\RichEditor::make('description.vi')->label('Mô tả / Hướng dẫn'),
+                                    Forms\Components\TextInput::make('title.vi')->label(__('exam-resource.form.field.title'))->required(),
+                                    Forms\Components\RichEditor::make('description.vi')->label(__('exam-resource.form.field.description')),
                                 ]),
-                            Forms\Components\Tabs\Tab::make('Tiếng Anh')
+                            Forms\Components\Tabs\Tab::make(__('exam-resource.form.tab.english'))
                                 ->schema([
-                                    Forms\Components\TextInput::make('title.en')->label('Title'),
-                                    Forms\Components\RichEditor::make('description.en')->label('Description / Instructions'),
+                                    Forms\Components\TextInput::make('title.en')->label(__('exam-resource.form.field.title')),
+                                    Forms\Components\RichEditor::make('description.en')->label(__('exam-resource.form.field.description')),
                                 ]),
                         ]),
                         Forms\Components\Grid::make()->schema([
                             Forms\Components\Select::make('course_id')
                                 ->relationship('course', 'name')
-                                ->searchable()->preload()->label('Thuộc khóa học'),
+                                ->searchable()->preload()->label(__('exam-resource.form.field.course')),
                             Forms\Components\Select::make('lecture_id')
                                 ->relationship('lecture', 'title')
-                                ->searchable()->preload()->label('Thuộc bài giảng'),
+                                ->searchable()->preload()->label(__('exam-resource.form.field.lecture')),
                         ]),
                     ]),
 
                 // CỘT PHẢI (1/3) - CÁC CÀI ĐẶT
-                Forms\Components\Section::make('Cài đặt & Thuộc tính')
+                Forms\Components\Section::make(__('exam-resource.form.section.settings'))
                     ->columnSpan(1)
                     ->schema([
-                        Forms\Components\DateTimePicker::make('start_time')->label('Thời gian bắt đầu'),
-                        Forms\Components\DateTimePicker::make('end_time')->label('Thời gian kết thúc'),
-                        Forms\Components\TextInput::make('duration_minutes')->label('Thời gian làm bài (phút)')->numeric()->required()->default(60),
-                        Forms\Components\TextInput::make('max_attempts')->label('Số lần làm bài tối đa')->numeric()->required()->default(1),
-                        Forms\Components\TextInput::make('passing_score')->label('Điểm đạt (%)')->numeric()->required()->default(50),
+                        Forms\Components\DateTimePicker::make('start_time')->label(__('exam-resource.form.field.start_time')),
+                        Forms\Components\DateTimePicker::make('end_time')->label(__('exam-resource.form.field.end_time')),
+                        Forms\Components\TextInput::make('duration_minutes')->label(__('exam-resource.form.field.duration'))->numeric()->required()->default(60),
+                        Forms\Components\TextInput::make('max_attempts')->label(__('exam-resource.form.field.max_attempts'))->numeric()->required()->default(1),
+                        Forms\Components\TextInput::make('passing_score')->label(__('exam-resource.form.field.passing_score'))->numeric()->required()->default(50),
                         Forms\Components\Select::make('show_results_after')
-                            ->label('Hiển thị kết quả')
+                            ->label(__('exam-resource.form.field.show_results'))
                             ->options(
                                 collect(\App\Enums\ExamShowResultsType::cases())->mapWithKeys(fn($case) => [
                                     $case->value => $case->label(),
                                 ])->all()
                             )
                             ->required()->native(false),
-                        Forms\Components\Toggle::make('shuffle_questions')->label('Xáo trộn câu hỏi?'),
-                        Forms\Components\Toggle::make('shuffle_answers')->label('Xáo trộn đáp án?'),
+                        Forms\Components\Toggle::make('shuffle_questions')->label(__('exam-resource.form.field.shuffle_questions')),
+                        Forms\Components\Toggle::make('shuffle_answers')->label(__('exam-resource.form.field.shuffle_answers')),
                     ]),
             ]),
         ]);
@@ -84,25 +97,26 @@ class ExamResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('title')
-                    ->label('Tiêu đề')
+                    ->label(__('exam-resource.table.column.title'))
                     ->limit(40)
                     ->getStateUsing(fn($record): ?string => $record->getTranslation('title', app()->getLocale()))
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->where('title->' . app()->getLocale(), 'like', "%{$search}%");
                     }),
-                // Đã xoá cột exam_type ở đây
-                Tables\Columns\TextColumn::make('course.name')->label('Khóa học')->sortable(),
-                Tables\Columns\TextColumn::make('status')->label('Trạng thái')->badge(),
+                Tables\Columns\TextColumn::make('course.name')->label(__('exam-resource.table.column.course'))->sortable(),
+                Tables\Columns\TextColumn::make('status')->label(__('exam-resource.table.column.status'))->badge(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-
-                // THÊM NÚT MỚI TẠI ĐÂY
                 Action::make('take')
-                    ->label('Làm bài')
+                    ->label(__('exam-resource.table.action.take_exam'))
                     ->icon('heroicon-o-pencil-square')
-                    ->color('success') // Tạo URL đến trang làm bài
+                    ->color('success')
                     ->url(fn(Exam $record): string => static::getUrl('take', ['record' => $record])),
+
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]),
             ]);
     }
 

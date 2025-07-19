@@ -1,179 +1,249 @@
 <x-filament-panels::page>
+
+<style>
+    :root {
+        --body-bg: #f9fafb;
+        --card-bg: #ffffff;
+        --text-color: #1f2937;
+        --text-secondary: #6b7280;
+        --border-color: #e5e7eb;
+        --primary-color: #4f46e5;
+        --primary-color-light: #eef2ff;
+        --primary-text: #ffffff;
+        --success-color: #16a34a;
+        --danger-color: #dc2626;
+    }
+    .dark {
+        --body-bg: #111827;
+        --card-bg: #1f2937;
+        --text-color: #f3f4f6;
+        --text-secondary: #9ca3af;
+        --border-color: #4b5563;
+        --primary-color-light: rgba(79, 70, 229, 0.15);
+    }
+    .exam-container {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        color: var(--text-color);
+    }
+    .card {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+        border-top: 4px solid var(--primary-color);
+    }
+    .text-center { text-align: center; }
+    h2 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.75rem; letter-spacing: -0.02em; }
+    h3 { font-size: 1.25rem; font-weight: 600; line-height: 1.6; }
+    h4 { font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-secondary); }
+    .btn {
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 600;
+        border: 1px solid transparent; background-color: var(--primary-color);
+        color: var(--primary-text); cursor: pointer; transition: all 0.2s ease-in-out;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .btn.btn-secondary {
+        background-color: var(--card-bg); color: var(--primary-color); border-color: var(--primary-color);
+    }
+    .btn.btn-success {
+        background-color: var(--success-color); border-color: var(--success-color);
+    }
+    .btn:disabled {
+        opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;
+    }
+    .btn-palette {
+        width: 40px; height: 40px; padding: 0;
+        border: 1px solid var(--border-color); background-color: var(--card-bg);
+        color: var(--text-color); border-radius: 8px; font-weight: 600;
+        transition: all 0.2s ease; cursor: pointer;
+    }
+    .btn-palette:hover {
+        transform: translateY(-2px); border-color: var(--primary-color);
+    }
+    .btn-palette.current {
+        background-color: var(--primary-color); border-color: var(--primary-color);
+        color: var(--primary-text); box-shadow: 0 0 10px rgba(79, 70, 229, 0.5);
+    }
+    .btn-palette.answered {
+        background-color: #dcfce7; border-color: #86efac; color: #166534;
+    }
+    .dark .btn-palette.answered {
+        background-color: #14532d; border-color: #22c55e; color: #a7f3d0;
+    }
+    .badge {
+        flex-shrink: 0; display: inline-block;
+        padding: 4px 12px; font-size: 0.75rem; font-weight: 600;
+        border-radius: 9999px; background-color: #dbeafe; color: #1e40af;
+    }
+    .dark .badge {
+        background-color: #1e3a8a; color: #bfdbfe;
+    }
+    .form-input, textarea.form-input {
+        width: 100%; padding: 10px 14px;
+        border: 1px solid var(--border-color); background-color: var(--body-bg);
+        border-radius: 8px; color: var(--text-color);
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input:focus, textarea.form-input:focus {
+        outline: none; border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px var(--primary-color-light);
+    }
+    .choice-label {
+        display: block; padding: 16px; border: 2px solid var(--border-color);
+        border-radius: 10px; cursor: pointer; transition: border-color 0.2s, background-color 0.2s;
+        position: relative;
+    }
+    .choice-label:hover { border-color: var(--primary-color); }
+    .choice-label input { display: none; }
+    .choice-label:has(input:checked) {
+        border-color: var(--primary-color); background-color: var(--primary-color-light);
+    }
+    .choice-label:has(input:checked)::after {
+        content: '✔'; position: absolute; top: 50%; right: 16px;
+        transform: translateY(-50%); color: var(--primary-color); font-size: 1.25rem;
+    }
+    /* Style cho câu hỏi điền vào chỗ trống */
+    .fill-blank-input {
+        display: inline-block;
+        width: 150px;
+        border: none;
+        border-bottom: 2px solid var(--text-secondary);
+        background-color: transparent;
+        text-align: center;
+        margin: 0 8px;
+        padding: 2px 4px;
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--text-color);
+    }
+    .fill-blank-input:focus {
+        outline: none;
+        border-bottom-color: var(--primary-color);
+    }
+</style>
+
+<div class="exam-container">
     @if (!$examStarted)
-        {{-- Màn hình bắt đầu bài thi --}}
-        <div class="p-6 text-center bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700">
-            <h2 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{{ $record->title }}</h2>
-            <p class="mb-4 font-normal text-gray-700 dark:text-gray-400">{{ $record->description }}</p>
-            <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Thời gian làm bài: {{ $record->duration_minutes }} phút</p>
+        <div class="card">
+            <h2>{{ $record->title }}</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">{!! $record->description !!}</p>
+            <p style="margin-bottom: 1.5rem; font-weight: 500;">Duration: {{ $record->duration_minutes }} minutes</p>
 
-          <div class="flex items-center justify-center space-x-8">
-    @if ($this->incompleteAttempt)
-        <x-filament::button wire:click="continueExam" color="success">
-            Tiếp tục bài làm dở
-        </x-filament::button>
-    @endif
-
-    <x-filament::button wire:click="startExam" wire:confirm="Bắt đầu làm bài mới sẽ xóa bài làm dở trước đó (nếu có). Bạn có chắc không?">
-        Bắt đầu bài thi mới
-    </x-filament::button>
-</div>
+            <div class="text-center" style="padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                @if ($this->incompleteAttempt)
+                    <button type="button" class="btn btn-secondary" wire:click="continueExam" style="margin-right: 1rem;">Continue unfinished attempt</button>
+                @endif
+                <button type="button" class="btn" wire:click="startExam" wire:confirm="Starting a new attempt will delete the previous unfinished one (if any). Are you sure?">Start new exam</button>
+            </div>
         </div>
     @else
-        <div
-            x-data="{
-                timeLeft: @entangle('timeLeft'),
-                timer: null,
-                init() {
-                    if (this.timeLeft > 0) {
-                        this.timer = setInterval(() => {
-                            this.timeLeft--;
-                            if (this.timeLeft <= 0) {
-                                clearInterval(this.timer);
-                                @this.submitExam();
-                            }
-                        }, 1000);
-                    }
-                    this.$watch('timeLeft', (newValue) => {
-                        if (newValue <= 0) {
-                            clearInterval(this.timer);
-                        }
-                    });
-                },
-                formatTime() {
-                    if (this.timeLeft === null || this.timeLeft < 0) return '00:00';
-                    const minutes = Math.floor(this.timeLeft / 60);
-                    const seconds = this.timeLeft % 60;
-                    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-                }
-            }"
-            class="grid grid-cols-1 gap-6"
-        >
-            <div>
-                <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800">
-                    {{-- Thời gian --}}
-                    <div class="mb-6 text-center">
-                        <h4 class="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Thời gian còn lại</h4>
-                        <div x-text="formatTime()" class="text-4xl font-bold text-gray-900 dark:text-white" :class="{'text-danger-500': timeLeft < 60}"></div>
+        <div x-data="{ timeLeft: @entangle('timeLeft'), timer: null, init() { if (this.timeLeft > 0) { this.timer = setInterval(() => { this.timeLeft--; if (this.timeLeft <= 0) { clearInterval(this.timer); @this.submitExam(); } }, 1000); } }, formatTime() { if (this.timeLeft === null || this.timeLeft < 0) return '00:00'; const minutes = Math.floor(this.timeLeft / 60); const seconds = this.timeLeft % 60; return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`; } }">
+            <div class="card">
+                <div class="text-center" style="margin-bottom: 1.5rem;">
+                    <h4>Time left</h4>
+                    <p x-text="formatTime()" style="font-family: monospace; font-size: 2.5rem; font-weight: 700;" :style="timeLeft < 60 && { color: 'var(--danger-color)' }"></p>
+                </div>
+                <hr style="border-color: var(--border-color);" />
+                <div style="padding-top: 1.5rem;">
+                    <h4>Questions</h4>
+                    <div style="display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 8px;">
+                        @foreach ($questions as $index => $question)
+                            @php
+                                // THÊM LOGIC KIỂM TRA CHO CÂU HỎI MỚI
+                                $isAnswered = !is_null(
+                                    ($singleChoiceAnswers[$question->id] ?? null) ??
+                                    (!empty($multipleChoiceAnswers[$question->id]) ? true : null) ??
+                                    (filled($shortAnswers[$question->id] ?? null) ? true : null) ??
+                                    (filled($essayAnswers[$question->id] ?? null) ? true : null) ??
+                                    (!empty(array_filter($fillBlankAnswers[$question->id] ?? [])) ? true : null)
+                                );
+                                $paletteBtnClass = 'btn-palette';
+                                if ($currentQuestionIndex == $index) $paletteBtnClass .= ' current';
+                                elseif ($isAnswered) $paletteBtnClass .= ' answered';
+                            @endphp
+                            <button type="button" wire:click="goToQuestion({{ $index }})" class="{{ $paletteBtnClass }}">{{ $index + 1 }}</button>
+                        @endforeach
                     </div>
+                </div>
+            </div>
 
-                    {{-- Bảng câu hỏi --}}
-                    <div class="border-t pt-6 dark:border-gray-700">
-                        <h4 class="mb-4 text-sm font-medium text-gray-500 dark:text-gray-400">Danh sách câu hỏi</h4>
-                        <div class="flex pb-2 space-x-2 overflow-x-auto">
-                            @foreach ($questions as $index => $question)
-                                @php
-                                    $isAnswered = false;
-                                    $qType = $this->getQuestionType($question);
-                                    $qId = $question->id;
-                                    if ($qType?->value === 'multiple_choice') {
-                                        $isAnswered = !empty($multipleChoiceAnswers[$qId]);
-                                    } else {
-                                        $isAnswered = !is_null(
-                                            ($singleChoiceAnswers[$qId] ?? null) ??
-                                            ($trueFalseAnswers[$qId] ?? null) ??
-                                            ($shortAnswers[$qId] ?? null) ??
-                                            ($essayAnswers[$qId] ?? null)
-                                        );
-                                    }
-                                @endphp
-                                <button
-                                    type="button"
-                                    wire:click="goToQuestion({{ $index }})"
-                                    class="flex items-center justify-center flex-shrink-0 w-10 h-10 text-sm font-medium border rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-primary-500"
-                                    :class="{
-                                        'bg-primary-600 text-white border-primary-600': {{ $currentQuestionIndex == $index ? 'true' : 'false' }},
-                                        'bg-green-100 text-green-800 border-green-300 dark:bg-green-900 dark:text-green-300 dark:border-green-700': {{ $isAnswered && $currentQuestionIndex != $index ? 'true' : 'false' }},
-                                        'bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600': {{ !$isAnswered && $currentQuestionIndex != $index ? 'true' : 'false' }}
-                                    }"
-                                >
-                                    {{ $index + 1 }}
-                                </button>
+            <div class="card">
+                @php
+                    $currentQuestion = $questions[$currentQuestionIndex];
+                    $questionType = $this->getQuestionType($currentQuestion);
+                @endphp
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; gap: 1rem;">
+                    {{-- Không hiển thị câu hỏi ở đây cho loại FillBlank --}}
+                    @if($questionType?->value !== 'fill_blank')
+                        <h3>{!! $currentQuestion->question_text !!}</h3>
+                    @endif
+                    <span class="badge">{{ $questionMeta[$currentQuestion->id]['points'] ?? 1 }} points</span>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    @switch($questionType)
+                        @case(App\Enums\QuestionType::SingleChoice)
+                        @case(App\Enums\QuestionType::TrueFalse)
+                            @foreach($currentQuestion->choices as $choice)
+                                <label class="choice-label">
+                                    <input type="radio" name="answer.{{ $currentQuestion->id }}" wire:model.live="singleChoiceAnswers.{{ $currentQuestion->id }}" value="{{ $choice->id }}">
+                                    <span>{!! $choice->choice_text !!}</span>
+                                </label>
                             @endforeach
-                        </div>
-                    </div>
+                            @break
+                        @case(App\Enums\QuestionType::MultipleChoice)
+                            @foreach($currentQuestion->choices as $choice)
+                                <label class="choice-label">
+                                    <input type="checkbox" wire:model.live="multipleChoiceAnswers.{{ $currentQuestion->id }}" value="{{ $choice->id }}">
+                                    <span>{!! $choice->choice_text !!}</span>
+                                </label>
+                            @endforeach
+                            @break
+                        @case(App\Enums\QuestionType::ShortAnswer)
+                            <input type="text" class="form-input" wire:model.live.debounce.500ms="shortAnswers.{{ $currentQuestion->id }}" placeholder="Enter your answer">
+                            @break
+                        @case(App\Enums\QuestionType::Essay)
+                            <textarea class="form-input" wire:model.live.debounce.500ms="essayAnswers.{{ $currentQuestion->id }}" placeholder="Enter your essay" rows="6"></textarea>
+                            @break
+
+                        {{-- THÊM GIAO DIỆN CHO CÂU HỎI MỚI --}}
+                        @case(App\Enums\QuestionType::FillBlank)
+                            @php
+                                // Placeholder là [BLANK]
+                                $parts = explode('[BLANK]', $currentQuestion->question_text);
+                            @endphp
+                            <div style="font-size: 1.25rem; line-height: 2.5;">
+                                @foreach($parts as $index => $part)
+                                    {!! $part !!}
+                                    @if(!$loop->last)
+                                        <input type="text"
+                                               class="form-input fill-blank-input"
+                                               wire:model.live.debounce.500ms="fillBlankAnswers.{{ $currentQuestion->id }}.{{ $index }}"
+                                               autocomplete="off">
+                                    @endif
+                                @endforeach
+                            </div>
+                            @break
+
+                    @endswitch
                 </div>
             </div>
 
-            <div>
-                <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800">
-                    @php
-                        $currentQuestion = $questions[$currentQuestionIndex];
-                        $questionType = $this->getQuestionType($currentQuestion);
-                    @endphp
-
-                    {{-- Header câu hỏi (Tiêu đề) --}}
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            {{ $currentQuestion->question_text }}
-                        </h3>
-                        <span class="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300">
-                            {{ $questionMeta[$currentQuestion->id]['points'] ?? 1 }} điểm
-                        </span>
-                    </div>
-
-               {{-- Vùng trả lời --}}
-<div class="space-y-4">
-    @switch($questionType)
-
-        @case(App\Enums\QuestionType::SingleChoice)
-        @case(App\Enums\QuestionType::TrueFalse)
-            @foreach($currentQuestion->choices as $choice)
-                <label class="flex items-center p-3 border rounded-lg cursor-pointer dark:border-gray-700">
-                    <input type="radio" name="answer.{{ $currentQuestion->id }}" wire:model.live="singleChoiceAnswers.{{ $currentQuestion->id }}" value="{{ $choice->id }}" class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-
-                    {{-- SỬA LẠI: Thêm !important vào class margin --}}
-                    <span class="!ml-8 text-sm font-medium text-gray-900 dark:text-white">
-                        {!! $choice->choice_text !!}
-                    </span>
-                </label>
-            @endforeach
-            @break
-
-        @case(App\Enums\QuestionType::MultipleChoice)
-            @foreach($currentQuestion->choices as $choice)
-                <label class="flex items-center p-3 border rounded-lg cursor-pointer dark:border-gray-700">
-                    <input type="checkbox" wire:model.live="multipleChoiceAnswers.{{ $currentQuestion->id }}" value="{{ $choice->id }}" class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-
-                    {{-- SỬA LẠI: Thêm !important vào class margin --}}
-                    <span class="!ml-8 text-sm font-medium text-gray-900 dark:text-white">
-                        {!! $choice->choice_text !!}
-                    </span>
-                </label>
-            @endforeach
-            @break
-
-        @case(App\Enums\QuestionType::ShortAnswer)
-            <input type="text" wire:model.live.debounce.500ms="shortAnswers.{{ $currentQuestion->id }}" placeholder="Nhập câu trả lời của bạn" class="block w-full transition duration-75 border-gray-300 rounded-lg shadow-sm fi-input focus:border-primary-500 focus:ring-1 focus:ring-inset focus:ring-primary-500 disabled:opacity-70 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:border-primary-500">
-            @break
-
-        @case(App\Enums\QuestionType::Essay)
-            <textarea wire:model.live.debounce.500ms="essayAnswers.{{ $currentQuestion->id }}" placeholder="Nhập bài luận của bạn" rows="6" class="block w-full transition duration-75 border-gray-300 rounded-lg shadow-sm fi-input focus:border-primary-500 focus:ring-1 focus:ring-inset focus:ring-primary-500 disabled:opacity-70 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:border-primary-500"></textarea>
-            @break
-    @endswitch
-</div>
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                    <button type="button" class="btn btn-secondary" wire:click="previousQuestion" @disabled($currentQuestionIndex === 0)>Previous</button>
+                    <button type="button" class="btn" wire:click="nextQuestion" @disabled(($questions?->count() ?? 0) > 0 && $currentQuestionIndex === $questions->count() - 1)>Next</button>
                 </div>
-            </div>
-
-            <div>
-                <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800">
-                    <div class="flex justify-between mb-4">
-                        <x-filament::button wire:click="previousQuestion" :disabled="$currentQuestionIndex === 0">
-                            Câu trước
-                        </x-filament::button>
-                        <x-filament::button wire:click="nextQuestion" :disabled="$currentQuestionIndex === $questions->count() - 1">
-                            Câu sau
-                        </x-filament::button>
-                    </div>
-                    <x-filament::button
-                        wire:click="submitExam"
-                        wire:confirm="Bạn có chắc chắn muốn nộp bài không?"
-                        color="success"
-                        class="w-full"
-                    >
-                        Nộp bài
-                    </x-filament::button>
-                </div>
+                <button type="button" class="btn btn-success" wire:click="submitExam" wire:confirm="Are you sure you want to submit?" style="width: 100%;">Submit</button>
             </div>
         </div>
     @endif
+</div>
+
 </x-filament-panels::page>
