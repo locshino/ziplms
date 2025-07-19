@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\Location;
 use App\Models\User;
+use App\Models\Location;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class LocationPolicy

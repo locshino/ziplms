@@ -6,6 +6,7 @@ use App\States\Status;
 use Spatie\ModelStates\HasStates;
 use Spatie\Tags\HasTags;
 use Spatie\Translatable\HasTranslations;
+use App\States\AssignmentStatus;
 
 /**
  * @property string $id
@@ -75,7 +76,7 @@ class Assignment extends Base\Model
         'instructions' => 'json',
         'due_date' => 'datetime',
         'allow_late_submissions' => 'boolean',
-        'status' => Status::class,
+        'status' => AssignmentStatus::class,
     ];
 
     public array $translatable = [

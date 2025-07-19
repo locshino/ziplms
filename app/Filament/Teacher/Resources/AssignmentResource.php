@@ -24,6 +24,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\Tags\Tag;
 
+
 class AssignmentResource extends Resource
 {
     use Translatable;
@@ -88,8 +89,10 @@ class AssignmentResource extends Resource
                 Forms\Components\Select::make('status')
                     ->label('Trạng thái')
                     ->options([
-                        'active' => 'Tích cực',
-                        'inactive' => 'Không hoạt động',
+                          'draft' => 'Nháp',
+        'published' => 'Công khai',
+        'closed' => 'Đã đóng',
+        'cancelled' => 'Hủy bỏ',
                     ])
                     ->required(),
 
@@ -194,7 +197,9 @@ class AssignmentResource extends Resource
 
                     return is_array($vi) && (! empty($vi['file'] ?? null) || ! empty($vi['en'] ?? null));
                 }),
+
         ]);
+        
     }
 
     public static function getEloquentQuery(): Builder
