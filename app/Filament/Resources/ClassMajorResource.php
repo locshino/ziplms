@@ -14,7 +14,10 @@ use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-
+use Spatie\Tags\Tag;
+use Spatie\Tags\TagsInput;
+use Filament\Tables\Columns\TagsColumn;
+use Filament\Tables\Actions\DeleteAction;
 class ClassMajorResource extends Resource
 {
     use Translatable;
@@ -22,7 +25,10 @@ class ClassMajorResource extends Resource
     protected static ?string $model = ClassesMajor::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
+  public static function getTreeLabel(): string
+    {
+        return 'name';
+    }
     public static function form(Form $form): Form
     {
         return $form
@@ -49,7 +55,12 @@ class ClassMajorResource extends Resource
                     ->searchable(),
 
                 Forms\Components\TagsInput::make('tags')
-                    ->label('Tags'),
+                    ->label('Tags')
+                    ->suggestions(Tag::pluck('name')->toArray())
+                    ->saveRelationshipsUsing(function ($record, $state) {
+                        $record->syncTags($state);
+                    })
+                    ,
             ]);
     }
 
@@ -69,6 +80,8 @@ class ClassMajorResource extends Resource
 
                 Tables\Columns\TextColumn::make('organization.name')
                     ->label('Tổ chức'),
+                TagsColumn::make('tags.name')
+                ->label('Tags')
             ])
             ->filters([
                 SelectFilter::make('parent_id')
@@ -88,6 +101,7 @@ class ClassMajorResource extends Resource
             ->actions([
                                     Tables\Actions\EditAction::make(),
                                     Tables\Actions\ViewAction::make(),
+                                    DeleteAction::make(),
                                 ])
             ->bulkActions([
                                     Tables\Actions\BulkActionGroup::make([

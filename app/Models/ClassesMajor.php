@@ -80,7 +80,6 @@ class ClassesMajor extends Base\Model
         'name',
         'description',
     ];
-
     public function organization()
     {
         return $this->belongsTo(Organization::class);

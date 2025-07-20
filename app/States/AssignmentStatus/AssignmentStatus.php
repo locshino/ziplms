@@ -2,7 +2,7 @@
 
 // app/States/AssignmentStatus.php
 
-namespace App\States;
+namespace App\States\AssignmentStatus;
 
 use Illuminate\Support\Str;
 use Spatie\ModelStates\State;
@@ -40,6 +40,9 @@ abstract class AssignmentStatus extends State
         return parent::config()
             ->default(Draft::class)
             ->allowTransition(Draft::class, Published::class)
-            ->allowTransition(Published::class, Closed::class);
+        ->allowTransition(Published::class, Closed::class) 
+        ->allowTransition(Published::class, Cancelled::class)
+        ->allowTransition(Draft::class, Cancelled::class)
+        ->allowTransition(Closed::class, Draft::class); 
     }
 }

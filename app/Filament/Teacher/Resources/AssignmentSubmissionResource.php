@@ -13,6 +13,14 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use App\Filament\Teacher\Resources\AssignmentSubmissionResource\Pages\CreateAssignmentSubmission;
+use App\Filament\Teacher\Resources\AssignmentSubmissionResource\Pages\EditAssignmentSubmission;
 
 class AssignmentSubmissionResource extends Resource
 {
@@ -26,9 +34,27 @@ class AssignmentSubmissionResource extends Resource
     {
         return $form
             ->schema([
-                SpatieMediaLibraryFileUpload::make('attachments')
-                    ->collection('submissions')
-                    ->multiple(),
+                 Section::make('Tệp bài nộp')
+                ->schema([
+                    SpatieMediaLibraryFileUpload::make('attachments')
+                        ->collection('submissions')
+                        ->disabled(), 
+                ]),
+
+            Section::make('Chấm điểm')
+                ->schema([
+                    TextInput::make('grade.grade')
+                        ->label('Điểm số')
+                        ->numeric()
+                        ->minValue(0)
+                        ->maxValue(10)
+                        ->step(0.1)
+                        ->required(),
+
+                    Textarea::make('grade.feedback')
+                        ->label('Nhận xét')
+                        ->rows(4),
+                ]),
 
             ]);
     }
@@ -69,6 +95,12 @@ class AssignmentSubmissionResource extends Resource
                     ->label('Ngày nộp')
                     ->dateTime()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('media.first.file_name')
+    ->label('Tệp')
+    // ->formatStateUsing(fn ($state) => 'Tải xuống')
+    // ->url(fn ($record) => $record->getFirstMediaUrl('submissions'))
+    // ->openUrlInNewTab()
+    // ->icon('heroicon-o-arrow-down-tray'),
 
             ])
 
@@ -77,8 +109,10 @@ class AssignmentSubmissionResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
-                    ->label('Nộp bài')
-                    ->icon('heroicon-o-pencil'),
+    ->label('Comment')
+    ->color('primary') 
+    ->icon('heroicon-m-pencil-square')
+    ->button() ,
                 ViewAction::make(),
             ])
             ->bulkActions([

@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
-use App\States\AssignmentStatus;
-use App\States\Status;
+use App\States\AssignmentStatus\AssignmentStatus;
+
 use Spatie\ModelStates\HasStates;
 use Spatie\Tags\HasTags;
 use Spatie\Translatable\HasTranslations;
+
 
 /**
  * @property string $id

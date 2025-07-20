@@ -4,8 +4,8 @@ namespace App\Filament\Resources\ClassMajorResource\Pages;
 
 use App\Filament\Resources\ClassMajorResource;
 use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Form;                      // Thêm dòng này
-use Filament\Resources\Pages\ViewRecord;   // Thêm dòng này
+use Filament\Forms\Form;                      
+use Filament\Resources\Pages\ViewRecord;   
 
 class ViewClassMajor extends ViewRecord
 {

@@ -16,19 +16,16 @@ class EditAssignmentSubmission extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
-
     public function getTitle(): string
-    {
-        return 'Nộp bài tập';
-    }
+{
+    return 'Chấm điểm bài nộp';
+}
+protected function getSaveButtonLabel(): string
+{
+    return 'Save points'; 
+}
 
-    protected function getFormActions(): array
-    {
-        return [
-            Actions\Action::make('submit')
-                ->label('Nộp bài')
-                ->action('save')
-                ->color('primary'),
-        ];
-    }
+
+ 
+   
 }

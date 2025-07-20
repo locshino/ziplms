@@ -11,4 +11,6 @@ return [
     App\Providers\RepositoryServiceProvider::class,
     App\Providers\TelescopeRegisterProvider::class,
     App\Providers\VoltServiceProvider::class,
+    Studio15\FilamentTree\FilamentTreeServiceProvider::class,
+
 ];
