@@ -16,16 +16,14 @@ class EditAssignmentSubmission extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
     public function getTitle(): string
-{
-    return 'Chấm điểm bài nộp';
-}
-protected function getSaveButtonLabel(): string
-{
-    return 'Save points'; 
-}
+    {
+        return 'Chấm điểm bài nộp';
+    }
 
-
- 
-   
+    protected function getSaveButtonLabel(): string
+    {
+        return 'Save points';
+    }
 }

@@ -17,6 +17,7 @@ class EditAssignment extends EditRecord
             // ...
         ];
     }
+
     protected function mutateFormDataBeforeSave(array $data): array
     {
 
@@ -39,7 +40,6 @@ class EditAssignment extends EditRecord
 
         return $data;
     }
-
 
     protected static string $resource = AssignmentResource::class;
 }

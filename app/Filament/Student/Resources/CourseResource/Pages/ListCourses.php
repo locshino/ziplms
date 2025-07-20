@@ -3,12 +3,12 @@
 namespace App\Filament\Student\Resources\CourseResource\Pages;
 
 use App\Filament\Student\Resources\CourseResource;
+use Closure;
 use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Infolist\Split;
 use Filament\Support\Infolist\TextEntry;
-use Closure;
 
 class ListCourses extends ListRecords
 {
@@ -16,12 +16,13 @@ class ListCourses extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        
+
         return [
             Actions\CreateAction::make(),
         ];
     }
-     public function getTableRecordUrlUsing(): ?Closure
+
+    public function getTableRecordUrlUsing(): ?Closure
     {
         return fn ($record) => CourseResource::getUrl('view', ['record' => $record]);
     }
@@ -32,12 +33,13 @@ class ListCourses extends ListRecords
     }
 
     protected function getTableContentGrid(): ?array
-{
-    return [
-        'default' => 3,
-    ];
-}
-     protected function getTableRecordInfolist(): ?Closure
+    {
+        return [
+            'default' => 3,
+        ];
+    }
+
+    protected function getTableRecordInfolist(): ?Closure
     {
         return fn ($record) => Infolist::make([
             Split::make([
@@ -58,5 +60,4 @@ class ListCourses extends ListRecords
             ]),
         ]);
     }
-
 }

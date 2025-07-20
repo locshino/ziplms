@@ -3,15 +3,11 @@
 namespace App\Filament\Student\Resources;
 
 use App\Filament\Student\Resources\CourseResource\Pages;
-use App\Filament\Student\Resources\CourseResource\RelationManagers;
 use App\Models\Course;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CourseResource extends Resource
 {
