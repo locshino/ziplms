@@ -16,10 +16,10 @@ enum OrganizationType: string
     public function label(): string
     {
         return match ($this) {
-            self::HighSchool => 'Trường cấp 3',
-            self::College => 'Trường cao đẳng',
-            self::University => 'Trường đại học',
-            self::TrainingCenter => 'Trung tâm đào tạo',
+            self::HighSchool => 'High School',
+            self::College => 'College',
+            self::University => 'University',
+            self::TrainingCenter => 'Training Center',
             default => 'Unknown Type',
         };
     }
