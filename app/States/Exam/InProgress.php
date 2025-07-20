@@ -12,7 +12,7 @@ class InProgress extends Status
 
     public static function label(): string
     {
-        return 'Đang diễn ra';
+        return 'In Progress';
     }
 
     public function color(): string

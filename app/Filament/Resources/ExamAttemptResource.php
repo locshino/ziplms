@@ -14,6 +14,14 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
+// Import các lớp trạng thái cụ thể
+use App\States\Exam\Active;
+use App\States\Exam\Cancelled;
+use App\States\Exam\Completed;
+use App\States\Exam\Inactive;
+use App\States\Exam\InProgress;
+
+
 class ExamAttemptResource extends Resource
 {
     use Translatable;
@@ -67,11 +75,11 @@ class ExamAttemptResource extends Resource
                         Components\TextEntry::make('status')
                             ->label(__('exam-attempt-resource.infolist.field.status'))
                             ->badge()
-                            ->color(fn (Status $state): string => $state->color()),
+                            ->color(fn(Status $state): string => $state->color()),
 
                         Components\TextEntry::make('time_spent_seconds')
                             ->label(__('exam-attempt-resource.infolist.field.time_spent'))
-                            ->formatStateUsing(fn (?int $state): string => $state ? gmdate('H:i:s', $state) : 'N/A'),
+                            ->formatStateUsing(fn(?int $state): string => $state ? gmdate('H:i:s', $state) : 'N/A'),
                     ]),
                 Components\Section::make(__('exam-attempt-resource.infolist.section.timestamps'))
                     ->columns(2)
@@ -97,8 +105,38 @@ class ExamAttemptResource extends Resource
                     ->sortable()
                     ->numeric(),
                 Tables\Columns\TextColumn::make('status')->label(__('exam-attempt-resource.table.column.status'))->badge()
-                    ->color(fn (Status $state): string => $state->color()),
+                    ->color(fn(Status $state): string => $state->color()),
                 Tables\Columns\TextColumn::make('completed_at')->label(__('exam-attempt-resource.table.column.submission_date'))->dateTime('d/m/Y')->sortable(),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('exam_id')
+                    ->label(__('exam-attempt-resource.table.column.exam_title'))
+                    ->relationship('exam', 'title')
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\SelectFilter::make('status')
+                    ->label(__('exam-attempt-resource.table.column.status'))
+                    // [SỬA LỖI] Cập nhật logic để lấy tùy chọn từ các lớp State cụ thể
+                    ->options(function (): array {
+                        // Liệt kê các lớp state dựa trên file Status.php mới
+                        $stateClasses = [
+                            Inactive::class,
+                            Active::class,
+                            InProgress::class,
+                            Completed::class,
+                            Cancelled::class,
+                        ];
+
+                        return collect($stateClasses)
+                            ->mapWithKeys(function (string $stateClass) {
+                                // Giá trị được lưu trong DB (ví dụ: 'inactive')
+                                $value = (new $stateClass(new ExamAttempt()))->getValue();
+                                // Nhãn hiển thị (ví dụ: 'Không hoạt động') từ phương thức static label()
+                                $label = $stateClass::label();
+                                return [$value => $label];
+                            })->all();
+                    })
+                    ->searchable(),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()->label(__('exam-attempt-resource.table.action.view_details')),

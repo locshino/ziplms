@@ -8,7 +8,7 @@ class Cancelled extends Status
 
     public static function label(): string
     {
-        return 'Đã hủy';
+        return 'Cancelled';
     }
 
     public function color(): string
