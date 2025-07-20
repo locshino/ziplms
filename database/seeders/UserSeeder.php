@@ -35,17 +35,10 @@ class UserSeeder extends Seeder
             $this->command->warn('Không tìm thấy vai trò Manager, Teacher, hoặc Student. Sẽ tạo người dùng mà không có các vai trò này.');
         }
 
-        if ($organizations->isEmpty()) {
-            $this->command->warn('Không tìm thấy tổ chức nào. Sẽ tạo người dùng mà không có tổ chức.');
-        }
-        // 3. Tạo các người dùng khác và gán vai trò/tổ chức ngẫu nhiên
-        User::factory()->count(20)->create()->each(function (User $user) use ($otherRoles, $organizations) {
+        // 3. Tạo các người dùng khác và gán vai trò ngẫu nhiên từ danh sách
+        User::factory()->count(20)->create()->each(function (User $user) use ($otherRoles) {
             if ($otherRoles->isNotEmpty()) {
                 $user->assignRole($otherRoles->random());
-            }
-            if ($organizations->isNotEmpty()) {
-                // Gán người dùng vào một tổ chức ngẫu nhiên
-                $user->organizations()->attach($organizations->random());
             }
         });
     }

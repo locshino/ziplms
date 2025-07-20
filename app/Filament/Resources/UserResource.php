@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Enums\RoleEnum;
+use App\Enums\UserEnum; // Đảm bảo đã import UserEnum
 use App\Filament\Exports\UserExporter;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\Role;
@@ -73,7 +74,7 @@ class UserResource extends Resource
                 },
             ])
             ->with(['roles', 'organizations', 'classesMajors'])
-            ->whereDoesntHave('roles', fn (Builder $query) => $query
+            ->whereDoesntHave('roles', fn(Builder $query) => $query
                 ->where('name', RoleEnum::Admin->value));
     }
 
@@ -98,10 +99,10 @@ class UserResource extends Resource
                         ->password()
                         ->revealable()
                         ->rule(Password::min(8)->mixedCase()->numbers())
-                        ->dehydrateStateUsing(fn ($state) => Hash::make($state))
-                        ->dehydrated(fn ($state) => filled($state))
-                        ->required(fn (string $operation): bool => $operation === 'create')
-                        ->visible(fn (string $operation): bool => $operation === 'create'),
+                        ->dehydrateStateUsing(fn($state) => Hash::make($state))
+                        ->dehydrated(fn($state) => filled($state))
+                        ->required(fn(string $operation): bool => $operation === 'create')
+                        ->visible(fn(string $operation): bool => $operation === 'create'),
 
                     Forms\Components\TextInput::make('password_confirmation')
                         ->label('Xác nhận mật khẩu')
@@ -110,7 +111,7 @@ class UserResource extends Resource
                         ->requiredWith('password')
                         ->dehydrated(false)
                         ->same('password')
-                        ->visible(fn (string $operation): bool => $operation === 'create'),
+                        ->visible(fn(string $operation): bool => $operation === 'create'),
                     Forms\Components\TextInput::make('code')
                         ->label('Mã người dùng')
                         ->required()
@@ -138,7 +139,7 @@ class UserResource extends Resource
                         ->relationship(
                             name: 'roles',
                             titleAttribute: 'name',
-                            modifyQueryUsing: fn (Builder $query) => $query
+                            modifyQueryUsing: fn(Builder $query) => $query
                                 ->where('name', '!=', RoleEnum::Admin->value)
                         )
                         ->preload()
@@ -151,7 +152,7 @@ class UserResource extends Resource
                         ->label('Trạng thái')
                         ->options(
                             collect(Status::getStates())
-                                ->mapWithKeys(fn ($stateClass) => [$stateClass::$name => $stateClass::label()])
+                                ->mapWithKeys(fn($stateClass) => [$stateClass::$name => $stateClass::label()])
                         )
                         ->required()
                         ->default(\App\States\Active::$name),
@@ -181,7 +182,7 @@ class UserResource extends Resource
                 ->label('Mã')
                 ->sortable()
                 ->default('Null')
-                ->color(fn ($state): string => $state === 'Null' ? 'gray' : 'primary')
+                ->color(fn($state): string => $state === 'Null' ? 'gray' : 'primary')
                 ->searchable(),
             Tables\Columns\TextColumn::make('name')
                 ->label('Tên')
@@ -200,15 +201,17 @@ class UserResource extends Resource
                 ->label('Lớp')
                 ->badge()
                 ->searchable(),
+            // === ĐÃ SỬA: Tích hợp màu từ UserEnum ===
             Tables\Columns\TextColumn::make('roles.name')
                 ->label('Vai trò')
                 ->badge()
-                ->color(fn (string $state): string => RoleEnum::tryFrom($state)?->color() ?? 'gray'),
+                ->color(fn(string $state): string => UserEnum::tryFrom($state)?->color() ?? 'gray'),
+            // ========================================
             Tables\Columns\TextColumn::make('status')
                 ->label('Trạng thái')
                 ->badge()
-                ->formatStateUsing(fn (Status $state) => $state::label())
-                ->color(fn (Status $state) => $state->color()),
+                ->formatStateUsing(fn(Status $state) => $state::label())
+                ->color(fn(Status $state) => $state->color()),
 
             Tables\Columns\TextColumn::make('created_at')
                 ->label('Ngày tạo')
@@ -224,7 +227,7 @@ class UserResource extends Resource
             SelectFilter::make('roles')
                 ->label('Vai trò')
                 ->relationship('roles', 'name')
-                ->options(fn () => Role::where('name', '!=', RoleEnum::Admin->value)->pluck('name', 'id'))
+                ->options(fn() => Role::where('name', '!=', RoleEnum::Admin->value)->pluck('name', 'id'))
                 ->multiple()
                 ->preload(),
             SelectFilter::make('organizations')
@@ -243,7 +246,7 @@ class UserResource extends Resource
                 ->label('Trạng thái')
                 ->options(
                     collect(Status::getStates())
-                        ->mapWithKeys(fn ($stateClass) => [$stateClass::$name => $stateClass::label()])
+                        ->mapWithKeys(fn($stateClass) => [$stateClass::$name => $stateClass::label()])
                 )
                 ->multiple()
                 ->preload(),
@@ -289,11 +292,10 @@ class UserResource extends Resource
         return $infolist
             ->schema([
                 Section::make('Thông tin người dùng')
-                    ->columns(2) // Thiết lập 2 cột cho section này
+                    ->columns(2)
                     ->schema([
-                        // === CỘT BÊN TRÁI ===
                         Infolists\Components\Group::make()
-                            ->columnSpan(1) // Nhóm này chiếm 1 cột
+                            ->columnSpan(1)
                             ->schema([
                                 SpatieMediaLibraryImageEntry::make('profile_picture')
                                     ->collection('profile_picture')
@@ -303,7 +305,7 @@ class UserResource extends Resource
                                     ->alignCenter()
                                     ->columnSpanFull(),
                                 TextEntry::make('name')
-                                    ->label(false) // Ẩn nhãn để tên hiển thị lớn hơn
+                                    ->label(false)
                                     ->size('2xl')
                                     ->weight('bold')
                                     ->alignCenter(),
@@ -320,30 +322,30 @@ class UserResource extends Resource
                                     ->icon('heroicon-m-phone')
                                     ->placeholder('Chưa cập nhật'),
                             ]),
-
-                        // === CỘT BÊN PHẢI ===
                         Infolists\Components\Group::make()
-                            ->columnSpan(1) // Nhóm này chiếm 1 cột
+                            ->columnSpan(1)
                             ->schema([
                                 TextEntry::make('address')
                                     ->label('Địa chỉ')
                                     ->icon('heroicon-m-map-pin')
                                     ->placeholder('Chưa cập nhật'),
+                                // === ĐÃ SỬA: Tích hợp màu từ UserEnum ===
                                 TextEntry::make('roles.name')
                                     ->label('Vai trò')
-                                    ->badge(),
+                                    ->badge()
+                                    ->color(fn(string $state): string => UserEnum::tryFrom($state)?->color() ?? 'gray'),
+                                // ========================================
                                 TextEntry::make('organizations.name')
                                     ->label('Cơ sở')
                                     ->badge()
-                                    ->listWithLineBreaks(), // Hiển thị nhiều cơ sở theo danh sách
+                                    ->listWithLineBreaks(),
                                 TextEntry::make('classesMajors.name')
                                     ->label('Lớp')
                                     ->badge(),
                             ]),
                     ]),
-
                 Section::make('Thống kê học tập')
-                    ->columnSpanFull() // Chiếm toàn bộ chiều rộng
+                    ->columnSpanFull()
                     ->columns(3)
                     ->schema([
                         TextEntry::make('courses_count')
@@ -359,20 +361,19 @@ class UserResource extends Resource
                             ->icon('heroicon-o-presentation-chart-line')
                             ->size(TextEntry\TextEntrySize::Large)
                             ->color('primary')
-                            ->state(fn ($record): string => empty($record->courses_count)
+                            ->state(fn($record): string => empty($record->courses_count)
                                 ? '0%'
-                                : round($record->completed_courses_count / $record->courses_count * 100).'%'),
+                                : round($record->completed_courses_count / $record->courses_count * 100) . '%'),
                     ]),
-
                 Section::make('Trạng thái & Lịch sử')
-                    ->columnSpanFull() // Chiếm toàn bộ chiều rộng
+                    ->columnSpanFull()
                     ->columns(2)
                     ->schema([
                         TextEntry::make('status')
                             ->label('Trạng thái')
                             ->badge()
-                            ->formatStateUsing(fn (Status $state) => $state::label())
-                            ->color(fn (Status $state) => $state->color()),
+                            ->formatStateUsing(fn(Status $state) => $state::label())
+                            ->color(fn(Status $state) => $state->color()),
                         TextEntry::make('email_verified_at')
                             ->label('Đã xác thực')
                             ->since()
