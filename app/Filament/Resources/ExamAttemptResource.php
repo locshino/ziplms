@@ -5,22 +5,20 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ExamAttemptResource\Pages;
 use App\Filament\Resources\ExamAttemptResource\RelationManagers;
 use App\Models\ExamAttempt;
-use App\States\Exam\Status;
-use Filament\Infolists\Components;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Concerns\Translatable;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-
-// Import các lớp trạng thái cụ thể
 use App\States\Exam\Active;
 use App\States\Exam\Cancelled;
 use App\States\Exam\Completed;
 use App\States\Exam\Inactive;
 use App\States\Exam\InProgress;
-
+use App\States\Exam\Status;
+use Filament\Infolists\Components;
+use Filament\Infolists\Infolist;
+// Import các lớp trạng thái cụ thể
+use Filament\Resources\Concerns\Translatable;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ExamAttemptResource extends Resource
 {
@@ -75,11 +73,11 @@ class ExamAttemptResource extends Resource
                         Components\TextEntry::make('status')
                             ->label(__('exam-attempt-resource.infolist.field.status'))
                             ->badge()
-                            ->color(fn(Status $state): string => $state->color()),
+                            ->color(fn (Status $state): string => $state->color()),
 
                         Components\TextEntry::make('time_spent_seconds')
                             ->label(__('exam-attempt-resource.infolist.field.time_spent'))
-                            ->formatStateUsing(fn(?int $state): string => $state ? gmdate('H:i:s', $state) : 'N/A'),
+                            ->formatStateUsing(fn (?int $state): string => $state ? gmdate('H:i:s', $state) : 'N/A'),
                     ]),
                 Components\Section::make(__('exam-attempt-resource.infolist.section.timestamps'))
                     ->columns(2)
@@ -105,7 +103,7 @@ class ExamAttemptResource extends Resource
                     ->sortable()
                     ->numeric(),
                 Tables\Columns\TextColumn::make('status')->label(__('exam-attempt-resource.table.column.status'))->badge()
-                    ->color(fn(Status $state): string => $state->color()),
+                    ->color(fn (Status $state): string => $state->color()),
                 Tables\Columns\TextColumn::make('completed_at')->label(__('exam-attempt-resource.table.column.submission_date'))->dateTime('d/m/Y')->sortable(),
             ])
             ->filters([
@@ -130,9 +128,10 @@ class ExamAttemptResource extends Resource
                         return collect($stateClasses)
                             ->mapWithKeys(function (string $stateClass) {
                                 // Giá trị được lưu trong DB (ví dụ: 'inactive')
-                                $value = (new $stateClass(new ExamAttempt()))->getValue();
+                                $value = (new $stateClass(new ExamAttempt))->getValue();
                                 // Nhãn hiển thị (ví dụ: 'Không hoạt động') từ phương thức static label()
                                 $label = $stateClass::label();
+
                                 return [$value => $label];
                             })->all();
                     })
