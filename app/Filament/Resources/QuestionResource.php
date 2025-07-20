@@ -18,8 +18,8 @@ use Filament\Tables\Columns\SpatieTagsColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use FilamentTiptapEditor\TiptapEditor;
+use Illuminate\Database\Eloquent\Builder;
 
 class QuestionResource extends Resource
 {
@@ -63,7 +63,7 @@ class QuestionResource extends Resource
                             ->required()
                             ->native(false)
                             ->options(
-                                collect(QuestionType::cases())->mapWithKeys(fn($case) => [$case->value => $case->label()])
+                                collect(QuestionType::cases())->mapWithKeys(fn ($case) => [$case->value => $case->label()])
                             )
                             ->loadStateFromRelationshipsUsing(function (Select $component, ?Question $record) {
                                 if (! $record) {
@@ -85,7 +85,7 @@ class QuestionResource extends Resource
                             ->required()
                             ->native(false)
                             ->options(
-                                collect(OrganizationType::cases())->mapWithKeys(fn($case) => [$case->value => $case->label()])
+                                collect(OrganizationType::cases())->mapWithKeys(fn ($case) => [$case->value => $case->label()])
                             )
                             ->loadStateFromRelationshipsUsing(function (Select $component, ?Question $record) {
                                 if (! $record) {
@@ -140,24 +140,24 @@ class QuestionResource extends Resource
                     ->label(__('question-resource.table.filter.question_type'))
                     ->multiple()
                     ->options(
-                        collect(QuestionType::cases())->mapWithKeys(fn($case) => [$case->value => $case->label()])->all()
+                        collect(QuestionType::cases())->mapWithKeys(fn ($case) => [$case->value => $case->label()])->all()
                     )
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['values'],
-                            fn(Builder $query, $tags) => $query->withAnyTags($tags, QuestionType::key())
+                            fn (Builder $query, $tags) => $query->withAnyTags($tags, QuestionType::key())
                         );
                     }),
                 SelectFilter::make('organization_type')
                     ->label(__('question-resource.table.filter.organization_type'))
                     ->multiple()
                     ->options(
-                        collect(OrganizationType::cases())->mapWithKeys(fn($case) => [$case->value => $case->label()])->all()
+                        collect(OrganizationType::cases())->mapWithKeys(fn ($case) => [$case->value => $case->label()])->all()
                     )
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['values'],
-                            fn(Builder $query, $tags) => $query->withAnyTags($tags, OrganizationType::key())
+                            fn (Builder $query, $tags) => $query->withAnyTags($tags, OrganizationType::key())
                         );
                     }),
             ])
