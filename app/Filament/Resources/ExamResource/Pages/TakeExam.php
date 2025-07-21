@@ -8,7 +8,7 @@ use App\Models\Exam;
 use App\Models\ExamAnswer;
 use App\Models\ExamAttempt;
 use App\Models\Question;
-use App\States\Exam\Active; // <-- THÊM DÒNG NÀY
+use App\States\Active;
 use App\States\Exam\Cancelled;
 use App\States\Exam\Completed;
 use App\States\Exam\InProgress;
@@ -62,9 +62,7 @@ class TakeExam extends Page
 
     public function mount(): void
     {
-        // =================================================================
-        // == BẮT ĐẦU: KIỂM TRA TRẠNG THÁI BÀI THI                    ==
-        // =================================================================
+        // XÓA DÒNG DEBUG dd()
 
         // Kiểm tra xem trạng thái của bài thi có phải là một instance của class 'Active' hay không.
         if (! $this->record->status instanceof Active) {
@@ -80,10 +78,6 @@ class TakeExam extends Page
             // Dừng thực thi các mã tiếp theo
             return;
         }
-
-        // =================================================================
-        // == KẾT THÚC: KIỂM TRA TRẠNG THÁI BÀI THI                     ==
-        // =================================================================
     }
 
     #[Computed(persist: true)]
@@ -422,22 +416,28 @@ class TakeExam extends Page
         return $tag ? QuestionType::tryFrom($tag->name) : null;
     }
 
-    protected function getHeaderActions(): array
-    {
-        if ($this->examStarted) {
-            return [];
-        }
+    // protected function getCustomActions(): array
+    // {
+    //     if ($this->examStarted) {
+    //         return [];
+    //     }
 
-        return [
-            Action::make('startExam')
-                ->label('Bắt đầu bài thi mới')
-                ->action('startExam')
-                ->requiresConfirmation()
-                ->modalHeading('Bắt đầu bài thi mới?')
-                ->modalDescription('Bắt đầu một lượt làm bài mới sẽ xoá bài làm dang dở trước đó (nếu có). Bạn có chắc chắn không?')
-                ->modalSubmitActionLabel('Vâng, bắt đầu'),
-        ];
-    }
+    //     return [
+    //         Action::make('startExam')
+    //             ->label('Bắt đầu bài thi mới')
+    //             ->action('startExam')
+    //             ->requiresConfirmation()
+    //             ->modalHeading('Bắt đầu bài thi mới?')
+    //             ->modalDescription('Bắt đầu một lượt làm bài mới sẽ xoá bài làm dang dở trước đó (nếu có). Bạn có chắc chắn không?')
+    //             ->modalSubmitActionLabel('Vâng, bắt đầu'),
+    //     ];
+    // }
+
+    // // QUAN TRỌNG: Phải đăng ký action này để Filament biết đến nó
+    // protected function getActions(): array
+    // {
+    //     return $this->getCustomActions();
+    // }
 
     public function getAnsweredQuestionsCount(): int
     {

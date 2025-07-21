@@ -219,9 +219,7 @@
                     </div>
                 </div>
             </div>
-@php
-    $this->getStartExamAction();
-@endphp
+
             <div class="card">
                 @php
                     $currentQuestion = $questions[$currentQuestionIndex];
