@@ -1,5 +1,6 @@
 <x-filament-panels::page>
 
+{{-- GIỮ NGUYÊN CSS HIỆN TẠI --}}
 <style>
     :root {
         --body-bg: #f9fafb;
@@ -49,7 +50,10 @@
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
     .btn.btn-secondary {
-        background-color: var(--card-bg); color: var(--primary-color); border-color: var(--primary-color);
+        background-color: var(--card-bg); color: var(--text-color); border-color: var(--border-color);
+    }
+    .btn.btn-secondary:hover {
+        background-color: var(--body-bg); color: var(--text-color); border-color: var(--border-color);
     }
     .btn.btn-success {
         background-color: var(--success-color); border-color: var(--success-color);
@@ -108,7 +112,6 @@
         content: '✔'; position: absolute; top: 50%; right: 16px;
         transform: translateY(-50%); color: var(--primary-color); font-size: 1.25rem;
     }
-    /* Style cho câu hỏi điền vào chỗ trống */
     .fill-blank-input {
         display: inline-block;
         width: 150px;
@@ -126,9 +129,39 @@
         outline: none;
         border-bottom-color: var(--primary-color);
     }
+    /* THÊM CSS CHO MODAL */
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+    }
+    .dark .modal-overlay {
+        background-color: rgba(20, 20, 30, 0.7);
+    }
+    .modal-content {
+        max-width: 450px;
+        width: 95%;
+        border-top: 4px solid var(--primary-color);
+        margin: 0; /* Ghi đè margin-bottom từ class .card */
+    }
 </style>
 
-<div class="exam-container">
+{{-- BẮT ĐẦU: KHAI BÁO ALPINE.JS CHO MODAL --}}
+<div class="exam-container" x-data="{
+    isModalOpen: false,
+    modalTitle: '',
+    modalMessage: '',
+    confirmAction: '',
+    confirmButtonText: 'Confirm',
+    confirmButtonClass: 'btn'
+}">
+
+
+
     @if (!$examStarted)
         <div class="card">
             <h2>{{ $record->title }}</h2>
@@ -139,10 +172,25 @@
                 @if ($this->incompleteAttempt)
                     <button type="button" class="btn btn-secondary" wire:click="continueExam" style="margin-right: 1rem;">Continue unfinished attempt</button>
                 @endif
-                <button type="button" class="btn" wire:click="startExam" wire:confirm="Starting a new attempt will delete the previous unfinished one (if any). Are you sure?">Start new exam</button>
+
+                {{-- THAY ĐỔI: Nút Start Exam giờ sẽ mở modal --}}
+                <button
+                    type="button"
+                    class="btn"
+                    @click="
+                        isModalOpen = true;
+                        modalTitle = 'Start New Exam';
+                        modalMessage = 'Starting a new attempt will delete the previous unfinished one (if any). Are you sure?';
+                        confirmAction = 'startExam';
+                        confirmButtonText = 'Yes, Start New';
+                        confirmButtonClass = 'btn';
+                    ">
+                    Start new exam
+                </button>
             </div>
         </div>
     @else
+        {{-- Phần bài thi đang diễn ra --}}
         <div x-data="{ timeLeft: @entangle('timeLeft'), timer: null, init() { if (this.timeLeft > 0) { this.timer = setInterval(() => { this.timeLeft--; if (this.timeLeft <= 0) { clearInterval(this.timer); @this.submitExam(); } }, 1000); } }, formatTime() { if (this.timeLeft === null || this.timeLeft < 0) return '00:00'; const minutes = Math.floor(this.timeLeft / 60); const seconds = this.timeLeft % 60; return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`; } }">
             <div class="card">
                 <div class="text-center" style="margin-bottom: 1.5rem;">
@@ -155,7 +203,6 @@
                     <div style="display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 8px;">
                         @foreach ($questions as $index => $question)
                             @php
-                                // THÊM LOGIC KIỂM TRA CHO CÂU HỎI MỚI
                                 $isAnswered = !is_null(
                                     ($singleChoiceAnswers[$question->id] ?? null) ??
                                     (!empty($multipleChoiceAnswers[$question->id]) ? true : null) ??
@@ -172,14 +219,15 @@
                     </div>
                 </div>
             </div>
-
+@php
+    $this->getStartExamAction();
+@endphp
             <div class="card">
                 @php
                     $currentQuestion = $questions[$currentQuestionIndex];
                     $questionType = $this->getQuestionType($currentQuestion);
                 @endphp
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; gap: 1rem;">
-                    {{-- Không hiển thị câu hỏi ở đây cho loại FillBlank --}}
                     @if($questionType?->value !== 'fill_blank')
                         <h3>{!! $currentQuestion->question_text !!}</h3>
                     @endif
@@ -211,11 +259,8 @@
                         @case(App\Enums\QuestionType::Essay)
                             <textarea class="form-input" wire:model.live.debounce.500ms="essayAnswers.{{ $currentQuestion->id }}" placeholder="Enter your essay" rows="6"></textarea>
                             @break
-
-                        {{-- THÊM GIAO DIỆN CHO CÂU HỎI MỚI --}}
                         @case(App\Enums\QuestionType::FillBlank)
                             @php
-                                // Placeholder là [BLANK]
                                 $parts = explode('[BLANK]', $currentQuestion->question_text);
                             @endphp
                             <div style="font-size: 1.25rem; line-height: 2.5;">
@@ -230,7 +275,6 @@
                                 @endforeach
                             </div>
                             @break
-
                     @endswitch
                 </div>
             </div>
@@ -240,10 +284,58 @@
                     <button type="button" class="btn btn-secondary" wire:click="previousQuestion" @disabled($currentQuestionIndex === 0)>Previous</button>
                     <button type="button" class="btn" wire:click="nextQuestion" @disabled(($questions?->count() ?? 0) > 0 && $currentQuestionIndex === $questions->count() - 1)>Next</button>
                 </div>
-                <button type="button" class="btn btn-success" wire:click="submitExam" wire:confirm="Are you sure you want to submit?" style="width: 100%;">Submit</button>
+
+                {{-- THAY ĐỔI: Nút Submit giờ sẽ mở modal --}}
+                <button
+                    type="button"
+                    class="btn btn-success"
+                    style="width: 100%;"
+                    @click="
+                        isModalOpen = true;
+                        modalTitle = 'Submit Exam';
+                        modalMessage = 'Are you sure you want to submit? You cannot change your answers after this.';
+                        confirmAction = 'submitExam';
+                        confirmButtonText = 'Yes, Submit';
+                        confirmButtonClass = 'btn btn-success';
+                    ">
+                    Submit
+                </button>
             </div>
         </div>
     @endif
+
+    {{-- BẮT ĐẦU: CẤU TRÚC HTML CỦA MODAL --}}
+    <div
+        x-show="isModalOpen"
+        x-transition:enter="ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="modal-overlay"
+        @keydown.escape.window="isModalOpen = false"
+        x-cloak>
+        <div
+            class="card modal-content"
+            @click.outside="isModalOpen = false">
+            <h3 x-text="modalTitle" style="margin-bottom: 1rem;"></h3>
+            <p x-text="modalMessage" style="color: var(--text-secondary); margin-bottom: 1.5rem;"></p>
+            <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+                <button type="button" class="btn btn-secondary" @click="isModalOpen = false">
+                    Cancel
+                </button>
+                <button
+                    type="button"
+                    :class="confirmButtonClass"
+                    @click="$wire.call(confirmAction); isModalOpen = false">
+                    <span x-text="confirmButtonText"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+    {{-- KẾT THÚC: CẤU TRÚC HTML CỦA MODAL --}}
+
 </div>
 
 </x-filament-panels::page>

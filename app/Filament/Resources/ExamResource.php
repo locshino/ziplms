@@ -15,9 +15,11 @@ use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Resources\Concerns\Translatable;
 
 class ExamResource extends Resource
 {
+    use Translatable;
     protected static ?string $model = Exam::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';

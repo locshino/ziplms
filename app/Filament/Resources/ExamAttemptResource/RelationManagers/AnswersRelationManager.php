@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\ExamAttemptResource\RelationManagers;
 
+use App\Enums\QuestionType;
+use App\Models\QuestionChoice;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder; // <-- Thêm import này
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class AnswersRelationManager extends RelationManager
@@ -45,8 +47,8 @@ class AnswersRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            // V THÊM DÒNG NÀY ĐỂ TẢI TRƯỚC DỮ LIỆU
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['question', 'selectedChoice']))
+            // Tải trước các quan hệ để tăng hiệu suất và lấy được loại câu hỏi
+            ->modifyQueryUsing(fn(Builder $query) => $query->with(['question.tags', 'selectedChoice']))
             ->columns([
                 Tables\Columns\TextColumn::make('question.question_text')
                     ->label('Câu hỏi')
@@ -56,32 +58,62 @@ class AnswersRelationManager extends RelationManager
                     ->label('Câu trả lời của HS')
                     ->wrap()
                     ->getStateUsing(function (Model $record): string {
-                        // 1. Ưu tiên hiển thị câu trả lời trắc nghiệm
-                        if ($record->selectedChoice) {
-                            // Giờ đây $record->selectedChoice sẽ không còn là null
-                            return $record->selectedChoice->choice_text;
+                        // Lấy loại câu hỏi từ a question relationship đã tải trước
+                        $questionTypeTag = $record->question?->tagsWithType(QuestionType::key())->first();
+                        $questionType = $questionTypeTag ? QuestionType::tryFrom($questionTypeTag->name) : null;
+
+                        if (!$questionType) {
+                            return 'Không xác định được loại câu hỏi';
                         }
 
-                        // 2. Nếu không có, hiển thị câu trả lời tự luận
-                        if ($record->answer_text) {
-                            return $record->answer_text;
-                        }
+                        switch ($questionType) {
+                            case QuestionType::SingleChoice:
+                            case QuestionType::TrueFalse:
+                                return $record->selectedChoice->choice_text ?? '—';
 
-                        // 3. Nếu không có cả hai, hiển thị gạch ngang
-                        return '—';
+                            case QuestionType::MultipleChoice:
+                                if (empty($record->chosen_option_ids)) {
+                                    return '—';
+                                }
+                                // Lấy nội dung text của các lựa chọn đã chọn
+                                $choices = QuestionChoice::whereIn('id', $record->chosen_option_ids)->pluck('choice_text');
+                                return $choices->isNotEmpty() ? $choices->implode(', ') : '—';
+
+                            case QuestionType::ShortAnswer:
+                            case QuestionType::Essay:
+                            case QuestionType::FillBlank:
+                                // Lấy tất cả các bản dịch có sẵn cho câu trả lời
+                                $translations = $record->getTranslations('answer_text');
+                                if (empty($translations)) {
+                                    return '—';
+                                }
+
+                                // Ưu tiên ngôn ngữ hiện tại, nếu không có thì lấy bản dịch đầu tiên (ngôn ngữ gốc)
+                                $studentAnswer = $record->answer_text ?: reset($translations);
+
+                                // Định dạng lại cho câu hỏi điền vào chỗ trống
+                                if ($questionType === QuestionType::FillBlank) {
+                                    return str_replace('|', ' | ', $studentAnswer);
+                                }
+
+                                return $studentAnswer;
+
+                            default:
+                                return '—';
+                        }
                     }),
 
                 Tables\Columns\IconColumn::make('is_correct')
                     ->label('Kết quả')
-                    ->icon(fn ($state): string => match ($state) {
+                    ->icon(fn($state): string => match ($state) {
                         true => 'heroicon-o-check-circle',
                         false => 'heroicon-o-x-circle',
-                        null => 'heroicon-o-clock',
+                        default => 'heroicon-o-clock', // Dùng default thay cho null
                     })
-                    ->color(fn ($state): string => match ($state) {
+                    ->color(fn($state): string => match ($state) {
                         true => 'success',
                         false => 'danger',
-                        null => 'warning',
+                        default => 'warning', // Dùng default thay cho null
                     }),
 
                 Tables\Columns\TextColumn::make('points_earned')->label('Điểm nhận được')->placeholder('Chưa chấm'),

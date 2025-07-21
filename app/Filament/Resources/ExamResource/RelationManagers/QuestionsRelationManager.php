@@ -31,7 +31,7 @@ class QuestionsRelationManager extends RelationManager
                     ->limit(80)
                     ->wrap()
                     // This correctly gets the translation for the question itself
-                    ->getStateUsing(fn ($record): ?string => $record->getTranslation('question_text', app()->getLocale())),
+                    ->getStateUsing(fn($record): ?string => $record->getTranslation('question_text', app()->getLocale())),
 
                 Tables\Columns\TextColumn::make('points')
                     ->label(__('exam-resource.relation_manager.questions.column.points'))
@@ -44,7 +44,7 @@ class QuestionsRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\AttachAction::make()
                     ->successNotificationTitle(__('exam-resource.relation_manager.questions.action.attach.notification_success'))
-                    ->form(fn (Tables\Actions\AttachAction $action): array => [
+                    ->form(fn(Tables\Actions\AttachAction $action): array => [
                         $action->getRecordSelect(),
                         Forms\Components\TextInput::make('points')
                             ->label(__('exam-resource.relation_manager.questions.form.points'))
@@ -61,10 +61,10 @@ class QuestionsRelationManager extends RelationManager
                                 'min' => __('exam-resource.relation_manager.questions.validation.order_not_negative'),
                             ])
                             ->rules([
-                                // Custom rule to check for uniqueness within this exam
-                                function () use ($action) {
-                                    return function (string $attribute, $value, Closure $fail) use ($action) {
-                                        $exists = $action->getOwnerRecord()->questions()->where('question_order', $value)->exists();
+                                // FIXED: Inject the RelationManager's Livewire component instead of the Action.
+                                function (RelationManager $livewire) {
+                                    return function (string $attribute, $value, Closure $fail) use ($livewire) {
+                                        $exists = $livewire->getOwnerRecord()->questions()->where('question_order', $value)->exists();
                                         if ($exists) {
                                             $fail(__('exam-resource.relation_manager.questions.validation.order_unique'));
                                         }

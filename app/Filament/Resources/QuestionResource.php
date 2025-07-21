@@ -20,9 +20,12 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Resources\Concerns\Translatable;
 
 class QuestionResource extends Resource
 {
+    use Translatable;
+
     protected static ?string $model = Question::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-question-mark-circle';
