@@ -31,7 +31,7 @@ class QuestionsRelationManager extends RelationManager
                     ->limit(80)
                     ->wrap()
                     // This correctly gets the translation for the question itself
-                    ->getStateUsing(fn($record): ?string => $record->getTranslation('question_text', app()->getLocale())),
+                    ->getStateUsing(fn ($record): ?string => $record->getTranslation('question_text', app()->getLocale())),
 
                 Tables\Columns\TextColumn::make('points')
                     ->label(__('exam-resource.relation_manager.questions.column.points'))
@@ -44,7 +44,7 @@ class QuestionsRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\AttachAction::make()
                     ->successNotificationTitle(__('exam-resource.relation_manager.questions.action.attach.notification_success'))
-                    ->form(fn(Tables\Actions\AttachAction $action): array => [
+                    ->form(fn (Tables\Actions\AttachAction $action): array => [
                         $action->getRecordSelect(),
                         Forms\Components\TextInput::make('points')
                             ->label(__('exam-resource.relation_manager.questions.form.points'))

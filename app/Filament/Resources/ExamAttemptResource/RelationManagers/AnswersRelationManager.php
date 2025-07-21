@@ -48,7 +48,7 @@ class AnswersRelationManager extends RelationManager
     {
         return $table
             // Tải trước các quan hệ để tăng hiệu suất và lấy được loại câu hỏi
-            ->modifyQueryUsing(fn(Builder $query) => $query->with(['question.tags', 'selectedChoice']))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['question.tags', 'selectedChoice']))
             ->columns([
                 Tables\Columns\TextColumn::make('question.question_text')
                     ->label('Câu hỏi')
@@ -62,7 +62,7 @@ class AnswersRelationManager extends RelationManager
                         $questionTypeTag = $record->question?->tagsWithType(QuestionType::key())->first();
                         $questionType = $questionTypeTag ? QuestionType::tryFrom($questionTypeTag->name) : null;
 
-                        if (!$questionType) {
+                        if (! $questionType) {
                             return 'Không xác định được loại câu hỏi';
                         }
 
@@ -77,6 +77,7 @@ class AnswersRelationManager extends RelationManager
                                 }
                                 // Lấy nội dung text của các lựa chọn đã chọn
                                 $choices = QuestionChoice::whereIn('id', $record->chosen_option_ids)->pluck('choice_text');
+
                                 return $choices->isNotEmpty() ? $choices->implode(', ') : '—';
 
                             case QuestionType::ShortAnswer:
@@ -105,12 +106,12 @@ class AnswersRelationManager extends RelationManager
 
                 Tables\Columns\IconColumn::make('is_correct')
                     ->label('Kết quả')
-                    ->icon(fn($state): string => match ($state) {
+                    ->icon(fn ($state): string => match ($state) {
                         true => 'heroicon-o-check-circle',
                         false => 'heroicon-o-x-circle',
                         default => 'heroicon-o-clock', // Dùng default thay cho null
                     })
-                    ->color(fn($state): string => match ($state) {
+                    ->color(fn ($state): string => match ($state) {
                         true => 'success',
                         false => 'danger',
                         default => 'warning', // Dùng default thay cho null

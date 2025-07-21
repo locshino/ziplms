@@ -45,10 +45,15 @@ class TakeExam extends Page
 
     // Mảng lưu câu trả lời của người dùng
     public array $singleChoiceAnswers = [];
+
     public array $multipleChoiceAnswers = [];
+
     public array $trueFalseAnswers = [];
+
     public array $shortAnswers = [];
+
     public array $essayAnswers = [];
+
     public array $fillBlankAnswers = [];
 
     public ?int $timeLeft = null;
@@ -93,7 +98,7 @@ class TakeExam extends Page
 
     public function getTitle(): string
     {
-        return $this->examStarted ? 'Đang làm bài: ' . $this->record->title : 'Bắt đầu: ' . $this->record->title;
+        return $this->examStarted ? 'Đang làm bài: '.$this->record->title : 'Bắt đầu: '.$this->record->title;
     }
 
     public function continueExam(): void
@@ -102,6 +107,7 @@ class TakeExam extends Page
 
         if (! $this->attempt) {
             Notification::make()->title('Không tìm thấy bài làm dang dở!')->danger()->send();
+
             return;
         }
 
@@ -119,6 +125,7 @@ class TakeExam extends Page
 
         if ($feedbackData === null) {
             $this->invalidateOldAttempt('Dữ liệu bài làm cũ bị lỗi hoặc không hợp lệ.');
+
             return;
         }
 
@@ -126,6 +133,7 @@ class TakeExam extends Page
 
         if (empty($questionOrderIds)) {
             $this->invalidateOldAttempt('Dữ liệu bài làm cũ bị thiếu thông tin câu hỏi.');
+
             return;
         }
 
@@ -133,6 +141,7 @@ class TakeExam extends Page
 
         if ($this->questions->isEmpty()) {
             $this->invalidateOldAttempt('Tất cả câu hỏi trong bài thi đã bị xóa. Không thể tiếp tục.');
+
             return;
         }
 
@@ -172,6 +181,7 @@ class TakeExam extends Page
 
         if ($this->questions->isEmpty()) {
             Notification::make()->title('Bài thi này không có câu hỏi nào.')->warning()->send();
+
             return;
         }
 
@@ -215,7 +225,7 @@ class TakeExam extends Page
                 $query->orderBy('exam_questions.question_order');
             } else {
                 $questionOrderIdsString = implode(',', array_map('intval', $questionOrderIds));
-                if (!empty($questionOrderIdsString)) {
+                if (! empty($questionOrderIdsString)) {
                     $query->orderByRaw("FIELD(questions.id, $questionOrderIdsString)");
                 }
             }
@@ -360,7 +370,7 @@ class TakeExam extends Page
                 case 'fill_blank':
                     $userAnswers = array_map('trim', $this->fillBlankAnswers[$qId] ?? []);
                     $answerData['answer_text'] = ['vi' => implode('|', $userAnswers)];
-                    $correctAnswers = $question->choices->pluck('choice_text')->map(fn($text) => trim($text))->all();
+                    $correctAnswers = $question->choices->pluck('choice_text')->map(fn ($text) => trim($text))->all();
                     if (! empty($userAnswers) && $userAnswers === $correctAnswers) {
                         $answerData['is_correct'] = true;
                         $answerData['points_earned'] = $this->questionMeta[$qId]['points'] ?? 1;
@@ -408,6 +418,7 @@ class TakeExam extends Page
     public function getQuestionType(Question $question): ?QuestionType
     {
         $tag = $question->tagsWithType(QuestionType::key())->first();
+
         return $tag ? QuestionType::tryFrom($tag->name) : null;
     }
 
@@ -439,11 +450,11 @@ class TakeExam extends Page
             $type = $this->getQuestionType($question)?->value;
 
             $isAnswered = match ($type) {
-                'single_choice', 'true_false' => !is_null($this->singleChoiceAnswers[$qId] ?? null) || !is_null($this->trueFalseAnswers[$qId] ?? null),
-                'multiple_choice' => !empty($this->multipleChoiceAnswers[$qId] ?? []),
-                'fill_blank' => !empty(array_filter($this->fillBlankAnswers[$qId] ?? [])),
-                'short_answer' => !blank($this->shortAnswers[$qId] ?? null),
-                'essay' => !blank($this->essayAnswers[$qId] ?? null),
+                'single_choice', 'true_false' => ! is_null($this->singleChoiceAnswers[$qId] ?? null) || ! is_null($this->trueFalseAnswers[$qId] ?? null),
+                'multiple_choice' => ! empty($this->multipleChoiceAnswers[$qId] ?? []),
+                'fill_blank' => ! empty(array_filter($this->fillBlankAnswers[$qId] ?? [])),
+                'short_answer' => ! blank($this->shortAnswers[$qId] ?? null),
+                'essay' => ! blank($this->essayAnswers[$qId] ?? null),
                 default => false,
             };
 
@@ -451,12 +462,13 @@ class TakeExam extends Page
                 $answeredCount++;
             }
         }
+
         return $answeredCount;
     }
 
     protected function getFooterActions(): array
     {
-        if (!$this->examStarted) {
+        if (! $this->examStarted) {
             return [];
         }
 
@@ -464,7 +476,7 @@ class TakeExam extends Page
             Action::make('submitModal')
                 ->label('Nộp Bài')
                 ->color('primary')
-                ->modalContent(fn(Action $action): View => view(
+                ->modalContent(fn (Action $action): View => view(
                     'filament.resources.exam-resource.pages.actions.submit-modal-content',
                     [
                         'action' => $action,
@@ -475,7 +487,7 @@ class TakeExam extends Page
                 ->registerModalActions([
                     Action::make('confirmSubmit')
                         ->label('Xác nhận & Nộp bài')
-                        ->action(fn() => $this->submitExam()),
+                        ->action(fn () => $this->submitExam()),
                     Action::make('cancel')
                         ->label('Quay lại làm bài')
                         ->color('gray')
