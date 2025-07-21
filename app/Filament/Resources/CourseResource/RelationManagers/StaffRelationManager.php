@@ -9,13 +9,15 @@ use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 
 class StaffRelationManager extends RelationManager
 {
     protected static string $relationship = 'staffAssignments';
+
     protected static ?string $recordTitleAttribute = 'id';
+
     protected static ?string $modelLabel = 'Nhân sự';
+
     protected static ?string $pluralModelLabel = 'Danh sách Nhân sự';
 
     public function form(Form $form): Form
@@ -42,7 +44,6 @@ class StaffRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            // ->recordKey('id') // <--- XÓA DÒNG NÀY
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Họ và Tên')

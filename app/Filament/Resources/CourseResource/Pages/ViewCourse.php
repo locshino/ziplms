@@ -35,13 +35,13 @@ class ViewCourse extends ViewRecord
                             ->label('Số lượng học viên')
                             ->badge()
                             ->color('success')
-                            ->state(fn(Course $record): int => $record->students()->count()),
+                            ->state(fn (Course $record): int => $record->students()->count()),
 
                         TextEntry::make('staff_count')
                             ->label('Số lượng nhân viên/giáo viên') // Sửa lại label cho rõ nghĩa
                             ->badge()
                             ->color('info')
-                            ->state(fn(Course $record): int => $record->staff()->count()), // SỬA Ở ĐÂY
+                            ->state(fn (Course $record): int => $record->staff()->count()), // SỬA Ở ĐÂY
                     ]),
 
                 Section::make('Thông tin môn học')

@@ -3,28 +3,30 @@
 namespace App\Filament\Resources;
 
 use App\Enums\CourseStaffRole;
-use App\Filament\Resources\CourseResource;
-use App\Filament\Resources\UserResource;
 use App\Filament\Resources\CourseStaffAssignmentResource\Pages;
 use App\Models\CourseStaffAssignment;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Validation\Rules\Unique;
-use Filament\Forms\Get;
-use Filament\Forms\Components\Section;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Grouping\Group;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\Rules\Unique;
 
 class CourseStaffAssignmentResource extends Resource
 {
     protected static ?string $model = CourseStaffAssignment::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
+
     protected static ?string $modelLabel = 'Phân công';
+
     protected static ?string $pluralModelLabel = 'Phân công Nhân sự';
+
     protected static ?string $navigationGroup = 'Quản lý Khóa học';
 
     public static function form(Form $form): Form
@@ -46,7 +48,7 @@ class CourseStaffAssignmentResource extends Resource
                             ->relationship(
                                 name: 'user',
                                 titleAttribute: 'name',
-                                modifyQueryUsing: fn(Builder $query) => $query->whereHas('roles', fn($q) => $q->whereIn('name', ['admin', 'manager', 'teacher']))
+                                modifyQueryUsing: fn (Builder $query) => $query->whereHas('roles', fn ($q) => $q->whereIn('name', ['admin', 'manager', 'teacher']))
                             )
                             ->searchable()
                             ->preload()
@@ -62,7 +64,6 @@ class CourseStaffAssignmentResource extends Resource
                             ->validationMessages([
                                 'unique' => 'Nhân sự này đã được phân công cho khóa học này rồi.',
                             ]),
-
 
                         Forms\Components\Select::make('role_tag')
                             ->label('Vai trò trong khóa học')
@@ -81,13 +82,13 @@ class CourseStaffAssignmentResource extends Resource
                     ->label('Khóa học')
                     ->searchable()
                     ->sortable()
-                    ->url(fn($record): string => CourseResource::getUrl('edit', ['record' => $record->course_id])),
+                    ->url(fn ($record): string => CourseResource::getUrl('edit', ['record' => $record->course_id])),
 
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Họ và Tên')
                     ->searchable()
                     ->sortable()
-                    ->url(fn($record): string => UserResource::getUrl('edit', ['record' => $record->user_id])),
+                    ->url(fn ($record): string => UserResource::getUrl('edit', ['record' => $record->user_id])),
 
                 Tables\Columns\TextColumn::make('user.email')
                     ->label('Email')
@@ -111,6 +112,7 @@ class CourseStaffAssignmentResource extends Resource
                         if (empty($data['value'])) {
                             return $query;
                         }
+
                         return $query->whereHas('tags', function ($query) use ($data) {
                             $query->where('name', $data['value']);
                         });
@@ -133,7 +135,7 @@ class CourseStaffAssignmentResource extends Resource
             ->groups([
                 Group::make('course_id')
                     ->label('Khóa học')
-                    ->getTitleFromRecordUsing(fn(CourseStaffAssignment $record): ?string => $record->course?->name),
+                    ->getTitleFromRecordUsing(fn (CourseStaffAssignment $record): ?string => $record->course?->name),
             ])
             ->defaultSort('created_at', 'desc');
     }

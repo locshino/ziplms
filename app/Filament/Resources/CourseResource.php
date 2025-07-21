@@ -5,9 +5,10 @@ namespace App\Filament\Resources;
 use App\Filament\Exports\CourseExporter;
 use App\Filament\Imports\CourseImporter;
 use App\Filament\Resources\CourseResource\Pages;
+use App\Filament\Resources\CourseResource\RelationManagers\StaffRelationManager;
 use App\Models\Course;
 use App\States\Status;
-use Carbon\Carbon; // Thêm import Carbon
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Concerns\Translatable;
@@ -15,11 +16,10 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Actions\ImportAction;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Filter;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use App\Filament\Resources\CourseResource\RelationManagers\StaffRelationManager;
+use Illuminate\Database\Eloquent\Builder;
 
 class CourseResource extends Resource
 {
@@ -74,13 +74,13 @@ class CourseResource extends Resource
                                     ->unique(ignoreRecord: true),
                                 Forms\Components\Select::make('status')
                                     ->label(__('course-resource.form.status'))
-                                    ->options(collect(Status::getStates())->mapWithKeys(fn($state) => [$state::$name => $state::label()]))
+                                    ->options(collect(Status::getStates())->mapWithKeys(fn ($state) => [$state::$name => $state::label()]))
                                     ->required(),
                                 Forms\Components\Select::make('parent_id')
                                     ->label(__('course-resource.form.parent_id'))
                                     ->relationship('parent', 'name')
                                     ->searchable()
-                                    ->options(fn(?Course $record) => Course::where('id', '!=', $record?->id)->pluck('name', 'id')),
+                                    ->options(fn (?Course $record) => Course::where('id', '!=', $record?->id)->pluck('name', 'id')),
                                 Forms\Components\Select::make('organization_id')
                                     ->label(__('course-resource.form.organization_id'))
                                     ->relationship('organization', 'name')
@@ -114,8 +114,8 @@ class CourseResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label(__('course-resource.table.status'))
                     ->badge()
-                    ->formatStateUsing(fn($state) => $state::label())
-                    ->color(fn($state): string => $state->color()),
+                    ->formatStateUsing(fn ($state) => $state::label())
+                    ->color(fn ($state): string => $state->color()),
                 Tables\Columns\SpatieTagsColumn::make('tags')
                     ->label(__('course-resource.table.tags')),
                 Tables\Columns\TextColumn::make('organization.name')
@@ -126,7 +126,7 @@ class CourseResource extends Resource
             ->filters([
                 SelectFilter::make('status')
                     ->label(__('course-resource.filters.status'))
-                    ->options(collect(Status::getStates())->mapWithKeys(fn($state) => [$state::$name => $state::label()])),
+                    ->options(collect(Status::getStates())->mapWithKeys(fn ($state) => [$state::$name => $state::label()])),
 
                 SelectFilter::make('organization')
                     ->label(__('course-resource.filters.organization'))
@@ -151,11 +151,11 @@ class CourseResource extends Resource
                         return $query
                             ->when(
                                 $data['created_from'],
-                                fn(Builder $query, $fromDate): Builder => $query->where('created_at', '>=', Carbon::parse($fromDate)->startOfDay()),
+                                fn (Builder $query, $fromDate): Builder => $query->where('created_at', '>=', Carbon::parse($fromDate)->startOfDay()),
                             )
                             ->when(
                                 $data['created_until'],
-                                fn(Builder $query, $untilDate): Builder => $query->where('created_at', '<=', Carbon::parse($untilDate)->endOfDay()),
+                                fn (Builder $query, $untilDate): Builder => $query->where('created_at', '<=', Carbon::parse($untilDate)->endOfDay()),
                             );
                     }),
             ])

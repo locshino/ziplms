@@ -13,7 +13,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-
 class CourseEnrollmentResource extends Resource
 {
     use Translatable;
@@ -21,7 +20,6 @@ class CourseEnrollmentResource extends Resource
     protected static ?string $model = CourseEnrollment::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
 
     public static function getModelLabel(): string
     {

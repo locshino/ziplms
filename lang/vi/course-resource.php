@@ -45,7 +45,7 @@ return [
         'export' => 'Xuất Excel',
         'import' => 'Nhập Excel',
     ],
-    
+
     'notifications' => [
         'delete_success_title' => 'Xóa môn học thành công',
         'delete_success_body' => 'Môn học đã được xóa khỏi hệ thống.',

@@ -19,6 +19,7 @@ use Spatie\Translatable\HasTranslations;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $staff
  * @property-read int|null $staff_count
  * // ... các PHPDoc khác
+ *
  * @mixin \Eloquent
  */
 class Course extends Base\Model implements HasMedia
@@ -50,7 +51,7 @@ class Course extends Base\Model implements HasMedia
         'organization_id',
         'parent_id',
         'created_by',
-        'code'
+        'code',
     ];
 
     public function registerMediaCollections(): void

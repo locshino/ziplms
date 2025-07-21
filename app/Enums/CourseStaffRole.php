@@ -5,7 +5,7 @@ namespace App\Enums;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
-enum CourseStaffRole: string implements HasLabel, HasColor
+enum CourseStaffRole: string implements HasColor, HasLabel
 {
     case INSTRUCTOR = 'instructor';
     case ASSISTANT = 'assistant';
@@ -19,7 +19,6 @@ enum CourseStaffRole: string implements HasLabel, HasColor
             self::MENTOR => 'Cố vấn học tập',
         };
     }
-
 
     public function getColor(): string|array|null
     {

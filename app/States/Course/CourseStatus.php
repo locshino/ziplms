@@ -17,13 +17,13 @@ abstract class CourseStatus extends State
 
             // 'Chờ duyệt' có thể được chấp thuận và chuyển sang 'Hoạt động'.
             ->allowTransition(Pending::class, Active::class)
-            
+
             // 'Chờ duyệt' cũng có thể bị 'Hoãn'.
             ->allowTransition(Pending::class, Postponed::class)
 
             // 'Hoạt động' có thể bắt đầu và chuyển sang 'Đang tiến hành'.
             ->allowTransition(Active::class, InProgress::class)
-            
+
             // 'Hoạt động' cũng có thể bị 'Hoãn'.
             ->allowTransition(Active::class, Postponed::class)
 
@@ -32,10 +32,10 @@ abstract class CourseStatus extends State
 
             // 'Đang tiến hành' sẽ chuyển thành 'Hoàn thành' khi kết thúc.
             ->allowTransition(InProgress::class, Completed::class)
-            
+
             // 'Đang tiến hành' cũng có thể bị 'Hoãn'.
             ->allowTransition(InProgress::class, Postponed::class)
-            
+
             // 'Bị hoãn' có thể được lên lịch lại và quay về 'Hoạt động'.
             ->allowTransition(Postponed::class, Active::class)
 
@@ -68,6 +68,7 @@ abstract class CourseStatus extends State
         foreach (static::getStates() as $state) {
             $options[$state::$name] = $state::label();
         }
+
         return $options;
     }
 }
