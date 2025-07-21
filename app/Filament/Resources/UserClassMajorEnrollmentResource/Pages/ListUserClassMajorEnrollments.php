@@ -17,4 +17,8 @@ class ListUserClassMajorEnrollments extends ListRecords
 
         ];
     }
+    public function getTitle(): string
+    {
+        return __('filament.List of User Class Major Enrollments');
+    }
 }

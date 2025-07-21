@@ -17,7 +17,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\Tags\Tag;
-
+use Dvarilek\FilamentTableSelect\Components\Form\TableSelect;
 class ClassMajorResource extends Resource
 {
     use Translatable;
@@ -52,10 +52,10 @@ class ClassMajorResource extends Resource
                     ->required(),
 
                 Forms\Components\Select::make('parent_id')
-                    ->relationship('parent', 'name')
+    ->relationship('parent', 'name')
                     ->label('Đơn vị Cha')
                     ->searchable(),
-
+    
                 Forms\Components\TagsInput::make('tags')
                     ->label('Tags')
                     ->suggestions(Tag::pluck('name')->toArray())

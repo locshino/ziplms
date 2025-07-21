@@ -17,4 +17,8 @@ class EditUserClassMajorEnrollment extends EditRecord
             Actions\LocaleSwitcher::make(),
         ];
     }
+    public function getTitle(): string
+    {
+        return __('filament.Edit User Class Major Enrollment');
+    }
 }

@@ -26,7 +26,7 @@
         "bezhansalleh/filament-shield": "^3.3",
         "charrafimed/global-search-modal": "^3.7",
         "croustibat/filament-jobs-monitor": "^2.6",
-        "dvarilek/filament-table-select": "^2.0",
+        "dvarilek/filament-table-select": "2.0.3",
         "eightynine/filament-excel-import": "^3.1",
         "erag/laravel-pwa": "^1.7",
         "fibtegis/filament-infinite-scroll": "^1.0",

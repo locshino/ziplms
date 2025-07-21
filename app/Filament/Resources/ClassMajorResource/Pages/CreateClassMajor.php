@@ -19,4 +19,8 @@ class CreateClassMajor extends CreateRecord
 
         ];
     }
+    public function getTitle(): string
+    {
+        return __('filament.Create Classes Major');
+    }
 }

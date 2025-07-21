@@ -21,4 +21,10 @@ class CreateUserClassMajorEnrollment extends CreateRecord
             }
         }
     }
+     public function getTitle(): string
+    {
+        return __('filament.Create User Class Major Enrollment');
+    }
+
+
 }

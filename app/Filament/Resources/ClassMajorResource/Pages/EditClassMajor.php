@@ -19,4 +19,8 @@ class EditClassMajor extends EditRecord
             Actions\LocaleSwitcher::make(),
         ];
     }
+    public function getTitle(): string
+    {
+        return __('filament.Edit Classes Major');
+    }
 }
