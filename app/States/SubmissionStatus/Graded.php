@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace App\States\SubmissionStatus;
 
 class Graded extends SubmissionStatus

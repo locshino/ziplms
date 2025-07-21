@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace App\States\AssignmentStatus;
 
 class Closed extends AssignmentStatus

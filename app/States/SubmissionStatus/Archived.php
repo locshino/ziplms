@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace App\States\SubmissionStatus;
 
 class Archived extends SubmissionStatus

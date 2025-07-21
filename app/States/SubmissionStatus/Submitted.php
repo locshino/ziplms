@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace App\States\SubmissionStatus;
 
 class Submitted extends SubmissionStatus
