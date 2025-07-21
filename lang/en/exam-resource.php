@@ -23,6 +23,7 @@ return [
             'description' => 'Description / Instructions',
             'course' => 'Belongs to Course',
             'lecture' => 'Belongs to Lecture',
+            'status' => 'Status', // <-- ĐÃ THÊM
             'start_time' => 'Start Time',
             'end_time' => 'End Time',
             'duration' => 'Duration (minutes)',
@@ -43,6 +44,9 @@ return [
         ],
         'action' => [
             'take_exam' => 'Take Exam',
+            'change_status' => 'Change Status',
+            'change_status_success_title' => 'Update Successful',
+            'change_status_success_body' => 'The exam\'s status has been changed successfully.',
         ],
     ],
     'relation_manager' => [

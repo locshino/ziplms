@@ -5,6 +5,8 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ExamResource\Pages;
 use App\Filament\Resources\ExamResource\RelationManagers;
 use App\Models\Exam;
+use App\States\Exam\Active;   // <-- THÊM MỚI
+use App\States\Exam\Inactive; // <-- THÊM MỚI
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Concerns\Translatable;
@@ -25,7 +27,6 @@ class ExamResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
 
-    // [CẬP NHẬT] Sử dụng các phương thức get* để gọi file ngôn ngữ
     public static function getNavigationGroup(): ?string
     {
         return __('exam-resource.navigation.group');
@@ -75,6 +76,22 @@ class ExamResource extends Resource
                 Forms\Components\Section::make(__('exam-resource.form.section.settings'))
                     ->columnSpan(1)
                     ->schema([
+                        Forms\Components\Select::make('status')
+                            ->label(__('exam-resource.form.field.status'))
+                            ->options(function () {
+                                // CẬP NHẬT: Chỉ lấy 2 trạng thái Active và Inactive
+                                $allowedStates = [
+                                    Active::class,
+                                    Inactive::class,
+                                ];
+
+                                return collect($allowedStates)->mapWithKeys(fn ($state) => [
+                                    $state => (new $state(new Exam))->label(),
+                                ])->all();
+                            })
+                            ->required()
+                            ->native(false),
+
                         Forms\Components\DateTimePicker::make('start_time')->label(__('exam-resource.form.field.start_time')),
                         Forms\Components\DateTimePicker::make('end_time')->label(__('exam-resource.form.field.end_time')),
                         Forms\Components\TextInput::make('duration_minutes')->label(__('exam-resource.form.field.duration'))->numeric()->required()->default(60),
@@ -109,7 +126,6 @@ class ExamResource extends Resource
                 Tables\Columns\TextColumn::make('course.name')->label(__('exam-resource.table.column.course'))->sortable(),
                 Tables\Columns\TextColumn::make('status')->label(__('exam-resource.table.column.status'))->badge(),
             ])
-            // [THÊM MỚI] Thêm bộ lọc cho bảng
             ->filters([
                 Tables\Filters\SelectFilter::make('course_id')
                     ->label(__('exam-resource.form.field.course'))
@@ -125,6 +141,7 @@ class ExamResource extends Resource
                     ->url(fn (Exam $record): string => static::getUrl('take', ['record' => $record])),
 
                 ActionGroup::make([
+
                     EditAction::make(),
                     DeleteAction::make(),
                 ]),

@@ -124,20 +124,4 @@ class AnswersRelationManager extends RelationManager
                     ->successNotificationTitle('Điểm cho câu trả lời đã được cập nhật.'),
             ]);
     }
-
-    // Vô hiệu hóa các hành động không cần thiết
-    public function canCreate(): bool
-    {
-        return false;
-    }
-
-    public function canDelete(Model $record): bool
-    {
-        return false;
-    }
-
-    public function canDeleteAny(): bool
-    {
-        return false;
-    }
 }

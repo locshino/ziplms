@@ -23,6 +23,7 @@ return [
             'description' => 'Mô tả / Hướng dẫn',
             'course' => 'Thuộc khóa học',
             'lecture' => 'Thuộc bài giảng',
+            'status' => 'Trạng thái', // <-- ĐÃ THÊM
             'start_time' => 'Thời gian bắt đầu',
             'end_time' => 'Thời gian kết thúc',
             'duration' => 'Thời gian làm bài (phút)',
@@ -43,6 +44,9 @@ return [
         ],
         'action' => [
             'take_exam' => 'Làm bài',
+            'change_status' => 'Đổi trạng thái', // <-- ĐÃ THÊM
+            'change_status_success_title' => 'Cập nhật thành công', // <-- ĐÃ THÊM
+            'change_status_success_body' => 'Trạng thái của bài thi đã được thay đổi.', // <-- ĐÃ THÊM
         ],
     ],
 

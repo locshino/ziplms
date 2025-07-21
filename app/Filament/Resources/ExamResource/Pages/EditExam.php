@@ -13,6 +13,8 @@ class EditExam extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\ForceDeleteAction::make(),
+            Actions\RestoreAction::make(),
             Actions\DeleteAction::make()
                 ->successNotificationTitle('Bài thi đã được xóa thành công.'),
         ];

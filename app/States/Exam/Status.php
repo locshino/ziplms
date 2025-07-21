@@ -43,4 +43,15 @@ abstract class Status extends State
             // Hoặc chuyển sang 'Đã hủy'
             ->allowTransition(InProgress::class, Cancelled::class);
     }
+
+    public static function getStates(): array
+    {
+        return [
+            Active::class,
+            Inactive::class,
+            InProgress::class,
+            Completed::class,
+            Cancelled::class,
+        ];
+    }
 }

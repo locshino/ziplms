@@ -13,6 +13,8 @@ class EditQuestion extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\ForceDeleteAction::make(),
+            Actions\RestoreAction::make(),
             Actions\DeleteAction::make(),
         ];
     }

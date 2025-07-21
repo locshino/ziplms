@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ExamShowResultsType;
-use App\States\Status;
+use App\States\Exam\Status;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\ModelStates\HasStates;
 use Spatie\Translatable\HasTranslations;
