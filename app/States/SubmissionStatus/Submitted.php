@@ -1,6 +1,6 @@
 <?php
 
-// app/States/SubmissionStatus/Submitted.php
+
 
 namespace App\States\SubmissionStatus;
 

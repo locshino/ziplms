@@ -30,19 +30,16 @@ class CourseResource extends Resource
                     ->schema([
                         Forms\Components\Section::make('Thông tin chung')
                             ->schema([
-                                // Tên (đa ngôn ngữ)
+
                                 Forms\Components\TextInput::make('name')
                                     ->label('Tên môn học')
                                     ->required(),
-                                // ->translatable(), // <-- Bỏ đi, không cần thiết
 
-                                // Mô tả (đa ngôn ngữ)
                                 Forms\Components\RichEditor::make('description')
                                     ->label('Mô tả chi tiết')
-                                    // ->translatable() // <-- Bỏ đi, không cần thiết
+
                                     ->columnSpanFull(),
 
-                                // Gắn thẻ
                                 Forms\Components\SpatieTagsInput::make('tags')
                                     ->label('Phân loại'),
                             ])
@@ -50,7 +47,6 @@ class CourseResource extends Resource
                     ])
                     ->columnSpan(['lg' => 2]),
 
-                // Cột phụ bên phải
                 Forms\Components\Group::make()
                     ->schema([
                         Forms\Components\Section::make('Trạng thái & Cấu hình')
@@ -58,11 +54,11 @@ class CourseResource extends Resource
                                 Forms\Components\SpatieMediaLibraryFileUpload::make('image')
                                     ->label('Ảnh đại diện')
                                     ->collection('image')
-                                    ->disk('public') // Chỉ định rõ disk lưu trữ (dù là mặc định)
-                                    ->image() // Bật chế độ xem trước và chỉnh sửa ảnh
-                                    ->live() // Tải lên ngay lập tức, rất quan trọng cho form đa ngôn ngữ
-                                    ->reorderable() // Giúp ổn định trạng thái trong một số trường hợp phức tạp
-                                    ->maxSize(5120) // Tăng giới hạn kích thước tệp lên 5MB (5120 KB)
+                                    ->disk('public')
+                                    ->image()
+                                    ->live()
+                                    ->reorderable()
+                                    ->maxSize(5120)
                                     ->validationMessages([
                                         'max' => 'Dung lượng ảnh không được vượt quá :max KB.',
                                         'image' => 'Tệp tải lên phải là hình ảnh.',
@@ -113,16 +109,14 @@ class CourseResource extends Resource
                     ->searchable()
                     ->sortable(),
 
-                // Cột Mã môn học
                 Tables\Columns\TextColumn::make('code')
                     ->label('Mã')
                     ->searchable(),
 
-                // Cột Trạng thái (hiển thị dạng badge)
                 Tables\Columns\TextColumn::make('status')
                     ->label('Trạng thái')
                     ->badge()
-                    ->formatStateUsing(fn ($state) => $state::label()) // Lấy label từ class State
+                    ->formatStateUsing(fn ($state) => $state::label())
                     ->color(fn ($state): string => match (true) {
                         $state instanceof \App\States\Active => 'success',
                         $state instanceof \App\States\Inactive => 'warning',
@@ -130,35 +124,31 @@ class CourseResource extends Resource
                         default => 'info',
                     }),
 
-                // Cột Thẻ (tags)
                 Tables\Columns\SpatieTagsColumn::make('tags')
                     ->label('Phân Loại'),
 
-                // Cột Tổ chức
                 Tables\Columns\TextColumn::make('organization.name')
                     ->label('Tổ chức')
                     ->sortable(),
 
-                // Cột Ngày cập nhật
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Cập nhật lúc')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true), // Mặc định ẩn
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                // Bộ lọc theo trạng thái
+
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Lọc theo trạng thái')
                     ->options(collect(Status::getStates())->mapWithKeys(fn ($state) => [$state => $state::label()])),
 
-                // Bộ lọc theo tổ chức
                 Tables\Filters\SelectFilter::make('organization_id')
                     ->label('Lọc theo tổ chức')
                     ->relationship('organization', 'name')
                     ->searchable(),
 
-                Tables\Filters\TrashedFilter::make(), // Bộ lọc cho SoftDeletes
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -176,7 +166,7 @@ class CourseResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 

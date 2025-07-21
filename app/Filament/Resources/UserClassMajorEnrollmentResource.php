@@ -5,7 +5,6 @@ namespace App\Filament\Resources;
 use App\Filament\Exports\UserClassMajorEnrollmentExporter;
 use App\Filament\Resources\UserClassMajorEnrollmentResource\Pages;
 use App\Models\Role;
-use app\models\User;
 use App\Models\UserClassMajorEnrollment;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -31,13 +30,13 @@ class UserClassMajorEnrollmentResource extends Resource
             ->schema([
                 Select::make('user_id')
                     ->label('Người dùng')
-                    ->relationship('user', 'name') // quan hệ model User
+                    ->relationship('user', 'name')
                     ->searchable()
                     ->required(),
 
                 Select::make('class_major_id')
                     ->label('Đơn vị cấu trúc')
-                    ->relationship('classMajor', 'name') // quan hệ model ClassMajor
+                    ->relationship('classMajor', 'name')
                     ->searchable()
                     ->required(),
 
@@ -145,8 +144,8 @@ class UserClassMajorEnrollmentResource extends Resource
                     }),
             ])
             ->headerActions([
-                    ExportAction::make()
-                        ->exporter(UserClassMajorEnrollmentExporter::class),
+                ExportAction::make()
+                    ->exporter(UserClassMajorEnrollmentExporter::class),
 
             ]);
     }

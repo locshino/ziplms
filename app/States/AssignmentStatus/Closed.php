@@ -1,6 +1,6 @@
 <?php
 
-// app/States/Closed.php
+
 
 namespace App\States\AssignmentStatus;
 

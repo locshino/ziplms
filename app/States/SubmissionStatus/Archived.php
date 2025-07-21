@@ -1,6 +1,6 @@
 <?php
 
-// app/States/SubmissionStatus/Archived.php
+
 
 namespace App\States\SubmissionStatus;
 
