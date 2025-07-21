@@ -20,7 +20,8 @@ class ListClassMajors extends ListRecords
             Actions\LocaleSwitcher::make(),
         ];
     }
-     public function getTitle(): string
+
+    public function getTitle(): string
     {
         return __('filament.List of Classes Majors');
     }

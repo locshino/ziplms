@@ -110,5 +110,4 @@ class ClassesMajor extends Base\Model
     {
         return $this->morphMany(Schedule::class, 'schedulable');
     }
-    
 }

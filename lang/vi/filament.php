@@ -11,14 +11,14 @@ return [
     'List of Classes Majors' => 'Danh sách đơn vị cấu trúc',
     'New Classes Major' => 'Đơn vị cấu trúc mới',
 
-     'User Class Major Enrollment' => 'Ghi danh Người dùng vào Đơn vị Cấu trúc',
+    'User Class Major Enrollment' => 'Ghi danh Người dùng vào Đơn vị Cấu trúc',
     'User Class Major Enrollments' => 'Danh sách ghi danh Người dùng vào Đơn vị Cấu trúc',
     'Create User Class Major Enrollment' => 'Tạo ghi danh Người dùng vào Đơn vị Cấu trúc',
     'Edit User Class Major Enrollment' => 'Chỉnh sửa ghi danh Người dùng vào Đơn vị Cấu trúc',
     'View User Class Major Enrollment' => 'Xem ghi danh Người dùng vào Đơn vị Cấu trúc',
     'Delete User Class Major Enrollment' => 'Xóa ghi danh Người dùng vào Đơn vị Cấu trúc',
     'List of User Class Major Enrollments' => 'Danh sách ghi danh Người dùng vào Đơn vị Cấu trúc',
-    
+
     'Save' => 'Lưu',
     'Cancel' => 'Hủy',
     'Name' => 'Tên',
