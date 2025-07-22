@@ -1,26 +1,24 @@
 <?php
 
-namespace App\Filament\Teacher\Resources\AssignmentResource\Pages;
+namespace App\Filament\Resources\AssignmentResource\Pages;
 
 use App\Filament\Teacher\Resources\AssignmentResource;
 use Filament\Actions;
-use Filament\Resources\Pages\CreateRecord;
+use Filament\Resources\Pages\EditRecord;
 
-class CreateAssignment extends CreateRecord
+class EditAssignment extends EditRecord
 {
-    use CreateRecord\Concerns\Translatable;
+    use EditRecord\Concerns\Translatable;
 
     protected function getHeaderActions(): array
     {
         return [
             Actions\LocaleSwitcher::make(),
-            // ...
+
         ];
     }
 
-    protected static string $resource = AssignmentResource::class;
-
-    protected function mutateFormDataBeforeCreate(array $data): array
+    protected function mutateFormDataBeforeSave(array $data): array
     {
 
         if ($data['instructions_type'] === 'file') {
@@ -42,4 +40,6 @@ class CreateAssignment extends CreateRecord
 
         return $data;
     }
+
+    protected static string $resource = AssignmentResource::class;
 }

@@ -45,7 +45,7 @@ class UserClassMajorEnrollmentResource extends Resource
                     ->label(__('user_class_major_enrollments.form.role'))
                     ->required()
                     ->options(
-                        fn () => Role::query()->select('id', 'name')
+                        fn() => Role::query()->select('id', 'name')
                             ->pluck('name', 'id'),
                     ),
 
@@ -104,25 +104,25 @@ class UserClassMajorEnrollmentResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
 
             ])->filters([
-                SelectFilter::make('class_major_id')
-                    ->label('Lọc theo đơn vị cấu trúc')
-                    ->options(function () {
-                        return app(UserClassMajorEnrollmentRepositoryInterface::class)->getClassMajorFilterOptions();
-                    })->query(function (Builder $query, array $data): Builder {
-                        return app(UserClassMajorEnrollmentRepositoryInterface::class)->applyClassMajorFilter(
-                            $query,
-                            $data['value']
-                        );
-                    }),
+                    SelectFilter::make('class_major_id')
+                        ->label('Lọc theo đơn vị cấu trúc')
+                        ->options(function () {
+                            return app(UserClassMajorEnrollmentRepositoryInterface::class)->getClassMajorFilterOptions();
+                        })->query(function (Builder $query, array $data): Builder {
+                            return app(UserClassMajorEnrollmentRepositoryInterface::class)->applyClassMajorFilter(
+                                $query,
+                                $data['value']
+                            );
+                        }),
 
-            ])
+                ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\DeleteAction::make()
                     ->using(function ($record) {
                         $user = $record->user;
 
-                        if (! $user) {
+                        if (!$user) {
                             Notification::make()
                                 ->title('Lỗi')
                                 ->body('Bản ghi không có người dùng liên kết.')

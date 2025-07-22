@@ -114,9 +114,4 @@ class User extends Base\AuthModel implements FilamentUser, HasMedia
             default => false,
         };
     }
-
-    public function getRoleNamesStringAttribute(): string
-    {
-        return $this->getRoleNames()->implode(', ');
-    }
 }
