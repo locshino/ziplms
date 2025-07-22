@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3db8072e01ef76259ed8b73088bafa28",
+     "content-hash": "a2b857ad5b0d0e1314f92fd155e1c788",
     "packages": [
         {
             "name": "15web/filament-tree",
@@ -3379,16 +3379,16 @@
         },
         {
             "name": "eightynine/filament-excel-import",
-            "version": "v3.1.11",
+            "version": "v3.1.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/eighty9nine/filament-excel-import.git",
-                "reference": "a8167515d8f6a946a96774ad8e93ad1f10b43f31"
+                 "reference": "e4097eedec47ef75c96ae6b8e9ec11c4dbd75567"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/eighty9nine/filament-excel-import/zipball/a8167515d8f6a946a96774ad8e93ad1f10b43f31",
-                "reference": "a8167515d8f6a946a96774ad8e93ad1f10b43f31",
+                  "url": "https://api.github.com/repos/eighty9nine/filament-excel-import/zipball/e4097eedec47ef75c96ae6b8e9ec11c4dbd75567",
+                "reference": "e4097eedec47ef75c96ae6b8e9ec11c4dbd75567",
                 "shasum": ""
             },
             "require": {

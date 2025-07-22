@@ -22,6 +22,6 @@ class EditClassMajor extends EditRecord
 
     public function getTitle(): string
     {
-        return __('filament.Edit Classes Major');
+        return __('class_major_lang.Edit Classes Major');
     }
 }

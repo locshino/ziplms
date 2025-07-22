@@ -20,6 +20,6 @@ class EditUserClassMajorEnrollment extends EditRecord
 
     public function getTitle(): string
     {
-        return __('filament.Edit User Class Major Enrollment');
+        return __('class_major_lang.Edit User Class Major Enrollment');
     }
 }

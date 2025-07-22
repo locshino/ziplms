@@ -63,41 +63,41 @@ class UserClassMajorEnrollmentResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')
-                    ->label('ID')
+                    ->label(__('user_class_major_enrollments.columns.id'))
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('Người dùng')
+                    ->label(__('user_class_major_enrollments.columns.user.name'))
                     ->searchable()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('classMajor.name')
-                    ->label('Đơn vị cấu trúc')
+                    ->label(__('user_class_major_enrollments.columns.classMajor.name'))
                     ->searchable()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('user.role_names_string')
-                    ->label('Vai trò')
+                    ->label(__('user_class_major_enrollments.columns.user.role_names_string'))
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('start_date')
-                    ->label('Ngày bắt đầu')
+                    ->label(__('user_class_major_enrollments.columns.start_date'))
                     ->date()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('end_date')
-                    ->label('Ngày kết thúc')
+                    ->label(__('user_class_major_enrollments.columns.end_date'))
                     ->date()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Tạo lúc')
+                    ->label(__('user_class_major_enrollments.columns.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Cập nhật lúc')
+                    ->label(__('user_class_major_enrollments.columns.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -106,13 +106,12 @@ class UserClassMajorEnrollmentResource extends Resource
                 SelectFilter::make('class_major_id')
                     ->label('Lọc theo đơn vị cấu trúc')
                     ->options(function () {
-                        return \App\Models\ClassesMajor::query()->pluck('name', 'id');
+                        return app(\App\Repositories\UserClassMajorEnrollmentRepository::class)->getClassMajorFilterOptions();
                     })->query(function (Builder $query, array $data): Builder {
-                        if (! empty($data['value'])) {
-                            $query->where('class_major_id', $data['value']);
-                        }
-
-                        return $query;
+                        return app(\App\Repositories\UserClassMajorEnrollmentRepository::class)->applyClassMajorFilter(
+                            $query,
+                            $data['value']
+                        );
                     }),
 
             ])

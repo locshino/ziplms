@@ -4,6 +4,7 @@ namespace App\Filament\Teacher\Resources;
 
 use App\Filament\Teacher\Resources\AssignmentResource\Pages;
 use App\Models\Assignment;
+use App\Repositories\AssignmentRepository;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
@@ -167,7 +168,7 @@ class AssignmentResource extends Resource
 
             TextEntry::make('instructions_text')
                 ->label('Đề bài')
-                ->default(fn ($record) => optional($record->getTranslation('instructions', 'vi'))['text'] ?? null)
+                ->default(fn ($record) => app(AssignmentRepository::class)->getInstructionsText($record))
                 ->visible(fn ($record) => ! empty(optional($record->getTranslation('instructions', 'vi'))['text'] ?? null)),
 
             TextEntry::make('instructions_url')
@@ -179,23 +180,10 @@ class AssignmentResource extends Resource
 
             TextEntry::make('instructions_file')
                 ->label('Tệp đính kèm')
-                ->url(function ($record) {
-                    $vi = $record->getTranslation('instructions', 'vi');
-                    $filePath = is_array($vi) ? ($vi['file'] ?? $vi['en'] ?? null) : null;
-
-                    return $filePath ? asset('storage/'.$filePath) : null;
-                })
-                ->default(function ($record) {
-                    $vi = $record->getTranslation('instructions', 'vi');
-
-                    return is_array($vi) ? ($vi['file'] ?? $vi['en'] ?? null) : null;
-                })
+                ->url(fn ($record) => app(AssignmentRepository::class)->getInstructionsFileUrl($record))
+                ->default(fn ($record) => app(AssignmentRepository::class)->getInstructionsFileDefault($record))
                 ->openUrlInNewTab()
-                ->visible(function ($record) {
-                    $vi = $record->getTranslation('instructions', 'vi');
-
-                    return is_array($vi) && (! empty($vi['file'] ?? null) || ! empty($vi['en'] ?? null));
-                }),
+                ->visible(fn ($record) => app(AssignmentRepository::class)->shouldShowInstructionsFile($record) !== null),
 
         ]);
 

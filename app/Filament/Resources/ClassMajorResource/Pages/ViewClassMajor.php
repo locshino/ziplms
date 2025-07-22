@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ClassMajorResource\Pages;
 
 use App\Filament\Resources\ClassMajorResource;
+use Filament\Actions;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\ViewRecord;
@@ -27,5 +28,18 @@ class ViewClassMajor extends ViewRecord
             Placeholder::make('parent')->label('Đơn vị Cha')
                 ->content(fn () => $this->record->parent ? $this->record->parent->name : 'Không có'),
         ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+
+            Actions\DeleteAction::make(),
+            Actions\ForceDeleteAction::make(),
+            Actions\RestoreAction::make(),
+
+            // FilamentRecordNav\Actions\PreviousRecordAction::make(),
+            // FilamentRecordNav\Actions\NextRecordAction::make(),
+        ];
     }
 }

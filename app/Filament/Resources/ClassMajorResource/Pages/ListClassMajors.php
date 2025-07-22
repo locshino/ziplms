@@ -23,6 +23,6 @@ class ListClassMajors extends ListRecords
 
     public function getTitle(): string
     {
-        return __('filament.List of Classes Majors');
+        return __('class_major_lang.List of Classes Majors');
     }
 }

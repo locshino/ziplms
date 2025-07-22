@@ -22,6 +22,6 @@ class CreateClassMajor extends CreateRecord
 
     public function getTitle(): string
     {
-        return __('filament.Create Classes Major');
+        return __('class_major_lang.Create Classes Major');
     }
 }

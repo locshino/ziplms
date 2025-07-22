@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Exports\ClassesMajorExporter;
 use App\Filament\Resources\ClassMajorResource\Pages;
 use App\Models\ClassesMajor;
+use App\Repositories\ClassesMajorRepository;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Concerns\Translatable;
@@ -70,32 +71,26 @@ class ClassMajorResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Tên đơn vị')
+                    ->label(__('classes_major.columns.name'))
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('code')
-                    ->label('Mã'),
+                    ->label(__('classes_major.columns.code')),
 
                 Tables\Columns\TextColumn::make('parent.name')
-                    ->label('Đơn vị Cha'),
+                    ->label(__('classes_major.columns.parent.name')),
 
                 Tables\Columns\TextColumn::make('organization.name')
-                    ->label('Tổ chức'),
+                    ->label(__('classes_major.columns.organization.name')),
                 TagsColumn::make('tags.name')
-                    ->label('Tags'),
+                    ->label(__('classes_major.columns.tags.name')),
             ])
             ->filters([
                 SelectFilter::make('parent_id')
                     ->label('Lọc theo loại')
-                    ->options(fn () => ClassesMajor::query()
-                        ->select('id', 'name')
-                        ->pluck('name', 'id'))
+                    ->options(fn () => app(ClassesMajorRepository::class)->getParentOptions())
                     ->query(function (Builder $query, array $data): Builder {
-                        if (! empty($data['value'])) {
-                            $query->whereRaw('parent_id = ?', [$data['value']]);
-                        }
-
-                        return $query;
+                        return app(ClassesMajorRepository::class)->applyParentFilter($query, $data['value']);
                     }),
 
             ])

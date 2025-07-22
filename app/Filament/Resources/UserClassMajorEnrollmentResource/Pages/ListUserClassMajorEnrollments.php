@@ -20,6 +20,6 @@ class ListUserClassMajorEnrollments extends ListRecords
 
     public function getTitle(): string
     {
-        return __('filament.List of User Class Major Enrollments');
+        return __('class_major_lang.List of User Class Major Enrollments');
     }
 }
