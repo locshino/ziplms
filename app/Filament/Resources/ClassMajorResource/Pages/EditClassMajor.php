@@ -15,8 +15,12 @@ class EditClassMajor extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
             Actions\LocaleSwitcher::make(),
+            Actions\DeleteAction::make(),
+            Actions\ForceDeleteAction::make(),
+            Actions\RestoreAction::make(),
+
+            
         ];
     }
 
@@ -24,4 +28,5 @@ class EditClassMajor extends EditRecord
     {
         return __('class_major_lang.Edit Classes Major');
     }
+    
 }

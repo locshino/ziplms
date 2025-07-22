@@ -14,7 +14,7 @@ class EditAssignment extends EditRecord
     {
         return [
             Actions\LocaleSwitcher::make(),
-            // ...
+
         ];
     }
 
