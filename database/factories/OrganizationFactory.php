@@ -19,7 +19,6 @@ class OrganizationFactory extends Factory
 
         return [
             'name' => $name,
-            'slug' => Str::slug($name),
             'address' => fake()->address,
             'phone_number' => fake()->phoneNumber,
             'settings' => json_encode(['theme' => 'default']),
