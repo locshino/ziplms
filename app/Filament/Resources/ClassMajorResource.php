@@ -88,7 +88,7 @@ class ClassMajorResource extends Resource
             ->filters([
                 SelectFilter::make('parent_id')
                     ->label('Lọc theo loại')
-                    ->options(fn() => app(ClassesMajorRepositoryInterface::class)->getParentOptions())
+                    ->options(fn () => app(ClassesMajorRepositoryInterface::class)->getParentOptions())
                     ->query(function (Builder $query, array $data): Builder {
                         return app(ClassesMajorRepositoryInterface::class)->applyParentFilter($query, $data['value']);
                     }),

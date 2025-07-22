@@ -12,7 +12,7 @@ class CreateUserClassMajorEnrollment extends CreateRecord
 
     protected function afterCreate(): void
     {
-        $roleId = $this->data['role_id'] ?? null; 
+        $roleId = $this->data['role_id'] ?? null;
 
         if ($roleId && $this->record->user) {
             $role = Role::find($roleId);
