@@ -3,7 +3,8 @@
 namespace App\Models;
 
 use App\Enums\ExamShowResultsType;
-use App\States\Status;
+use App\States\Exam\Status;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\ModelStates\HasStates;
 use Spatie\Translatable\HasTranslations;
 
@@ -134,9 +135,12 @@ class Exam extends Base\Model
         return $this->hasMany(ExamQuestion::class);
     }
 
-    public function questions()
+    public function questions(): BelongsToMany
     {
-        return $this->belongsToMany(Question::class, 'exam_questions');
+        return $this->belongsToMany(Question::class, 'exam_questions')
+            ->using(ExamQuestion::class)
+            ->withPivot('id', 'points', 'question_order')
+            ->withTimestamps();
     }
 
     public function attempts()

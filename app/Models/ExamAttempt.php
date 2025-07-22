@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\States\Status;
+use App\States\Exam\Status;
 use Spatie\ModelStates\HasStates;
 use Spatie\Translatable\HasTranslations;
 
@@ -57,7 +57,7 @@ use Spatie\Translatable\HasTranslations;
  *
  * @mixin \Eloquent
  */
-class ExamAttempt extends Base\Model
+class ExamAttempt extends Base\Pivot
 {
     use HasStates,
         HasTranslations;
@@ -97,6 +97,6 @@ class ExamAttempt extends Base\Model
 
     public function answers()
     {
-        return $this->hasMany(ExamAnswer::class);
+        return $this->hasMany(ExamAnswer::class, 'exam_attempt_id');
     }
 }
