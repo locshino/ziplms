@@ -82,10 +82,9 @@ use Spatie\Permission\Traits\HasRoles;
  *
  * @mixin \Eloquent
  */
-class User extends Base\AuthModel implements FilamentUser, HasMedia
+class User extends Base\AuthModel implements  HasMedia
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use Authorizable, HasRoles, HasStates, InteractsWithMedia, Notifiable;
+    use HasStates, InteractsWithMedia;
 
     /**
      * The attributes that are mass assignable.
@@ -181,28 +180,5 @@ class User extends Base\AuthModel implements FilamentUser, HasMedia
             ->width(100)
             ->height(100)
             ->sharpen(10);
-    }
-
-    /**
-     * Checks if the user can access a specific Filament Panel.
-     * This is the central authorization method for Filament panels.
-     *
-     * @param  \Filament\Panel  $panel  The panel instance being accessed.
-     */
-    public function canAccessPanel(Panel $panel): bool
-    {
-        // The logic checks based on the panel's ID and the user's role.
-        // For example:
-        // - To access the 'admin' panel (at /admin), the user must have the 'admin' role.
-        // - To access the 'teacher' panel (at /teacher), the user must have the 'teacher' role.
-
-        // A match statement is used to handle more complex cases.
-        return match ($panel->getId()) {
-            'admin' => $this->hasRole('admin'),
-            'manager' => $this->hasRole(['manager', 'admin']), // 'manager' or 'admin' role can access the manager panel
-            'teacher' => $this->hasAnyRole(['teacher', 'admin']), // 'teacher' or 'admin' role can access the teacher panel
-            'student' => $this->hasRole('student'),
-            default => false,
-        };
-    }
+    } 
 }

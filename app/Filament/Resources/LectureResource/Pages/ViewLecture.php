@@ -5,6 +5,7 @@ namespace App\Filament\Resources\LectureResource\Pages;
 use App\Filament\Resources\LectureResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
+use Nben\FilamentRecordNav;
 
 class ViewLecture extends ViewRecord
 {
@@ -13,13 +14,13 @@ class ViewLecture extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            // Nút "Sửa" đã có
             Actions\EditAction::make(),
+            Actions\DeleteAction::make(),
+            Actions\ForceDeleteAction::make(),
+            Actions\RestoreAction::make(),
 
-            Actions\Action::make('cancel')
-                ->label('Cancel')
-                ->url($this->getResource()::getUrl('index')) 
-                ->color('gray'),
+            FilamentRecordNav\Actions\PreviousRecordAction::make(),
+            FilamentRecordNav\Actions\NextRecordAction::make(),
         ];
     }
 }

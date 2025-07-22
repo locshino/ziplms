@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\LectureEnum;
 use App\States\Status;
 use Spatie\ModelStates\HasStates;
 use Spatie\Translatable\HasTranslations;
@@ -65,7 +66,7 @@ class Lecture extends Base\Model
     protected $casts = [
         'title' => 'json',
         'description' => 'json',
-        'status' => Status::class,
+        'status' => LectureEnum::class,
     ];
 
     public $translatable = [

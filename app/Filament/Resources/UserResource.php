@@ -3,7 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Enums\RoleEnum;
-use App\Enums\UserEnum; // Đảm bảo đã import UserEnum
+use App\Enums\UserEnum;
 use App\Filament\Exports\UserExporter;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\Role;
@@ -30,21 +30,16 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
-
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-users';
-
     protected static ?string $modelLabel = 'Người dùng';
-
     public static function form(Form $form): Form
     {
         return $form
             ->schema(static::getFormSchema());
     }
-
     public static function table(Table $table): Table
     {
         return $table
@@ -53,7 +48,6 @@ class UserResource extends Resource
             ->actions(static::getTableActions())
             ->bulkActions(static::getTableBulkActions());
     }
-
     public static function getPages(): array
     {
         return [
@@ -63,7 +57,6 @@ class UserResource extends Resource
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
-
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
@@ -77,7 +70,6 @@ class UserResource extends Resource
             ->whereDoesntHave('roles', fn(Builder $query) => $query
                 ->where('name', RoleEnum::Admin->value));
     }
-
     public static function getFormSchema(): array
     {
         return [
@@ -141,13 +133,10 @@ class UserResource extends Resource
                             titleAttribute: 'name',
                             modifyQueryUsing: fn(Builder $query) => $query
                                 ->where('name', '!=', RoleEnum::Admin->value)
+                                ->where('name', '!=', RoleEnum::Dev->value)
                         )
                         ->preload()
-                        ->searchable()
-                        ->disabled(function ($livewire): bool {
-                            return $livewire instanceof Pages\CreateUser && filled($livewire->role);
-                        })
-                        ->dehydrated(false),
+                        ->searchable(),
                     Forms\Components\Select::make('status')
                         ->label('Trạng thái')
                         ->options(
@@ -170,7 +159,6 @@ class UserResource extends Resource
                 ])->columns(2),
         ];
     }
-
     public static function getTableColumns(): array
     {
         return [
@@ -201,12 +189,10 @@ class UserResource extends Resource
                 ->label('Lớp')
                 ->badge()
                 ->searchable(),
-            // === ĐÃ SỬA: Tích hợp màu từ UserEnum ===
             Tables\Columns\TextColumn::make('roles.name')
                 ->label('Vai trò')
                 ->badge()
                 ->color(fn(string $state): string => UserEnum::tryFrom($state)?->color() ?? 'gray'),
-            // ========================================
             Tables\Columns\TextColumn::make('status')
                 ->label('Trạng thái')
                 ->badge()
@@ -220,7 +206,6 @@ class UserResource extends Resource
                 ->toggleable(isToggledHiddenByDefault: true),
         ];
     }
-
     public static function getTableFilters(): array
     {
         return [
@@ -252,7 +237,6 @@ class UserResource extends Resource
                 ->preload(),
         ];
     }
-
     public static function getTableActions(): array
     {
         return [
@@ -267,7 +251,6 @@ class UserResource extends Resource
                 ),
         ];
     }
-
     public static function getTableBulkActions(): array
     {
         return [
@@ -286,7 +269,6 @@ class UserResource extends Resource
             ]),
         ];
     }
-
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist
@@ -329,12 +311,10 @@ class UserResource extends Resource
                                     ->label('Địa chỉ')
                                     ->icon('heroicon-m-map-pin')
                                     ->placeholder('Chưa cập nhật'),
-                                // === ĐÃ SỬA: Tích hợp màu từ UserEnum ===
                                 TextEntry::make('roles.name')
                                     ->label('Vai trò')
                                     ->badge()
                                     ->color(fn(string $state): string => UserEnum::tryFrom($state)?->color() ?? 'gray'),
-                                // ========================================
                                 TextEntry::make('organizations.name')
                                     ->label('Cơ sở')
                                     ->badge()

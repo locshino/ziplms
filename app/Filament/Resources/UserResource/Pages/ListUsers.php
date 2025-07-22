@@ -16,23 +16,7 @@ class ListUsers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ActionGroup::make([
-                Actions\Action::make('new_student')
-                    ->label('Tạo Học sinh mới')
-                    ->icon('heroicon-o-academic-cap')
-                    ->url(static::getResource()::getUrl('create', ['role' => RoleEnum::Student->value])),
-                Actions\Action::make('new_teacher')
-                    ->label('Tạo Giáo viên mới')
-                    ->icon('heroicon-o-user-circle')
-                    ->url(static::getResource()::getUrl('create', ['role' => RoleEnum::Teacher->value])),
-                Actions\Action::make('new_manager')
-                    ->label('Tạo Quản lý mới')
-                    ->icon('heroicon-o-briefcase')
-                    ->url(static::getResource()::getUrl('create', ['role' => RoleEnum::Manager->value])),
-            ])
-                ->label('Tạo người dùng mới')
-                ->icon('heroicon-m-plus')
-                ->button(),
+            Actions\CreateAction::make(),
 
             Actions\ExportAction::make()
                 ->label('Xuất Excel')

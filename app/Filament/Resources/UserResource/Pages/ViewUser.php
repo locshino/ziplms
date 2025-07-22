@@ -4,8 +4,8 @@ namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
 use Filament\Actions;
-use Filament\Actions\Action;
-use Filament\Resources\Pages\ViewRecord; // <-- Thêm use statement này
+use Filament\Resources\Pages\ViewRecord;
+use Nben\FilamentRecordNav;
 
 class ViewUser extends ViewRecord
 {
@@ -14,15 +14,13 @@ class ViewUser extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('back')
-                ->label('Quay về')
-                ->color('gray')
-                ->icon('heroicon-o-arrow-left')
-                ->url(static::getResource()::getUrl('index')),
+            Actions\EditAction::make(),
+            Actions\DeleteAction::make(),
+            Actions\ForceDeleteAction::make(),
+            Actions\RestoreAction::make(),
 
-            Actions\EditAction::make()->label('Chỉnh sửa')
-                ->icon('heroicon-o-pencil')
-                ->color('primary'),
+            FilamentRecordNav\Actions\PreviousRecordAction::make(),
+            FilamentRecordNav\Actions\NextRecordAction::make(),
         ];
     }
 }
