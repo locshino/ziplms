@@ -5,18 +5,18 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\OrganizationResource\Pages;
 use App\Models\Organization;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\Indicator;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\Indicator;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 class OrganizationResource extends Resource
@@ -24,8 +24,11 @@ class OrganizationResource extends Resource
     protected static ?string $model = Organization::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
     protected static ?string $navigationLabel = 'Tổ chức';
+
     protected static ?string $pluralLabel = 'Tổ chức';
+
     protected static ?string $modelLabel = 'Tổ chức';
 
     public static function form(Form $form): Form
@@ -121,21 +124,22 @@ class OrganizationResource extends Resource
                         return $query
                             ->when(
                                 $data['name'],
-                                fn(Builder $query, $name): Builder => $query->where('name', 'like', "%{$name}%")
+                                fn (Builder $query, $name): Builder => $query->where('name', 'like', "%{$name}%")
                             )
                             ->when(
                                 $data['phone_number'],
-                                fn(Builder $query, $phone): Builder => $query->where('settings->phone_number', 'like', "%{$phone}%")
+                                fn (Builder $query, $phone): Builder => $query->where('settings->phone_number', 'like', "%{$phone}%")
                             );
                     })
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
                         if ($data['name'] ?? null) {
-                            $indicators[] = Indicator::make('Tên tổ chức: ' . $data['name'])->removeField('name');
+                            $indicators[] = Indicator::make('Tên tổ chức: '.$data['name'])->removeField('name');
                         }
                         if ($data['phone_number'] ?? null) {
-                            $indicators[] = Indicator::make('Số điện thoại: ' . $data['phone_number'])->removeField('phone_number');
+                            $indicators[] = Indicator::make('Số điện thoại: '.$data['phone_number'])->removeField('phone_number');
                         }
+
                         return $indicators;
                     }),
                 SelectFilter::make('type')

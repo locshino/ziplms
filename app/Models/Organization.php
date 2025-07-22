@@ -73,6 +73,7 @@ class Organization extends Base\Model implements HasMedia
         'settings',
         'phone_number',
     ];
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('logo')
