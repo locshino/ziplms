@@ -1,6 +1,12 @@
 <?php
 
 return [
+    'organization' => 'Tổ chức',
+    'name' => 'Tên đơn vị',
+    'description' => 'Mô tả',
+    'code' => 'Mã đơn vị',
+    'parent' => 'Đơn vị Cha',
+    'tags' => 'Tags',
     'Classes Majors' => 'Đơn vị cấu trúc',
     'Classes Major' => 'Đơn vị cấu trúc',
     'Create Classes Major' => 'Tạo đơn vị cấu trúc',

@@ -5,7 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Exports\ClassesMajorExporter;
 use App\Filament\Resources\ClassMajorResource\Pages;
 use App\Models\ClassesMajor;
-use App\Repositories\ClassesMajorRepository;
+use App\Repositories\Contracts\ClassesMajorRepositoryInterface;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Concerns\Translatable;
@@ -38,27 +38,27 @@ class ClassMajorResource extends Resource
             ->schema([
                 Forms\Components\Select::make('organization_id')
                     ->relationship('organization', 'name')
-                    ->label('Tổ chức')
+                    ->label(__('class_major_lang.organization'))
                     ->required(),
 
                 Forms\Components\TextInput::make('name')
-                    ->label('Tên đơn vị')
+                    ->label(__('class_major_lang.name'))
                     ->required(),
 
                 Forms\Components\Textarea::make('description')
-                    ->label('Mô tả'),
+                    ->label(__('class_major_lang.description')),
 
                 Forms\Components\TextInput::make('code')
-                    ->label('Mã đơn vị')
+                    ->label(__('class_major_lang.code'))
                     ->required(),
 
                 Forms\Components\Select::make('parent_id')
                     ->relationship('parent', 'name')
-                    ->label('Đơn vị Cha')
+                    ->label(__('class_major_lang.parent'))
                     ->searchable(),
 
                 Forms\Components\TagsInput::make('tags')
-                    ->label('Tags')
+                    ->label(__('class_major_lang.tags'))
                     ->suggestions(Tag::pluck('name')->toArray())
                     ->saveRelationshipsUsing(function ($record, $state) {
                         $record->syncTags($state);
@@ -88,9 +88,9 @@ class ClassMajorResource extends Resource
             ->filters([
                 SelectFilter::make('parent_id')
                     ->label('Lọc theo loại')
-                    ->options(fn () => app(ClassesMajorRepository::class)->getParentOptions())
+                    ->options(fn () => app(ClassesMajorRepositoryInterface::class)->getParentOptions())
                     ->query(function (Builder $query, array $data): Builder {
-                        return app(ClassesMajorRepository::class)->applyParentFilter($query, $data['value']);
+                        return app(ClassesMajorRepositoryInterface::class)->applyParentFilter($query, $data['value']);
                     }),
 
             ])
@@ -117,6 +117,11 @@ class ClassMajorResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('class_major_lang.Classes Majors');
     }
 
     public static function getPages(): array

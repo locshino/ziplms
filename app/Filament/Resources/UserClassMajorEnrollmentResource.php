@@ -6,6 +6,7 @@ use App\Filament\Exports\UserClassMajorEnrollmentExporter;
 use App\Filament\Resources\UserClassMajorEnrollmentResource\Pages;
 use App\Models\Role;
 use App\Models\UserClassMajorEnrollment;
+use App\Repositories\Contracts\UserClassMajorEnrollmentRepositoryInterface;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
@@ -29,19 +30,19 @@ class UserClassMajorEnrollmentResource extends Resource
         return $form
             ->schema([
                 Select::make('user_id')
-                    ->label('Người dùng')
+                    ->label(__('user_class_major_enrollments.form.user'))
                     ->relationship('user', 'name')
                     ->searchable()
                     ->required(),
 
                 Select::make('class_major_id')
-                    ->label('Đơn vị cấu trúc')
+                    ->label(__('user_class_major_enrollments.form.classMajor'))
                     ->relationship('classMajor', 'name')
                     ->searchable()
                     ->required(),
 
                 Select::make('role_id')
-                    ->label('Vai trò')
+                    ->label(__('user_class_major_enrollments.form.role'))
                     ->required()
                     ->options(
                         fn () => Role::query()->select('id', 'name')
@@ -49,11 +50,11 @@ class UserClassMajorEnrollmentResource extends Resource
                     ),
 
                 DatePicker::make('start_date')
-                    ->label('Ngày bắt đầu')
+                    ->label(__('user_class_major_enrollments.form.start_date'))
                     ->required(),
 
                 DatePicker::make('end_date')
-                    ->label('Ngày kết thúc')
+                    ->label(__('user_class_major_enrollments.form.end_date'))
                     ->nullable(),
             ]);
     }
@@ -106,9 +107,9 @@ class UserClassMajorEnrollmentResource extends Resource
                 SelectFilter::make('class_major_id')
                     ->label('Lọc theo đơn vị cấu trúc')
                     ->options(function () {
-                        return app(\App\Repositories\UserClassMajorEnrollmentRepository::class)->getClassMajorFilterOptions();
+                        return app(UserClassMajorEnrollmentRepositoryInterface::class)->getClassMajorFilterOptions();
                     })->query(function (Builder $query, array $data): Builder {
-                        return app(\App\Repositories\UserClassMajorEnrollmentRepository::class)->applyClassMajorFilter(
+                        return app(UserClassMajorEnrollmentRepositoryInterface::class)->applyClassMajorFilter(
                             $query,
                             $data['value']
                         );
@@ -154,6 +155,11 @@ class UserClassMajorEnrollmentResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('user_class_major_enrollments.title');
     }
 
     public static function getPages(): array

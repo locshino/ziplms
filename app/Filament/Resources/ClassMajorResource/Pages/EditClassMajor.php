@@ -20,7 +20,6 @@ class EditClassMajor extends EditRecord
             Actions\ForceDeleteAction::make(),
             Actions\RestoreAction::make(),
 
-            
         ];
     }
 
@@ -28,5 +27,4 @@ class EditClassMajor extends EditRecord
     {
         return __('class_major_lang.Edit Classes Major');
     }
-    
 }

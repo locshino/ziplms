@@ -4,7 +4,7 @@ namespace App\Filament\Teacher\Resources;
 
 use App\Filament\Teacher\Resources\AssignmentResource\Pages;
 use App\Models\Assignment;
-use App\Repositories\AssignmentRepository;
+use App\Repositories\Contracts\AssignmentRepositoryInterface;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
@@ -38,17 +38,17 @@ class AssignmentResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Select::make('course_id')
-                    ->label('Khóa học')
+                    ->label(__('assignment.labels.course'))
                     ->relationship('course', 'name')
                     ->required(),
 
                 Forms\Components\TextInput::make('title')
-                    ->label('Tiêu đề')
+                    ->label(__('assignment.labels.title'))
                     ->required(),
 
                 Group::make([
                     Radio::make('instructions_type')
-                        ->label('Loại đề bài')
+                        ->label(__('assignment.labels.instructions_type'))
                         ->options([
                             'text' => 'Nhập văn bản',
                             'file' => 'Tải file',
@@ -58,18 +58,18 @@ class AssignmentResource extends Resource
                         ->required(),
 
                     Textarea::make('instructions_text')
-                        ->label('Nhập đề bài')
+                        ->label(__('assignment.labels.instructions_text'))
                         ->visible(fn ($get) => $get('instructions_type') === 'text'),
 
                     FileUpload::make('instructions_file')
-                        ->label('Tệp đề bài')
+                        ->label(__('assignment.labels.instructions_file'))
                         ->disk('public')
                         ->directory('assignments')
                         ->visible(fn ($get) => $get('instructions_type') === 'file')
                         ->preserveFilenames()
                         ->acceptedFileTypes(['application/pdf', 'application/msword']),
                     TextInput::make('instructions_url')
-                        ->label('Link đề bài')
+                        ->label(__('assignment.labels.instructions_url'))
                         ->url()
                         ->placeholder('https://...')
                         ->visible(fn ($get) => $get('instructions_type') === 'url'),
@@ -77,17 +77,18 @@ class AssignmentResource extends Resource
                 ]),
 
                 Forms\Components\TextInput::make('max_score')
+                    ->label(__('assignment.labels.max_score'))
                     ->numeric()
                     ->default(0)->minValue(0)->maxValue(100),
 
                 Forms\Components\DateTimePicker::make('due_date')
-                    ->label('Hạn nộp'),
+                    ->label(__('assignment.labels.due_date')),
 
                 Forms\Components\Toggle::make('allow_late_submissions')
-                    ->label('Cho phép nộp trễ'),
+                    ->label(__('assignment.labels.allow_late_submissions')),
 
                 Forms\Components\Select::make('status')
-                    ->label('Trạng thái')
+                    ->label(__('assignment.labels.status'))
                     ->options([
                         'draft' => 'Nháp',
                         'published' => 'Công khai',
@@ -97,7 +98,7 @@ class AssignmentResource extends Resource
                     ->required(),
 
                 Forms\Components\TagsInput::make('tags')
-                    ->label('Thẻ')
+                    ->label(__('assignment.labels.tags'))
                     ->suggestions(Tag::pluck('name')->toArray())
                     ->saveRelationshipsUsing(function ($record, $state) {
                         $record->syncTags($state);
@@ -110,22 +111,22 @@ class AssignmentResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('title')->label('Tiêu đề')->limit(50)->searchable(),
-                TextColumn::make('course.name')->label('Khóa học'),
-                TextColumn::make('max_score')->label('Điểm'),
-                TextColumn::make('due_date')->label('Hạn nộp')->dateTime(),
-                BooleanColumn::make('allow_late_submissions')->label('Cho phép trễ'),
-                TextColumn::make('creator.name')->label('Người tạo')->searchable(),
-                TagsColumn::make('tags_string')->label('Thẻ'),
+                TextColumn::make('title')->label(__('assignment.label.title'))->limit(50)->searchable(),
+                TextColumn::make('course.name')->label(__('assignment.label.course')),
+                TextColumn::make('max_score')->label(__('assignment.label.max_score')),
+                TextColumn::make('due_date')->label(__('assignment.label.due_date'))->dateTime(),
+                BooleanColumn::make('allow_late_submissions')->label(__('assignment.label.allow_late_submissions')),
+                TextColumn::make('creator.name')->label(__('assignment.label.creator'))->searchable(),
+                TagsColumn::make('tags_string')->label(__('assignment.label.tags')),
                 BadgeColumn::make('status')
-                    ->label('Trạng thái')
+                    ->label(__('assignment.label.status'))
                     ->color(fn ($state) => $state::color())
                     ->formatStateUsing(fn ($state) => $state::label()),
             ])
 
             ->filters([
                 Tables\Filters\SelectFilter::make('course_id')
-                    ->label('Lọc theo Khóa học')
+                    ->label(__('assignment.filters.filter_by_course'))
                     ->relationship('course', 'name'),
 
             ])
@@ -168,7 +169,7 @@ class AssignmentResource extends Resource
 
             TextEntry::make('instructions_text')
                 ->label('Đề bài')
-                ->default(fn ($record) => app(AssignmentRepository::class)->getInstructionsText($record))
+                ->default(fn ($record) => app(AssignmentRepositoryInterface::class)->getInstructionsText($record))
                 ->visible(fn ($record) => ! empty(optional($record->getTranslation('instructions', 'vi'))['text'] ?? null)),
 
             TextEntry::make('instructions_url')
@@ -180,10 +181,10 @@ class AssignmentResource extends Resource
 
             TextEntry::make('instructions_file')
                 ->label('Tệp đính kèm')
-                ->url(fn ($record) => app(AssignmentRepository::class)->getInstructionsFileUrl($record))
-                ->default(fn ($record) => app(AssignmentRepository::class)->getInstructionsFileDefault($record))
+                ->url(fn ($record) => app(AssignmentRepositoryInterface::class)->getInstructionsFileUrl($record))
+                ->default(fn ($record) => app(AssignmentRepositoryInterface::class)->getInstructionsFileDefault($record))
                 ->openUrlInNewTab()
-                ->visible(fn ($record) => app(AssignmentRepository::class)->shouldShowInstructionsFile($record) !== null),
+                ->visible(fn ($record) => app(AssignmentRepositoryInterface::class)->shouldShowInstructionsFile($record) !== null),
 
         ]);
 
@@ -198,6 +199,11 @@ class AssignmentResource extends Resource
         }
 
         return $query;
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('assignment.title');
     }
 
     public static function getPages(): array

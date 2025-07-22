@@ -2,7 +2,15 @@
 
 return [
 
-    'title' => 'User Class Major Enrollments',
+    'form_title' => [
+        'user' => 'User',
+    ],
+    'labels' => [
+        'class_major_id' => 'Class Major Unit',
+        'role_id' => 'Role',
+        'start_date' => 'Start Date',
+        'end_date' => 'End Date',
+    ],
 
     'columns' => [
         'id' => 'ID',

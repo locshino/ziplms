@@ -3,7 +3,15 @@
 return [
 
     'title' => 'Ghi danh Người dùng vào Đơn vị cấu trúc',
-
+    'form_title' => [
+        'user' => 'Người dùng',
+    ],
+    'labels' => [
+        'class_major_id' => 'Đơn vị cấu trúc',
+        'role_id' => 'Vai trò',
+        'start_date' => 'Ngày bắt đầu',
+        'end_date' => 'Ngày kết thúc',
+    ],
     'columns' => [
         'id' => 'ID',
         'user' => [

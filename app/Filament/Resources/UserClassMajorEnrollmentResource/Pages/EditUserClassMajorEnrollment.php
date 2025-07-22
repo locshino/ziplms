@@ -18,7 +18,6 @@ class EditUserClassMajorEnrollment extends EditRecord
             Actions\ForceDeleteAction::make(),
             Actions\RestoreAction::make(),
 
-            
         ];
     }
 

@@ -1,6 +1,13 @@
 <?php
 
 return [
+    'organization' => 'Organization',
+
+    'name' => 'Unit Name',
+    'description' => 'Description',
+    'code' => 'Unit Code',
+    'parent' => 'Parent Unit',
+    'tags' => 'Tags',
     'Classes Majors' => 'Classes Majors',
     'Classes Major' => 'Classes Major',
     'Create Classes Major' => 'Create Classes Major',
