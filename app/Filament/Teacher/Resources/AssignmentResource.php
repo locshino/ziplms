@@ -118,9 +118,9 @@ class AssignmentResource extends Resource
                 BooleanColumn::make('allow_late_submissions')->label(__('assignment.label.allow_late_submissions')),
                 TextColumn::make('creator.name')->label(__('assignment.label.creator'))->searchable(),
                 TagsColumn::make('tags_string')->label(__('assignment.label.tags'))
-                ->formatStateUsing(function ($record) {
-        return $record->tags ? $record->tags->pluck('name')->join(', ') : '';
-    }),
+                    ->formatStateUsing(function ($record) {
+                        return $record->tags ? $record->tags->pluck('name')->join(', ') : '';
+                    }),
                 BadgeColumn::make('status')
                     ->label(__('assignment.label.status'))
                     ->color(fn ($state) => $state::color())
@@ -128,21 +128,21 @@ class AssignmentResource extends Resource
             ])
 
             ->filters([
-                Tables\Filters\SelectFilter::make('course_id')
-                    ->label(__('assignment.filters.filter_by_course'))
-                    ->relationship('course', 'name'),
+                                Tables\Filters\SelectFilter::make('course_id')
+                                    ->label(__('assignment.filters.filter_by_course'))
+                                    ->relationship('course', 'name'),
 
-            ])
+                            ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\ViewAction::make(),
-            ])
+                                Tables\Actions\EditAction::make(),
+                                Tables\Actions\ViewAction::make(),
+                            ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                                Tables\Actions\BulkActionGroup::make([
+                                    Tables\Actions\DeleteBulkAction::make(),
 
-                ]),
-            ]);
+                                ]),
+                            ]);
     }
 
     public static function getRelations(): array

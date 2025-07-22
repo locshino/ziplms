@@ -100,8 +100,6 @@ class Assignment extends Base\Model
         return $this->hasMany(AssignmentSubmission::class);
     }
 
-   
-
     protected static function booted()
     {
         static::creating(function ($model) {
