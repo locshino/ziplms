@@ -117,7 +117,10 @@ class AssignmentResource extends Resource
                 TextColumn::make('due_date')->label(__('assignment.label.due_date'))->dateTime(),
                 BooleanColumn::make('allow_late_submissions')->label(__('assignment.label.allow_late_submissions')),
                 TextColumn::make('creator.name')->label(__('assignment.label.creator'))->searchable(),
-                TagsColumn::make('tags_string')->label(__('assignment.label.tags')),
+                TagsColumn::make('tags_string')->label(__('assignment.label.tags'))
+                ->formatStateUsing(function ($record) {
+        return $record->tags ? $record->tags->pluck('name')->join(', ') : '';
+    }),
                 BadgeColumn::make('status')
                     ->label(__('assignment.label.status'))
                     ->color(fn ($state) => $state::color())
@@ -153,7 +156,7 @@ class AssignmentResource extends Resource
     {
         return $infolist->schema([
             TextEntry::make('title')
-                ->label('Tiêu đề')
+                ->label(__('assignment.labels.title'))
                 ->columnSpanFull()
                 ->extraAttributes([
                     'class' => 'text-lg font-semibold !text-gray-600',
