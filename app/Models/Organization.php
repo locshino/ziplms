@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Tags\HasTags;
 
 /**
@@ -56,9 +59,9 @@ use Spatie\Tags\HasTags;
  *
  * @mixin \Eloquent
  */
-class Organization extends Base\Model
+class Organization extends Base\Model implements HasMedia
 {
-    use HasTags;
+    use HasFactory, HasTags, InteractsWithMedia;
 
     protected $casts = [
         'settings' => 'json',
@@ -66,11 +69,16 @@ class Organization extends Base\Model
 
     protected $fillable = [
         'name',
-        'slug',
         'address',
         'settings',
         'phone_number',
     ];
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('logo')
+            ->singleFile();
+    }
 
     public function users()
     {
