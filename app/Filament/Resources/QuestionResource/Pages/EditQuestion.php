@@ -9,6 +9,7 @@ use Filament\Resources\Pages\EditRecord;
 class EditQuestion extends EditRecord
 {
     protected static string $resource = QuestionResource::class;
+
     use EditRecord\Concerns\Translatable;
 
     protected function getHeaderActions(): array
@@ -20,8 +21,6 @@ class EditQuestion extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
-
-
 
     protected function getSavedNotificationTitle(): ?string
     {
