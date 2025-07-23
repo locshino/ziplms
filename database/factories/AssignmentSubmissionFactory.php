@@ -29,7 +29,7 @@ class AssignmentSubmissionFactory extends Factory
             'user_id' => $this->assignRandomOrNewModel(User::class),
             'submission_text' => fake()->paragraph(),
             'submission_date' => now(),
-            'status' => $this->fakeStatus(),
+            'status' => $this->fakeStatus(\App\States\SubmissionStatus\SubmissionStatus::class),
         ];
     }
 }

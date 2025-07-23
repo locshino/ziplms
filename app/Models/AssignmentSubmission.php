@@ -5,11 +5,17 @@ namespace App\Models;
 use App\Enums\AssignmentType;
 use App\Enums\AttachmentType;
 use App\States\Status;
+use App\States\SubmissionStatus\SubmissionStatus;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\ModelStates\HasStates;
 
-/**
+/**use App\States\SubmissionStatus\SubmissionStatus;
+
+protected $casts = [
+    'status' => SubmissionStatus::class,
+];
+
  * @property string $id
  * @property string $assignment_id
  * @property string $user_id
@@ -55,7 +61,7 @@ class AssignmentSubmission extends Base\Model implements HasMedia
 
     protected $casts = [
         'submitted_at' => 'datetime',
-        'status' => Status::class,
+        'status' => SubmissionStatus::class,
     ];
 
     protected $fillable = [

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\States\Status;
+use App\States\AssignmentStatus\AssignmentStatus;
 use Spatie\ModelStates\HasStates;
 use Spatie\Tags\HasTags;
 use Spatie\Translatable\HasTranslations;
@@ -75,13 +75,15 @@ class Assignment extends Base\Model
         'instructions' => 'json',
         'due_date' => 'datetime',
         'allow_late_submissions' => 'boolean',
-        'status' => Status::class,
+        'status' => AssignmentStatus::class,
     ];
 
     public array $translatable = [
         'title',
         'instructions',
     ];
+
+    protected $guarded = [];
 
     public function course()
     {
@@ -96,5 +98,14 @@ class Assignment extends Base\Model
     public function submissions()
     {
         return $this->hasMany(AssignmentSubmission::class);
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if (auth()->check()) {
+                $model->created_by = auth()->id();
+            }
+        });
     }
 }
