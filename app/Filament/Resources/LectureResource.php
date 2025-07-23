@@ -19,16 +19,21 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class LectureResource extends Resource
 {
     protected static ?string $model = Lecture::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+
     protected static ?string $modelLabel = 'Lecture';
+
     protected static ?string $navigationGroup = 'Learning content';
+
     protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
         $statusOptions = collect(Status::getStates())
             ->mapWithKeys(function ($stateClass) {
-                $stateInstance = new $stateClass(new Lecture());
+                $stateInstance = new $stateClass(new Lecture);
+
                 return [$stateInstance::$name => $stateInstance->getLabel()];
             })
             ->all();
@@ -52,8 +57,9 @@ class LectureResource extends Resource
                                     ->mask('99:99')->placeholder('00:00')
                                     ->rules(['regex:/^([0-3][0-9]|4[0-8]):[0-5][0-9]$/'])
                                     ->formatStateUsing(function (?string $state): ?string {
-                                        if (empty($state))
+                                        if (empty($state)) {
                                             return null;
+                                        }
                                         preg_match_all('/\d+/', $state, $matches);
                                         $numbers = $matches[0];
                                         $hours = 0;
@@ -64,26 +70,31 @@ class LectureResource extends Resource
                                         } else {
                                             $minutes = (int) ($numbers[0] ?? 0);
                                         }
+
                                         return sprintf('%02d:%02d', $hours, $minutes);
                                     })
                                     ->dehydrateStateUsing(function (?string $state): ?string {
-                                        if (empty($state))
+                                        if (empty($state)) {
                                             return null;
+                                        }
                                         $parts = explode(':', $state);
                                         $hours = (int) ($parts[0] ?? 0);
                                         $minutes = (int) ($parts[1] ?? 0);
                                         $displayParts = [];
-                                        if ($hours > 0)
+                                        if ($hours > 0) {
                                             $displayParts[] = "{$hours} hours";
-                                        if ($minutes > 0)
+                                        }
+                                        if ($minutes > 0) {
                                             $displayParts[] = "{$minutes} minutes";
+                                        }
+
                                         return count($displayParts) > 0 ? implode(' ', $displayParts) : null;
                                     }),
                                 Forms\Components\TextInput::make('lecture_order')->required()->numeric()->default(0)->label('Thứ tự bài giảng'),
                                 Forms\Components\Select::make('status')
                                     ->options($statusOptions)
                                     ->required()
-                                    ->default((new Status::$defaultStateClass(new Lecture()))::$name)
+                                    ->default((new Status::$defaultStateClass(new Lecture))::$name)
                                     ->label('Trạng thái'),
                             ]),
                     ]),
@@ -95,7 +106,8 @@ class LectureResource extends Resource
     {
         $statusFilterOptions = collect(Status::getStates())
             ->mapWithKeys(function ($stateClass) {
-                $stateInstance = new $stateClass(new Lecture());
+                $stateInstance = new $stateClass(new Lecture);
+
                 return [$stateInstance::$name => $stateInstance->getLabel()];
             })
             ->all();
@@ -108,7 +120,7 @@ class LectureResource extends Resource
                 Tables\Columns\TextColumn::make('course.name')->label('Môn học')->searchable()->sortable()->limit(30),
                 Tables\Columns\TextColumn::make('duration_estimate')
                     ->label('Thời lượng dự kiến')
-                    ->formatStateUsing(fn(?string $state): string => $state ?? '-')
+                    ->formatStateUsing(fn (?string $state): string => $state ?? '-')
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('status')->label('Trạng thái')->badge(),
@@ -154,7 +166,7 @@ class LectureResource extends Resource
                                 Infolists\Components\TextEntry::make('course.name')->label('Thuộc Môn học :'),
                                 Infolists\Components\TextEntry::make('duration_estimate')
                                     ->label('Thời lượng dự kiến :')
-                                    ->formatStateUsing(fn(?string $state): string => $state ?? '-'),
+                                    ->formatStateUsing(fn (?string $state): string => $state ?? '-'),
 
                                 Infolists\Components\TextEntry::make('lecture_order')->label('Thứ tự bài giảng :'),
                                 Infolists\Components\TextEntry::make('status')->label('Trạng thái')->badge(),

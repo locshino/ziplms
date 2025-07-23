@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Filament\Resources;
+
 use App\Enums\RoleEnum;
 use App\Filament\Exports\UserExporter;
 use App\Filament\Resources\UserResource\Pages;
-use App\Models\Role;
 use App\Models\User;
 use App\States\Status;
 use Filament\Forms;
@@ -32,7 +32,9 @@ use Illuminate\Validation\Rules\Password;
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-users';
+
     protected static ?string $modelLabel = 'Người dùng';
 
     public static function form(Form $form): Form
@@ -70,7 +72,7 @@ class UserResource extends Resource
                 },
             ])
             ->with(['roles', 'organizations', 'classesMajors'])
-            ->whereDoesntHave('roles', fn(Builder $query) => $query
+            ->whereDoesntHave('roles', fn (Builder $query) => $query
                 ->where('name', RoleEnum::Admin->value));
     }
 
@@ -95,10 +97,10 @@ class UserResource extends Resource
                         ->password()
                         ->revealable()
                         ->rule(Password::min(8)->mixedCase()->numbers())
-                        ->dehydrateStateUsing(fn($state) => Hash::make($state))
-                        ->dehydrated(fn($state) => filled($state))
-                        ->required(fn(string $operation): bool => $operation === 'create')
-                        ->visible(fn(string $operation): bool => $operation === 'create'),
+                        ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                        ->dehydrated(fn ($state) => filled($state))
+                        ->required(fn (string $operation): bool => $operation === 'create')
+                        ->visible(fn (string $operation): bool => $operation === 'create'),
 
                     Forms\Components\TextInput::make('password_confirmation')
                         ->label('Xác nhận mật khẩu')
@@ -107,7 +109,7 @@ class UserResource extends Resource
                         ->requiredWith('password')
                         ->dehydrated(false)
                         ->same('password')
-                        ->visible(fn(string $operation): bool => $operation === 'create'),
+                        ->visible(fn (string $operation): bool => $operation === 'create'),
                     Forms\Components\TextInput::make('code')
                         ->label('Mã người dùng')
                         ->required()
@@ -135,7 +137,7 @@ class UserResource extends Resource
                         ->relationship(
                             name: 'roles',
                             titleAttribute: 'name',
-                            modifyQueryUsing: fn(Builder $query) => $query
+                            modifyQueryUsing: fn (Builder $query) => $query
                                 ->where('name', '!=', RoleEnum::Admin->value)
                                 ->where('name', '!=', RoleEnum::Dev->value)
                         )
@@ -145,7 +147,7 @@ class UserResource extends Resource
                         ->label('Trạng thái')
                         ->options(
                             collect(Status::getStates())
-                                ->mapWithKeys(fn($stateClass) => [$stateClass::$name => $stateClass::label()])
+                                ->mapWithKeys(fn ($stateClass) => [$stateClass::$name => $stateClass::label()])
                         )
                         ->required()
                         ->default(\App\States\Active::$name),
@@ -175,7 +177,7 @@ class UserResource extends Resource
                 ->label('Mã')
                 ->sortable()
                 ->default('Null')
-                ->color(fn($state): string => $state === 'Null' ? 'gray' : 'primary')
+                ->color(fn ($state): string => $state === 'Null' ? 'gray' : 'primary')
                 ->searchable(),
             Tables\Columns\TextColumn::make('name')
                 ->label('Tên')
@@ -200,8 +202,8 @@ class UserResource extends Resource
             Tables\Columns\TextColumn::make('status')
                 ->label('Trạng thái')
                 ->badge()
-                ->formatStateUsing(fn(Status $state) => $state::label())
-                ->color(fn(Status $state) => $state->color()),
+                ->formatStateUsing(fn (Status $state) => $state::label())
+                ->color(fn (Status $state) => $state->color()),
 
             Tables\Columns\TextColumn::make('created_at')
                 ->label('Ngày tạo')
@@ -219,7 +221,7 @@ class UserResource extends Resource
                 ->relationship(
                     'roles',
                     'name',
-                    fn(Builder $query) => $query->whereNotIn('name', [
+                    fn (Builder $query) => $query->whereNotIn('name', [
                         RoleEnum::Admin->value,
                         RoleEnum::Dev->value,
                     ])
@@ -242,7 +244,7 @@ class UserResource extends Resource
                 ->label('Trạng thái')
                 ->options(
                     collect(Status::getStates())
-                        ->mapWithKeys(fn($stateClass) => [$stateClass::$name => $stateClass::label()])
+                        ->mapWithKeys(fn ($stateClass) => [$stateClass::$name => $stateClass::label()])
                 )
                 ->multiple()
                 ->preload(),
@@ -354,9 +356,9 @@ class UserResource extends Resource
                             ->icon('heroicon-o-presentation-chart-line')
                             ->size(TextEntry\TextEntrySize::Large)
                             ->color('primary')
-                            ->state(fn($record): string => empty($record->courses_count)
+                            ->state(fn ($record): string => empty($record->courses_count)
                                 ? '0%'
-                                : round($record->completed_courses_count / $record->courses_count * 100) . '%'),
+                                : round($record->completed_courses_count / $record->courses_count * 100).'%'),
                     ]),
                 Section::make('Trạng thái & Lịch sử')
                     ->columnSpanFull()
@@ -365,8 +367,8 @@ class UserResource extends Resource
                         TextEntry::make('status')
                             ->label('Trạng thái')
                             ->badge()
-                            ->formatStateUsing(fn(Status $state) => $state::label())
-                            ->color(fn(Status $state) => $state->color()),
+                            ->formatStateUsing(fn (Status $state) => $state::label())
+                            ->color(fn (Status $state) => $state->color()),
                         TextEntry::make('email_verified_at')
                             ->label('Đã xác thực')
                             ->since()

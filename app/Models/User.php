@@ -3,15 +3,10 @@
 namespace App\Models;
 
 use App\States\Status;
-use Filament\Models\Contracts\FilamentUser;
-use Filament\Panel;
-use Illuminate\Foundation\Auth\Access\Authorizable;
-use Illuminate\Notifications\Notifiable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\ModelStates\HasStates;
-use Spatie\Permission\Traits\HasRoles;
 
 /**
  * The User model represents a user in the system.
@@ -82,7 +77,7 @@ use Spatie\Permission\Traits\HasRoles;
  *
  * @mixin \Eloquent
  */
-class User extends Base\AuthModel implements  HasMedia
+class User extends Base\AuthModel implements HasMedia
 {
     use HasStates, InteractsWithMedia;
 
@@ -180,5 +175,5 @@ class User extends Base\AuthModel implements  HasMedia
             ->width(100)
             ->height(100)
             ->sharpen(10);
-    } 
+    }
 }

@@ -12,7 +12,7 @@ class CreateUser extends CreateRecord
 
     protected function getCreatedNotification(): ?Notification
     {
-        
+
         return Notification::make()
             ->success()
             ->title('Tạo người dùng thành công')
