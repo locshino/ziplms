@@ -30,6 +30,11 @@ class QuestionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-question-mark-circle';
 
+    public static function getTranslatableLocales(): array
+    {
+        return ['vi', 'en'];
+    }
+
     public static function getNavigationGroup(): ?string
     {
         return __('question-resource.navigation.group');
@@ -66,7 +71,7 @@ class QuestionResource extends Resource
                             ->required()
                             ->native(false)
                             ->options(
-                                collect(QuestionType::cases())->mapWithKeys(fn ($case) => [$case->value => $case->label()])
+                                QuestionType::options()
                             )
                             ->loadStateFromRelationshipsUsing(function (Select $component, ?Question $record) {
                                 if (! $record) {
@@ -87,9 +92,8 @@ class QuestionResource extends Resource
                             ->label(__('question-resource.form.field.classification_tags'))
                             ->required()
                             ->native(false)
-                            ->options(
-                                collect(OrganizationType::cases())->mapWithKeys(fn ($case) => [$case->value => $case->label()])
-                            )
+                            ->options(OrganizationType::options())
+
                             ->loadStateFromRelationshipsUsing(function (Select $component, ?Question $record) {
                                 if (! $record) {
                                     return;
@@ -142,9 +146,7 @@ class QuestionResource extends Resource
                 SelectFilter::make('question_type')
                     ->label(__('question-resource.table.filter.question_type'))
                     ->multiple()
-                    ->options(
-                        collect(QuestionType::cases())->mapWithKeys(fn ($case) => [$case->value => $case->label()])->all()
-                    )
+                    ->options(QuestionType::options())
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['values'],
@@ -154,9 +156,7 @@ class QuestionResource extends Resource
                 SelectFilter::make('organization_type')
                     ->label(__('question-resource.table.filter.organization_type'))
                     ->multiple()
-                    ->options(
-                        collect(OrganizationType::cases())->mapWithKeys(fn ($case) => [$case->value => $case->label()])->all()
-                    )
+                    ->options(OrganizationType::options())
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['values'],

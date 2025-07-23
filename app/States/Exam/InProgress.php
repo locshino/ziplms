@@ -1,8 +1,6 @@
 <?php
 
 // File: app/States/Exam/InProgress.php
-// ------------------------------------
-// Trạng thái: Người dùng đang trong quá trình làm bài thi.
 
 namespace App\States\Exam;
 
@@ -10,14 +8,25 @@ class InProgress extends Status
 {
     public static string $name = 'in_progress';
 
+    public static string $langFile = 'states_exam';
+
     public static function label(): string
     {
-        return 'In Progress';
+        return __(static::$langFile.'.'.self::$name.'.label');
     }
 
-    public function color(): string
+    public static function color(): string
     {
-        // Màu vàng để chỉ sự hoạt động
         return 'warning';
+    }
+
+    public static function icon(): string
+    {
+        return 'heroicon-o-clock';
+    }
+
+    public static function description(): string
+    {
+        return __(static::$langFile.'.'.self::$name.'.description');
     }
 }

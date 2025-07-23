@@ -99,6 +99,24 @@ abstract class State extends ModelStates implements HasColor, HasDescription, Ha
             ->toArray();
     }
 
+    /**
+     * Get options for a Filament Select component where the class name is the key.
+     * This is useful for form select inputs that bind directly to the state class.
+     *
+     * @param  array|null  $only  An array of state classes to include. If null, all states from getStates() are used.
+     * @return array<string, string>
+     */
+    public static function getOptionsForSelect(?array $only = null): array
+    {
+        $states = $only ?? static::getStates();
+
+        return collect($states)
+            ->mapWithKeys(fn (string $stateClass) => [
+                $stateClass => $stateClass::label(),
+            ])
+            ->all();
+    }
+
     // --- Default Values ---
     public static function defaultLabel(): string
     {

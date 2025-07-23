@@ -2,26 +2,16 @@
 
 namespace App\States\Exam;
 
-use Spatie\ModelStates\State;
+use App\States\Base;
 use Spatie\ModelStates\StateConfig;
 
-// Import các lớp trạng thái
-
-abstract class Status extends State
+abstract class Status extends Base\State
 {
     /**
      * Lấy nhãn hiển thị cho trạng thái.
      */
     abstract public static function label(): string;
 
-    /**
-     * Lấy màu sắc tương ứng với trạng thái (hữu ích cho UI).
-     */
-    abstract public function color(): string;
-
-    /**
-     * Cấu hình các trạng thái và các quy tắc chuyển đổi.
-     */
     public static function config(): StateConfig
     {
         return parent::config()

@@ -9,12 +9,11 @@ use Filament\Resources\Pages\EditRecord;
 class EditExamAttempt extends EditRecord
 {
     protected static string $resource = ExamAttemptResource::class;
-
+    use EditRecord\Concerns\Translatable;
     protected function getHeaderActions(): array
     {
         return [
             Actions\LocaleSwitcher::make(),
-            Actions\DeleteAction::make(),
             Actions\ForceDeleteAction::make(),
             Actions\RestoreAction::make(),
         ];

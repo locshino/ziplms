@@ -6,14 +6,25 @@ class Started extends Status
 {
     public static string $name = 'started';
 
-    // SỬA LỖI: Thêm phương thức label() bắt buộc
+    public static string $langFile = 'states_exam';
+
     public static function label(): string
     {
-        return 'Started';
+        return __(static::$langFile.'.'.self::$name.'.label');
     }
 
-    public function color(): string
+    public static function color(): string
     {
-        return 'warning';
+        return 'info';
+    }
+
+    public static function icon(): string
+    {
+        return 'heroicon-o-play-circle';
+    }
+
+    public static function description(): string
+    {
+        return __(static::$langFile.'.'.self::$name.'.description');
     }
 }
