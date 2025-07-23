@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
-use App\Exports\UsersSampleExport;
-use App\Filament\Actions\ImportExcelAction;
+use App\Enums\RoleEnum;
+use App\Filament\Exports\UserExporter;
+use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\UserResource;
-use App\Imports\UserImporter;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -18,17 +18,25 @@ class ListUsers extends ListRecords
         return [
             Actions\CreateAction::make(),
 
-            ImportExcelAction::make('importUsers')
-                ->label('Import Manager Users')
-                ->importer(UserImporter::class)
-                ->role('manager') // Optional
-                // CORRECTED: Use the correct method signature for sampleExcel
-                ->sampleExcel(
-                    sampleData: UsersSampleExport::sampleData(),
-                    fileName: 'users_sample.xlsx',
-                    exportClass: UsersSampleExport::class,
-                    sampleButtonLabel: 'Download Sample',
-                ),
+            Actions\ExportAction::make()
+                ->label('Xuất Excel')
+                ->exporter(UserExporter::class)
+                ->icon('heroicon-o-document-arrow-down'),
+
+            Actions\ActionGroup::make([
+                Actions\ImportAction::make('importStudents')
+                    ->label('Nhập Học sinh')
+                    ->importer(UserImporter::class)
+                    ->options(['role' => RoleEnum::Student->value]),
+
+                Actions\ImportAction::make('importTeachers')
+                    ->label('Nhập Giáo viên')
+                    ->importer(UserImporter::class)
+                    ->options(['role' => RoleEnum::Teacher->value]),
+            ])
+                ->label('Nhập từ CSV')
+                ->icon('heroicon-o-document-arrow-up')
+                ->button(),
         ];
     }
 }
