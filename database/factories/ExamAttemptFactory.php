@@ -37,7 +37,7 @@ class ExamAttemptFactory extends Factory
             'score' => $score,
             'time_spent_seconds' => fake()->optional()->numberBetween(600, 7200),
             'feedback' => $this->fakeSentenceTranslations(),
-            'status' => $this->fakeStatus(),
+            // 'status' => $this->fakeStatus(),
         ];
     }
 }

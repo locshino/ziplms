@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Teacher\Resources\AssignmentSubmissionResource\Pages;
+namespace App\Filament\Resources\AssignmentSubmissionResource\Pages;
 
-use App\Filament\Teacher\Resources\AssignmentSubmissionResource;
+
+use App\Filament\Resources\AssignmentSubmissionResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 

@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Filament\Teacher\Resources;
+namespace App\Filament\Resources;
 
-use App\Filament\Teacher\Resources\AssignmentSubmissionResource\Pages;
+use App\Filament\Resources\AssignmentSubmissionResource\Pages;
+
+use App\Filament\Resources\AssignmentSubmissionRe;
 use App\Models\AssignmentSubmission;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
@@ -61,13 +63,13 @@ class AssignmentSubmissionResource extends Resource
 
                 BadgeColumn::make('status')
                     ->label('Trạng thái')
-                    ->color(fn ($state) => $state::color())
-                    ->icon(fn ($state) => $state::icon())
-                    ->formatStateUsing(fn ($state) => $state::label()),
+                    ->color(fn($state) => $state::color())
+                    ->icon(fn($state) => $state::icon())
+                    ->formatStateUsing(fn($state) => $state::label()),
 
                 TextColumn::make('media.first.file_name')
                     ->label('File bài nộp')
-                    ->url(fn ($record) => $record->getFirstMediaUrl('submissions'))
+                    ->url(fn($record) => $record->getFirstMediaUrl('submissions'))
                     ->openUrlInNewTab(),
                 TextColumn::make('user.name')
                     ->label('Người nộp')

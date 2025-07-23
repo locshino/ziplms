@@ -41,7 +41,7 @@ class ExamFactory extends Factory
             'shuffle_answers' => fake()->boolean,
             'show_results_after' => fake()->randomElement(ExamShowResultsType::values()),
             'created_by' => $this->assignRandomOrNewModel(User::class),
-            'status' => $this->fakeStatus(),
+            // 'status' => $this->fakeStatus(),
         ];
     }
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Teacher\Resources\AssignmentSubmissionResource\Pages;
+namespace App\Filament\Resources\AssignmentSubmissionResource\Pages;
 
-use App\Filament\Teacher\Resources\AssignmentSubmissionResource;
+use App\Filament\Resources\AssignmentSubmissionResource;
 use Filament\Infolists;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
@@ -32,8 +32,8 @@ class ViewAssignmentSubmission extends ViewRecord
                 TextEntry::make('status')
                     ->label('Trạng thái')
                     ->badge()
-                    ->color(fn ($state) => $state::color())
-                    ->formatStateUsing(fn ($state) => $state::label()),
+                    ->color(fn($state) => $state::color())
+                    ->formatStateUsing(fn($state) => $state::label()),
 
                 // SpatieMediaLibraryEntry::make('submissions')
                 //     ->label('File đã nộp'),
@@ -41,7 +41,7 @@ class ViewAssignmentSubmission extends ViewRecord
                 TextEntry::make('grade.grade')
                     ->label('Điểm')
                     ->placeholder('-')
-                    ->formatStateUsing(fn ($state) => $state !== null ? $state : 'Chưa chấm điểm'),
+                    ->formatStateUsing(fn($state) => $state !== null ? $state : 'Chưa chấm điểm'),
 
                 TextEntry::make('grade.feedback')
                     ->label('Phản hồi')
