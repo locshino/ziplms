@@ -9,6 +9,7 @@ use App\Models\Location;
 use App\Models\Schedule;
 use App\Repositories\Contracts\ScheduleRepositoryInterface;
 use App\States\Status;
+use Dvarilek\FilamentTableSelect\Components\Form\TableSelect;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Concerns\Translatable;
@@ -86,11 +87,10 @@ class ScheduleResource extends Resource
                 Forms\Components\Section::make(__('schedule-resource.form.section.assignment_status'))
                     ->schema([
                         // Changed to assigned_id and relationship assignedTo
-                        Forms\Components\Select::make('assigned_id')
+                        TableSelect::make('assigned_id')
                             ->label(__('schedule-resource.form.assigned_to'))
                             ->relationship('assignedTo', 'name')
-                            ->searchable()
-                            ->preload(),
+                            ->tableLocation(UserResource::class),
 
                         Forms\Components\Select::make('status')
                             ->label(__('schedule-resource.form.status'))

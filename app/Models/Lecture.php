@@ -76,6 +76,7 @@ class Lecture extends Base\Model
     protected $fillable = [
         'course_id',
         'title',
+        'lecture_order',
         'description',
         'duration_estimate',
         'created_by',
