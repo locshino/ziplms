@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('organizations', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
-            $table->string('slug')->unique()->nullable();
             // $table->string('type'); // Managed by plugin filament-spatie-tags
             $table->string('address')->nullable();
             $table->json('settings')->nullable();

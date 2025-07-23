@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('organization_users', function (Blueprint $table) {
-            $table->uuid('id')->primary(); // Hoặc bạn có thể bỏ qua id và dùng khóa chính kết hợp
+            $table->uuid('id')->primary(); // Khóa chính UUID
             $table->uuid('organization_id');
             $table->uuid('user_id');
 
@@ -24,15 +24,17 @@ return new class extends Migration
             $table->index('user_id');
 
             // Foreign key constraints
-            $table->foreign('organization_id')->references('id')
-                ->on('organizations')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')
-                ->on('users')->onDelete('cascade');
+            $table->foreign('organization_id')
+                ->references('id')
+                ->on('organizations')
+                ->onDelete('cascade');
 
-            $table->unique([
-                'organization_id',
-                'user_id',
-            ], 'organization_user_unique');
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
+
+            $table->unique(['organization_id', 'user_id'], 'organization_user_unique');
         });
     }
 
@@ -41,6 +43,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('organization_user');
+        Schema::dropIfExists('organization_users');
     }
 };
