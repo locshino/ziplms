@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\AssignmentSubmissionResource\Pages;
 
-
 use App\Filament\Resources\AssignmentSubmissionResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
