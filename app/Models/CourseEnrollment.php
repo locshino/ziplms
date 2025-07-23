@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\States\Status;
+use App\States\Course\CourseStatus;
 use Spatie\ModelStates\HasStates;
 
 /**
@@ -10,7 +10,7 @@ use Spatie\ModelStates\HasStates;
  * @property string $user_id
  * @property string $course_id
  * @property string|null $final_grade
- * @property Status $status
+ * @property CourseStatus $status
  * @property string $enrollment_date
  * @property \Illuminate\Support\Carbon|null $completed_at
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -49,7 +49,7 @@ class CourseEnrollment extends Base\Model
 
     protected $casts = [
         'completed_at' => 'datetime',
-        'status' => Status::class,
+        'status' => CourseStatus::class,
     ];
 
     protected $fillable = [
