@@ -20,4 +20,9 @@ class ListQuestions extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    public static function getTranslatableLocales(): array
+    {
+        return ['vi', 'en'];
+    }
 }

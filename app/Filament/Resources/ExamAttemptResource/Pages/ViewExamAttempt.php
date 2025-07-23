@@ -3,7 +3,8 @@
 namespace App\Filament\Resources\ExamAttemptResource\Pages;
 
 use App\Filament\Resources\ExamAttemptResource;
-use Filament\Resources\Pages\ViewRecord; // <-- Dùng ViewRecord thay vì EditRecord
+use Filament\Actions;
+use Filament\Resources\Pages\ViewRecord;
 
 class ViewExamAttempt extends ViewRecord
 {
@@ -12,7 +13,8 @@ class ViewExamAttempt extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            // Bạn có thể thêm các nút hành động ở đây nếu cần, ví dụ: nút In kết quả
+            Actions\ForceDeleteAction::make(),
+            Actions\RestoreAction::make(),
         ];
     }
 }

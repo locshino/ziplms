@@ -18,6 +18,12 @@ class ListExams extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+            Actions\LocaleSwitcher::make(),
         ];
+    }
+
+    public function getTranslatableLocales(): array
+    {
+        return ['vi', 'en'];
     }
 }

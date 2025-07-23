@@ -5,8 +5,9 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ExamResource\Pages;
 use App\Filament\Resources\ExamResource\RelationManagers;
 use App\Models\Exam;
-use App\States\Exam\Active;   // <-- THÊM MỚI
-use App\States\Exam\Inactive; // <-- THÊM MỚI
+use App\States\Exam\Active;
+use App\States\Exam\Inactive;
+use App\States\Exam\Status;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Concerns\Translatable;
@@ -26,6 +27,11 @@ class ExamResource extends Resource
     protected static ?string $model = Exam::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+
+    public static function getTranslatableLocales(): array
+    {
+        return ['vi', 'en'];
+    }
 
     public static function getNavigationGroup(): ?string
     {
@@ -50,25 +56,18 @@ class ExamResource extends Resource
                 Forms\Components\Section::make(__('exam-resource.form.section.main_content'))
                     ->columnSpan(2)
                     ->schema([
-                        Forms\Components\Tabs::make('Translations')->tabs([
-                            Forms\Components\Tabs\Tab::make(__('exam-resource.form.tab.vietnamese'))
-                                ->schema([
-                                    Forms\Components\TextInput::make('title.vi')->label(__('exam-resource.form.field.title'))->required(),
-                                    Forms\Components\RichEditor::make('description.vi')->label(__('exam-resource.form.field.description')),
-                                ]),
-                            Forms\Components\Tabs\Tab::make(__('exam-resource.form.tab.english'))
-                                ->schema([
-                                    Forms\Components\TextInput::make('title.en')->label(__('exam-resource.form.field.title')),
-                                    Forms\Components\RichEditor::make('description.en')->label(__('exam-resource.form.field.description')),
-                                ]),
-                        ]),
+
+                        // XÓA TABS, DÙNG INPUT TRỰC TIẾP
+                        Forms\Components\TextInput::make('title') // <-- KHÔNG CẦN .vi HAY .en
+                            ->label(__('exam-resource.form.field.title'))
+                            ->required(),
+
+                        Forms\Components\RichEditor::make('description') // <-- KHÔNG CẦN .vi HAY .en
+                            ->label(__('exam-resource.form.field.description')),
+
                         Forms\Components\Grid::make()->schema([
-                            Forms\Components\Select::make('course_id')
-                                ->relationship('course', 'name')
-                                ->searchable()->preload()->label(__('exam-resource.form.field.course')),
-                            Forms\Components\Select::make('lecture_id')
-                                ->relationship('lecture', 'title')
-                                ->searchable()->preload()->label(__('exam-resource.form.field.lecture')),
+                            Forms\Components\Select::make('course_id')->relationship('course', 'name')->searchable()->preload()->label(__('exam-resource.form.field.course')),
+                            Forms\Components\Select::make('lecture_id')->relationship('lecture', 'title')->searchable()->preload()->label(__('exam-resource.form.field.lecture')),
                         ]),
                     ]),
 
@@ -76,35 +75,17 @@ class ExamResource extends Resource
                 Forms\Components\Section::make(__('exam-resource.form.section.settings'))
                     ->columnSpan(1)
                     ->schema([
+                        // ... giữ nguyên các field cài đặt
                         Forms\Components\Select::make('status')
                             ->label(__('exam-resource.form.field.status'))
-                            ->options(function () {
-                                // CẬP NHẬT: Chỉ lấy 2 trạng thái Active và Inactive
-                                $allowedStates = [
-                                    Active::class,
-                                    Inactive::class,
-                                ];
-
-                                return collect($allowedStates)->mapWithKeys(fn ($state) => [
-                                    $state => (new $state(new Exam))->label(),
-                                ])->all();
-                            })
-                            ->required()
-                            ->native(false),
-
+                            ->options(Status::getOptionsForSelect([Active::class, Inactive::class]))
+                            ->required()->native(false),
                         Forms\Components\DateTimePicker::make('start_time')->label(__('exam-resource.form.field.start_time')),
                         Forms\Components\DateTimePicker::make('end_time')->label(__('exam-resource.form.field.end_time')),
                         Forms\Components\TextInput::make('duration_minutes')->label(__('exam-resource.form.field.duration'))->numeric()->required()->default(60),
                         Forms\Components\TextInput::make('max_attempts')->label(__('exam-resource.form.field.max_attempts'))->numeric()->required()->default(1),
                         Forms\Components\TextInput::make('passing_score')->label(__('exam-resource.form.field.passing_score'))->numeric()->required()->default(50),
-                        Forms\Components\Select::make('show_results_after')
-                            ->label(__('exam-resource.form.field.show_results'))
-                            ->options(
-                                collect(\App\Enums\ExamShowResultsType::cases())->mapWithKeys(fn ($case) => [
-                                    $case->value => $case->label(),
-                                ])->all()
-                            )
-                            ->required()->native(false),
+                        Forms\Components\Select::make('show_results_after')->label(__('exam-resource.form.field.show_results'))->options(\App\Enums\ExamShowResultsType::options())->required()->native(false),
                         Forms\Components\Toggle::make('shuffle_questions')->label(__('exam-resource.form.field.shuffle_questions')),
                         Forms\Components\Toggle::make('shuffle_answers')->label(__('exam-resource.form.field.shuffle_answers')),
                     ]),
@@ -138,7 +119,8 @@ class ExamResource extends Resource
                     ->label(__('exam-resource.table.action.take_exam'))
                     ->icon('heroicon-o-pencil-square')
                     ->color('success')
-                    ->url(fn (Exam $record): string => static::getUrl('take', ['record' => $record])),
+                    ->url(fn (Exam $record): string => static::getUrl('take', ['record' => $record]))
+                    ->visible(fn (Exam $record): bool => $record->status instanceof Active),
 
                 ActionGroup::make([
 

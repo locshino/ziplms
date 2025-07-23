@@ -1,19 +1,32 @@
 <?php
 
+// File: app/States/Exam/Active.php
+
 namespace App\States\Exam;
 
 class Active extends Status
 {
     public static string $name = 'active';
 
-    // SỬA LỖI: Thêm phương thức label() bắt buộc
+    public static string $langFile = 'states_exam';
+
     public static function label(): string
     {
-        return 'Active';
+        return __(static::$langFile.'.'.self::$name.'.label');
     }
 
-    public function color(): string
+    public static function color(): string
     {
         return 'success';
+    }
+
+    public static function icon(): string
+    {
+        return 'heroicon-o-check-circle';
+    }
+
+    public static function description(): string
+    {
+        return __(static::$langFile.'.'.self::$name.'.description');
     }
 }
