@@ -7,6 +7,7 @@ namespace App\States\SubmissionStatus;
 class Pending extends SubmissionStatus
 {
     public static string $name = 'pending';
+
     public static function label(): string
     {
         return __('submission_statuses.pending.label');
@@ -26,5 +27,4 @@ class Pending extends SubmissionStatus
     {
         return 'heroicon-o-clock';
     }
-
 }

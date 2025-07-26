@@ -7,7 +7,6 @@ use Spatie\ModelStates\StateConfig;
 
 abstract class SubmissionStatus extends State
 {
-
     public static string $langFile = 'submission_statuses';
 
     public static function config(): StateConfig
@@ -24,6 +23,7 @@ abstract class SubmissionStatus extends State
             ->allowTransition(Inactive::class, Pending::class)
             ->allowTransition(Pending::class, Postponed::class);
     }
+
     public static function getStates(): array
     {
         return [

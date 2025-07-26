@@ -5,6 +5,7 @@ namespace App\States\SubmissionStatus;
 class Graded extends SubmissionStatus
 {
     public static string $name = 'graded';
+
     public static function label(): string
     {
         return __('submission_statuses.graded.label');
