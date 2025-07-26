@@ -2,36 +2,13 @@
 
 namespace App\States\SubmissionStatus;
 
-use Illuminate\Support\Str;
-use Spatie\ModelStates\State;
+use App\States\Base\State;
 use Spatie\ModelStates\StateConfig;
 
 abstract class SubmissionStatus extends State
 {
-    public static function key(): string
-    {
-        return Str::snake(class_basename(static::class));
-    }
 
-    public static function label(): string
-    {
-        return __('submission_status.'.static::key().'.label');
-    }
-
-    public static function color(): string
-    {
-        return __('submission_status.'.static::key().'.color');
-    }
-
-    public static function icon(): string
-    {
-        return __('submission_status.'.static::key().'.icon');
-    }
-
-    public static function description(): string
-    {
-        return __('submission_status.'.static::key().'.description');
-    }
+    public static string $langFile = 'submission_statuses';
 
     public static function config(): StateConfig
     {
@@ -46,5 +23,19 @@ abstract class SubmissionStatus extends State
             ->allowTransition(Active::class, Inactive::class)
             ->allowTransition(Inactive::class, Pending::class)
             ->allowTransition(Pending::class, Postponed::class);
+    }
+    public static function getStates(): array
+    {
+        return [
+            Pending::class,
+            InProgress::class,
+            Active::class,
+            Submitted::class,
+            Graded::class,
+            Completed::class,
+            Archived::class,
+            Inactive::class,
+            Postponed::class,
+        ];
     }
 }
