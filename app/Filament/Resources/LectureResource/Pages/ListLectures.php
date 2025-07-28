@@ -17,10 +17,11 @@ class ListLectures extends ListRecords
         return [
             Actions\ExportAction::make()
                 ->exporter(LectureExporter::class)
-                ->label('Xuất Excel'),
+                ->label(__('lecture-resource.actions.export_excel')),
+
             Actions\ImportAction::make()
                 ->importer(LectureImporter::class)
-                ->label('Nhập Excel'),
+                ->label(__('lecture-resource.actions.import_excel')),
 
             Actions\CreateAction::make(),
         ];

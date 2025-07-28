@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\States\Status;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -107,6 +108,13 @@ class User extends Base\AuthModel implements HasMedia
         return array_merge(parent::casts(), [
             'status' => Status::class,
         ]);
+    }
+
+    public function lectures(): BelongsToMany
+    {
+        return $this->belongsToMany(Lecture::class, 'lecture_user')
+            ->withPivot('status', 'completed_at')
+            ->withTimestamps();
     }
 
     /**

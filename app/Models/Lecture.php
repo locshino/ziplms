@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\States\Status;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\ModelStates\HasStates;
 use Spatie\Translatable\HasTranslations;
 
@@ -26,6 +27,8 @@ use Spatie\Translatable\HasTranslations;
  * @property-read int|null $materials_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Schedule> $schedules
  * @property-read int|null $schedules_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
+ * @property-read int|null $users_count
  * @property-read mixed $translations
  *
  * @method static \Database\Factories\LectureFactory factory($count = null, $state = [])
@@ -64,7 +67,6 @@ class Lecture extends Base\Model
 
     protected $casts = [
         'title' => 'json',
-        'description' => 'json',
         'status' => Status::class,
     ];
 
@@ -82,6 +84,18 @@ class Lecture extends Base\Model
         'created_by',
         'status',
     ];
+
+    /**
+     * Accessor để đảm bảo description luôn trả về một mảng,
+     * ngay cả khi giá trị trong DB là NULL.
+     *
+     * @param  string|null  $value
+     */
+    public function getDescriptionAttribute($value): array
+    {
+        // Nếu giá trị là null hoặc không giải mã được, trả về mảng rỗng
+        return json_decode($value, true) ?: [];
+    }
 
     public function course()
     {
@@ -106,5 +120,15 @@ class Lecture extends Base\Model
     public function schedules()
     {
         return $this->morphMany(Schedule::class, 'schedulable');
+    }
+
+    /**
+     * Mối quan hệ để lấy danh sách học sinh đã tham gia bài giảng này.
+     */
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'lecture_user')
+            ->withPivot('status', 'completed_at')
+            ->withTimestamps();
     }
 }
