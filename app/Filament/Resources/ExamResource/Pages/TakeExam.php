@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ExamResource\Pages;
 
+use App\Enums\ExamShowResultsType;
 use App\Enums\QuestionType;
 use App\Filament\Resources\ExamResource;
 use App\Models\Exam;
@@ -24,59 +25,135 @@ use Livewire\Attributes\Locked;
 class TakeExam extends Page
 {
     protected static string $resource = ExamResource::class;
-
     protected static string $view = 'filament.resources.exam-resource.pages.take-exam';
-
     protected static string $routePath = '/{record}/take';
-
     protected static bool $shouldRegisterNavigation = false;
 
     #[Locked]
     public Exam $record;
-
     #[Locked]
     public ?ExamAttempt $attempt = null;
-
     public ?Collection $questions = null;
-
     public int $currentQuestionIndex = 0;
-
     public array $questionMeta = [];
-
-    // Mảng lưu câu trả lời của người dùng
     public array $singleChoiceAnswers = [];
-
     public array $multipleChoiceAnswers = [];
-
     public array $trueFalseAnswers = [];
-
     public array $shortAnswers = [];
-
     public array $essayAnswers = [];
-
     public array $fillBlankAnswers = [];
-
     public ?int $timeLeft = null;
-
     public bool $examStarted = false;
 
     public function mount(): void
     {
-        // Logic này sẽ chặn mọi truy cập trực tiếp qua URL nếu bài thi không Active
         if (! $this->record->status instanceof Active) {
-            Notification::make()
-                ->title('Không thể làm bài thi này')
-                ->body('Bài thi này hiện không hoạt động hoặc đã kết thúc.')
-                ->danger()
-                ->send();
-
-            // Chuyển hướng người dùng về trang danh sách
+            Notification::make()->title('Không thể làm bài thi này')->body('Bài thi này hiện không hoạt động hoặc đã kết thúc.')->danger()->send();
             $this->redirect(static::$resource::getUrl('index'));
-
             return;
         }
     }
 
+    public function submitExam(): void
+    {
+        if (! $this->attempt) {
+            return;
+        }
+        $this->attempt = ExamAttempt::find($this->attempt->id);
+        if (! $this->attempt || get_class($this->attempt->status) !== InProgress::class) {
+            return;
+        }
+        $this->saveStateToFeedback();
+
+        $completedAt = now();
+        $totalScore = 0;
+        $hasManualGradingQuestions = false;
+
+        // Biến cờ chính để quyết định có chấm tự động hay không
+        $isManualReviewRequired = $this->record->show_results_after === ExamShowResultsType::MANUAL;
+
+        foreach ($this->questions as $question) {
+            $type = $this->getQuestionType($question)?->value;
+            $qId = $question->id;
+            $answerData = [
+                'exam_attempt_id' => $this->attempt->id,
+                'exam_question_id' => $this->questionMeta[$qId]['exam_question_id'],
+                'question_id' => $qId,
+                'selected_choice_id' => null,
+                'chosen_option_ids' => null,
+                'answer_text' => null,
+                'is_correct' => null, // Mặc định là null (chưa chấm)
+                'points_earned' => null, // Mặc định là null (chưa chấm)
+            ];
+
+            // BƯỚC 1: LƯU CÂU TRẢ LỜI THÔ CỦA HỌC SINH (LUÔN LUÔN LÀM)
+            switch ($type) {
+                case 'single_choice':
+                case 'true_false':
+                    $answerData['selected_choice_id'] = $this->singleChoiceAnswers[$qId] ?? ($this->trueFalseAnswers[$qId] ?? null);
+                    break;
+                case 'multiple_choice':
+                    $answerData['chosen_option_ids'] = array_filter($this->multipleChoiceAnswers[$qId] ?? []);
+                    break;
+                case 'short_answer':
+                case 'essay':
+                    $hasManualGradingQuestions = true;
+                    $answerText = ($type === 'short_answer' ? $this->shortAnswers[$qId] : $this->essayAnswers[$qId]) ?? null;
+                    if ($answerText) {
+                        $answerData['answer_text'] = ['vi' => $answerText];
+                    }
+                    break;
+                case 'fill_blank':
+                    $hasManualGradingQuestions = true; // Fill blank luôn cần review
+                    $userAnswers = array_map('trim', $this->fillBlankAnswers[$qId] ?? []);
+                    $answerData['answer_text'] = ['vi' => implode('|', $userAnswers)];
+                    break;
+            }
+
+            // BƯỚC 2: CHỈ CHẤM TỰ ĐỘNG NẾU BÀI THI KHÔNG YÊU CẦU CHẤM THỦ CÔNG
+            if (!$isManualReviewRequired) {
+                switch ($type) {
+                    case 'single_choice':
+                    case 'true_false':
+                        $correctChoice = $question->choices->where('is_correct', true)->first();
+                        $isCorrect = $correctChoice && $answerData['selected_choice_id'] == $correctChoice->id;
+                        $answerData['is_correct'] = $isCorrect;
+                        $answerData['points_earned'] = $isCorrect ? ($this->questionMeta[$qId]['points'] ?? 1) : 0;
+                        if ($isCorrect) $totalScore += $answerData['points_earned'];
+                        break;
+                    case 'multiple_choice':
+                        $selectedChoices = $answerData['chosen_option_ids'];
+                        sort($selectedChoices);
+                        $correctChoices = $question->choices->where('is_correct', true)->pluck('id')->sort()->values()->all();
+                        $isCorrect = !empty($selectedChoices) && $selectedChoices === $correctChoices;
+                        $answerData['is_correct'] = $isCorrect;
+                        $answerData['points_earned'] = $isCorrect ? ($this->questionMeta[$qId]['points'] ?? 1) : 0;
+                        if ($isCorrect) $totalScore += $answerData['points_earned'];
+                        break;
+                }
+            }
+
+            ExamAnswer::create($answerData);
+        }
+
+        $timeSpent = $this->attempt->started_at->diffInSeconds($completedAt);
+        $this->attempt->completed_at = $completedAt;
+        $this->attempt->time_spent_seconds = $timeSpent;
+
+        // BƯỚC 3: QUYẾT ĐỊNH TRẠNG THÁI CUỐI CÙNG
+        if ($hasManualGradingQuestions || $isManualReviewRequired) {
+            $this->attempt->score = $isManualReviewRequired ? null : $totalScore; // Nếu chấm thủ công, điểm ban đầu là null
+            $this->attempt->save(); // Giữ nguyên trạng thái InProgress
+        } else {
+            $this->attempt->score = $totalScore;
+            $this->attempt->status->transitionTo(Completed::class);
+        }
+
+        Notification::make()->title('Nộp bài thành công!')->success()->send();
+        $this->redirect(static::$resource::getUrl('index'));
+    }
+
+    // ... các phương thức khác không thay đổi ...
     #[Computed(persist: true)]
     public function incompleteAttempt(): ?ExamAttempt
     {
@@ -89,7 +166,7 @@ class TakeExam extends Page
 
     public function getTitle(): string
     {
-        return $this->examStarted ? 'Đang làm bài: '.$this->record->title : 'Bắt đầu: '.$this->record->title;
+        return $this->examStarted ? 'Đang làm bài: ' . $this->record->title : 'Bắt đầu: ' . $this->record->title;
     }
 
     public function continueExam(): void
@@ -299,89 +376,6 @@ class TakeExam extends Page
         }
     }
 
-    public function submitExam(): void
-    {
-        if (! $this->attempt) {
-            return;
-        }
-        $this->attempt = ExamAttempt::find($this->attempt->id);
-        if (! $this->attempt || get_class($this->attempt->status) !== InProgress::class) {
-            return;
-        }
-        $this->saveStateToFeedback();
-
-        $completedAt = now();
-        $totalScore = 0;
-
-        foreach ($this->questions as $question) {
-            $type = $this->getQuestionType($question)?->value;
-            $qId = $question->id;
-            $answerData = [
-                'exam_attempt_id' => $this->attempt->id,
-                'exam_question_id' => $this->questionMeta[$qId]['exam_question_id'],
-                'question_id' => $qId,
-                'selected_choice_id' => null,
-                'chosen_option_ids' => null,
-                'answer_text' => null,
-                'is_correct' => false,
-                'points_earned' => 0,
-            ];
-
-            switch ($type) {
-                case 'single_choice':
-                case 'true_false':
-                    $selectedChoiceId = $this->singleChoiceAnswers[$qId] ?? ($this->trueFalseAnswers[$qId] ?? null);
-                    $answerData['selected_choice_id'] = $selectedChoiceId;
-                    $correctChoice = $question->choices->where('is_correct', true)->first();
-                    if ($correctChoice && $selectedChoiceId == $correctChoice->id) {
-                        $answerData['is_correct'] = true;
-                        $answerData['points_earned'] = $this->questionMeta[$qId]['points'] ?? 1;
-                        $totalScore += $answerData['points_earned'];
-                    }
-                    break;
-                case 'multiple_choice':
-                    $selectedChoices = array_filter($this->multipleChoiceAnswers[$qId] ?? []);
-                    sort($selectedChoices);
-                    $answerData['chosen_option_ids'] = $selectedChoices;
-                    $correctChoices = $question->choices->where('is_correct', true)->pluck('id')->sort()->values()->all();
-                    if (! empty($selectedChoices) && $selectedChoices === $correctChoices) {
-                        $answerData['is_correct'] = true;
-                        $answerData['points_earned'] = $this->questionMeta[$qId]['points'] ?? 1;
-                        $totalScore += $answerData['points_earned'];
-                    }
-                    break;
-                case 'short_answer':
-                case 'essay':
-                    $answerText = ($type === 'short_answer' ? $this->shortAnswers[$qId] : $this->essayAnswers[$qId]) ?? null;
-                    if ($answerText) {
-                        $answerData['answer_text'] = ['vi' => $answerText];
-                    }
-                    $answerData['points_earned'] = null; // Needs manual grading
-                    break;
-                case 'fill_blank':
-                    $userAnswers = array_map('trim', $this->fillBlankAnswers[$qId] ?? []);
-                    $answerData['answer_text'] = ['vi' => implode('|', $userAnswers)];
-                    $correctAnswers = $question->choices->pluck('choice_text')->map(fn ($text) => trim($text))->all();
-                    if (! empty($userAnswers) && $userAnswers === $correctAnswers) {
-                        $answerData['is_correct'] = true;
-                        $answerData['points_earned'] = $this->questionMeta[$qId]['points'] ?? 1;
-                        $totalScore += $answerData['points_earned'];
-                    }
-                    break;
-            }
-            ExamAnswer::create($answerData);
-        }
-
-        $timeSpent = $this->attempt->started_at->diffInSeconds($completedAt);
-        $this->attempt->score = $totalScore;
-        $this->attempt->completed_at = $completedAt;
-        $this->attempt->time_spent_seconds = $timeSpent;
-        $this->attempt->status->transitionTo(Completed::class);
-
-        Notification::make()->title('Nộp bài thành công!')->success()->send();
-        $this->redirect(static::$resource::getUrl('index'));
-    }
-
     public function nextQuestion(): void
     {
         if ($this->currentQuestionIndex < $this->questions->count() - 1) {
@@ -409,7 +403,6 @@ class TakeExam extends Page
     public function getQuestionType(Question $question): ?QuestionType
     {
         $tag = $question->tagsWithType(QuestionType::key())->first();
-
         return $tag ? QuestionType::tryFrom($tag->name) : null;
     }
 
@@ -418,7 +411,6 @@ class TakeExam extends Page
         if ($this->examStarted) {
             return [];
         }
-
         return [
             Action::make('startExam')
                 ->label('Bắt đầu bài thi mới')
@@ -453,7 +445,6 @@ class TakeExam extends Page
                 $answeredCount++;
             }
         }
-
         return $answeredCount;
     }
 
@@ -462,12 +453,11 @@ class TakeExam extends Page
         if (! $this->examStarted) {
             return [];
         }
-
         return [
             Action::make('submitModal')
                 ->label('Nộp Bài')
                 ->color('primary')
-                ->modalContent(fn (Action $action): View => view(
+                ->modalContent(fn(Action $action): View => view(
                     'filament.resources.exam-resource.pages.actions.submit-modal-content',
                     [
                         'action' => $action,
@@ -478,7 +468,7 @@ class TakeExam extends Page
                 ->registerModalActions([
                     Action::make('confirmSubmit')
                         ->label('Xác nhận & Nộp bài')
-                        ->action(fn () => $this->submitExam()),
+                        ->action(fn() => $this->submitExam()),
                     Action::make('cancel')
                         ->label('Quay lại làm bài')
                         ->color('gray')

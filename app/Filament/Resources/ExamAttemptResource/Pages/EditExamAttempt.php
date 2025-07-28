@@ -8,16 +8,23 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditExamAttempt extends EditRecord
 {
-    protected static string $resource = ExamAttemptResource::class;
+    use EditRecord\Concerns\Translatable; 
 
-    use EditRecord\Concerns\Translatable;
+    protected static string $resource = ExamAttemptResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\LocaleSwitcher::make(),
+            Actions\LocaleSwitcher::make(), //
+            Actions\DeleteAction::make()
+                ->successNotificationTitle(__('exam-attempt-resource.notification.delete_success')),
             Actions\ForceDeleteAction::make(),
             Actions\RestoreAction::make(),
         ];
+    }
+
+    protected function getSavedNotificationTitle(): ?string
+    {
+        return __('exam-attempt-resource.notification.update_success');
     }
 }

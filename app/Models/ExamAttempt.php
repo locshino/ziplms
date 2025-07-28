@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\States\Exam\Completed;
 use App\States\Exam\Status;
 use Spatie\ModelStates\HasStates;
 use Spatie\Translatable\HasTranslations;
@@ -98,5 +99,25 @@ class ExamAttempt extends Base\Pivot
     public function answers()
     {
         return $this->hasMany(ExamAnswer::class, 'exam_attempt_id');
+    }
+    public function recalculateAndFinalize(): void
+    {
+        if ($this->status instanceof Completed) {
+            // Nếu đã hoàn thành, chỉ cập nhật lại điểm, không chuyển trạng thái nữa
+            $this->score = $this->answers()->where('is_correct', true)->sum('points_earned');
+            $this->save();
+            return;
+        }
+
+        $ungradedCount = $this->answers()->whereNull('points_earned')->count();
+
+        if ($ungradedCount === 0) {
+            // ▼▼▼ ĐÃ SỬA: Chỉ tính tổng điểm của các câu trả lời đúng ▼▼▼
+            $totalScore = $this->answers()->where('is_correct', true)->sum('points_earned');
+
+            $this->score = $totalScore;
+            $this->status->transitionTo(Completed::class);
+            $this->save();
+        }
     }
 }

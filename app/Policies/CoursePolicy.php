@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\Course;
 use App\Models\User;
+use App\Models\Course;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class CoursePolicy

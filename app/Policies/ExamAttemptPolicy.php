@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\ExamAttempt;
 use App\Models\User;
+use App\Models\ExamAttempt;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ExamAttemptPolicy

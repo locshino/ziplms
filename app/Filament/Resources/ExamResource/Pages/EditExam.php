@@ -8,23 +8,23 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditExam extends EditRecord
 {
-    protected static string $resource = ExamResource::class;
-
     use EditRecord\Concerns\Translatable;
+
+    protected static string $resource = ExamResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
             Actions\LocaleSwitcher::make(),
+            Actions\DeleteAction::make()
+                ->successNotificationTitle(__('exam-resource.notification.delete_success')),
             Actions\ForceDeleteAction::make(),
             Actions\RestoreAction::make(),
-            Actions\DeleteAction::make()
-                ->successNotificationTitle('Bài thi đã được xóa thành công.'),
         ];
     }
 
     protected function getSavedNotificationTitle(): ?string
     {
-        return 'Bài thi đã được cập nhật thành công.';
+        return __('exam-resource.notification.update_success');
     }
 }

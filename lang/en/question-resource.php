@@ -1,14 +1,12 @@
 <?php
 
 return [
-    // Navigation and Model Labels
+    // ... other sections
     'navigation' => [
         'group' => 'Assessment Management',
         'label' => 'Question',
         'plural_label' => 'Questions',
     ],
-
-    // Form Fields and Sections
     'form' => [
         'section' => [
             'question_details' => 'Question Details',
@@ -22,8 +20,6 @@ return [
             'organization' => 'Organization',
         ],
     ],
-
-    // Table Columns
     'table' => [
         'column' => [
             'question_text' => 'Question Content',
@@ -37,9 +33,9 @@ return [
             'organization_type' => 'Filter by Organization Type',
         ],
     ],
-
-    // Notifications
+    // FIXED: Added 'create_success' key
     'notification' => [
+        'create_success' => 'Question created successfully.',
         'update_success' => 'Question updated successfully.',
         'delete_success' => 'Question deleted successfully.',
     ],

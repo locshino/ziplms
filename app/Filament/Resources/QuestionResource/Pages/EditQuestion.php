@@ -8,22 +8,23 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditQuestion extends EditRecord
 {
-    protected static string $resource = QuestionResource::class;
-
     use EditRecord\Concerns\Translatable;
+
+    protected static string $resource = QuestionResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
             Actions\LocaleSwitcher::make(),
+            Actions\DeleteAction::make()
+                ->successNotificationTitle(__('question-resource.notification.delete_success')),
             Actions\ForceDeleteAction::make(),
             Actions\RestoreAction::make(),
-            Actions\DeleteAction::make(),
         ];
     }
 
     protected function getSavedNotificationTitle(): ?string
     {
-        return 'Câu hỏi đã được cập nhật thành công.';
+        return __('question-resource.notification.update_success');
     }
 }

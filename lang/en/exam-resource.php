@@ -1,29 +1,22 @@
 <?php
 
 return [
-    // Navigation and Model Labels
     'navigation' => [
         'group' => 'Assessment Management',
         'label' => 'Exam',
         'plural_label' => 'Exams',
     ],
-
-    // Form Fields and Sections
     'form' => [
         'section' => [
             'main_content' => 'Multi-language Content',
             'settings' => 'Settings & Properties',
-        ],
-        'tab' => [
-            'vietnamese' => 'Vietnamese',
-            'english' => 'English',
         ],
         'field' => [
             'title' => 'Title',
             'description' => 'Description / Instructions',
             'course' => 'Belongs to Course',
             'lecture' => 'Belongs to Lecture',
-            'status' => 'Status', // <-- ĐÃ THÊM
+            'status' => 'Status',
             'start_time' => 'Start Time',
             'end_time' => 'End Time',
             'duration' => 'Duration (minutes)',
@@ -34,8 +27,6 @@ return [
             'shuffle_answers' => 'Shuffle Answers?',
         ],
     ],
-
-    // Table Columns and Actions
     'table' => [
         'column' => [
             'title' => 'Title',
@@ -44,10 +35,12 @@ return [
         ],
         'action' => [
             'take_exam' => 'Take Exam',
-            'change_status' => 'Change Status',
-            'change_status_success_title' => 'Update Successful',
-            'change_status_success_body' => 'The exam\'s status has been changed successfully.',
         ],
+    ],
+    'notification' => [
+        'create_success' => 'The exam has been created successfully.',
+        'update_success' => 'The exam has been updated successfully.',
+        'delete_success' => 'The exam has been deleted successfully.',
     ],
     'relation_manager' => [
         'questions' => [
@@ -58,18 +51,12 @@ return [
                 'order' => 'Order',
             ],
             'action' => [
-                'attach' => [
-                    'notification_success' => 'Question has been added to the exam.',
-                ],
-                'edit' => [
-                    'notification_success' => 'Question information has been updated.',
-                ],
-                'detach' => [
-                    'notification_success' => 'Question has been removed from the exam.',
-                ],
-                'detach_bulk' => [
-                    'notification_success' => 'Selected questions have been removed from the exam.',
-                ],
+                'attach' => ['notification_success' => 'Question has been added to the exam.'],
+                'edit' => ['notification_success' => 'Question information has been updated.'],
+                'detach' => ['notification_success' => 'Question has been removed from the exam.'],
+                'delete' => ['notification_success' => 'The question has been permanently deleted.'],
+                'detach_bulk' => ['notification_success' => 'Selected questions have been removed from the exam.'],
+                'delete_bulk' => ['notification_success' => 'Selected questions have been permanently deleted.'],
             ],
             'form' => [
                 'points' => 'Points',

@@ -75,7 +75,6 @@ class ExamResource extends Resource
                 Forms\Components\Section::make(__('exam-resource.form.section.settings'))
                     ->columnSpan(1)
                     ->schema([
-                        // ... giữ nguyên các field cài đặt
                         Forms\Components\Select::make('status')
                             ->label(__('exam-resource.form.field.status'))
                             ->options(Status::getOptionsForSelect([Active::class, Inactive::class]))
@@ -100,9 +99,9 @@ class ExamResource extends Resource
                 Tables\Columns\TextColumn::make('title')
                     ->label(__('exam-resource.table.column.title'))
                     ->limit(40)
-                    ->getStateUsing(fn ($record): ?string => $record->getTranslation('title', app()->getLocale()))
+                    ->getStateUsing(fn($record): ?string => $record->getTranslation('title', app()->getLocale()))
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->where('title->'.app()->getLocale(), 'like', "%{$search}%");
+                        return $query->where('title->' . app()->getLocale(), 'like', "%{$search}%");
                     }),
                 Tables\Columns\TextColumn::make('course.name')->label(__('exam-resource.table.column.course'))->sortable(),
                 Tables\Columns\TextColumn::make('status')->label(__('exam-resource.table.column.status'))->badge(),
@@ -119,8 +118,8 @@ class ExamResource extends Resource
                     ->label(__('exam-resource.table.action.take_exam'))
                     ->icon('heroicon-o-pencil-square')
                     ->color('success')
-                    ->url(fn (Exam $record): string => static::getUrl('take', ['record' => $record]))
-                    ->visible(fn (Exam $record): bool => $record->status instanceof Active),
+                    ->url(fn(Exam $record): string => static::getUrl('take', ['record' => $record]))
+                    ->visible(fn(Exam $record): bool => $record->status instanceof Active),
 
                 ActionGroup::make([
 

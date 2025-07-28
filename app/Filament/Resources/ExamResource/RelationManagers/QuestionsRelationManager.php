@@ -4,9 +4,11 @@ namespace App\Filament\Resources\ExamResource\RelationManagers;
 
 use Closure;
 use Filament\Forms;
+use Filament\Forms\Form; // Cần import Form
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -16,7 +18,6 @@ class QuestionsRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'question_text';
 
-    // Updated to use translation with the correct key
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('exam-resource.relation_manager.questions.label');
@@ -30,8 +31,10 @@ class QuestionsRelationManager extends RelationManager
                     ->label(__('exam-resource.relation_manager.questions.column.question_content'))
                     ->limit(80)
                     ->wrap()
-                    // This correctly gets the translation for the question itself
-                    ->getStateUsing(fn ($record): ?string => $record->getTranslation('question_text', app()->getLocale())),
+                    // TỐI ƯU HÓA: Bỏ getStateUsing, để model tự xử lý đa ngôn ngữ.
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->where('question_text->' . app()->getLocale(), 'like', "%{$search}%");
+                    }),
 
                 Tables\Columns\TextColumn::make('points')
                     ->label(__('exam-resource.relation_manager.questions.column.points'))
@@ -44,7 +47,7 @@ class QuestionsRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\AttachAction::make()
                     ->successNotificationTitle(__('exam-resource.relation_manager.questions.action.attach.notification_success'))
-                    ->form(fn (Tables\Actions\AttachAction $action): array => [
+                    ->form(fn(Tables\Actions\AttachAction $action): array => [
                         $action->getRecordSelect(),
                         Forms\Components\TextInput::make('points')
                             ->label(__('exam-resource.relation_manager.questions.form.points'))
@@ -61,7 +64,6 @@ class QuestionsRelationManager extends RelationManager
                                 'min' => __('exam-resource.relation_manager.questions.validation.order_not_negative'),
                             ])
                             ->rules([
-                                // FIXED: Inject the RelationManager's Livewire component instead of the Action.
                                 function (RelationManager $livewire) {
                                     return function (string $attribute, $value, Closure $fail) use ($livewire) {
                                         $exists = $livewire->getOwnerRecord()->questions()->where('question_order', $value)->exists();
@@ -72,10 +74,8 @@ class QuestionsRelationManager extends RelationManager
                                 },
                             ]),
                     ])
-                    // This block generates a UUID for the pivot table's primary key.
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['id'] = Str::uuid()->toString();
-
                         return $data;
                     })
                     ->preloadRecordSelect(),
@@ -98,10 +98,8 @@ class QuestionsRelationManager extends RelationManager
                                     'min' => __('exam-resource.relation_manager.questions.validation.order_not_negative'),
                                 ])
                                 ->rules([
-                                    // Custom rule to check for uniqueness, ignoring the current record
                                     function (RelationManager $livewire) use ($record) {
                                         return function (string $attribute, $value, Closure $fail) use ($livewire, $record) {
-                                            // In a BelongsToMany relation, pivot data is on the `pivot` property.
                                             $pivotId = $record->pivot->id;
                                             $query = $livewire->getOwnerRecord()->questions()
                                                 ->where('question_order', $value)
@@ -116,13 +114,15 @@ class QuestionsRelationManager extends RelationManager
                         ];
                     }),
 
-                Tables\Actions\DetachAction::make()
-                    ->successNotificationTitle(__('exam-resource.relation_manager.questions.action.detach.notification_success')),
+
+                Tables\Actions\DeleteAction::make()
+                    ->successNotificationTitle(__('exam-resource.relation_manager.questions.action.delete.notification_success')),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DetachBulkAction::make()
-                        ->successNotificationTitle(__('exam-resource.relation_manager.questions.action.detach_bulk.notification_success')),
+
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->successNotificationTitle(__('exam-resource.relation_manager.questions.action.delete_bulk.notification_success')),
                 ]),
             ]);
     }

@@ -1,14 +1,12 @@
 <?php
 
 return [
-    // Navigation and Model Labels
+    // ... các phần khác
     'navigation' => [
         'group' => 'Quản lý Đánh giá',
         'label' => 'Câu hỏi',
         'plural_label' => 'Danh Sách Câu hỏi',
     ],
-
-    // Form Fields and Sections
     'form' => [
         'section' => [
             'question_details' => 'Chi tiết câu hỏi',
@@ -22,8 +20,6 @@ return [
             'organization' => 'Tổ chức',
         ],
     ],
-
-    // Table Columns
     'table' => [
         'column' => [
             'question_text' => 'Nội dung câu hỏi',
@@ -36,11 +32,10 @@ return [
             'question_type' => 'Lọc theo Loại câu hỏi',
             'organization_type' => 'Lọc theo Loại hình Tổ chức',
         ],
-
     ],
-
-    // Notifications
+    // ĐÃ SỬA: Bổ sung key 'create_success'
     'notification' => [
+        'create_success' => 'Câu hỏi đã được tạo thành công.',
         'update_success' => 'Câu hỏi đã được cập nhật thành công.',
         'delete_success' => 'Câu hỏi đã được xóa thành công.',
     ],
