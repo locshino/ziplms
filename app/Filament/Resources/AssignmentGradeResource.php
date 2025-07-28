@@ -73,7 +73,7 @@ class AssignmentGradeResource extends Resource
                 Action::make('download')
                     ->label('Tải bài nộp')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn ($record) => asset('storage/'.$record->submission->submission_text))
+                    ->url(fn($record) => asset('storage/' . $record->submission->submission_text))
                     ->openUrlInNewTab(),
 
             ])
@@ -105,10 +105,13 @@ class AssignmentGradeResource extends Resource
                 '=',
                 'latest_subs.latest_id'
             );
-        $query->whereHas('submission.assignment', function (Builder $query) {
-            $query->where('created_by', Auth::id());
-        });
+        if (Auth::user()->hasRole('teacher')) {
+            $teacherId = Auth::id();
 
+            $query->whereHas('submission.assignment', function (Builder $query) use ($teacherId) {
+                $query->where('created_by', $teacherId);
+            });
+        }
         return $query;
     }
 
