@@ -18,7 +18,6 @@ class ListClassMajors extends ListRecords
             Actions\LocaleSwitcher::make(),
             Actions\CreateAction::make(),
 
-
         ];
     }
 

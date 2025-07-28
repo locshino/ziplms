@@ -7,19 +7,16 @@ use App\Models\AssignmentGrade;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Resources\Concerns\Translatable;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use Filament\Resources\Concerns\Translatable;
-use Filament\Forms\Components\Toggle;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Filters\SelectFilter;
-use App\Models\Classroom;
-use Filament\Tables\Actions\BulkAction;
-use Filament\Forms\Get;
+
 class AssignmentGradeResource extends Resource
 {
     use Translatable;
@@ -65,7 +62,6 @@ class AssignmentGradeResource extends Resource
                     ->relationship('submission.assignment.course', 'name')
                     ->placeholder('Chọn môn học'),
 
-
             ])
             ->actions([
 
@@ -76,10 +72,8 @@ class AssignmentGradeResource extends Resource
                 Action::make('download')
                     ->label('Tải bài nộp')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn($record) => asset('storage/' . $record->submission->submission_text))
-                    ->openUrlInNewTab()
-
-
+                    ->url(fn ($record) => asset('storage/'.$record->submission->submission_text))
+                    ->openUrlInNewTab(),
 
             ])
             ->bulkActions([
@@ -95,6 +89,7 @@ class AssignmentGradeResource extends Resource
             //
         ];
     }
+
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
@@ -112,14 +107,17 @@ class AssignmentGradeResource extends Resource
 
         return $query;
     }
+
     public static function getNavigationLabel(): string
     {
         return __('assignment_grade.label.plural');
     }
+
     protected function getTitle(): string
     {
         return __('assignment_grade.label.plural');
     }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-pencil-square';

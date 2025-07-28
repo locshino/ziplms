@@ -4,16 +4,15 @@ namespace App\Filament\Resources\AssignmentGradeResource\Pages;
 
 use App\Filament\Resources\AssignmentGradeResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 use Filament\Actions\Action;
-use Filament\Tables\Actions\BulkAction;
+use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
-
 
 class ListAssignmentGrades extends ListRecords
 {
     use ListRecords\Concerns\Translatable;
+
     protected static string $resource = AssignmentGradeResource::class;
 
     protected function getHeaderActions(): array
@@ -66,9 +65,6 @@ class ListAssignmentGrades extends ListRecords
             //     ->requiresConfirmation()
             //     ->color('success')
 
-
-
         ];
     }
-
 }

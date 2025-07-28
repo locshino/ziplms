@@ -11,14 +11,12 @@ use Filament\Resources\Concerns\Translatable;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+
 // use Filament\Tables\Filters\SelectFilter;
-
-
 
 class AssignmentSubmissionResource extends Resource
 {
@@ -52,15 +50,15 @@ class AssignmentSubmissionResource extends Resource
             ->columns([
 
                 Tables\Columns\TextColumn::make('user.name')->label(__('assignment_submission.fields.user_name'))
-                    ->visible(fn() => !Auth::user()?->hasRole('student')),
+                    ->visible(fn () => ! Auth::user()?->hasRole('student')),
 
                 Tables\Columns\TextColumn::make('assignment.title')->label(__('assignment_submission.fields.assignment_title')),
                 Tables\Columns\TextColumn::make('grade.grade')->label(__('assignment_submission.fields.grade')),
                 Tables\Columns\TextColumn::make('feedback')->label(__('assignment_submission.fields.feedback'))->limit(20),
                 Tables\Columns\BadgeColumn::make('status')
                     ->label(__('assignment_submission.fields.status'))
-                    ->color(fn($state) => $state::color())
-                    ->formatStateUsing(fn($state) => $state::label()),
+                    ->color(fn ($state) => $state::color())
+                    ->formatStateUsing(fn ($state) => $state::label()),
 
             ])
 
@@ -96,7 +94,6 @@ class AssignmentSubmissionResource extends Resource
         if (Auth::user()?->hasRole('student')) {
             $query->where('user_id', Auth::id());
         }
-        ;
 
         $query->select('assignment_submissions.*')
             ->joinSub(
@@ -110,14 +107,14 @@ class AssignmentSubmissionResource extends Resource
 
             );
 
-
-
         return $query;
     }
+
     public static function getNavigationLabel(): string
     {
         return __('assignment_submission.label.plural');
     }
+
     public static function getModelLabel(): string
     {
         return __('assignment_submission.label.singular');
@@ -127,6 +124,7 @@ class AssignmentSubmissionResource extends Resource
     {
         return __('assignment_submission.label.plural');
     }
+
     public static function getPages(): array
     {
         return [
