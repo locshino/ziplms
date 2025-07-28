@@ -18,6 +18,7 @@ class EditAssignmentGrade extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
     public function getTitle(): string
     {
         return __('assignment_grade.label.assignment_grade');
