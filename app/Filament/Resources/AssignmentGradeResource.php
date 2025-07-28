@@ -73,7 +73,7 @@ class AssignmentGradeResource extends Resource
                 Action::make('download')
                     ->label('Tải bài nộp')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn($record) => asset('storage/' . $record->submission->submission_text))
+                    ->url(fn ($record) => asset('storage/'.$record->submission->submission_text))
                     ->openUrlInNewTab(),
 
             ])
@@ -112,6 +112,7 @@ class AssignmentGradeResource extends Resource
                 $query->where('created_by', $teacherId);
             });
         }
+
         return $query;
     }
 
