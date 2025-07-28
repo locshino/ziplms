@@ -12,6 +12,8 @@ use App\States\Status;
 use Dvarilek\FilamentTableSelect\Components\Form\TableSelect;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Concerns\Translatable;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -43,60 +45,57 @@ class ScheduleResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make(__('schedule-resource.form.section.main'))
-                    ->schema([
-                        Forms\Components\MorphToSelect::make('schedulable')
-                            ->label(__('schedule-resource.form.associated_with'))
-                            ->types(SchedulableType::getMorphToSelectTypes())
-                            ->searchable()
-                            ->required(),
+                Forms\Components\Tabs::make('Tabs')->tabs([
+                    Forms\Components\Tabs\Tab::make(__('schedule-resource.form.section.main'))
+                        ->schema([
+                            Forms\Components\MorphToSelect::make('schedulable')
+                                ->label(__('schedule-resource.form.associated_with'))
+                                ->types(SchedulableType::getMorphToSelectTypes())
+                                ->searchable()
+                                ->required(),
 
-                        Forms\Components\TextInput::make('title')
-                            ->label(__('schedule-resource.form.title'))
-                            ->required(),
+                            Forms\Components\TextInput::make('title')
+                                ->label(__('schedule-resource.form.title'))
+                                ->required()
+                                ->columnSpanFull(),
 
-                        TiptapEditor::make('description')
-                            ->label(__('schedule-resource.form.description'))
-                            ->columnSpanFull(),
-                    ])->columns(2),
+                            TiptapEditor::make('description')
+                                ->label(__('schedule-resource.form.description'))
+                                ->columnSpanFull(),
+                        ]),
 
-                Forms\Components\Section::make(__('schedule-resource.form.section.time_location'))
-                    ->schema([
-                        Forms\Components\DateTimePicker::make('start_time')
-                            ->label(__('schedule-resource.form.start_time'))
-                            ->required(),
+                    Forms\Components\Tabs\Tab::make(__('schedule-resource.form.section.assignment_status'))
+                        ->schema([
+                            TableSelect::make('assigned_id')
+                                ->label(__('schedule-resource.form.assigned_to'))
+                                ->relationship('assignedTo', 'name')
+                                ->tableLocation(UserResource::class),
 
-                        Forms\Components\DateTimePicker::make('end_time')
-                            ->label(__('schedule-resource.form.end_time'))
-                            ->required()
-                            ->after('start_time'),
+                            Forms\Components\Select::make('status')
+                                ->label(__('schedule-resource.form.status'))
+                                ->options(Status::getOptions())
+                                ->required(),
 
-                        // Changed from SpatieTagsInput to a relationship select
-                        Forms\Components\Select::make('location_id')
-                            ->label(__('schedule-resource.form.location'))
-                            ->relationship('location', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->createOptionForm([
-                                Forms\Components\TextInput::make('name')
-                                    ->required(),
-                            ])
-                            ->columnSpanFull(),
-                    ])->columns(2),
+                            Forms\Components\DateTimePicker::make('start_time')
+                                ->label(__('schedule-resource.form.start_time'))
+                                ->required(),
 
-                Forms\Components\Section::make(__('schedule-resource.form.section.assignment_status'))
-                    ->schema([
-                        // Changed to assigned_id and relationship assignedTo
-                        TableSelect::make('assigned_id')
-                            ->label(__('schedule-resource.form.assigned_to'))
-                            ->relationship('assignedTo', 'name')
-                            ->tableLocation(UserResource::class),
+                            Forms\Components\DateTimePicker::make('end_time')
+                                ->label(__('schedule-resource.form.end_time'))
+                                ->required()
+                                ->after('start_time'),
 
-                        Forms\Components\Select::make('status')
-                            ->label(__('schedule-resource.form.status'))
-                            ->options(Status::getOptions())
-                            ->required(),
-                    ])->columns(2),
+                            Forms\Components\Select::make('location_id')
+                                ->label(__('schedule-resource.form.location'))
+                                ->relationship('location', 'name')
+                                ->searchable()
+                                ->preload()
+                                ->createOptionForm([
+                                    Forms\Components\TextInput::make('name')->required(),
+                                ])
+                                ->columnSpanFull(),
+                        ])->columns(2),
+                ])->columnSpanFull(),
             ]);
     }
 
@@ -120,14 +119,12 @@ class ScheduleResource extends Resource
                     ->limit(30)
                     ->tooltip(fn (?string $state): ?string => $state),
 
-                // Changed to assignedTo.name
                 Tables\Columns\TextColumn::make('assignedTo.name')
                     ->label(__('schedule-resource.form.assigned_to'))
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
 
-                // Added location column
                 Tables\Columns\TextColumn::make('location.name')
                     ->label(__('schedule-resource.form.location'))
                     ->searchable()
@@ -154,11 +151,35 @@ class ScheduleResource extends Resource
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
 
-                // Added status filter
                 Tables\Filters\SelectFilter::make('status')
                     ->label(__('schedule-resource.form.status'))
                     ->multiple()
                     ->options(Status::getOptions()),
+
+                Tables\Filters\SelectFilter::make('assigned_id')
+                    ->label(__('schedule-resource.form.assigned_to'))
+                    ->relationship('assignedTo', 'name')
+                    ->searchable()
+                    ->preload(),
+
+                Tables\Filters\Filter::make('start_time')
+                    ->form([
+                        Forms\Components\DatePicker::make('start_from')
+                            ->label('Từ ngày'),
+                        Forms\Components\DatePicker::make('start_until')
+                            ->label('Đến ngày'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['start_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('start_time', '>=', $date),
+                            )
+                            ->when(
+                                $data['start_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('start_time', '<=', $date),
+                            );
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -174,8 +195,51 @@ class ScheduleResource extends Resource
                         ->exporter(ScheduleExporter::class),
                 ]),
             ])
-            ->headerActions([
-                Tables\Actions\CreateAction::make(),
+            ->defaultSort('start_time', 'desc')
+            ->groups([
+                Tables\Grouping\Group::make('status')
+                    ->label('Gom nhóm theo trạng thái')
+                    ->collapsible(),
+            ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\Section::make('Thông tin chính')
+                    ->schema([
+                        Infolists\Components\TextEntry::make('title')
+                            ->label('Tiêu đề'),
+                        Infolists\Components\TextEntry::make('schedulable')
+                             ->label('Liên quan đến')
+                             ->getStateUsing(fn ($record): ?string => app(ScheduleRepositoryInterface::class)->getSchedulableTitle($record)),
+                        Infolists\Components\TextEntry::make('assignedTo.name')
+                            ->label('Giao cho'),
+                        Infolists\Components\TextEntry::make('status')
+                            ->label('Trạng thái')
+                            ->badge(),
+                    ])->columns(2),
+
+                Infolists\Components\Section::make('Thời gian & Địa điểm')
+                    ->schema([
+                        Infolists\Components\TextEntry::make('start_time')
+                            ->label('Thời gian bắt đầu')
+                            ->dateTime(),
+                        Infolists\Components\TextEntry::make('end_time')
+                            ->label('Thời gian kết thúc')
+                            ->dateTime(),
+                        Infolists\Components\TextEntry::make('location.name')
+                            ->label('Địa điểm'),
+                    ])->columns(2),
+
+                Infolists\Components\Section::make('Mô tả')
+                    ->schema([
+                        Infolists\Components\TextEntry::make('description')
+                            ->label('')
+                            ->html()
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 

@@ -9,7 +9,7 @@ use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
-
+use Nben\FilamentRecordNav;
 class ViewCourse extends ViewRecord
 {
     use ViewRecord\Concerns\Translatable;
@@ -21,6 +21,11 @@ class ViewCourse extends ViewRecord
         return [
             Actions\EditAction::make(),
             Actions\LocaleSwitcher::make(),
+            Actions\DeleteAction::make(),
+            Actions\ForceDeleteAction::make(),
+            Actions\RestoreAction::make(),
+            FilamentRecordNav\Actions\PreviousRecordAction::make(),
+            FilamentRecordNav\Actions\NextRecordAction::make(),
         ];
     }
 
@@ -38,10 +43,10 @@ class ViewCourse extends ViewRecord
                             ->state(fn (Course $record): int => $record->students()->count()),
 
                         TextEntry::make('staff_count')
-                            ->label('Số lượng nhân viên/giáo viên') // Sửa lại label cho rõ nghĩa
+                            ->label('Số lượng nhân viên/giáo viên')
                             ->badge()
                             ->color('info')
-                            ->state(fn (Course $record): int => $record->staff()->count()), // SỬA Ở ĐÂY
+                            ->state(fn (Course $record): int => $record->staff()->count()),
                     ]),
 
                 Section::make('Thông tin môn học')

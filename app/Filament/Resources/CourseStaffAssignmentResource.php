@@ -23,20 +23,29 @@ class CourseStaffAssignmentResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
-    protected static ?string $modelLabel = 'Phân công';
+    public static function getModelLabel(): string
+    {
+        return __('course-staff-assignment-resource.model_label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Phân công Nhân sự';
+    public static function getPluralModelLabel(): string
+    {
+        return __('course-staff-assignment-resource.model_label_plural');
+    }
 
-    protected static ?string $navigationGroup = 'Quản lý Khóa học';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('course-staff-assignment-resource.navigation_group');
+    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Section::make('Thông tin phân công chi tiết')
+                Section::make(__('course-staff-assignment-resource.form.section.details'))
                     ->schema([
                         Forms\Components\Select::make('course_id')
-                            ->label('Khóa học')
+                            ->label(__('course-staff-assignment-resource.form.course'))
                             ->relationship('course', 'name')
                             ->searchable()
                             ->preload()
@@ -44,7 +53,7 @@ class CourseStaffAssignmentResource extends Resource
                             ->required(),
 
                         Forms\Components\Select::make('user_id')
-                            ->label('Nhân sự')
+                            ->label(__('course-staff-assignment-resource.form.staff'))
                             ->relationship(
                                 name: 'user',
                                 titleAttribute: 'name',
@@ -62,11 +71,11 @@ class CourseStaffAssignmentResource extends Resource
                                 }
                             )
                             ->validationMessages([
-                                'unique' => 'Nhân sự này đã được phân công cho khóa học này rồi.',
+                                'unique' => __('course-staff-assignment-resource.form.validation.unique'),
                             ]),
 
                         Forms\Components\Select::make('role_tag')
-                            ->label('Vai trò trong khóa học')
+                            ->label(__('course-staff-assignment-resource.form.role'))
                             ->options(CourseStaffRole::class)
                             ->required(),
 
@@ -79,34 +88,34 @@ class CourseStaffAssignmentResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('course.name')
-                    ->label('Khóa học')
+                    ->label(__('course-staff-assignment-resource.table.course'))
                     ->searchable()
                     ->sortable()
                     ->url(fn ($record): string => CourseResource::getUrl('edit', ['record' => $record->course_id])),
 
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('Họ và Tên')
+                    ->label(__('course-staff-assignment-resource.table.staff_name'))
                     ->searchable()
                     ->sortable()
                     ->url(fn ($record): string => UserResource::getUrl('edit', ['record' => $record->user_id])),
 
                 Tables\Columns\TextColumn::make('user.email')
-                    ->label('Email')
+                    ->label(__('course-staff-assignment-resource.table.staff_email'))
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('tags.name')
-                    ->label('Vai trò')
+                    ->label(__('course-staff-assignment-resource.table.role'))
                     ->badge(),
             ])
             ->filters([
                 SelectFilter::make('course')
-                    ->label('Lọc theo khóa học')
+                    ->label(__('course-staff-assignment-resource.filters.course'))
                     ->relationship('course', 'name')
                     ->searchable()
                     ->preload(),
 
                 SelectFilter::make('role')
-                    ->label('Lọc theo vai trò')
+                    ->label(__('course-staff-assignment-resource.filters.role'))
                     ->options(CourseStaffRole::class)
                     ->query(function (Builder $query, array $data): Builder {
                         if (empty($data['value'])) {
@@ -134,7 +143,7 @@ class CourseStaffAssignmentResource extends Resource
             ])
             ->groups([
                 Group::make('course_id')
-                    ->label('Khóa học')
+                    ->label(__('course-staff-assignment-resource.table.group'))
                     ->getTitleFromRecordUsing(fn (CourseStaffAssignment $record): ?string => $record->course?->name),
             ])
             ->defaultSort('created_at', 'desc');
