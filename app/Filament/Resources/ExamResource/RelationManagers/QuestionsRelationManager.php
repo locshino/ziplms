@@ -2,15 +2,14 @@
 
 namespace App\Filament\Resources\ExamResource\RelationManagers;
 
-use Closure;
+use App\Models\Question;
 use Filament\Forms;
-use Filament\Forms\Form; // Cần import Form
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 
 class QuestionsRelationManager extends RelationManager
 {
@@ -26,65 +25,71 @@ class QuestionsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->defaultSort('question_order', 'asc')
             ->columns([
                 Tables\Columns\TextColumn::make('question_text')
                     ->label(__('exam-resource.relation_manager.questions.column.question_content'))
                     ->limit(80)
                     ->wrap()
-                    // TỐI ƯU HÓA: Bỏ getStateUsing, để model tự xử lý đa ngôn ngữ.
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->where('question_text->'.app()->getLocale(), 'like', "%{$search}%");
                     }),
 
-                Tables\Columns\TextColumn::make('points')
+                Tables\Columns\TextInputColumn::make('points')
                     ->label(__('exam-resource.relation_manager.questions.column.points'))
+                    ->rules(['required', 'numeric', 'min:0'])
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('question_order')
+                Tables\Columns\TextInputColumn::make('question_order')
                     ->label(__('exam-resource.relation_manager.questions.column.order'))
+                    ->rules(['required', 'numeric', 'min:0'])
                     ->sortable(),
             ])
             ->headerActions([
-                Tables\Actions\AttachAction::make()
-                    ->successNotificationTitle(__('exam-resource.relation_manager.questions.action.attach.notification_success'))
-                    ->form(fn (Tables\Actions\AttachAction $action): array => [
-                        $action->getRecordSelect(),
+                Tables\Actions\Action::make('add_questions')
+                    ->label('exam-resource.relation_manager.questions.action.attach.label')
+                    ->icon('heroicon-o-plus-circle')
+                    ->form([
+                        Forms\Components\Select::make('records')
+                            ->label('Chọn câu hỏi')
+                            ->multiple()
+                            ->options(function (RelationManager $livewire) {
+                                $questionTable = (new Question)->getTable();
+                                $attachedIds = $livewire->getOwnerRecord()->questions()->pluck($questionTable.'.id')->all();
+
+                                return Question::whereNotIn('id', $attachedIds)->pluck('question_text', 'id');
+                            })
+                            ->searchable()
+                            ->preload()
+                            ->required(),
                         Forms\Components\TextInput::make('points')
                             ->label(__('exam-resource.relation_manager.questions.form.points'))
                             ->numeric()
                             ->required()
                             ->default(1.00),
-                        Forms\Components\TextInput::make('question_order')
-                            ->label(__('exam-resource.relation_manager.questions.form.order'))
-                            ->numeric()
-                            ->required()
-                            ->default(0)
-                            ->minValue(0)
-                            ->validationMessages([
-                                'min' => __('exam-resource.relation_manager.questions.validation.order_not_negative'),
-                            ])
-                            ->rules([
-                                function (RelationManager $livewire) {
-                                    return function (string $attribute, $value, Closure $fail) use ($livewire) {
-                                        $exists = $livewire->getOwnerRecord()->questions()->where('question_order', $value)->exists();
-                                        if ($exists) {
-                                            $fail(__('exam-resource.relation_manager.questions.validation.order_unique'));
-                                        }
-                                    };
-                                },
-                            ]),
                     ])
-                    ->mutateFormDataUsing(function (array $data): array {
-                        $data['id'] = Str::uuid()->toString();
+                    ->action(function (RelationManager $livewire, array $data): void {
+                        $relationship = $livewire->getRelationship();
+                        $maxOrder = $relationship->max('question_order') ?? -1;
+                        $orderCounter = $maxOrder + 1;
 
-                        return $data;
-                    })
-                    ->preloadRecordSelect(),
+                        foreach ($data['records'] as $recordId) {
+                            $relationship->attach($recordId, [
+                                'points' => $data['points'],
+                                'question_order' => $orderCounter,
+                            ]);
+                            $orderCounter++;
+                        }
+
+                        Notification::make()
+                            ->title(__('exam-resource.relation_manager.questions.action.attach.notification_success'))
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
-                    ->successNotificationTitle(__('exam-resource.relation_manager.questions.action.edit.notification_success'))
-                    ->form(function (Model $record) { // Pass the record to the form closure
+                    ->form(function (Model $record) {
                         return [
                             Forms\Components\TextInput::make('points')
                                 ->label(__('exam-resource.relation_manager.questions.form.points'))
@@ -94,35 +99,14 @@ class QuestionsRelationManager extends RelationManager
                                 ->label(__('exam-resource.relation_manager.questions.form.order'))
                                 ->numeric()
                                 ->required()
-                                ->minValue(0)
-                                ->validationMessages([
-                                    'min' => __('exam-resource.relation_manager.questions.validation.order_not_negative'),
-                                ])
-                                ->rules([
-                                    function (RelationManager $livewire) use ($record) {
-                                        return function (string $attribute, $value, Closure $fail) use ($livewire, $record) {
-                                            $pivotId = $record->pivot->id;
-                                            $query = $livewire->getOwnerRecord()->questions()
-                                                ->where('question_order', $value)
-                                                ->wherePivot('id', '!=', $pivotId);
-
-                                            if ($query->exists()) {
-                                                $fail(__('exam-resource.relation_manager.questions.validation.order_unique'));
-                                            }
-                                        };
-                                    },
-                                ]),
+                                ->minValue(0),
                         ];
                     }),
-
-                Tables\Actions\DeleteAction::make()
-                    ->successNotificationTitle(__('exam-resource.relation_manager.questions.action.delete.notification_success')),
+                Tables\Actions\DetachAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-
-                    Tables\Actions\DeleteBulkAction::make()
-                        ->successNotificationTitle(__('exam-resource.relation_manager.questions.action.delete_bulk.notification_success')),
+                    Tables\Actions\DetachBulkAction::make(),
                 ]),
             ]);
     }

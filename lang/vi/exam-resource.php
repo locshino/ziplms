@@ -51,7 +51,10 @@ return [
                 'order' => 'Thứ tự',
             ],
             'action' => [
-                'attach' => ['notification_success' => 'Câu hỏi đã được thêm vào bài thi.'],
+                'attach' => [
+                    'notification_success' => 'Câu hỏi đã được thêm vào bài thi.',
+                    'label' => 'Thêm câu hỏi',
+                ],
                 'edit' => ['notification_success' => 'Thông tin câu hỏi đã được cập nhật.'],
                 'detach' => ['notification_success' => 'Câu hỏi đã được gỡ khỏi bài thi.'],
                 'delete' => ['notification_success' => 'Câu hỏi đã được xóa vĩnh viễn.'],

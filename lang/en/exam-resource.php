@@ -51,7 +51,10 @@ return [
                 'order' => 'Order',
             ],
             'action' => [
-                'attach' => ['notification_success' => 'Question has been added to the exam.'],
+                'attach' => [
+                    'notification_success' => 'Question has been added to the exam.',
+                    'label' => 'Add Question',
+                ],
                 'edit' => ['notification_success' => 'Question information has been updated.'],
                 'detach' => ['notification_success' => 'Question has been removed from the exam.'],
                 'delete' => ['notification_success' => 'The question has been permanently deleted.'],
