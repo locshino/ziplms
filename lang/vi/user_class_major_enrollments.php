@@ -1,6 +1,15 @@
 <?php
 
 return [
+    'add' => 'Thêm',
+    'export_excel' => 'Xuất Excel',
+    'form' => [
+        'user' => 'Người dùng',
+        'classMajor' => 'Lớp chuyên ngành',
+        'role' => 'Vai trò',
+        'start_date' => 'Ngày bắt đầu',
+        'end_date' => 'Ngày kết thúc',
+    ],
 
     'title' => 'Ghi danh Người dùng vào Đơn vị cấu trúc',
     'form_title' => [

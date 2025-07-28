@@ -1,6 +1,15 @@
 <?php
 
 return [
+    'add' => 'Add',
+    'export_excel' => 'Export to Excel',
+    'form' => [
+        'user' => 'User',
+        'classMajor' => 'Class Major',
+        'role' => 'Role',
+        'start_date' => 'Start Date',
+        'end_date' => 'End Date',
+    ],
 
     'form_title' => [
         'user' => 'User',

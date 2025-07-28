@@ -144,8 +144,9 @@ class UserClassMajorEnrollmentResource extends Resource
                     }),
             ])
             ->headerActions([
-                ExportAction::make()
-                    ->exporter(UserClassMajorEnrollmentExporter::class),
+                ExportAction::make()->
+                    label(__('user_class_major_enrollments.export_excel'))
+                        ->exporter(UserClassMajorEnrollmentExporter::class),
 
             ]);
     }

@@ -13,5 +13,5 @@ interface AssignmentRepositoryInterface extends RepositoryInterface
 
     public function getInstructionsFileDefault(Assignment $assignment): ?string;
 
-    public function shouldShowInstructionsFile(Assignment $assignment): bool;
+    public function isStudent(): bool;
 }

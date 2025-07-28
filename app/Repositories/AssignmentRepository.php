@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Assignment;
 use App\Repositories\Base\Repository;
 use App\Repositories\Contracts\AssignmentRepositoryInterface;
+use Illuminate\Support\Facades\Auth;
 
 class AssignmentRepository extends Repository implements AssignmentRepositoryInterface
 {
@@ -70,5 +71,10 @@ class AssignmentRepository extends Repository implements AssignmentRepositoryInt
 
         // Kiểm tra nếu bản dịch là mảng và có trường 'file' hoặc trường 'en' không rỗng thì trả về true
         return is_array($vi) && (! empty($vi['file'] ?? null) || ! empty($vi['en'] ?? null));
+    }
+
+    public function isStudent(): bool
+    {
+        return Auth::check() && ! Auth::user()->hasRole('student');
     }
 }

@@ -13,8 +13,8 @@ class ListUserClassMajorEnrollments extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
-
+            Actions\CreateAction::make()
+                ->label(__('user_class_major_enrollments.add')),
         ];
     }
 

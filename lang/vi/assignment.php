@@ -4,7 +4,7 @@ return [
     'title' => 'Bài tập',
     'label' => [
         'title' => 'Tiêu đề',
-        'course' => 'Khóa học',
+        'course' => 'Môn học',
         'max_score' => 'Điểm',
         'due_date' => 'Hạn nộp',
         'allow_late_submissions' => 'Cho phép nộp trễ',

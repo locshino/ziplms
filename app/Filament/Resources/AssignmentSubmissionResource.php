@@ -4,8 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AssignmentSubmissionResource\Pages;
 use App\Models\AssignmentSubmission;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -13,9 +11,14 @@ use Filament\Resources\Concerns\Translatable;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+// use Filament\Tables\Filters\SelectFilter;
+
+
 
 class AssignmentSubmissionResource extends Resource
 {
@@ -23,34 +26,23 @@ class AssignmentSubmissionResource extends Resource
 
     protected static ?string $model = AssignmentSubmission::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Section::make('Tệp bài nộp')
-                    ->schema([
-                        SpatieMediaLibraryFileUpload::make('attachments')
-                            ->collection('submissions')
-                            ->disabled(),
-                    ]),
+                TextInput::make('grade.grade')
+                    ->label(__('assignment_submission.form.grade'))
+                    ->numeric()
+                    ->minValue(0)
+                    ->maxValue(10)
+                    ->required(),
 
-                Section::make('Chấm điểm')
-                    ->schema([
-                        TextInput::make('grade.grade')
-                            ->label('Điểm số')
-                            ->numeric()
-                            ->minValue(0)
-                            ->maxValue(10)
-                            ->step(0.1)
-                            ->required(),
-
-                        Textarea::make('grade.feedback')
-                            ->label('Nhận xét')
-                            ->rows(4),
-                    ]),
-
+                Textarea::make('feedback')
+                    ->label(__('assignment_submission.form.feedback'))
+                    ->rows(4)
+                    ->maxLength(1000),
             ]);
     }
 
@@ -59,55 +51,23 @@ class AssignmentSubmissionResource extends Resource
         return $table
             ->columns([
 
-                BadgeColumn::make('status')
-                    ->label('Trạng thái')
-                    ->color(fn ($state) => $state::color())
-                    ->icon(fn ($state) => $state::icon())
-                    ->formatStateUsing(fn ($state) => $state::label()),
+                Tables\Columns\TextColumn::make('user.name')->label(__('assignment_submission.fields.user_name'))
+                    ->visible(fn() => !Auth::user()?->hasRole('student')),
 
-                TextColumn::make('media.first.file_name')
-                    ->label('File bài nộp')
-                    ->url(fn ($record) => $record->getFirstMediaUrl('submissions'))
-                    ->openUrlInNewTab(),
-                TextColumn::make('user.name')
-                    ->label('Người nộp')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('assignment.title')
-                    ->label('Bài tập')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('grade.grade')
-                    ->label('Điểm số')
-                    ->sortable()
-                    ->numeric(decimalPlaces: 2)
-                    ->alignRight(),
-                TextColumn::make('grade.feedback')
-                    ->label('Đánh giá')
-                    ->sortable()
-                    ->limit(50),
-                TextColumn::make('created_at')
-                    ->label('Ngày nộp')
-                    ->dateTime()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('media.first.file_name')
-                    ->label('Tệp'),
-                // ->formatStateUsing(fn ($state) => 'Tải xuống')
-                // ->url(fn ($record) => $record->getFirstMediaUrl('submissions'))
-                // ->openUrlInNewTab()
-                // ->icon('heroicon-o-arrow-down-tray'),
+                Tables\Columns\TextColumn::make('assignment.title')->label(__('assignment_submission.fields.assignment_title')),
+                Tables\Columns\TextColumn::make('grade.grade')->label(__('assignment_submission.fields.grade')),
+                Tables\Columns\TextColumn::make('feedback')->label(__('assignment_submission.fields.feedback'))->limit(20),
+                Tables\Columns\BadgeColumn::make('status')
+                    ->label(__('assignment_submission.fields.status'))
+                    ->color(fn($state) => $state::color())
+                    ->formatStateUsing(fn($state) => $state::label()),
 
             ])
 
             ->filters([
-                //
+
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
-                    ->label('Comment')
-                    ->color('primary')
-                    ->icon('heroicon-m-pencil-square')
-                    ->button(),
                 ViewAction::make(),
             ])
             ->bulkActions([
@@ -125,6 +85,48 @@ class AssignmentSubmissionResource extends Resource
         ];
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        if (Auth::user()?->hasRole('teacher')) {
+            $query->whereHas('assignment', function ($query) {
+                $query->where('created_by', Auth::id());
+            });
+        }
+        if (Auth::user()?->hasRole('student')) {
+            $query->where('user_id', Auth::id());
+        }
+        ;
+
+        $query->select('assignment_submissions.*')
+            ->joinSub(
+                DB::table('assignment_submissions as sub2')
+                    ->selectRaw('MAX(id) as ids')
+                    ->groupBy('user_id', 'assignment_id'),
+                'latest_submissions',
+                'assignment_submissions.id',
+                '=',
+                'latest_submissions.ids'
+
+            );
+
+
+
+        return $query;
+    }
+    public static function getNavigationLabel(): string
+    {
+        return __('assignment_submission.label.plural');
+    }
+    public static function getModelLabel(): string
+    {
+        return __('assignment_submission.label.singular');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('assignment_submission.label.plural');
+    }
     public static function getPages(): array
     {
         return [
