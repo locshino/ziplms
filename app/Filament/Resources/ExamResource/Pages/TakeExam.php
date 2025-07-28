@@ -25,24 +25,39 @@ use Livewire\Attributes\Locked;
 class TakeExam extends Page
 {
     protected static string $resource = ExamResource::class;
+
     protected static string $view = 'filament.resources.exam-resource.pages.take-exam';
+
     protected static string $routePath = '/{record}/take';
+
     protected static bool $shouldRegisterNavigation = false;
 
     #[Locked]
     public Exam $record;
+
     #[Locked]
     public ?ExamAttempt $attempt = null;
+
     public ?Collection $questions = null;
+
     public int $currentQuestionIndex = 0;
+
     public array $questionMeta = [];
+
     public array $singleChoiceAnswers = [];
+
     public array $multipleChoiceAnswers = [];
+
     public array $trueFalseAnswers = [];
+
     public array $shortAnswers = [];
+
     public array $essayAnswers = [];
+
     public array $fillBlankAnswers = [];
+
     public ?int $timeLeft = null;
+
     public bool $examStarted = false;
 
     public function mount(): void
@@ -50,6 +65,7 @@ class TakeExam extends Page
         if (! $this->record->status instanceof Active) {
             Notification::make()->title('Không thể làm bài thi này')->body('Bài thi này hiện không hoạt động hoặc đã kết thúc.')->danger()->send();
             $this->redirect(static::$resource::getUrl('index'));
+
             return;
         }
     }
@@ -111,7 +127,7 @@ class TakeExam extends Page
             }
 
             // BƯỚC 2: CHỈ CHẤM TỰ ĐỘNG NẾU BÀI THI KHÔNG YÊU CẦU CHẤM THỦ CÔNG
-            if (!$isManualReviewRequired) {
+            if (! $isManualReviewRequired) {
                 switch ($type) {
                     case 'single_choice':
                     case 'true_false':
@@ -119,16 +135,20 @@ class TakeExam extends Page
                         $isCorrect = $correctChoice && $answerData['selected_choice_id'] == $correctChoice->id;
                         $answerData['is_correct'] = $isCorrect;
                         $answerData['points_earned'] = $isCorrect ? ($this->questionMeta[$qId]['points'] ?? 1) : 0;
-                        if ($isCorrect) $totalScore += $answerData['points_earned'];
+                        if ($isCorrect) {
+                            $totalScore += $answerData['points_earned'];
+                        }
                         break;
                     case 'multiple_choice':
                         $selectedChoices = $answerData['chosen_option_ids'];
                         sort($selectedChoices);
                         $correctChoices = $question->choices->where('is_correct', true)->pluck('id')->sort()->values()->all();
-                        $isCorrect = !empty($selectedChoices) && $selectedChoices === $correctChoices;
+                        $isCorrect = ! empty($selectedChoices) && $selectedChoices === $correctChoices;
                         $answerData['is_correct'] = $isCorrect;
                         $answerData['points_earned'] = $isCorrect ? ($this->questionMeta[$qId]['points'] ?? 1) : 0;
-                        if ($isCorrect) $totalScore += $answerData['points_earned'];
+                        if ($isCorrect) {
+                            $totalScore += $answerData['points_earned'];
+                        }
                         break;
                 }
             }
@@ -166,7 +186,7 @@ class TakeExam extends Page
 
     public function getTitle(): string
     {
-        return $this->examStarted ? 'Đang làm bài: ' . $this->record->title : 'Bắt đầu: ' . $this->record->title;
+        return $this->examStarted ? 'Đang làm bài: '.$this->record->title : 'Bắt đầu: '.$this->record->title;
     }
 
     public function continueExam(): void
@@ -403,6 +423,7 @@ class TakeExam extends Page
     public function getQuestionType(Question $question): ?QuestionType
     {
         $tag = $question->tagsWithType(QuestionType::key())->first();
+
         return $tag ? QuestionType::tryFrom($tag->name) : null;
     }
 
@@ -411,6 +432,7 @@ class TakeExam extends Page
         if ($this->examStarted) {
             return [];
         }
+
         return [
             Action::make('startExam')
                 ->label('Bắt đầu bài thi mới')
@@ -445,6 +467,7 @@ class TakeExam extends Page
                 $answeredCount++;
             }
         }
+
         return $answeredCount;
     }
 
@@ -453,11 +476,12 @@ class TakeExam extends Page
         if (! $this->examStarted) {
             return [];
         }
+
         return [
             Action::make('submitModal')
                 ->label('Nộp Bài')
                 ->color('primary')
-                ->modalContent(fn(Action $action): View => view(
+                ->modalContent(fn (Action $action): View => view(
                     'filament.resources.exam-resource.pages.actions.submit-modal-content',
                     [
                         'action' => $action,
@@ -468,7 +492,7 @@ class TakeExam extends Page
                 ->registerModalActions([
                     Action::make('confirmSubmit')
                         ->label('Xác nhận & Nộp bài')
-                        ->action(fn() => $this->submitExam()),
+                        ->action(fn () => $this->submitExam()),
                     Action::make('cancel')
                         ->label('Quay lại làm bài')
                         ->color('gray')

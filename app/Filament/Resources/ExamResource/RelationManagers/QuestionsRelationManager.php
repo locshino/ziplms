@@ -33,7 +33,7 @@ class QuestionsRelationManager extends RelationManager
                     ->wrap()
                     // TỐI ƯU HÓA: Bỏ getStateUsing, để model tự xử lý đa ngôn ngữ.
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->where('question_text->' . app()->getLocale(), 'like', "%{$search}%");
+                        return $query->where('question_text->'.app()->getLocale(), 'like', "%{$search}%");
                     }),
 
                 Tables\Columns\TextColumn::make('points')
@@ -47,7 +47,7 @@ class QuestionsRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\AttachAction::make()
                     ->successNotificationTitle(__('exam-resource.relation_manager.questions.action.attach.notification_success'))
-                    ->form(fn(Tables\Actions\AttachAction $action): array => [
+                    ->form(fn (Tables\Actions\AttachAction $action): array => [
                         $action->getRecordSelect(),
                         Forms\Components\TextInput::make('points')
                             ->label(__('exam-resource.relation_manager.questions.form.points'))
@@ -76,6 +76,7 @@ class QuestionsRelationManager extends RelationManager
                     ])
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['id'] = Str::uuid()->toString();
+
                         return $data;
                     })
                     ->preloadRecordSelect(),
@@ -113,7 +114,6 @@ class QuestionsRelationManager extends RelationManager
                                 ]),
                         ];
                     }),
-
 
                 Tables\Actions\DeleteAction::make()
                     ->successNotificationTitle(__('exam-resource.relation_manager.questions.action.delete.notification_success')),

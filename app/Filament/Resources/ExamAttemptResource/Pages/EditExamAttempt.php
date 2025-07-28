@@ -8,7 +8,7 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditExamAttempt extends EditRecord
 {
-    use EditRecord\Concerns\Translatable; 
+    use EditRecord\Concerns\Translatable;
 
     protected static string $resource = ExamAttemptResource::class;
 

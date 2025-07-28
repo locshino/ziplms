@@ -7,7 +7,7 @@ return [
         'label' => 'Attempt',
         'plural_label' => 'Attempts',
     ],
- 'notification' => [
+    'notification' => [
         'update_success' => 'The attempt has been updated successfully.',
         'delete_success' => 'The attempt has been deleted successfully.',
     ],

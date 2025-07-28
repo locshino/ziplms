@@ -15,7 +15,6 @@ class ReviewAnswer extends Page
 
     public ExamAnswer $record;
 
-
     public function mount(ExamAnswer $record): void
     {
         // Tải các quan hệ cần thiết vào bản ghi đã được inject
@@ -25,7 +24,7 @@ class ReviewAnswer extends Page
     }
     // ▲▲▲ KẾT THÚC SỬA LỖI ▲▲▲
 
-    public function getTitle(): string | Htmlable
+    public function getTitle(): string|Htmlable
     {
         return __('review-answer-page.title');
     }

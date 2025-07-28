@@ -100,12 +100,14 @@ class ExamAttempt extends Base\Pivot
     {
         return $this->hasMany(ExamAnswer::class, 'exam_attempt_id');
     }
+
     public function recalculateAndFinalize(): void
     {
         if ($this->status instanceof Completed) {
             // Nếu đã hoàn thành, chỉ cập nhật lại điểm, không chuyển trạng thái nữa
             $this->score = $this->answers()->where('is_correct', true)->sum('points_earned');
             $this->save();
+
             return;
         }
 

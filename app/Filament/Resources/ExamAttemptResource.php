@@ -22,6 +22,7 @@ class ExamAttemptResource extends Resource
     use Translatable;
 
     protected static ?string $model = ExamAttempt::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-document-check';
 
     public static function getNavigationGroup(): ?string
@@ -58,9 +59,9 @@ class ExamAttemptResource extends Resource
                         Components\TextEntry::make('user.name')->label(__('exam-attempt-resource.infolist.field.student_name')),
                     ]),
                 Components\Section::make(__('exam-attempt-resource.infolist.section.results'))->columns(3)->schema([
-                    Components\TextEntry::make('score')->label(__('exam-attempt-resource.infolist.field.score'))->badge()->color('success')->numeric()->visible(fn($record): bool => $record->status instanceof Completed),
-                    Components\TextEntry::make('status')->label(__('exam-attempt-resource.infolist.field.status'))->badge()->color(fn(Status $state): string => $state->color()),
-                    Components\TextEntry::make('time_spent_seconds')->label(__('exam-attempt-resource.infolist.field.time_spent'))->formatStateUsing(fn(?int $state): string => $state ? gmdate('H:i:s', $state) : 'N/A'),
+                    Components\TextEntry::make('score')->label(__('exam-attempt-resource.infolist.field.score'))->badge()->color('success')->numeric()->visible(fn ($record): bool => $record->status instanceof Completed),
+                    Components\TextEntry::make('status')->label(__('exam-attempt-resource.infolist.field.status'))->badge()->color(fn (Status $state): string => $state->color()),
+                    Components\TextEntry::make('time_spent_seconds')->label(__('exam-attempt-resource.infolist.field.time_spent'))->formatStateUsing(fn (?int $state): string => $state ? gmdate('H:i:s', $state) : 'N/A'),
                 ]),
                 Components\Section::make(__('exam-attempt-resource.infolist.section.timestamps'))->columns(2)->schema([
                     Components\TextEntry::make('started_at')->label(__('exam-attempt-resource.infolist.field.started_at'))->dateTime('d/m/Y H:i:s'),
@@ -94,7 +95,7 @@ class ExamAttemptResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label(__('exam-attempt-resource.table.column.status'))
                     ->badge()
-                    ->color(fn(Status $state): string => $state->color()),
+                    ->color(fn (Status $state): string => $state->color()),
                 Tables\Columns\TextColumn::make('completed_at')
                     ->label(__('exam-attempt-resource.table.column.submission_date'))
                     ->dateTime('d/m/Y')
@@ -114,8 +115,9 @@ class ExamAttemptResource extends Resource
                         if (empty($data['course_id'])) {
                             return $query;
                         }
+
                         // Dùng whereHas để lọc qua quan hệ
-                        return $query->whereHas('exam', fn(Builder $q) => $q->where('course_id', $data['course_id']));
+                        return $query->whereHas('exam', fn (Builder $q) => $q->where('course_id', $data['course_id']));
                     }),
 
                 Tables\Filters\SelectFilter::make('exam_id')

@@ -7,7 +7,7 @@ return [
         'label' => 'Lượt làm bài',
         'plural_label' => 'Danh sách Lượt làm bài',
     ],
- 'notification' => [
+    'notification' => [
         'update_success' => 'Bài làm đã được cập nhật thành công.',
         'delete_success' => 'Bài làm đã được xóa thành công.',
     ],
