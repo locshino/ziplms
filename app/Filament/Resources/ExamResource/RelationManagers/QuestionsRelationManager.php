@@ -32,7 +32,7 @@ class QuestionsRelationManager extends RelationManager
                     ->limit(80)
                     ->wrap()
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->where('question_text->'.app()->getLocale(), 'like', "%{$search}%");
+                        return $query->where('question_text->' . app()->getLocale(), 'like', "%{$search}%");
                     }),
 
                 Tables\Columns\TextInputColumn::make('points')
@@ -47,7 +47,7 @@ class QuestionsRelationManager extends RelationManager
             ])
             ->headerActions([
                 Tables\Actions\Action::make('add_questions')
-                    ->label('exam-resource.relation_manager.questions.action.attach.label')
+                    ->label(__('exam-resource.relation_manager.questions.action.attach.label'))
                     ->icon('heroicon-o-plus-circle')
                     ->form([
                         Forms\Components\Select::make('records')
@@ -55,7 +55,7 @@ class QuestionsRelationManager extends RelationManager
                             ->multiple()
                             ->options(function (RelationManager $livewire) {
                                 $questionTable = (new Question)->getTable();
-                                $attachedIds = $livewire->getOwnerRecord()->questions()->pluck($questionTable.'.id')->all();
+                                $attachedIds = $livewire->getOwnerRecord()->questions()->pluck($questionTable . '.id')->all();
 
                                 return Question::whereNotIn('id', $attachedIds)->pluck('question_text', 'id');
                             })
