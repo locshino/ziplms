@@ -5,6 +5,10 @@ return [
     'label' => [
         'singular' => 'Điểm bài tập',
         'plural' => 'Điểm bài tập',
+        'assignment_grade' => 'Chấm điểm bài tập',
+        'assignment_grades' => 'Danh sách chấm điểm bài tập',
+        'edit_assignment_grade' => 'Chỉnh sửa điểm bài tập',
+        'create_assignment_grade' => 'Tạo điểm bài tập mới',
     ],
 
     'fields' => [

@@ -18,12 +18,18 @@ class EditAssignmentGrade extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
-
-    protected function mutateFormDataBeforeSave(array $data): array
+    public function getTitle(): string
     {
+        return __('assignment_grade.label.assignment_grade');
+    }
 
-        $data['grade.grade'] = 'graded';
+    protected function afterSave(): void
+    {
+        $submission = $this->record->submission;
 
-        return $data;
+        if ($submission) {
+            $submission->status = 'graded';
+            $submission->save();
+        }
     }
 }

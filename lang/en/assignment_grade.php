@@ -5,6 +5,10 @@ return [
     'label' => [
         'singular' => 'Assignment Grade',
         'plural' => 'Assignment Grades',
+        'assignment_grade' => 'Assignment Grade',
+        'assignment_grades' => 'Assignment Grades List',
+        'edit_assignment_grade' => 'Edit Assignment Grade',
+        'create_assignment_grade' => 'Create New Assignment Grade',
     ],
 
     'fields' => [

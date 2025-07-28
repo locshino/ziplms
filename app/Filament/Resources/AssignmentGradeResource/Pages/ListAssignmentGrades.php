@@ -19,52 +19,12 @@ class ListAssignmentGrades extends ListRecords
     {
         return [
             Actions\LocaleSwitcher::make(),
-            // Action::make('uploadForFiltered')
-            //     ->label('Tải file cho tất cả bản ghi đang lọc')
-            //     ->icon('heroicon-o-arrow-up-tray')
-            //     ->action(function () {
-            //         $records = $this->getFilteredTableQuery()->get();
-            //         $files = [];
-            //         foreach ($records as $grade) {
-            //             $submission = $grade->submission;
-            //             if (!$submission)
-            //                 continue;
 
-            //             $mediaItems = $submission->getMedia('submissions');
-            //             foreach ($mediaItems as $media) {
-            //                 $path = Storage::disk('public')->path($media->getPathRelativeToRoot());
-            //                 if (file_exists($path)) {
-            //                     $files[] = $path;
-            //                 }
-            //             }
-            //         }
-
-            //         if (empty($files)) {
-            //             \Filament\Notifications\Notification::make()
-            //                 ->title('Không tìm thấy file nào.')
-            //                 ->warning()
-            //                 ->send();
-            //             return;
-            //         }
-
-            //         // Tạo file zip
-            //         $zipFileName = 'submissions_class_' . now()->timestamp . '.zip';
-            //         $zipPath = storage_path('app/public/' . $zipFileName);
-            //         $zip = new ZipArchive;
-
-            //         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-            //             foreach ($files as $file) {
-            //                 $zip->addFile($file, basename($file));
-            //             }
-            //             $zip->close();
-            //         }
-
-            //         // Trả về đường dẫn tải
-            //         return response()->download($zipPath)->deleteFileAfterSend(true);
-            //     })
-            //     ->requiresConfirmation()
-            //     ->color('success')
 
         ];
+    }
+    public function getTitle(): string
+    {
+        return __('assignment_grade.label.assignment_grades');
     }
 }
