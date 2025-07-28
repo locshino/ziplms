@@ -21,6 +21,7 @@ return [
     ],
 
     'submit_modal' => [
+        'success_message' => 'Submission successful!',
         'title' => 'Submit Exam',
         'message' => 'Are you sure you want to submit? You cannot change your answers after this.',
         'confirm_button' => 'Yes, Submit',

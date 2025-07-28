@@ -85,7 +85,6 @@ class TakeExam extends Page
         $totalScore = 0;
         $hasManualGradingQuestions = false;
 
-        // Biến cờ chính để quyết định có chấm tự động hay không
         $isManualReviewRequired = $this->record->show_results_after === ExamShowResultsType::MANUAL;
 
         foreach ($this->questions as $question) {
@@ -98,11 +97,10 @@ class TakeExam extends Page
                 'selected_choice_id' => null,
                 'chosen_option_ids' => null,
                 'answer_text' => null,
-                'is_correct' => null, // Mặc định là null (chưa chấm)
-                'points_earned' => null, // Mặc định là null (chưa chấm)
+                'is_correct' => null,
+                'points_earned' => null,
             ];
 
-            // BƯỚC 1: LƯU CÂU TRẢ LỜI THÔ CỦA HỌC SINH (LUÔN LUÔN LÀM)
             switch ($type) {
                 case 'single_choice':
                 case 'true_false':
@@ -120,13 +118,12 @@ class TakeExam extends Page
                     }
                     break;
                 case 'fill_blank':
-                    $hasManualGradingQuestions = true; // Fill blank luôn cần review
+                    $hasManualGradingQuestions = true;
                     $userAnswers = array_map('trim', $this->fillBlankAnswers[$qId] ?? []);
                     $answerData['answer_text'] = ['vi' => implode('|', $userAnswers)];
                     break;
             }
 
-            // BƯỚC 2: CHỈ CHẤM TỰ ĐỘNG NẾU BÀI THI KHÔNG YÊU CẦU CHẤM THỦ CÔNG
             if (! $isManualReviewRequired) {
                 switch ($type) {
                     case 'single_choice':
@@ -153,27 +150,31 @@ class TakeExam extends Page
                 }
             }
 
-            ExamAnswer::create($answerData);
+            ExamAnswer::updateOrCreate(
+                [
+                    'exam_attempt_id' => $this->attempt->id,
+                    'exam_question_id' => $this->questionMeta[$qId]['exam_question_id'],
+                ],
+                $answerData
+            );
         }
 
         $timeSpent = $this->attempt->started_at->diffInSeconds($completedAt);
         $this->attempt->completed_at = $completedAt;
         $this->attempt->time_spent_seconds = $timeSpent;
 
-        // BƯỚC 3: QUYẾT ĐỊNH TRẠNG THÁI CUỐI CÙNG
         if ($hasManualGradingQuestions || $isManualReviewRequired) {
-            $this->attempt->score = $isManualReviewRequired ? null : $totalScore; // Nếu chấm thủ công, điểm ban đầu là null
-            $this->attempt->save(); // Giữ nguyên trạng thái InProgress
+            $this->attempt->score = $isManualReviewRequired ? null : $totalScore;
         } else {
             $this->attempt->score = $totalScore;
-            $this->attempt->status->transitionTo(Completed::class);
         }
 
-        Notification::make()->title('Nộp bài thành công!')->success()->send();
+        $this->attempt->status->transitionTo(Completed::class);
+
+        Notification::make()->title(__('take-exam-page.submit_modal.success_message'))->success()->send();
         $this->redirect(static::$resource::getUrl('index'));
     }
 
-    // ... các phương thức khác không thay đổi ...
     #[Computed(persist: true)]
     public function incompleteAttempt(): ?ExamAttempt
     {
@@ -186,7 +187,7 @@ class TakeExam extends Page
 
     public function getTitle(): string
     {
-        return $this->examStarted ? 'Đang làm bài: '.$this->record->title : 'Bắt đầu: '.$this->record->title;
+        return $this->examStarted ? 'Đang làm bài: ' . $this->record->title : 'Bắt đầu: ' . $this->record->title;
     }
 
     public function continueExam(): void
@@ -195,7 +196,6 @@ class TakeExam extends Page
 
         if (! $this->attempt) {
             Notification::make()->title('Không tìm thấy bài làm dang dở!')->danger()->send();
-
             return;
         }
 
@@ -213,7 +213,6 @@ class TakeExam extends Page
 
         if ($feedbackData === null) {
             $this->invalidateOldAttempt('Dữ liệu bài làm cũ bị lỗi hoặc không hợp lệ.');
-
             return;
         }
 
@@ -221,7 +220,6 @@ class TakeExam extends Page
 
         if (empty($questionOrderIds)) {
             $this->invalidateOldAttempt('Dữ liệu bài làm cũ bị thiếu thông tin câu hỏi.');
-
             return;
         }
 
@@ -229,7 +227,6 @@ class TakeExam extends Page
 
         if ($this->questions->isEmpty()) {
             $this->invalidateOldAttempt('Tất cả câu hỏi trong bài thi đã bị xóa. Không thể tiếp tục.');
-
             return;
         }
 
@@ -269,7 +266,6 @@ class TakeExam extends Page
 
         if ($this->questions->isEmpty()) {
             Notification::make()->title('Bài thi này không có câu hỏi nào.')->warning()->send();
-
             return;
         }
 
@@ -312,7 +308,7 @@ class TakeExam extends Page
             if (! $this->record->shuffle_questions) {
                 $query->orderBy('exam_questions.question_order');
             } else {
-                $questionOrderIdsString = implode(',', array_map('intval', $questionOrderIds));
+                $questionOrderIdsString = implode(',', array_map(fn($id) => "'" . e($id) . "'", $questionOrderIds));
                 if (! empty($questionOrderIdsString)) {
                     $query->orderByRaw("FIELD(questions.id, $questionOrderIdsString)");
                 }
@@ -427,23 +423,6 @@ class TakeExam extends Page
         return $tag ? QuestionType::tryFrom($tag->name) : null;
     }
 
-    protected function getHeaderActions(): array
-    {
-        if ($this->examStarted) {
-            return [];
-        }
-
-        return [
-            Action::make('startExam')
-                ->label('Bắt đầu bài thi mới')
-                ->action('startExam')
-                ->requiresConfirmation()
-                ->modalHeading('Bắt đầu bài thi mới?')
-                ->modalDescription('Bắt đầu một lượt làm bài mới sẽ xoá bài làm dang dở trước đó (nếu có). Bạn có chắc chắn không?')
-                ->modalSubmitActionLabel('Vâng, bắt đầu'),
-        ];
-    }
-
     public function getAnsweredQuestionsCount(): int
     {
         $answeredCount = 0;
@@ -469,36 +448,5 @@ class TakeExam extends Page
         }
 
         return $answeredCount;
-    }
-
-    protected function getFooterActions(): array
-    {
-        if (! $this->examStarted) {
-            return [];
-        }
-
-        return [
-            Action::make('submitModal')
-                ->label('Nộp Bài')
-                ->color('primary')
-                ->modalContent(fn (Action $action): View => view(
-                    'filament.resources.exam-resource.pages.actions.submit-modal-content',
-                    [
-                        'action' => $action,
-                        'answeredCount' => $this->getAnsweredQuestionsCount(),
-                        'totalQuestions' => $this->questions?->count() ?? 0,
-                    ]
-                ))
-                ->registerModalActions([
-                    Action::make('confirmSubmit')
-                        ->label('Xác nhận & Nộp bài')
-                        ->action(fn () => $this->submitExam()),
-                    Action::make('cancel')
-                        ->label('Quay lại làm bài')
-                        ->color('gray')
-                        ->close(),
-                ])
-                ->modalActions([]),
-        ];
     }
 }

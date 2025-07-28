@@ -15,7 +15,7 @@ class EditExamAttempt extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\LocaleSwitcher::make(), //
+            Actions\LocaleSwitcher::make(), 
             Actions\DeleteAction::make()
                 ->successNotificationTitle(__('exam-attempt-resource.notification.delete_success')),
             Actions\ForceDeleteAction::make(),

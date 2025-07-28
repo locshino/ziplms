@@ -35,6 +35,7 @@ return [
         ],
         'action' => [
             'take_exam' => 'Làm bài',
+            'delete' => 'Xóa',
         ],
     ],
     'notification' => [

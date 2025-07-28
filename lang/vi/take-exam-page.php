@@ -21,6 +21,7 @@ return [
     ],
 
     'submit_modal' => [
+        'success_message' => 'Nộp bài thành công!',
         'title' => 'Xác nhận nộp bài',
         'message' => 'Bạn có chắc chắn muốn nộp bài không? Bạn sẽ không thể thay đổi câu trả lời sau khi nộp.',
         'confirm_button' => 'Vâng, Nộp bài',

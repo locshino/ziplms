@@ -1,6 +1,5 @@
 <x-filament-panels::page>
 
-
 <style>
   :root {
     --body-bg: #f9fafb;
@@ -235,8 +234,16 @@
                 <button
                     type="button"
                     :class="confirmButtonClass"
-                    @click="$wire.call(confirmAction); isModalOpen = false">
-                    <span x-text="confirmButtonText"></span>
+                    @click="$wire.call(confirmAction); isModalOpen = false"
+                    wire:loading.attr="disabled"
+                    wire:target="submitExam, startExam"
+                >
+                    <span wire:loading.remove wire:target="submitExam, startExam">
+                       <span x-text="confirmButtonText"></span>
+                    </span>
+                    <span wire:loading wire:target="submitExam, startExam">
+                        ...
+                    </span>
                 </button>
             </div>
         </div>

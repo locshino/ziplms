@@ -17,12 +17,10 @@ class ReviewAnswer extends Page
 
     public function mount(ExamAnswer $record): void
     {
-        // Tải các quan hệ cần thiết vào bản ghi đã được inject
         $record->load(['question.choices', 'question.tags', 'selectedChoice']);
 
         $this->record = $record;
     }
-    // ▲▲▲ KẾT THÚC SỬA LỖI ▲▲▲
 
     public function getTitle(): string|Htmlable
     {
