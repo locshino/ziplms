@@ -16,6 +16,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class AssignmentGradeResource extends Resource
 {
@@ -72,7 +73,7 @@ class AssignmentGradeResource extends Resource
                 Action::make('download')
                     ->label('Tải bài nộp')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn ($record) => asset('storage/'.$record->submission->submission_text))
+                    ->url(fn($record) => asset('storage/' . $record->submission->submission_text))
                     ->openUrlInNewTab(),
 
             ])
@@ -104,6 +105,9 @@ class AssignmentGradeResource extends Resource
                 '=',
                 'latest_subs.latest_id'
             );
+        $query->whereHas('submission.assignment', function (Builder $query) {
+            $query->where('created_by', Auth::id());
+        });
 
         return $query;
     }
