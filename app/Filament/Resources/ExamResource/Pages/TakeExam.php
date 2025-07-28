@@ -13,10 +13,8 @@ use App\States\Exam\Active;
 use App\States\Exam\Cancelled;
 use App\States\Exam\Completed;
 use App\States\Exam\InProgress;
-use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
-use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
@@ -187,7 +185,7 @@ class TakeExam extends Page
 
     public function getTitle(): string
     {
-        return $this->examStarted ? 'Đang làm bài: ' . $this->record->title : 'Bắt đầu: ' . $this->record->title;
+        return $this->examStarted ? 'Đang làm bài: '.$this->record->title : 'Bắt đầu: '.$this->record->title;
     }
 
     public function continueExam(): void
@@ -196,6 +194,7 @@ class TakeExam extends Page
 
         if (! $this->attempt) {
             Notification::make()->title('Không tìm thấy bài làm dang dở!')->danger()->send();
+
             return;
         }
 
@@ -213,6 +212,7 @@ class TakeExam extends Page
 
         if ($feedbackData === null) {
             $this->invalidateOldAttempt('Dữ liệu bài làm cũ bị lỗi hoặc không hợp lệ.');
+
             return;
         }
 
@@ -220,6 +220,7 @@ class TakeExam extends Page
 
         if (empty($questionOrderIds)) {
             $this->invalidateOldAttempt('Dữ liệu bài làm cũ bị thiếu thông tin câu hỏi.');
+
             return;
         }
 
@@ -227,6 +228,7 @@ class TakeExam extends Page
 
         if ($this->questions->isEmpty()) {
             $this->invalidateOldAttempt('Tất cả câu hỏi trong bài thi đã bị xóa. Không thể tiếp tục.');
+
             return;
         }
 
@@ -266,6 +268,7 @@ class TakeExam extends Page
 
         if ($this->questions->isEmpty()) {
             Notification::make()->title('Bài thi này không có câu hỏi nào.')->warning()->send();
+
             return;
         }
 
@@ -308,7 +311,7 @@ class TakeExam extends Page
             if (! $this->record->shuffle_questions) {
                 $query->orderBy('exam_questions.question_order');
             } else {
-                $questionOrderIdsString = implode(',', array_map(fn($id) => "'" . e($id) . "'", $questionOrderIds));
+                $questionOrderIdsString = implode(',', array_map(fn ($id) => "'".e($id)."'", $questionOrderIds));
                 if (! empty($questionOrderIdsString)) {
                     $query->orderByRaw("FIELD(questions.id, $questionOrderIdsString)");
                 }
