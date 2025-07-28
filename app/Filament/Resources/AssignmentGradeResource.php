@@ -15,8 +15,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AssignmentGradeResource extends Resource
 {
@@ -73,7 +73,7 @@ class AssignmentGradeResource extends Resource
                 Action::make('download')
                     ->label('Tải bài nộp')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn($record) => asset('storage/' . $record->submission->submission_text))
+                    ->url(fn ($record) => asset('storage/'.$record->submission->submission_text))
                     ->openUrlInNewTab(),
 
             ])
