@@ -10,7 +10,6 @@ use App\Repositories\Contracts\SubmissionRepository;
 use Dvarilek\FilamentTableSelect\Components\Form\TableSelect;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -74,7 +73,7 @@ class AssignmentResource extends Resource
 
                                 Textarea::make('instructions_text')
                                     ->label(__('assignment.labels.instructions_text'))
-                                    ->visible(fn($get) => $get('instructions_type') === 'text'),
+                                    ->visible(fn ($get) => $get('instructions_type') === 'text'),
 
                                 FileUpload::make('instructions_file')
                                     ->label(__('assignment.labels.instructions_file'))
@@ -87,17 +86,16 @@ class AssignmentResource extends Resource
                                         'application/zip',
                                         'application/x-zip-compressed',
                                     ])
-                                    ->visible(fn($get) => $get('instructions_type') === 'file'),
+                                    ->visible(fn ($get) => $get('instructions_type') === 'file'),
 
                                 TextInput::make('instructions_url')
                                     ->label(__('assignment.labels.instructions_url'))
                                     ->url()
                                     ->placeholder('https://...')
-                                    ->visible(fn($get) => $get('instructions_type') === 'url'),
+                                    ->visible(fn ($get) => $get('instructions_type') === 'url'),
                             ]),
                     ])
                     ->columnSpan(['lg' => 2]),
-
 
                 Forms\Components\Group::make()
                     ->schema([
@@ -129,12 +127,12 @@ class AssignmentResource extends Resource
                                 Forms\Components\TagsInput::make('tags')
                                     ->label(__('assignment.labels.tags'))
                                     ->suggestions(Tag::pluck('name')->toArray())
-                                    ->saveRelationshipsUsing(fn($record, $state) => $record->syncTags($state)),
+                                    ->saveRelationshipsUsing(fn ($record, $state) => $record->syncTags($state)),
                             ]),
                     ])
                     ->columnSpan(['lg' => 1]),
             ])->columns(3);
-        ;
+
     }
 
     public static function table(Table $table): Table
@@ -148,20 +146,20 @@ class AssignmentResource extends Resource
                 TextColumn::make('due_date')->label(__('assignment.label.due_date'))->dateTime(),
                 BooleanColumn::make('allow_late_submissions')->label(__('assignment.label.allow_late_submissions')),
                 TextColumn::make('creator.name')->label(__('assignment.label.creator'))->searchable()
-                    ->visible(fn() => app(AssignmentRepositoryInterface::class)->isStudent()),
+                    ->visible(fn () => app(AssignmentRepositoryInterface::class)->isStudent()),
                 TagsColumn::make('tags')
                     ->label(__('assignment.label.tags'))
                     ->getStateUsing(function ($record) {
 
                         return $record->tags ? $record->tags->pluck('name')->toArray() : [];
                     })
-                    ->visible(fn() => app(AssignmentRepositoryInterface::class)->isStudent()),
+                    ->visible(fn () => app(AssignmentRepositoryInterface::class)->isStudent()),
 
                 BadgeColumn::make('status')
                     ->label(__('assignment.label.status'))
-                    ->color(fn($state) => $state::color())
-                    ->formatStateUsing(fn($state) => $state::label())
-                    ->visible(fn() => app(AssignmentRepositoryInterface::class)->isStudent()),
+                    ->color(fn ($state) => $state::color())
+                    ->formatStateUsing(fn ($state) => $state::label())
+                    ->visible(fn () => app(AssignmentRepositoryInterface::class)->isStudent()),
 
             ])
 
@@ -183,7 +181,7 @@ class AssignmentResource extends Resource
                     ->button()
                     ->color('success')
                     ->icon('heroicon-o-arrow-up-circle')
-                    ->visible(fn($record) => ($record->due_date > now() || $record->status === 'published') && auth()->user()->hasRole('student'))
+                    ->visible(fn ($record) => ($record->due_date > now() || $record->status === 'published') && auth()->user()->hasRole('student'))
                     ->form([
                         FileUpload::make('submission_file')
                             ->label(__('assignment.labels.instructions_file'))
@@ -200,13 +198,13 @@ class AssignmentResource extends Resource
                             ->getUploadedFileNameForStorageUsing(function ($file, callable $get, callable $set) {
                                 $user = auth()->user();
                                 $username = Str::slug($user->name);
-                                $filename = $username . '-' . now()->timestamp . '.' . $file->getClientOriginalExtension();
+                                $filename = $username.'-'.now()->timestamp.'.'.$file->getClientOriginalExtension();
 
                                 return $file->storeAs('submissions', $filename, 'public');
                             }),
 
                     ])
-                    ->visible(fn() => !Auth::user()->hasRole('teacher'))
+                    ->visible(fn () => ! Auth::user()->hasRole('teacher'))
                     ->action(function (array $data, Assignment $record) {
 
                         $submissionRepo = app(SubmissionRepository::class);
@@ -237,17 +235,17 @@ class AssignmentResource extends Resource
                             }
 
                             $listItems = $submission->map(function ($submission) {
-                                $fileUrl = asset('storage/' . ltrim($submission->submission_text, '/'));
+                                $fileUrl = asset('storage/'.ltrim($submission->submission_text, '/'));
                                 $fileName = basename($submission->submission_text);
 
-                                return '<li><a href="' . e($fileUrl) . '" target="_blank" class="text-blue-600 hover:underline">' . e($fileName) . '</a></li>';
+                                return '<li><a href="'.e($fileUrl).'" target="_blank" class="text-blue-600 hover:underline">'.e($fileName).'</a></li>';
                             })->implode('');
 
-                            return new \Illuminate\Support\HtmlString('<ul class="list-disc pl-4">' . $listItems . '</ul>');
+                            return new \Illuminate\Support\HtmlString('<ul class="list-disc pl-4">'.$listItems.'</ul>');
 
                         }),
 
-                ])->visible(fn() => Auth::user()->hasRole('student')),
+                ])->visible(fn () => Auth::user()->hasRole('student')),
 
             ])
             ->bulkActions([
@@ -285,22 +283,22 @@ class AssignmentResource extends Resource
 
             TextEntry::make('instructions_text')
                 ->label('Đề bài')
-                ->default(fn($record) => app(AssignmentRepositoryInterface::class)->getInstructionsText($record))
-                ->visible(fn($record) => !empty(optional($record->getTranslation('instructions', 'vi'))['text'] ?? null)),
+                ->default(fn ($record) => app(AssignmentRepositoryInterface::class)->getInstructionsText($record))
+                ->visible(fn ($record) => ! empty(optional($record->getTranslation('instructions', 'vi'))['text'] ?? null)),
 
             TextEntry::make('instructions_url')
                 ->label('Link đề bài')
-                ->url(fn($record) => is_array($vi = $record->getTranslation('instructions', 'vi')) ? ($vi['url'] ?? null) : null)
-                ->default(fn($record) => is_array($vi = $record->getTranslation('instructions', 'vi')) ? ($vi['url'] ?? null) : null)
+                ->url(fn ($record) => is_array($vi = $record->getTranslation('instructions', 'vi')) ? ($vi['url'] ?? null) : null)
+                ->default(fn ($record) => is_array($vi = $record->getTranslation('instructions', 'vi')) ? ($vi['url'] ?? null) : null)
                 ->openUrlInNewTab()
-                ->visible(fn($record) => is_array($vi = $record->getTranslation('instructions', 'vi')) && !empty($vi['url'] ?? null)),
+                ->visible(fn ($record) => is_array($vi = $record->getTranslation('instructions', 'vi')) && ! empty($vi['url'] ?? null)),
 
             TextEntry::make('instructions_file')
                 ->label('Tệp đính kèm')
-                ->url(fn($record) => app(AssignmentRepositoryInterface::class)->getInstructionsFileUrl($record))
-                ->default(fn($record) => app(AssignmentRepositoryInterface::class)->getInstructionsFileDefault($record))
+                ->url(fn ($record) => app(AssignmentRepositoryInterface::class)->getInstructionsFileUrl($record))
+                ->default(fn ($record) => app(AssignmentRepositoryInterface::class)->getInstructionsFileDefault($record))
                 ->openUrlInNewTab()
-                ->visible(fn($record) => app(AssignmentRepositoryInterface::class)->shouldShowInstructionsFile($record) !== null),
+                ->visible(fn ($record) => app(AssignmentRepositoryInterface::class)->shouldShowInstructionsFile($record) !== null),
 
         ]);
 
