@@ -17,6 +17,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms;
 
 class AssignmentGradeResource extends Resource
 {
@@ -30,17 +32,40 @@ class AssignmentGradeResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('grade')
-                    ->label(__('assignment_grade.form.grade'))
-                    ->numeric()
-                    ->minValue(0)
-                    ->maxValue(10)
-                    ->required(),
-                Textarea::make('feedback')
-                    ->label(__('assignment_grade.form.feedback'))
-                    ->rows(5),
+                Forms\Components\Group::make()
+                    ->schema([
+                        Forms\Components\Section::make('Thông tin bài tập')
+                            ->schema([
+                                Forms\Components\Placeholder::make('assignment_title')
+                                    ->label('Tên bài tập')
+                                    ->content(fn($record) => $record?->submission->assignment?->title ?? '-'),
+                                Forms\Components\Placeholder::make('student_name')
+                                    ->label('Người nộp')
+                                    ->content(fn($record) => $record?->submission->user?->name ?? '-'),
+                            ])
+                            ->columns(1),
+                    ])
+                    ->columnSpan(['lg' => 2]),
 
-            ]);
+                Forms\Components\Group::make()
+                    ->schema([
+                        Forms\Components\Section::make('Đánh giá')
+                            ->schema([
+                                Forms\Components\TextInput::make('grade')
+                                    ->label(__('assignment_grade.form.grade'))
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->maxValue(10)
+                                    ->required(),
+                                Forms\Components\Textarea::make('feedback')
+                                    ->label(__('assignment_grade.form.feedback'))
+                                    ->rows(5),
+                            ])
+                            ->columns(1),
+                    ])
+
+            ])->columns(3)
+        ;
     }
 
     public static function table(Table $table): Table
@@ -73,7 +98,7 @@ class AssignmentGradeResource extends Resource
                 Action::make('download')
                     ->label('Tải bài nộp')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn ($record) => asset('storage/'.$record->submission->submission_text))
+                    ->url(fn($record) => asset('storage/' . $record->submission->submission_text))
                     ->openUrlInNewTab(),
 
             ])

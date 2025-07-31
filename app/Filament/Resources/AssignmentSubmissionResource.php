@@ -15,6 +15,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Filament\Tables\Filters\SelectFilter;
 
 // use Filament\Tables\Filters\SelectFilter;
 
@@ -30,17 +31,7 @@ class AssignmentSubmissionResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('grade.grade')
-                    ->label(__('assignment_submission.form.grade'))
-                    ->numeric()
-                    ->minValue(0)
-                    ->maxValue(10)
-                    ->required(),
 
-                Textarea::make('feedback')
-                    ->label(__('assignment_submission.form.feedback'))
-                    ->rows(4)
-                    ->maxLength(1000),
             ]);
     }
 
@@ -50,20 +41,28 @@ class AssignmentSubmissionResource extends Resource
             ->columns([
 
                 Tables\Columns\TextColumn::make('user.name')->label(__('assignment_submission.fields.user_name'))
-                    ->visible(fn () => ! Auth::user()?->hasRole('student')),
+                    ->visible(fn() => !Auth::user()?->hasRole('student')),
 
                 Tables\Columns\TextColumn::make('assignment.title')->label(__('assignment_submission.fields.assignment_title')),
                 Tables\Columns\TextColumn::make('grade.grade')->label(__('assignment_submission.fields.grade')),
-                Tables\Columns\TextColumn::make('feedback')->label(__('assignment_submission.fields.feedback'))->limit(20),
+                Tables\Columns\TextColumn::make('grade.feedback')->label(__('assignment_submission.fields.feedback'))->limit(20),
                 Tables\Columns\BadgeColumn::make('status')
                     ->label(__('assignment_submission.fields.status'))
-                    ->color(fn ($state) => $state::color())
-                    ->formatStateUsing(fn ($state) => $state::label()),
+                    ->color(fn($state) => $state::color())
+                    ->formatStateUsing(fn($state) => $state::label()),
 
             ])
 
             ->filters([
-
+                SelectFilter::make('assignment.course_id')
+                    ->label('Lọc theo môn học')
+                    ->relationship('assignment.course', 'name')
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('assignment.course.organization.classesMajors')
+                    ->label('Lọc theo Lớp học')
+                    ->relationship('assignment.course.organization.classesMajors', 'name')
+                    ->placeholder('Chọn lớp học'),
             ])
             ->actions([
                 ViewAction::make(),
