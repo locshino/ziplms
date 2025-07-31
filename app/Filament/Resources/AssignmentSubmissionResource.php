@@ -4,18 +4,16 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AssignmentSubmissionResource\Pages;
 use App\Models\AssignmentSubmission;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Concerns\Translatable;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Filament\Tables\Filters\SelectFilter;
 
 // use Filament\Tables\Filters\SelectFilter;
 
@@ -41,15 +39,15 @@ class AssignmentSubmissionResource extends Resource
             ->columns([
 
                 Tables\Columns\TextColumn::make('user.name')->label(__('assignment_submission.fields.user_name'))
-                    ->visible(fn() => !Auth::user()?->hasRole('student')),
+                    ->visible(fn () => ! Auth::user()?->hasRole('student')),
 
                 Tables\Columns\TextColumn::make('assignment.title')->label(__('assignment_submission.fields.assignment_title')),
                 Tables\Columns\TextColumn::make('grade.grade')->label(__('assignment_submission.fields.grade')),
                 Tables\Columns\TextColumn::make('grade.feedback')->label(__('assignment_submission.fields.feedback'))->limit(20),
                 Tables\Columns\BadgeColumn::make('status')
                     ->label(__('assignment_submission.fields.status'))
-                    ->color(fn($state) => $state::color())
-                    ->formatStateUsing(fn($state) => $state::label()),
+                    ->color(fn ($state) => $state::color())
+                    ->formatStateUsing(fn ($state) => $state::label()),
 
             ])
 

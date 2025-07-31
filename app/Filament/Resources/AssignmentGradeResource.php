@@ -4,8 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AssignmentGradeResource\Pages;
 use App\Models\AssignmentGrade;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
+use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Concerns\Translatable;
 use Filament\Resources\Resource;
@@ -17,8 +16,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms;
 
 class AssignmentGradeResource extends Resource
 {
@@ -38,10 +35,10 @@ class AssignmentGradeResource extends Resource
                             ->schema([
                                 Forms\Components\Placeholder::make('assignment_title')
                                     ->label('Tên bài tập')
-                                    ->content(fn($record) => $record?->submission->assignment?->title ?? '-'),
+                                    ->content(fn ($record) => $record?->submission->assignment?->title ?? '-'),
                                 Forms\Components\Placeholder::make('student_name')
                                     ->label('Người nộp')
-                                    ->content(fn($record) => $record?->submission->user?->name ?? '-'),
+                                    ->content(fn ($record) => $record?->submission->user?->name ?? '-'),
                             ])
                             ->columns(1),
                     ])
@@ -62,10 +59,9 @@ class AssignmentGradeResource extends Resource
                                     ->rows(5),
                             ])
                             ->columns(1),
-                    ])
+                    ]),
 
-            ])->columns(3)
-        ;
+            ])->columns(3);
     }
 
     public static function table(Table $table): Table
@@ -98,7 +94,7 @@ class AssignmentGradeResource extends Resource
                 Action::make('download')
                     ->label('Tải bài nộp')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn($record) => asset('storage/' . $record->submission->submission_text))
+                    ->url(fn ($record) => asset('storage/'.$record->submission->submission_text))
                     ->openUrlInNewTab(),
 
             ])
