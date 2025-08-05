@@ -15,7 +15,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles, HasUuids, SoftDeletes;
+    use HasFactory, HasRoles, HasUuids, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -73,8 +73,8 @@ class User extends Authenticatable
     public function enrolledCourses(): BelongsToMany
     {
         return $this->belongsToMany(Course::class, 'enrollments', 'student_id', 'course_id')
-                    ->withPivot('enrolled_at')
-                    ->withTimestamps();
+            ->withPivot('enrolled_at')
+            ->withTimestamps();
     }
 
     /**
@@ -115,7 +115,7 @@ class User extends Authenticatable
     public function badges(): BelongsToMany
     {
         return $this->belongsToMany(Badge::class, 'user_badges')
-                    ->withPivot('awarded_at')
-                    ->withTimestamps();
+            ->withPivot('awarded_at')
+            ->withTimestamps();
     }
 }

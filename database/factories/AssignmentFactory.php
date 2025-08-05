@@ -26,9 +26,9 @@ class AssignmentFactory extends Factory
     public function definition(): array
     {
         $startAt = $this->faker->dateTimeBetween('now', '+1 month');
-        $dueAt = $this->faker->dateTimeBetween($startAt, $startAt->format('Y-m-d H:i:s') . ' +2 months');
-        $gradingAt = $this->faker->dateTimeBetween($dueAt, $dueAt->format('Y-m-d H:i:s') . ' +1 week');
-        $endAt = $this->faker->dateTimeBetween($gradingAt, $gradingAt->format('Y-m-d H:i:s') . ' +2 weeks');
+        $dueAt = $this->faker->dateTimeBetween($startAt, $startAt->format('Y-m-d H:i:s').' +2 months');
+        $gradingAt = $this->faker->dateTimeBetween($dueAt, $dueAt->format('Y-m-d H:i:s').' +1 week');
+        $endAt = $this->faker->dateTimeBetween($gradingAt, $gradingAt->format('Y-m-d H:i:s').' +2 weeks');
 
         return [
             'course_id' => Course::factory(),

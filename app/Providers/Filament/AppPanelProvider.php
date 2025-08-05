@@ -54,7 +54,7 @@ class AppPanelProvider extends PanelProvider
             ])
             ->plugins(plugins: [
 
-                RevivePlugin::make()
+                RevivePlugin::make(),
             ])
             ->authMiddleware([
                 Authenticate::class,

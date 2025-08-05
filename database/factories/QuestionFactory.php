@@ -27,7 +27,7 @@ class QuestionFactory extends Factory
     {
         return [
             'quiz_id' => Quiz::factory(),
-            'title' => $this->faker->sentence() . '?',
+            'title' => $this->faker->sentence().'?',
             'points' => $this->faker->randomFloat(2, 1, 10),
             'is_multiple_response' => $this->faker->boolean(20),
         ];

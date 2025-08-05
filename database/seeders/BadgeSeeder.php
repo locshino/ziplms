@@ -89,9 +89,9 @@ class BadgeSeeder extends Seeder
         foreach ($badges as $badgeData) {
             $conditions = $badgeData['conditions'];
             unset($badgeData['conditions']);
-            
+
             $badge = Badge::create($badgeData);
-            
+
             // Attach conditions to badge
             foreach ($conditions as $condition) {
                 $badge->conditions()->attach($condition->id);

@@ -14,9 +14,10 @@ class AssignmentSeeder extends Seeder
     public function run(): void
     {
         $courses = Course::all();
-        
+
         if ($courses->isEmpty()) {
             $this->command->warn('No courses found. Please run CourseSeeder first.');
+
             return;
         }
 
@@ -47,13 +48,13 @@ class AssignmentSeeder extends Seeder
         foreach ($courses as $course) {
             $numAssignments = rand(2, 4);
             $selectedTemplates = collect($assignmentTemplates)->random($numAssignments);
-            
+
             foreach ($selectedTemplates as $index => $template) {
                 $startAt = now()->addDays(7 * ($index + 1));
                 $dueAt = $startAt->copy()->addDays(14);
                 $gradingAt = $dueAt->copy()->addDays(7);
                 $endAt = $gradingAt->copy()->addDays(7);
-                
+
                 Assignment::create(array_merge($template, [
                     'course_id' => $course->id,
                     'late_penalty_percentage' => rand(0, 1) ? rand(5, 25) : null,

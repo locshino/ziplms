@@ -14,9 +14,10 @@ class CourseSeeder extends Seeder
     public function run(): void
     {
         $teachers = User::role('teacher')->get();
-        
+
         if ($teachers->isEmpty()) {
             $this->command->warn('No teachers found. Please run UserSeeder first.');
+
             return;
         }
 

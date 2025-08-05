@@ -12,7 +12,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Assignment not found exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function notFound(?string $id = null, ?string $reason = null): static
     {
@@ -34,8 +34,8 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Assignment not found by ID exception.
      *
-     * @param string $id The assignment ID
-     * @param string|null $reason The failure reason
+     * @param  string  $id  The assignment ID
+     * @param  string|null  $reason  The failure reason
      */
     public static function notFoundById(string $id, ?string $reason = null): self
     {
@@ -49,8 +49,8 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * No assignments found for course exception.
      *
-     * @param string $course The course identifier
-     * @param string|null $reason The failure reason
+     * @param  string  $course  The course identifier
+     * @param  string|null  $reason  The failure reason
      */
     public static function notFoundByCourse(string $course, ?string $reason = null): self
     {
@@ -64,7 +64,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Invalid course ID exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function invalidCourse(?string $reason = null): self
     {
@@ -78,7 +78,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Invalid student ID exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function invalidStudent(?string $reason = null): self
     {
@@ -92,7 +92,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Invalid assignment data exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function invalidAssignmentData(?string $reason = null): self
     {
@@ -106,7 +106,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Assignment title required exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function titleRequired(?string $reason = null): self
     {
@@ -120,8 +120,8 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Assignment title too long exception.
      *
-     * @param int $max The maximum length
-     * @param string|null $reason The failure reason
+     * @param  int  $max  The maximum length
+     * @param  string|null  $reason  The failure reason
      */
     public static function titleTooLong(int $max, ?string $reason = null): self
     {
@@ -135,7 +135,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Assignment description required exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function descriptionRequired(?string $reason = null): self
     {
@@ -149,7 +149,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Invalid due date exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function invalidDueDate(?string $reason = null): self
     {
@@ -163,7 +163,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Invalid end date exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function invalidEndDate(?string $reason = null): self
     {
@@ -177,7 +177,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Due date in past exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function dueDatePast(?string $reason = null): self
     {
@@ -191,7 +191,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * End date before due date exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function endDateBeforeDue(?string $reason = null): self
     {
@@ -205,7 +205,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Invalid maximum score exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function invalidMaxScore(?string $reason = null): self
     {
@@ -219,7 +219,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Negative maximum score exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function maxScoreNegative(?string $reason = null): self
     {
@@ -233,7 +233,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Assignment already published exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function assignmentPublished(?string $reason = null): self
     {
@@ -247,7 +247,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Assignment not published exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function assignmentNotPublished(?string $reason = null): self
     {
@@ -273,7 +273,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Assignment overdue exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function assignmentOverdue(?string $reason = null): self
     {
@@ -287,7 +287,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Assignment not available exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function assignmentNotAvailable(?string $reason = null): self
     {
@@ -301,7 +301,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Submission period ended exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function submissionPeriodEnded(?string $reason = null): self
     {
@@ -315,7 +315,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Invalid assignment status exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function invalidStatus(?string $reason = null): self
     {
@@ -329,7 +329,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Duplicate assignment title exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function duplicateTitle(?string $reason = null): self
     {
@@ -343,7 +343,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Course not found for assignment exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function courseNotFound(?string $reason = null): self
     {
@@ -357,7 +357,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Instructor mismatch exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function instructorMismatch(?string $reason = null): self
     {
@@ -371,7 +371,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Student not enrolled exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function studentNotEnrolled(?string $reason = null): self
     {
@@ -385,7 +385,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Grading error exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function gradingError(?string $reason = null): self
     {
@@ -399,7 +399,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Submission not found exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function submissionNotFound(?string $reason = null): self
     {
@@ -413,7 +413,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Create assignment failed exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function createFailed(?string $reason = null): self
     {
@@ -427,7 +427,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Update assignment failed exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function updateFailed(?string $id = null, ?string $reason = null): static
     {
@@ -449,7 +449,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Delete assignment failed exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function deleteFailed(?string $id = null, ?string $reason = null): static
     {
@@ -471,7 +471,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Publish assignment failed exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function publishFailed(?string $reason = null): self
     {
@@ -485,7 +485,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Unpublish assignment failed exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function unpublishFailed(?string $reason = null): self
     {
@@ -499,7 +499,7 @@ class AssignmentRepositoryException extends RepositoryException
     /**
      * Database error exception.
      *
-     * @param string|null $reason The failure reason
+     * @param  string|null  $reason  The failure reason
      */
     public static function databaseError(?string $reason = null): self
     {

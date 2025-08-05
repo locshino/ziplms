@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('badge_has_conditions', function (Blueprint $table) {
             $table->uuid('badge_id');
             $table->uuid('condition_id');
-            
+
             $table->primary(['badge_id', 'condition_id']);
         });
     }

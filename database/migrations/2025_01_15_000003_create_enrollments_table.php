@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamp('enrolled_at')->useCurrent();
             $table->timestamps();
             $table->softDeletes();
-            
+
             $table->unique(['course_id', 'student_id']);
         });
     }

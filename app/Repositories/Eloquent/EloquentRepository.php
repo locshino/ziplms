@@ -27,6 +27,7 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
 
     /**
      * BaseRepository constructor.
+     *
      * @throws Exception
      */
     public function __construct()
@@ -36,15 +37,12 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
 
     /**
      * Get the model class name.
-     *
-     * @return string
      */
     abstract protected function model(): string;
 
     /**
      * Set the Eloquent model instance for the repository.
      *
-     * @return void
      * @throws Exception
      */
     public function setModel(): void
@@ -67,9 +65,6 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
     /**
      * Get all records.
      *
-     * @param array $columns
-     * @param array $relations
-     * @return Collection
      * @throws RepositoryException When database error occurs
      */
     public function all(array $columns = ['*'], array $relations = []): Collection
@@ -84,11 +79,6 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
     /**
      * Find record by ID.
      *
-     * @param mixed $modelId
-     * @param array $columns
-     * @param array $relations
-     * @param array $appends
-     * @return Model|null
      * @throws RepositoryException When database error occurs
      */
     public function findById(
@@ -107,8 +97,6 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
     /**
      * Create new record.
      *
-     * @param array $payload
-     * @return Model
      * @throws RepositoryException When creation fails or validation errors occur
      */
     public function create(array $payload): Model
@@ -123,9 +111,6 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
     /**
      * Update record by ID.
      *
-     * @param mixed $modelId
-     * @param array $payload
-     * @return bool
      * @throws RepositoryException When update fails or record not found
      */
     public function updateById(mixed $modelId, array $payload): bool
@@ -148,8 +133,6 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
     /**
      * Delete record by ID.
      *
-     * @param mixed $modelId
-     * @return bool
      * @throws RepositoryException When deletion fails or record not found
      */
     public function deleteById(mixed $modelId): bool

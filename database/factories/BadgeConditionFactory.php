@@ -26,8 +26,8 @@ class BadgeConditionFactory extends Factory
     {
         $type = $this->faker->randomElement(['course_completion', 'quiz_score', 'assignment_grade', 'enrollment_count']);
         $operator = $this->faker->randomElement(['>=', '>', '=', '<', '<=']);
-        
-        $parameters = match($type) {
+
+        $parameters = match ($type) {
             'course_completion' => [
                 'course_count' => $this->faker->numberBetween(1, 10),
             ],

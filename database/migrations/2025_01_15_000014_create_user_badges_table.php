@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('user_id');
             $table->uuid('badge_id');
             $table->timestamp('awarded_at')->useCurrent();
-            
+
             $table->unique(['user_id', 'badge_id']);
         });
     }

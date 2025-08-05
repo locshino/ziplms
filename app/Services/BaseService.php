@@ -6,16 +6,16 @@ use App\Exceptions\Repositories\RepositoryException;
 use App\Exceptions\Services\ServiceException;
 use App\Repositories\Interfaces\EloquentRepositoryInterface;
 use App\Services\Interfaces\BaseServiceInterface;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Exception;
 
 /**
  * Base service implementation.
- * 
+ *
  * Provides common business logic operations with proper exception handling.
- * 
+ *
  * @throws ServiceException When service operations fail
  * @throws RepositoryException When repository operations fail
  */
@@ -30,8 +30,6 @@ abstract class BaseService implements BaseServiceInterface
 
     /**
      * BaseService constructor.
-     *
-     * @param EloquentRepositoryInterface $repository
      */
     public function __construct(EloquentRepositoryInterface $repository)
     {
@@ -40,7 +38,7 @@ abstract class BaseService implements BaseServiceInterface
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @throws RepositoryException When database error occurs
      */
     public function all(): Collection
@@ -50,7 +48,7 @@ abstract class BaseService implements BaseServiceInterface
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @throws RepositoryException When database error occurs
      */
     public function findById(mixed $id): ?Model
@@ -60,7 +58,7 @@ abstract class BaseService implements BaseServiceInterface
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @throws ServiceException When validation fails or business logic errors occur
      * @throws RepositoryException When creation fails or database error occurs
      */
@@ -71,13 +69,13 @@ abstract class BaseService implements BaseServiceInterface
                 return $this->repository->create($payload);
             });
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to create record: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to create record: '.$e->getMessage());
         }
     }
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @throws ServiceException When validation fails or business logic errors occur
      * @throws RepositoryException When update fails or record not found
      */
@@ -88,13 +86,13 @@ abstract class BaseService implements BaseServiceInterface
                 return $this->repository->updateById($id, $payload);
             });
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to update record: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to update record: '.$e->getMessage());
         }
     }
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @throws ServiceException When business logic prevents deletion
      * @throws RepositoryException When deletion fails or record not found
      */
@@ -105,14 +103,12 @@ abstract class BaseService implements BaseServiceInterface
                 return $this->repository->deleteById($id);
             });
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to delete record: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to delete record: '.$e->getMessage());
         }
     }
 
     /**
      * Begin a database transaction.
-     *
-     * @return void
      */
     protected function beginTransaction(): void
     {
@@ -121,8 +117,6 @@ abstract class BaseService implements BaseServiceInterface
 
     /**
      * Commit the active database transaction.
-     *
-     * @return void
      */
     protected function commit(): void
     {
@@ -131,8 +125,6 @@ abstract class BaseService implements BaseServiceInterface
 
     /**
      * Rollback the active database transaction.
-     *
-     * @return void
      */
     protected function rollback(): void
     {

@@ -4,9 +4,9 @@ namespace App\Exceptions\Services;
 
 /**
  * Exception for enrollment service-related errors.
- * 
+ *
  * This exception class provides localized error messages specific to enrollment operations.
- * 
+ *
  * @throws EnrollmentServiceException When enrollment service operations fail
  */
 class EnrollmentServiceException extends ServiceException
@@ -14,24 +14,22 @@ class EnrollmentServiceException extends ServiceException
     /**
      * Create exception for enrollment not found.
      *
-     * @param string|null $id The enrollment ID
-     * @return static
+     * @param  string|null  $id  The enrollment ID
      */
     public static function enrollmentNotFound(?string $id = null): static
     {
-        $key = $id 
+        $key = $id
             ? 'exceptions_services_enrollmentservice.enrollment_not_found_with_id'
             : 'exceptions_services_enrollmentservice.enrollment_not_found';
-        
+
         return new static($key, ['id' => $id]);
     }
 
     /**
      * Create exception for enrollment not found for user.
      *
-     * @param string $userId The user ID
-     * @param string $courseId The course ID
-     * @return static
+     * @param  string  $userId  The user ID
+     * @param  string  $courseId  The course ID
      */
     public static function enrollmentNotFoundForUser(string $userId, string $courseId): static
     {
@@ -43,8 +41,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for user required.
-     *
-     * @return static
      */
     public static function userRequired(): static
     {
@@ -53,8 +49,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for course required.
-     *
-     * @return static
      */
     public static function courseRequired(): static
     {
@@ -63,8 +57,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for invalid user.
-     *
-     * @return static
      */
     public static function invalidUser(): static
     {
@@ -73,8 +65,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for invalid course.
-     *
-     * @return static
      */
     public static function invalidCourse(): static
     {
@@ -83,8 +73,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for user not found.
-     *
-     * @return static
      */
     public static function userNotFound(): static
     {
@@ -93,8 +81,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for course not found.
-     *
-     * @return static
      */
     public static function courseNotFound(): static
     {
@@ -103,8 +89,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment already exists.
-     *
-     * @return static
      */
     public static function enrollmentAlreadyExists(): static
     {
@@ -113,8 +97,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment already active.
-     *
-     * @return static
      */
     public static function enrollmentAlreadyActive(): static
     {
@@ -123,8 +105,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment already completed.
-     *
-     * @return static
      */
     public static function enrollmentAlreadyCompleted(): static
     {
@@ -133,8 +113,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment already cancelled.
-     *
-     * @return static
      */
     public static function enrollmentAlreadyCancelled(): static
     {
@@ -143,8 +121,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment not active.
-     *
-     * @return static
      */
     public static function enrollmentNotActive(): static
     {
@@ -153,8 +129,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment not pending.
-     *
-     * @return static
      */
     public static function enrollmentNotPending(): static
     {
@@ -163,8 +137,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment expired.
-     *
-     * @return static
      */
     public static function enrollmentExpired(): static
     {
@@ -173,8 +145,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for invalid enrollment status.
-     *
-     * @return static
      */
     public static function invalidEnrollmentStatus(): static
     {
@@ -183,8 +153,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for course not published.
-     *
-     * @return static
      */
     public static function courseNotPublished(): static
     {
@@ -193,8 +161,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for course not available.
-     *
-     * @return static
      */
     public static function courseNotAvailable(): static
     {
@@ -203,8 +169,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for course enrollment closed.
-     *
-     * @return static
      */
     public static function courseEnrollmentClosed(): static
     {
@@ -213,8 +177,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for course capacity full.
-     *
-     * @return static
      */
     public static function courseCapacityFull(): static
     {
@@ -223,8 +185,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for course prerequisites not met.
-     *
-     * @return static
      */
     public static function coursePrerequisitesNotMet(): static
     {
@@ -233,8 +193,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for course not started.
-     *
-     * @return static
      */
     public static function courseNotStarted(): static
     {
@@ -243,8 +201,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for course already ended.
-     *
-     * @return static
      */
     public static function courseAlreadyEnded(): static
     {
@@ -253,8 +209,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for user not active.
-     *
-     * @return static
      */
     public static function userNotActive(): static
     {
@@ -263,8 +217,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for user suspended.
-     *
-     * @return static
      */
     public static function userSuspended(): static
     {
@@ -273,8 +225,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for user not eligible.
-     *
-     * @return static
      */
     public static function userNotEligible(): static
     {
@@ -283,8 +233,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for user already completed course.
-     *
-     * @return static
      */
     public static function userAlreadyCompletedCourse(): static
     {
@@ -293,8 +241,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for user has pending enrollment.
-     *
-     * @return static
      */
     public static function userHasPendingEnrollment(): static
     {
@@ -303,8 +249,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for course requires payment.
-     *
-     * @return static
      */
     public static function courseRequiresPayment(): static
     {
@@ -313,8 +257,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for invalid payment method.
-     *
-     * @return static
      */
     public static function invalidPaymentMethod(): static
     {
@@ -323,8 +265,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for payment failed.
-     *
-     * @return static
      */
     public static function paymentFailed(): static
     {
@@ -333,8 +273,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for insufficient funds.
-     *
-     * @return static
      */
     public static function insufficientFunds(): static
     {
@@ -343,8 +281,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for pricing not available.
-     *
-     * @return static
      */
     public static function pricingNotAvailable(): static
     {
@@ -353,8 +289,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment create failed.
-     *
-     * @return static
      */
     public static function enrollmentCreateFailed(): static
     {
@@ -363,8 +297,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment update failed.
-     *
-     * @return static
      */
     public static function enrollmentUpdateFailed(): static
     {
@@ -373,8 +305,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment delete failed.
-     *
-     * @return static
      */
     public static function enrollmentDeleteFailed(): static
     {
@@ -383,8 +313,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment activate failed.
-     *
-     * @return static
      */
     public static function enrollmentActivateFailed(): static
     {
@@ -393,8 +321,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment deactivate failed.
-     *
-     * @return static
      */
     public static function enrollmentDeactivateFailed(): static
     {
@@ -403,8 +329,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment complete failed.
-     *
-     * @return static
      */
     public static function enrollmentCompleteFailed(): static
     {
@@ -413,8 +337,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment cancel failed.
-     *
-     * @return static
      */
     public static function enrollmentCancelFailed(): static
     {
@@ -423,8 +345,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment suspend failed.
-     *
-     * @return static
      */
     public static function enrollmentSuspendFailed(): static
     {
@@ -433,8 +353,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment resume failed.
-     *
-     * @return static
      */
     public static function enrollmentResumeFailed(): static
     {
@@ -443,8 +361,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for bulk enrollment failed.
-     *
-     * @return static
      */
     public static function bulkEnrollmentFailed(): static
     {
@@ -453,8 +369,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for bulk enrollment partial success.
-     *
-     * @return static
      */
     public static function bulkEnrollmentPartialSuccess(): static
     {
@@ -463,8 +377,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for invalid bulk data.
-     *
-     * @return static
      */
     public static function invalidBulkData(): static
     {
@@ -473,8 +385,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for bulk operation not permitted.
-     *
-     * @return static
      */
     public static function bulkOperationNotPermitted(): static
     {
@@ -483,8 +393,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for too many enrollments.
-     *
-     * @return static
      */
     public static function tooManyEnrollments(): static
     {
@@ -493,8 +401,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for progress update failed.
-     *
-     * @return static
      */
     public static function progressUpdateFailed(): static
     {
@@ -503,8 +409,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for invalid progress value.
-     *
-     * @return static
      */
     public static function invalidProgressValue(): static
     {
@@ -513,8 +417,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for progress cannot decrease.
-     *
-     * @return static
      */
     public static function progressCannotDecrease(): static
     {
@@ -523,8 +425,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for completion requirements not met.
-     *
-     * @return static
      */
     public static function completionRequirementsNotMet(): static
     {
@@ -533,8 +433,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for certificate generation failed.
-     *
-     * @return static
      */
     public static function certificateGenerationFailed(): static
     {
@@ -543,8 +441,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment statistics not available.
-     *
-     * @return static
      */
     public static function enrollmentStatisticsNotAvailable(): static
     {
@@ -553,8 +449,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for insufficient data for statistics.
-     *
-     * @return static
      */
     public static function insufficientDataForStatistics(): static
     {
@@ -563,8 +457,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for report generation failed.
-     *
-     * @return static
      */
     public static function reportGenerationFailed(): static
     {
@@ -573,8 +465,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment access denied.
-     *
-     * @return static
      */
     public static function enrollmentAccessDenied(): static
     {
@@ -583,8 +473,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for insufficient permissions.
-     *
-     * @return static
      */
     public static function insufficientPermissions(): static
     {
@@ -593,8 +481,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for instructor cannot enroll.
-     *
-     * @return static
      */
     public static function instructorCannotEnroll(): static
     {
@@ -603,8 +489,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for admin enrollment required.
-     *
-     * @return static
      */
     public static function adminEnrollmentRequired(): static
     {
@@ -613,8 +497,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for waitlist full.
-     *
-     * @return static
      */
     public static function waitlistFull(): static
     {
@@ -623,8 +505,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for already on waitlist.
-     *
-     * @return static
      */
     public static function alreadyOnWaitlist(): static
     {
@@ -633,8 +513,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for not on waitlist.
-     *
-     * @return static
      */
     public static function notOnWaitlist(): static
     {
@@ -643,8 +521,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for waitlist join failed.
-     *
-     * @return static
      */
     public static function waitlistJoinFailed(): static
     {
@@ -653,8 +529,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for waitlist remove failed.
-     *
-     * @return static
      */
     public static function waitlistRemoveFailed(): static
     {
@@ -663,8 +537,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment notification failed.
-     *
-     * @return static
      */
     public static function enrollmentNotificationFailed(): static
     {
@@ -673,8 +545,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for welcome email failed.
-     *
-     * @return static
      */
     public static function welcomeEmailFailed(): static
     {
@@ -683,8 +553,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for completion notification failed.
-     *
-     * @return static
      */
     public static function completionNotificationFailed(): static
     {
@@ -693,8 +561,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment data corrupted.
-     *
-     * @return static
      */
     public static function enrollmentDataCorrupted(): static
     {
@@ -703,8 +569,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment history missing.
-     *
-     * @return static
      */
     public static function enrollmentHistoryMissing(): static
     {
@@ -713,8 +577,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for duplicate enrollment detected.
-     *
-     * @return static
      */
     public static function duplicateEnrollmentDetected(): static
     {
@@ -723,8 +585,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for enrollment transfer failed.
-     *
-     * @return static
      */
     public static function enrollmentTransferFailed(): static
     {
@@ -733,8 +593,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for invalid transfer target.
-     *
-     * @return static
      */
     public static function invalidTransferTarget(): static
     {
@@ -743,8 +601,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for transfer not permitted.
-     *
-     * @return static
      */
     public static function transferNotPermitted(): static
     {
@@ -753,8 +609,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for refund not available.
-     *
-     * @return static
      */
     public static function refundNotAvailable(): static
     {
@@ -763,8 +617,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for refund period expired.
-     *
-     * @return static
      */
     public static function refundPeriodExpired(): static
     {
@@ -773,8 +625,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for refund processing failed.
-     *
-     * @return static
      */
     public static function refundProcessingFailed(): static
     {
@@ -783,8 +633,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for cancellation not permitted.
-     *
-     * @return static
      */
     public static function cancellationNotPermitted(): static
     {
@@ -793,8 +641,6 @@ class EnrollmentServiceException extends ServiceException
 
     /**
      * Create exception for cancellation deadline passed.
-     *
-     * @return static
      */
     public static function cancellationDeadlinePassed(): static
     {

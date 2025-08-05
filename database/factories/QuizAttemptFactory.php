@@ -49,7 +49,7 @@ class QuizAttemptFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $completedAt = $this->faker->dateTimeBetween($attributes['started_at'], 'now');
-            
+
             return [
                 'score' => $this->faker->randomFloat(2, 0, 100),
                 'status' => 'completed',
@@ -77,7 +77,7 @@ class QuizAttemptFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $completedAt = $this->faker->dateTimeBetween($attributes['started_at'], 'now');
-            
+
             return [
                 'score' => null,
                 'status' => 'submitted',

@@ -4,9 +4,9 @@ namespace App\Exceptions\Services;
 
 /**
  * Exception for quiz service-related errors.
- * 
+ *
  * This exception class provides localized error messages specific to quiz operations.
- * 
+ *
  * @throws QuizServiceException When quiz service operations fail
  */
 class QuizServiceException extends ServiceException
@@ -14,22 +14,19 @@ class QuizServiceException extends ServiceException
     /**
      * Create exception for quiz not found.
      *
-     * @param string|null $id The quiz ID
-     * @return static
+     * @param  string|null  $id  The quiz ID
      */
     public static function quizNotFound(?string $id = null): static
     {
-        $key = $id 
+        $key = $id
             ? 'exceptions_services_quizservice.quiz_not_found_with_id'
             : 'exceptions_services_quizservice.quiz_not_found';
-        
+
         return new static($key, ['id' => $id]);
     }
 
     /**
      * Create exception for quiz title required.
-     *
-     * @return static
      */
     public static function quizTitleRequired(): static
     {
@@ -38,8 +35,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz title too long.
-     *
-     * @return static
      */
     public static function quizTitleTooLong(): static
     {
@@ -48,8 +43,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz description required.
-     *
-     * @return static
      */
     public static function quizDescriptionRequired(): static
     {
@@ -58,8 +51,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for invalid time limit.
-     *
-     * @return static
      */
     public static function invalidTimeLimit(): static
     {
@@ -68,8 +59,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for invalid max attempts.
-     *
-     * @return static
      */
     public static function invalidMaxAttempts(): static
     {
@@ -78,8 +67,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for invalid passing score.
-     *
-     * @return static
      */
     public static function invalidPassingScore(): static
     {
@@ -88,8 +75,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz not published.
-     *
-     * @return static
      */
     public static function quizNotPublished(): static
     {
@@ -98,8 +83,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz already published.
-     *
-     * @return static
      */
     public static function quizAlreadyPublished(): static
     {
@@ -108,8 +91,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz not active.
-     *
-     * @return static
      */
     public static function quizNotActive(): static
     {
@@ -118,8 +99,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz expired.
-     *
-     * @return static
      */
     public static function quizExpired(): static
     {
@@ -128,8 +107,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz not started.
-     *
-     * @return static
      */
     public static function quizNotStarted(): static
     {
@@ -138,8 +115,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz attempt not found.
-     *
-     * @return static
      */
     public static function quizAttemptNotFound(): static
     {
@@ -148,8 +123,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz attempt already exists.
-     *
-     * @return static
      */
     public static function quizAttemptAlreadyExists(): static
     {
@@ -158,8 +131,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz attempt already completed.
-     *
-     * @return static
      */
     public static function quizAttemptAlreadyCompleted(): static
     {
@@ -168,8 +139,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz attempt already submitted.
-     *
-     * @return static
      */
     public static function quizAttemptAlreadySubmitted(): static
     {
@@ -178,8 +147,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz attempt time expired.
-     *
-     * @return static
      */
     public static function quizAttemptTimeExpired(): static
     {
@@ -188,8 +155,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for max attempts reached.
-     *
-     * @return static
      */
     public static function maxAttemptsReached(): static
     {
@@ -198,8 +163,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz attempt not started.
-     *
-     * @return static
      */
     public static function quizAttemptNotStarted(): static
     {
@@ -208,8 +171,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz attempt in progress.
-     *
-     * @return static
      */
     public static function quizAttemptInProgress(): static
     {
@@ -218,8 +179,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz access denied.
-     *
-     * @return static
      */
     public static function quizAccessDenied(): static
     {
@@ -228,8 +187,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for user not enrolled.
-     *
-     * @return static
      */
     public static function userNotEnrolled(): static
     {
@@ -238,8 +195,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for prerequisites not met.
-     *
-     * @return static
      */
     public static function prerequisitesNotMet(): static
     {
@@ -248,8 +203,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz not available for user.
-     *
-     * @return static
      */
     public static function quizNotAvailableForUser(): static
     {
@@ -258,8 +211,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz has no questions.
-     *
-     * @return static
      */
     public static function quizHasNoQuestions(): static
     {
@@ -268,8 +219,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz question not found.
-     *
-     * @return static
      */
     public static function quizQuestionNotFound(): static
     {
@@ -278,8 +227,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for answer required.
-     *
-     * @return static
      */
     public static function answerRequired(): static
     {
@@ -288,8 +235,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for invalid answer format.
-     *
-     * @return static
      */
     public static function invalidAnswerFormat(): static
     {
@@ -298,8 +243,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for answer out of range.
-     *
-     * @return static
      */
     public static function answerOutOfRange(): static
     {
@@ -308,8 +251,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz start failed.
-     *
-     * @return static
      */
     public static function quizStartFailed(): static
     {
@@ -318,8 +259,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz submit failed.
-     *
-     * @return static
      */
     public static function quizSubmitFailed(): static
     {
@@ -328,8 +267,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for save answer failed.
-     *
-     * @return static
      */
     public static function saveAnswerFailed(): static
     {
@@ -338,8 +275,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for calculate score failed.
-     *
-     * @return static
      */
     public static function calculateScoreFailed(): static
     {
@@ -348,8 +283,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for generate report failed.
-     *
-     * @return static
      */
     public static function generateReportFailed(): static
     {
@@ -358,8 +291,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for grading failed.
-     *
-     * @return static
      */
     public static function gradingFailed(): static
     {
@@ -368,8 +299,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for auto grading not available.
-     *
-     * @return static
      */
     public static function autoGradingNotAvailable(): static
     {
@@ -378,8 +307,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for manual grading required.
-     *
-     * @return static
      */
     public static function manualGradingRequired(): static
     {
@@ -388,8 +315,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for score calculation error.
-     *
-     * @return static
      */
     public static function scoreCalculationError(): static
     {
@@ -398,8 +323,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for statistics not available.
-     *
-     * @return static
      */
     public static function statisticsNotAvailable(): static
     {
@@ -408,8 +331,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for insufficient data for statistics.
-     *
-     * @return static
      */
     public static function insufficientDataForStatistics(): static
     {
@@ -418,8 +339,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for invalid configuration.
-     *
-     * @return static
      */
     public static function invalidConfiguration(): static
     {
@@ -428,8 +347,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for randomization failed.
-     *
-     * @return static
      */
     public static function randomizationFailed(): static
     {
@@ -438,8 +355,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for time limit exceeded.
-     *
-     * @return static
      */
     public static function timeLimitExceeded(): static
     {
@@ -448,8 +363,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for cannot delete published quiz.
-     *
-     * @return static
      */
     public static function cannotDeletePublished(): static
     {
@@ -458,8 +371,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for cannot delete quiz with attempts.
-     *
-     * @return static
      */
     public static function cannotDeleteWithAttempts(): static
     {
@@ -468,8 +379,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for delete failed.
-     *
-     * @return static
      */
     public static function deleteFailed(): static
     {
@@ -478,8 +387,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for cannot update published quiz.
-     *
-     * @return static
      */
     public static function cannotUpdatePublished(): static
     {
@@ -488,8 +395,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for update failed.
-     *
-     * @return static
      */
     public static function updateFailed(): static
     {
@@ -498,8 +403,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for create failed.
-     *
-     * @return static
      */
     public static function createFailed(): static
     {
@@ -508,8 +411,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for duplicate title.
-     *
-     * @return static
      */
     public static function duplicateTitle(): static
     {
@@ -518,8 +419,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for course not found.
-     *
-     * @return static
      */
     public static function courseNotFound(): static
     {
@@ -528,8 +427,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for course not active.
-     *
-     * @return static
      */
     public static function courseNotActive(): static
     {
@@ -538,8 +435,6 @@ class QuizServiceException extends ServiceException
 
     /**
      * Create exception for quiz not belongs to course.
-     *
-     * @return static
      */
     public static function quizNotBelongsToCourse(): static
     {

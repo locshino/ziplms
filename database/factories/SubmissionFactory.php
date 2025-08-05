@@ -28,7 +28,7 @@ class SubmissionFactory extends Factory
     {
         $submittedAt = $this->faker->dateTimeBetween('-1 month', 'now');
         $isGraded = $this->faker->boolean(70);
-        
+
         return [
             'assignment_id' => Assignment::factory(),
             'student_id' => User::factory(),

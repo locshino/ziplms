@@ -4,7 +4,6 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
 
 class RepositoryRegisterProvider extends ServiceProvider
 {
@@ -26,7 +25,7 @@ class RepositoryRegisterProvider extends ServiceProvider
         // Path to the Eloquent repositories
         $repositoryPath = app_path('Repositories/Eloquent');
 
-        if (!File::isDirectory($repositoryPath)) {
+        if (! File::isDirectory($repositoryPath)) {
             return;
         }
 
@@ -51,7 +50,6 @@ class RepositoryRegisterProvider extends ServiceProvider
             }
         }
     }
-
 
     /**
      * Bootstrap services.
