@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -11,48 +12,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Seed in proper order to handle dependencies
         $this->call([
-            // --- Roles & Permissions ---
             RoleSeeder::class,
             PermissionSeeder::class,
-
-            // --- Location ---
-            LocationSeeder::class,
-
-            // --- Core Entities ---
-            OrganizationSeeder::class,
             UserSeeder::class,
-
-            // --- Class & Course Structure ---
-            ClassesMajorSeeder::class,
-            UserClassMajorEnrollmentSeeder::class,
             CourseSeeder::class,
-            CourseEnrollmentSeeder::class,
-            CourseStaffAssignmentSeeder::class,
-            LectureSeeder::class,
-            LectureMaterialSeeder::class,
-
-            // --- Questions & Assessments ---
-            QuestionSeeder::class, // Handles QuestionChoiceSeeder internally
+            EnrollmentSeeder::class,
             AssignmentSeeder::class,
-            AssignmentSubmissionSeeder::class,
-            AssignmentGradeSeeder::class,
-            ExamSeeder::class,
-            ExamQuestionSeeder::class,
-            ExamAttemptSeeder::class,
-            ExamAnswerSeeder::class,
-
-            // --- Scheduling & Events ---
-            ScheduleSeeder::class,
-            AttendanceSeeder::class,
-            EventSeeder::class,
-
-            // --- Communication ---
-            ContactMessageSeeder::class,
-
-            // --- Gamification ---
+            QuizSeeder::class,
             BadgeSeeder::class,
-            UserBadgeSeeder::class,
         ]);
     }
 }

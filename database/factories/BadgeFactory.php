@@ -10,17 +10,54 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class BadgeFactory extends Factory
 {
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
     protected $model = Badge::class;
 
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
-        $vietnameseWord = fake()->word; // Generate one Vietnamese-like word for consistency if needed, or use separate fakes
-        $englishWord = fake()->word;
-
         return [
-            'name' => ['vi' => 'Huy hiệu '.$vietnameseWord, 'en' => 'Badge of '.$englishWord],
-            'description' => ['vi' => fake()->sentence, 'en' => fake()->sentence],
-            'criteria_description' => ['vi' => 'Hoàn thành xuất sắc nhiệm vụ.', 'en' => 'For excellent completion of tasks.'],
+            'title' => $this->faker->words(3, true),
+            'description' => $this->faker->sentence(),
+            'award_status' => $this->faker->randomElement(['automatic', 'manual', 'conditional']),
         ];
+    }
+
+    /**
+     * Indicate that the badge is automatically awarded.
+     */
+    public function automatic(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'award_status' => 'automatic',
+        ]);
+    }
+
+    /**
+     * Indicate that the badge is manually awarded.
+     */
+    public function manual(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'award_status' => 'manual',
+        ]);
+    }
+
+    /**
+     * Indicate that the badge is conditionally awarded.
+     */
+    public function conditional(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'award_status' => 'conditional',
+        ]);
     }
 }
