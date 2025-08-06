@@ -60,15 +60,6 @@ return [
             'report' => false,
         ],
 
-        'backups' => [
-            'driver' => 'local',
-            'root' => base_path(env('BACKUP_DIRECTORY', 'storage/app/backups')), // A dedicated folder for backups
-        ],
-
-        'temporary' => [
-            'driver' => 'local',
-            'root' => storage_path('app/temporary'),
-        ],
     ],
 
     /*
