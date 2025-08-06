@@ -1,91 +1,35 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "locshino/ziplms",
+    "name": "laravel/laravel",
     "type": "project",
-    "description": "Ziplms - A Laravel-based Learning Management System",
-    "keywords": [
-        "laravel",
-        "lms",
-        "learning-management-system",
-        "education",
-        "filament"
-    ],
+    "description": "The skeleton application for the Laravel framework.",
+    "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "15web/filament-tree": "^1.0",
-        "afsakar/filament-leaflet-map-picker": "^1.3",
-        "afsakar/filament-otp-login": "^1.4",
-        "andrefelipe18/filament-webpush": "^1.1",
+        "andrefelipe18/filament-webpush": "^1.2",
         "asmit/resized-column": "^1.0",
-        "avexsoft/filament-purl": "dev-main",
-        "awcodes/filament-tiptap-editor": "^3.5",
-        "awcodes/light-switch": "^1.0",
-        "awcodes/overlook": "^2.2",
-        "bezhansalleh/filament-language-switch": "^3.1",
         "bezhansalleh/filament-shield": "^3.3",
-        "charrafimed/global-search-modal": "^3.7",
-        "croustibat/filament-jobs-monitor": "^2.6",
-        "dvarilek/filament-table-select": "^2.0",
-        "eightynine/filament-excel-import": "^3.1",
-        "erag/laravel-pwa": "^1.7",
-        "fibtegis/filament-infinite-scroll": "^1.0",
-        "filament/filament": "^3.3",
-        "filament/spatie-laravel-media-library-plugin": "^3.3",
-        "filament/spatie-laravel-settings-plugin": "^3.3",
-        "filament/spatie-laravel-tags-plugin": "^3.3",
-        "filament/spatie-laravel-translatable-plugin": "^3.3",
-        "gboquizosanchez/filament-log-viewer": "^1.2",
-        "guava/filament-clusters": "^1.5",
-        "hasnayeen/themes": "^3.0",
-        "jaysontemporas/translation-overrides": "^1.0",
+        "dvarilek/filament-table-select": "2.0.5",
+        "filament/filament": "3.3",
+        "hayderhatem/filament-excel-import": "^1.0",
         "jeffgreco13/filament-breezy": "^2.6",
         "laravel/framework": "^12.0",
-        "laravel/octane": "^2.9",
+        "laravel/octane": "^2.12",
         "laravel/reverb": "^1.0",
         "laravel/tinker": "^2.10.1",
-        "livewire/flux": "*",
-        "livewire/livewire": "^3.6",
-        "livewire/volt": "^1.7",
-        "maatwebsite/excel": "^3.1",
+        "leandrocfe/filament-apex-charts": "*",
         "marcelweidum/filament-expiration-notice": "^1.0",
-        "marjose123/filament-lockscreen": "^2.6",
         "martinpetricko/filament-restore-or-create": "^1.0",
-        "nben/filament-record-nav": "^1.0",
-        "outerweb/filament-translatable-fields": "^2.1",
-        "predis/predis": "^3.0",
-        "pxlrbt/filament-environment-indicator": "^2.1",
+        "promethys/revive": "^1.2",
         "pxlrbt/filament-excel": "^2.4",
-        "relaticle/flowforge": "^0.2.1",
-        "rmsramos/activitylog": "^1.0",
-        "shuvroroy/filament-spatie-laravel-backup": "^2.2",
-        "shuvroroy/filament-spatie-laravel-health": "^2.3",
-        "spatie/laravel-activitylog": "^4.10",
-        "spatie/laravel-backup": "^9.3",
-        "spatie/laravel-data": "^4.15",
-        "spatie/laravel-health": "^1.34",
-        "spatie/laravel-medialibrary": "^11.13",
-        "spatie/laravel-model-states": "^2.11",
-        "spatie/laravel-one-time-passwords": "^1.0",
-        "spatie/laravel-permission": "^6.19",
-        "spatie/laravel-settings": "^3.4",
-        "spatie/laravel-tags": "^4.10",
-        "spatie/laravel-translatable": "^6.11",
-        "stechstudio/filament-impersonate": "^3.16",
-        "swisnl/filament-activitylog": "^1.0",
-        "tomatophp/filament-pwa": "^1.0",
-        "tomatophp/filament-settings-hub": "^1.0",
-        "visualbuilder/email-templates": "^3.1",
-        "zvizvi/relation-manager-repeater": "^1.0"
+        "spatie/laravel-permission": "^6.21"
     },
     "require-dev": {
-        "amnuts/opcache-gui": "*",
-        "barryvdh/laravel-ide-helper": "^3.5",
         "fakerphp/faker": "^1.23",
         "laravel/pail": "^1.2.2",
-        "laravel/pint": "^1.22",
-        "laravel/sail": "^1.43",
-        "laravel/telescope": "^5.9",
+        "laravel/pint": "^1.13",
+        "laravel/sail": "^1.41",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
         "pestphp/pest": "^3.8",
@@ -122,13 +66,7 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "pnpm run task start-dev"
-        ],
-        "optimize": [
-            "@php artisan optimize:clear",
-            "@php artisan filament:optimize-clear",
-            "@php artisan optimize",
-            "@php artisan filament:optimize"
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"npm run dev\" --names='server,queue,vite'"
         ],
         "test": [
             "@php artisan config:clear --ansi",
@@ -137,9 +75,7 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": [
-                "laravel/telescope"
-            ]
+            "dont-discover": []
         }
     },
     "config": {
@@ -151,6 +87,6 @@
             "php-http/discovery": true
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true
 }

@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Enums\RoleEnum;
 use App\Models\Role;
 use Illuminate\Database\Seeder;
 
@@ -13,10 +12,34 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create roles from RoleEnum
-        foreach (RoleEnum::cases() as $role) {
-            Role::findOrCreate($role->value, 'web');
+        $roles = [
+            [
+                'name' => 'super_admin',
+                'guard_name' => 'web',
+                'is_system' => true,
+            ],
+            [
+                'name' => 'admin',
+                'guard_name' => 'web',
+                'is_system' => true,
+            ],
+            [
+                'name' => 'teacher',
+                'guard_name' => 'web',
+                'is_system' => true,
+            ],
+            [
+                'name' => 'student',
+                'guard_name' => 'web',
+                'is_system' => true,
+            ],
+        ];
+
+        foreach ($roles as $roleData) {
+            Role::firstOrCreate(
+                ['name' => $roleData['name'], 'guard_name' => $roleData['guard_name']],
+                $roleData
+            );
         }
-        $this->command->info('Roles created successfully!');
     }
 }

@@ -12,17 +12,44 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class UserBadgeFactory extends Factory
 {
-    use Concerns\HasAssignsRandomOrNewModel;
-
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
     protected $model = UserBadge::class;
 
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
-        // Để trống vì user_id và badge_id sẽ được cung cấp bởi Seeder.
         return [
-            'user_id' => $this->assignRandomOrNewModel(User::class),
-            'badge_id' => $this->assignRandomOrNewModel(Badge::class),
-            'awarded_at' => fake()->dateTimeBetween('-1 year', 'now'),
+            'user_id' => User::factory(),
+            'badge_id' => Badge::factory(),
+            'awarded_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
         ];
+    }
+
+    /**
+     * Indicate that the badge was recently awarded.
+     */
+    public function recent(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'awarded_at' => $this->faker->dateTimeBetween('-1 week', 'now'),
+        ]);
+    }
+
+    /**
+     * Indicate that the badge was awarded long ago.
+     */
+    public function old(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'awarded_at' => $this->faker->dateTimeBetween('-2 years', '-6 months'),
+        ]);
     }
 }
