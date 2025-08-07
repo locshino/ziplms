@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use Filament\Http\Middleware\Authenticate;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -18,6 +19,12 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Promethys\Revive\RevivePlugin;
+use Afsakar\FilamentOtpLogin\FilamentOtpLoginPlugin;
+use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
+use Jeffgreco13\FilamentBreezy\BreezyCore;
+use FilamentWebpush\FilamentWebpushPlugin;
+use Asmit\ResizedColumn\ResizedColumnPlugin;
+use Awcodes\LightSwitch\LightSwitchPlugin;
 
 class AppPanelProvider extends PanelProvider
 {
@@ -52,12 +59,32 @@ class AppPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
+            ->plugins([
+                FilamentShieldPlugin::make(),
+            ])
             ->plugins(plugins: [
+                // FilamentOtpLoginPlugin::make(),
+                // GlobalSearchModalPlugin::make()
+                // ->closeButton(enabled: true)
+                // ->localStorageMaxItemsAllowed(50),
 
+                FilamentShieldPlugin::make(),
+
+                BreezyCore::make()
+                    // ->customMyProfilePage(AccountSettingsPage::class)
+                    ->enableTwoFactorAuthentication()
+                    ->myProfile(),
                 RevivePlugin::make(),
+                FilamentWebpushPlugin::make(),
+
+                ResizedColumnPlugin::make()
+                    ->preserveOnDB(),
+                LightSwitchPlugin::make(),
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->sidebarCollapsibleOnDesktop()
+            ->databaseNotifications();
     }
 }
