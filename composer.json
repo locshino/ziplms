@@ -3,15 +3,25 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "afsakar/filament-otp-login": "^1.4",
         "andrefelipe18/filament-webpush": "^1.2",
         "asmit/resized-column": "^1.0",
+        "awcodes/light-switch": "^1.0",
+        "bezhansalleh/filament-language-switch": "^3.1",
         "bezhansalleh/filament-shield": "^3.3",
+        "charrafimed/global-search-modal": "^3.7",
         "dvarilek/filament-table-select": "2.0.5",
         "filament/filament": "3.3",
+        "filament/notifications": "3.3",
+        "filament/spatie-laravel-media-library-plugin": "^3.3",
+        "filament/spatie-laravel-tags-plugin": "^3.3",
         "hayderhatem/filament-excel-import": "^1.0",
         "jeffgreco13/filament-breezy": "^2.6",
         "laravel/framework": "^12.0",
@@ -66,7 +76,7 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "npx concurrently -c \"#93c5fd,#c4b5fd,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"npm run dev\" --names='server,queue,vite'"
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"npm run dev\" \"php artisan reverb:start --debug\" --names='server,queue,vite,reverb'"
         ],
         "test": [
             "@php artisan config:clear --ansi",
