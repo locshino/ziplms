@@ -3,8 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\QuizResource\Pages;
+use App\Filament\Resources\QuizResource\RelationManagers;
 use App\Models\Quiz;
-use App\Models\Course;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -12,65 +12,56 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use HayderHatem\FilamentExcelImport\Actions\Concerns\CanImportExcelRecords;
+use App\Filament\Imports\QuizImporter;
 
 class QuizResource extends Resource
 {
+    use CanImportExcelRecords;
     protected static ?string $model = Quiz::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
-
-    protected static ?string $navigationLabel = 'Quiz';
-
-    protected static ?int $navigationSort = 3;
+    protected static ?string $navigationIcon = 'heroicon-o-question-mark-circle';
+    
+    protected static ?string $navigationGroup = 'Quản lý';
+    
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\Select::make('course_id')
-                    ->label('Khóa học')
-                    ->options(Course::all()->pluck('title', 'id'))
-                    ->required()
-                    ->searchable(),
-
+                    ->label(__('quiz_resource.fields.course_id'))
+                    ->relationship('course', 'title')
+                    ->required(),
                 Forms\Components\TextInput::make('title')
-                    ->label('Tiêu đề')
-                    ->required()
-                    ->maxLength(255),
-
+                    ->label(__('quiz_resource.fields.title'))
+                    ->required(),
                 Forms\Components\Textarea::make('description')
-                    ->label('Mô tả')
-                    ->rows(3),
-
+                    ->label(__('quiz_resource.fields.description'))
+                    ->columnSpanFull(),
                 Forms\Components\TextInput::make('max_points')
-                    ->label('Điểm tối đa')
-                    ->numeric()
-                    ->default(100.00)
-                    ->step(0.01)
-                    ->required(),
-
-                Forms\Components\TextInput::make('max_attempts')
-                    ->label('Số lần làm tối đa')
-                    ->numeric()
-                    ->minValue(1),
-
-                Forms\Components\Toggle::make('is_single_session')
-                    ->label('Phiên làm bài duy nhất')
-                    ->default(false),
-
-                Forms\Components\TextInput::make('time_limit_minutes')
-                    ->label('Thời gian làm bài (phút)')
-                    ->numeric()
-                    ->minValue(1),
-
-                Forms\Components\DateTimePicker::make('start_at')
-                    ->label('Thời gian bắt đầu')
-                    ->required(),
-
-                Forms\Components\DateTimePicker::make('end_at')
-                    ->label('Thời gian kết thúc')
+                    ->label(__('quiz_resource.fields.max_points'))
                     ->required()
-                    ->after('start_at'),
+                    ->numeric()
+                    ->default(100),
+                Forms\Components\TextInput::make('max_attempts')
+                    ->label(__('quiz_resource.fields.max_attempts'))
+                    ->numeric(),
+                Forms\Components\Toggle::make('is_single_session')
+                    ->label(__('quiz_resource.fields.is_single_session'))
+                    ->required(),
+                Forms\Components\TextInput::make('time_limit_minutes')
+                    ->label(__('quiz_resource.fields.time_limit_minutes'))
+                    ->numeric(),
+                Forms\Components\DateTimePicker::make('start_at')
+                    ->label(__('quiz_resource.fields.start_at'))
+                    ->required(),
+                Forms\Components\DateTimePicker::make('end_at')
+                    ->label(__('quiz_resource.fields.end_at'))
+                    ->required(),
             ]);
     }
 
@@ -78,94 +69,72 @@ class QuizResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('id')
+                    ->label(__('quiz_resource.columns.id'))
+                    ->searchable()
+                    ->copyable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('course.title')
-                    ->label('Khóa học')
-                    ->sortable()
+                    ->label(__('quiz_resource.columns.course_title'))
                     ->searchable(),
-
                 Tables\Columns\TextColumn::make('title')
-                    ->label('Tiêu đề')
-                    ->sortable()
+                    ->label(__('quiz_resource.columns.title'))
                     ->searchable(),
-
                 Tables\Columns\TextColumn::make('max_points')
-                    ->label('Điểm tối đa')
+                    ->label(__('quiz_resource.columns.max_points'))
+                    ->numeric()
                     ->sortable(),
-
                 Tables\Columns\TextColumn::make('max_attempts')
-                    ->label('Số lần làm')
+                    ->label(__('quiz_resource.columns.max_attempts'))
+                    ->numeric()
                     ->sortable(),
-
                 Tables\Columns\IconColumn::make('is_single_session')
-                    ->label('Phiên duy nhất')
+                    ->label(__('quiz_resource.columns.is_single_session'))
                     ->boolean(),
-
                 Tables\Columns\TextColumn::make('time_limit_minutes')
-                    ->label('Thời gian (phút)')
+                    ->label(__('quiz_resource.columns.time_limit_minutes'))
+                    ->numeric()
                     ->sortable(),
-
                 Tables\Columns\TextColumn::make('start_at')
-                    ->label('Bắt đầu')
-                    ->dateTime('d/m/Y H:i')
+                    ->label(__('quiz_resource.columns.start_at'))
+                    ->dateTime()
                     ->sortable(),
-
                 Tables\Columns\TextColumn::make('end_at')
-                    ->label('Kết thúc')
-                    ->dateTime('d/m/Y H:i')
+                    ->label(__('quiz_resource.columns.end_at'))
+                    ->dateTime()
                     ->sortable(),
-
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Tạo lúc')
-                    ->dateTime('d/m/Y H:i')
+                    ->label(__('quiz_resource.columns.created_at'))
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->label(__('quiz_resource.columns.updated_at'))
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('deleted_at')
+                    ->label(__('quiz_resource.columns.deleted_at'))
+                    ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\TrashedFilter::make(),
-
-                Tables\Filters\SelectFilter::make('course_id')
-                    ->label('Khóa học')
-                    ->options(Course::all()->pluck('title', 'id'))
-                    ->searchable(),
+                //
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
-                    ->visible(fn () => auth()->user()->hasRole(['super_admin', 'admin', 'manager', 'teacher'])),
-                Tables\Actions\DeleteAction::make()
-                    ->visible(fn () => auth()->user()->hasRole(['super_admin', 'admin', 'manager', 'teacher']))
-                    ->successNotification(
-                        \Filament\Notifications\Notification::make()
-                            ->success()
-                            ->title('Quiz đã được xóa')
-                            ->body('Quiz đã được xóa thành công.')
-                    ),
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
-                        ->visible(fn () => auth()->user()->hasRole(['super_admin', 'admin', 'manager', 'teacher']))
-                        ->successNotification(
-                            \Filament\Notifications\Notification::make()
-                                ->success()
-                                ->title('Quiz đã được xóa')
-                                ->body('Các quiz đã được xóa thành công.')
-                        ),
-                    Tables\Actions\ForceDeleteBulkAction::make()
-                        ->visible(fn () => auth()->user()->hasRole(['super_admin', 'admin', 'manager', 'teacher']))
-                        ->successNotification(
-                            \Filament\Notifications\Notification::make()
-                                ->success()
-                                ->title('Quiz đã được xóa vĩnh viễn')
-                                ->body('Các quiz đã được xóa vĩnh viễn.')
-                        ),
-                    Tables\Actions\RestoreBulkAction::make()
-                        ->visible(fn () => auth()->user()->hasRole(['super_admin', 'admin', 'manager', 'teacher']))
-                        ->successNotification(
-                            \Filament\Notifications\Notification::make()
-                                ->success()
-                                ->title('Quiz đã được khôi phục')
-                                ->body('Các quiz đã được khôi phục thành công.')
-                        ),
+                    Tables\Actions\DeleteBulkAction::make(),
+                    ExportBulkAction::make()->exports([
+                        ExcelExport::make()
+                            ->queue()
+                            ->askForFilename()
+                            ->askForWriterType(),
+                    ]),
                 ]),
             ]);
     }
@@ -182,53 +151,8 @@ class QuizResource extends Resource
         return [
             'index' => Pages\ListQuizzes::route('/'),
             'create' => Pages\CreateQuiz::route('/create'),
+            'view' => Pages\ViewQuiz::route('/{record}'),
             'edit' => Pages\EditQuiz::route('/{record}/edit'),
-            'manage-questions' => Pages\ManageQuestions::route('/{record}/questions'),
-            'view-attempts' => Pages\ViewAttempts::route('/{record}/attempts'),
-            'take-quiz' => Pages\TakeQuiz::route('/{record}/take'),
-            'quiz-result' => Pages\QuizResult::route('/{record}/result/{attempt}'),
         ];
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
-    }
-
-    public static function canAccess(): bool
-    {
-        $user = auth()->user();
-        
-        if (!$user) {
-            return false;
-        }
-
-        // Super admin có thể truy cập tất cả
-        if ($user->hasRole('super_admin')) {
-            return true;
-        }
-
-        // Kiểm tra quyền cơ bản
-        return $user->can('view_quizzes');
-    }
-
-    public static function canCreate(): bool
-    {
-        $user = auth()->user();
-        
-        if (!$user) {
-            return false;
-        }
-
-        // Super admin có thể tạo quiz
-        if ($user->hasRole('super_admin')) {
-            return true;
-        }
-
-        // Kiểm tra quyền tạo quiz
-        return $user->can('create_quizzes') && $user->hasRole(['admin', 'manager', 'teacher']);
     }
 }
