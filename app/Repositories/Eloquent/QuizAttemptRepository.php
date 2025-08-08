@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Enums\QuizAttemptStatus;
 use App\Models\QuizAttempt;
 use App\Repositories\Interfaces\QuizAttemptRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
@@ -84,9 +85,24 @@ class QuizAttemptRepository extends EloquentRepository implements QuizAttemptRep
      */
     public function getIncompleteAttempt(string $quizId, string $studentId): ?QuizAttempt
     {
-        return $this->model->where('quiz_id', $quizId)
+        return $this->model
+            ->where('quiz_id', $quizId)
             ->where('student_id', $studentId)
-            ->where('status', 'in_progress')
+            ->where('status', QuizAttemptStatus::IN_PROGRESS)
             ->first();
+    }
+
+    /**
+     * Get completed attempts for a quiz.
+     *
+     * @param string $quizId
+     * @return Collection
+     */
+    public function getCompletedAttemptsByQuiz(string $quizId): Collection
+    {
+        return $this->model
+            ->where('quiz_id', $quizId)
+            ->where('status', QuizAttemptStatus::COMPLETED)
+            ->get();
     }
 }

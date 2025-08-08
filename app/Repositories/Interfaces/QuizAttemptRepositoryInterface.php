@@ -50,4 +50,12 @@ interface QuizAttemptRepositoryInterface extends EloquentRepositoryInterface
      * @return QuizAttempt|null
      */
     public function getIncompleteAttempt(string $quizId, string $studentId): ?QuizAttempt;
+
+    /**
+     * Get completed attempts for a quiz.
+     *
+     * @param string $quizId
+     * @return Collection
+     */
+    public function getCompletedAttemptsByQuiz(string $quizId): Collection;
 }

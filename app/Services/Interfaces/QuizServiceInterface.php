@@ -77,4 +77,64 @@ interface QuizServiceInterface extends BaseServiceInterface
      * @return float
      */
     public function calculateScore(QuizAttempt $attempt): float;
+
+    /**
+     * Get quizzes for student (alias for getAvailableQuizzes).
+     *
+     * @param string $studentId
+     * @return Collection
+     */
+    public function getQuizzesForStudent(string $studentId): Collection;
+
+    /**
+     * Check if student can take quiz (alias for canTakeQuiz).
+     *
+     * @param string $quizId
+     * @param string $studentId
+     * @return bool
+     */
+    public function canStudentTakeQuiz(string $quizId, string $studentId): bool;
+
+    /**
+     * Check if quiz is currently active.
+     *
+     * @param string $quizId
+     * @return bool
+     */
+    public function isQuizActive(string $quizId): bool;
+
+    /**
+     * Get student attempts for a quiz.
+     *
+     * @param string $quizId
+     * @param string $studentId
+     * @return Collection
+     */
+    public function getStudentAttempts(string $quizId, string $studentId): Collection;
+
+    /**
+     * Get remaining attempts for student.
+     *
+     * @param string $quizId
+     * @param string $studentId
+     * @return int|null
+     */
+    public function getRemainingAttempts(string $quizId, string $studentId): ?int;
+
+    /**
+     * Get quiz performance statistics.
+     *
+     * @param string $quizId
+     * @return array
+     */
+    public function getQuizStats(string $quizId): array;
+
+    /**
+     * Get student's best score for a quiz.
+     *
+     * @param string $quizId
+     * @param string $studentId
+     * @return float|null
+     */
+    public function getStudentBestScore(string $quizId, string $studentId): ?float;
 }
