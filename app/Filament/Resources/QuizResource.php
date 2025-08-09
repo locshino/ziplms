@@ -10,22 +10,20 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use HayderHatem\FilamentExcelImport\Actions\Concerns\CanImportExcelRecords;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
-use HayderHatem\FilamentExcelImport\Actions\Concerns\CanImportExcelRecords;
-use App\Filament\Imports\QuizImporter;
 
 class QuizResource extends Resource
 {
     use CanImportExcelRecords;
+
     protected static ?string $model = Quiz::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-question-mark-circle';
-    
+
     protected static ?string $navigationGroup = 'Quản lý';
-    
+
     protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
@@ -35,34 +33,61 @@ class QuizResource extends Resource
                 Forms\Components\Select::make('course_id')
                     ->label(__('quiz_resource.fields.course_id'))
                     ->relationship('course', 'title')
-                    ->required(),
+                    ->required()
+                    ->searchable()
+                    ->preload(),
                 Forms\Components\TextInput::make('title')
                     ->label(__('quiz_resource.fields.title'))
-                    ->required(),
+                    ->required()
+                    ->maxLength(255)
+                    ->minLength(3)
+                    ->unique(ignoreRecord: true),
                 Forms\Components\Textarea::make('description')
                     ->label(__('quiz_resource.fields.description'))
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->maxLength(1000)
+                    ->rows(3),
                 Forms\Components\TextInput::make('max_points')
                     ->label(__('quiz_resource.fields.max_points'))
                     ->required()
                     ->numeric()
-                    ->default(100),
+                    ->default(100)
+                    ->minValue(1)
+                    ->maxValue(1000)
+                    ->step(0.01),
                 Forms\Components\TextInput::make('max_attempts')
                     ->label(__('quiz_resource.fields.max_attempts'))
-                    ->numeric(),
+                    ->numeric()
+                    ->minValue(1)
+                    ->maxValue(10)
+                    ->helperText('Để trống nếu không giới hạn số lần làm bài'),
                 Forms\Components\Toggle::make('is_single_session')
                     ->label(__('quiz_resource.fields.is_single_session'))
-                    ->required(),
+                    ->required()
+                    ->default(false)
+                    ->helperText('Bật nếu học viên phải hoàn thành quiz trong một phiên duy nhất'),
                 Forms\Components\TextInput::make('time_limit_minutes')
                     ->label(__('quiz_resource.fields.time_limit_minutes'))
-                    ->numeric(),
+                    ->numeric()
+                    ->minValue(1)
+                    ->maxValue(480)
+                    ->helperText('Thời gian tối đa để hoàn thành quiz (phút). Để trống nếu không giới hạn thời gian'),
                 Forms\Components\DateTimePicker::make('start_at')
                     ->label(__('quiz_resource.fields.start_at'))
-                    ->required(),
+                    ->required()
+                    ->native(false)
+                    ->displayFormat('d/m/Y H:i')
+                    ->afterOrEqual('today')
+                    ->helperText('Thời gian bắt đầu mở quiz cho học viên làm bài'),
                 Forms\Components\DateTimePicker::make('end_at')
                     ->label(__('quiz_resource.fields.end_at'))
-                    ->required(),
-            ]);
+                    ->required()
+                    ->native(false)
+                    ->displayFormat('d/m/Y H:i')
+                    ->after('start_at')
+                    ->helperText('Thời gian đóng quiz, sau thời điểm này học viên không thể làm bài'),
+            ])
+            ->columns(2);
     }
 
     public static function table(Table $table): Table
@@ -124,11 +149,29 @@ class QuizResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn (Quiz $record) => $record->attempts()->count() === 0)
+                    ->tooltip(fn (Quiz $record) => $record->attempts()->count() > 0 ? 'Không thể chỉnh sửa quiz đã có người làm bài' : null),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn (Quiz $record) => $record->attempts()->count() === 0)
+                    ->tooltip(fn (Quiz $record) => $record->attempts()->count() > 0 ? 'Không thể xóa quiz đã có người làm bài' : null),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->action(function ($records) {
+                            $recordsWithAttempts = $records->filter(fn ($record) => $record->attempts()->count() > 0);
+                            if ($recordsWithAttempts->count() > 0) {
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Không thể xóa')
+                                    ->body('Một số quiz đã có người làm bài và không thể xóa.')
+                                    ->danger()
+                                    ->send();
+
+                                return;
+                            }
+                            $records->each->delete();
+                        }),
                     ExportBulkAction::make()->exports([
                         ExcelExport::make()
                             ->queue()
@@ -142,7 +185,7 @@ class QuizResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\QuestionsRelationManager::class,
         ];
     }
 

@@ -42,6 +42,8 @@ return [
     'quiz_answer_required' => 'Câu trả lời là bắt buộc cho câu hỏi này.',
     'quiz_invalid_answer_format' => 'Định dạng câu trả lời không hợp lệ.',
     'quiz_answer_out_of_range' => 'Câu trả lời nằm ngoài phạm vi hợp lệ.',
+    'invalid_answer_submission' => 'Định dạng nộp bài không hợp lệ.',
+    'concurrent_attempt_not_allowed' => 'Không cho phép làm bài đồng thời.',
 
     // Quiz operation errors
     'quiz_start_failed' => 'Không thể bắt đầu làm bài.',
@@ -82,4 +84,7 @@ return [
     'quiz_course_not_found' => 'Không tìm thấy khóa học của bài kiểm tra.',
     'quiz_course_not_active' => 'Khóa học của bài kiểm tra không hoạt động.',
     'quiz_not_belongs_to_course' => 'Bài kiểm tra không thuộc khóa học được chỉ định.',
+
+    // Database errors
+    'database_error' => 'Lỗi cơ sở dữ liệu: :message',
 ];

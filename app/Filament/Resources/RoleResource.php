@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\RoleResource\Pages;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use BezhanSalleh\FilamentShield\Forms\ShieldSelectAllToggle;
-use App\Filament\Resources\RoleResource\Pages;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use App\Services\Interfaces\RoleServiceInterface;
 use App\Libs\Roles\RoleHelper;
@@ -15,6 +15,7 @@ use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use HayderHatem\FilamentExcelImport\Actions\Concerns\CanImportExcelRecords;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -27,8 +28,8 @@ use App\Filament\Resources\RoleResource\Concerns\HasShieldFormComponents;
 
 class RoleResource extends Resource implements HasShieldPermissions
 {
-    use HasShieldFormComponents;
     use CanImportExcelRecords;
+    use HasShieldFormComponents;
 
     protected static ?string $recordTitleAttribute = 'name';
 

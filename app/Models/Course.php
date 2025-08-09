@@ -12,7 +12,7 @@ use Promethys\Revive\Concerns\Recyclable;
 
 class Course extends Model
 {
-    use HasFactory, HasUuids, SoftDeletes, Recyclable;
+    use HasFactory, HasUuids, Recyclable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

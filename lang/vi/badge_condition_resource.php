@@ -10,7 +10,7 @@ return [
         'created_at' => 'Ngày tạo',
         'updated_at' => 'Ngày cập nhật',
         'deleted_at' => 'Ngày xóa',
-],
+    ],
     'fields' => [
         'condition_type' => 'Loại điều kiện',
         'condition_value' => 'Giá trị điều kiện',
@@ -19,7 +19,7 @@ return [
         'type' => 'Loại',
         'operator' => 'Toán tử',
         'parameters' => 'Tham số',
-],
+    ],
     'model' => [
         'singular' => 'Điều kiện huy hiệu',
         'plural' => 'Điều kiện huy hiệu',
