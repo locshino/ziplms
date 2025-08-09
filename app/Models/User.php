@@ -14,7 +14,7 @@ use Promethys\Revive\Concerns\Recyclable;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasUuids, Notifiable, SoftDeletes, Recyclable;
+    use HasFactory, HasUuids, Notifiable, Recyclable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

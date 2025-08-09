@@ -42,6 +42,8 @@ return [
     'quiz_answer_required' => 'Answer is required for this question.',
     'quiz_invalid_answer_format' => 'Invalid answer format.',
     'quiz_answer_out_of_range' => 'Answer is out of valid range.',
+    'invalid_answer_submission' => 'Invalid answer submission format.',
+    'concurrent_attempt_not_allowed' => 'Concurrent quiz attempts are not allowed.',
 
     // Quiz operation errors
     'quiz_start_failed' => 'Failed to start quiz attempt.',
@@ -82,4 +84,7 @@ return [
     'quiz_course_not_found' => 'Course for this quiz not found.',
     'quiz_course_not_active' => 'Course for this quiz is not active.',
     'quiz_not_belongs_to_course' => 'Quiz does not belong to the specified course.',
+
+    // Database errors
+    'database_error' => 'Database error: :message',
 ];

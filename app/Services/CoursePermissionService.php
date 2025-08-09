@@ -13,16 +13,16 @@ class CoursePermissionService
      */
     public function grantCoursePermission(User $manager, Course $course): bool
     {
-        if (!$manager->hasRole('manager')) {
+        if (! $manager->hasRole('manager')) {
             return false;
         }
 
-        $permissionName = 'manage-course-' . $course->id;
-        
+        $permissionName = 'manage-course-'.$course->id;
+
         // Create permission if it doesn't exist
         $permission = Permission::firstOrCreate([
             'name' => $permissionName,
-            'guard_name' => 'web'
+            'guard_name' => 'web',
         ]);
 
         // Give permission to manager
@@ -36,12 +36,12 @@ class CoursePermissionService
      */
     public function revokeCoursePermission(User $manager, Course $course): bool
     {
-        if (!$manager->hasRole('manager')) {
+        if (! $manager->hasRole('manager')) {
             return false;
         }
 
-        $permissionName = 'manage-course-' . $course->id;
-        
+        $permissionName = 'manage-course-'.$course->id;
+
         if ($manager->hasPermissionTo($permissionName)) {
             $manager->revokePermissionTo($permissionName);
         }
@@ -54,11 +54,11 @@ class CoursePermissionService
      */
     public function hasPermissionToManageCourse(User $manager, Course $course): bool
     {
-        if (!$manager->hasRole('manager')) {
+        if (! $manager->hasRole('manager')) {
             return false;
         }
 
-        return $manager->can('manage-course-' . $course->id);
+        return $manager->can('manage-course-'.$course->id);
     }
 
     /**
@@ -66,7 +66,7 @@ class CoursePermissionService
      */
     public function getManagerCourses(User $manager): array
     {
-        if (!$manager->hasRole('manager')) {
+        if (! $manager->hasRole('manager')) {
             return [];
         }
 
@@ -89,7 +89,7 @@ class CoursePermissionService
      */
     public function grantMultipleCoursePermissions(User $manager, array $courseIds): bool
     {
-        if (!$manager->hasRole('manager')) {
+        if (! $manager->hasRole('manager')) {
             return false;
         }
 
@@ -108,7 +108,7 @@ class CoursePermissionService
      */
     public function revokeAllCoursePermissions(User $manager): bool
     {
-        if (!$manager->hasRole('manager')) {
+        if (! $manager->hasRole('manager')) {
             return false;
         }
 
@@ -129,7 +129,7 @@ class CoursePermissionService
      */
     public function syncCoursePermissions(User $manager, array $courseIds): bool
     {
-        if (!$manager->hasRole('manager')) {
+        if (! $manager->hasRole('manager')) {
             return false;
         }
 

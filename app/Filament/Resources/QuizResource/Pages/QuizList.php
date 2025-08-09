@@ -3,21 +3,19 @@
 namespace App\Filament\Resources\QuizResource\Pages;
 
 use App\Filament\Resources\QuizResource;
+use App\Models\Course;
 use App\Models\Quiz;
-use App\Models\QuizAttempt;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Filament\Tables\Filters\SelectFilter;
-use App\Models\Course;
 
 class QuizList extends ListRecords
 {
-
     protected static string $resource = QuizResource::class;
 
     protected static string $view = 'filament.resources.quiz-resource.pages.quiz-list';
@@ -79,7 +77,7 @@ class QuizList extends ListRecords
                 TextColumn::make('time_limit_minutes')
                     ->label('Thời gian (phút)')
                     ->sortable()
-                    ->formatStateUsing(fn($state) => $state ? $state . ' phút' : 'Không giới hạn'),
+                    ->formatStateUsing(fn ($state) => $state ? $state.' phút' : 'Không giới hạn'),
 
                 BadgeColumn::make('status')
                     ->label('Trạng thái')
@@ -98,7 +96,7 @@ class QuizList extends ListRecords
                         'success' => 'active',
                         'danger' => 'ended',
                     ])
-                    ->formatStateUsing(fn($state) => match ($state) {
+                    ->formatStateUsing(fn ($state) => match ($state) {
                         'upcoming' => 'Sắp diễn ra',
                         'active' => 'Đang diễn ra',
                         'ended' => 'Đã kết thúc',
@@ -110,9 +108,10 @@ class QuizList extends ListRecords
                         if ($user->hasRole(['admin', 'manager', 'teacher'])) {
                             return $record->attempts()->count();
                         }
+
                         return $record->attempts()->where('student_id', $user->id)->count();
                     })
-                    ->visible(fn() => $user->hasRole(['admin', 'manager', 'teacher', 'student'])),
+                    ->visible(fn () => $user->hasRole(['admin', 'manager', 'teacher', 'student'])),
 
                 BadgeColumn::make('best_score')
                     ->label('Điểm cao nhất')
@@ -127,15 +126,15 @@ class QuizList extends ListRecords
                             ->orderBy('score', 'desc')
                             ->first();
 
-                        return $bestAttempt ? round($bestAttempt->score, 1) . '%' : 'Chưa làm';
+                        return $bestAttempt ? round($bestAttempt->score, 1).'%' : 'Chưa làm';
                     })
                     ->colors([
-                        'success' => fn($state) => str_contains($state, '%') && (float)str_replace('%', '', $state) >= 80,
-                        'warning' => fn($state) => str_contains($state, '%') && (float)str_replace('%', '', $state) >= 60,
-                        'danger' => fn($state) => str_contains($state, '%') && (float)str_replace('%', '', $state) < 60,
-                        'gray' => fn($state) => $state === 'Chưa làm',
+                        'success' => fn ($state) => str_contains($state, '%') && (float) str_replace('%', '', $state) >= 80,
+                        'warning' => fn ($state) => str_contains($state, '%') && (float) str_replace('%', '', $state) >= 60,
+                        'danger' => fn ($state) => str_contains($state, '%') && (float) str_replace('%', '', $state) < 60,
+                        'gray' => fn ($state) => $state === 'Chưa làm',
                     ])
-                    ->visible(fn() => $user->hasRole('student')),
+                    ->visible(fn () => $user->hasRole('student')),
 
                 TextColumn::make('start_at')
                     ->label('Bắt đầu')
@@ -171,11 +170,12 @@ class QuizList extends ListRecords
                         'ended' => 'Đã kết thúc',
                     ])
                     ->query(function (Builder $query, array $data) {
-                        if (!$data['value']) {
+                        if (! $data['value']) {
                             return $query;
                         }
 
                         $now = now();
+
                         return match ($data['value']) {
                             'upcoming' => $query->where('start_at', '>', $now),
                             'active' => $query->where('start_at', '<=', $now)->where('end_at', '>=', $now),
@@ -190,14 +190,14 @@ class QuizList extends ListRecords
                     ->label('Làm bài')
                     ->icon('heroicon-o-play')
                     ->color('success')
-                    ->url(fn(Quiz $record) => QuizResource::getUrl('take-quiz', ['record' => $record]))
+                    ->url(fn (Quiz $record) => QuizResource::getUrl('take-quiz', ['record' => $record]))
                     ->visible(function (Quiz $record) use ($user) {
                         // Super admin và admin có thể làm bất kỳ quiz nào
                         if ($user->hasRole(['super_admin', 'admin'])) {
                             return true;
                         }
 
-                        if (!$user->hasRole('student')) {
+                        if (! $user->hasRole('student')) {
                             return false;
                         }
 
@@ -226,7 +226,7 @@ class QuizList extends ListRecords
                     ->label('Tiếp tục')
                     ->icon('heroicon-o-arrow-right')
                     ->color('warning')
-                    ->url(fn(Quiz $record) => QuizResource::getUrl('take-quiz', ['record' => $record]))
+                    ->url(fn (Quiz $record) => QuizResource::getUrl('take-quiz', ['record' => $record]))
                     ->visible(function (Quiz $record) use ($user) {
                         // Super admin và admin có thể tiếp tục quiz
                         if ($user->hasRole(['super_admin', 'admin'])) {
@@ -234,10 +234,11 @@ class QuizList extends ListRecords
                                 ->where('student_id', $user->id)
                                 ->whereNull('completed_at')
                                 ->exists();
+
                             return $ongoingAttempt;
                         }
 
-                        if (!$user->hasRole('student')) {
+                        if (! $user->hasRole('student')) {
                             return false;
                         }
 
@@ -282,22 +283,22 @@ class QuizList extends ListRecords
                     ->label('Quản lý câu hỏi')
                     ->icon('heroicon-o-question-mark-circle')
                     ->color('info')
-                    ->url(fn(Quiz $record) => QuizResource::getUrl('manage-questions', ['record' => $record]))
-                    ->visible(fn() => $user->hasRole(['super_admin', 'admin', 'manager', 'teacher'])),
+                    ->url(fn (Quiz $record) => QuizResource::getUrl('manage-questions', ['record' => $record]))
+                    ->visible(fn () => $user->hasRole(['super_admin', 'admin', 'manager', 'teacher'])),
 
                 Action::make('view_attempts')
                     ->label('Xem kết quả')
                     ->icon('heroicon-o-chart-bar')
                     ->color('warning')
-                    ->url(fn(Quiz $record) => QuizResource::getUrl('view-attempts', ['record' => $record]))
-                    ->visible(fn() => $user->hasRole(['super_admin', 'admin', 'manager', 'teacher'])),
+                    ->url(fn (Quiz $record) => QuizResource::getUrl('view-attempts', ['record' => $record]))
+                    ->visible(fn () => $user->hasRole(['super_admin', 'admin', 'manager', 'teacher'])),
 
                 Action::make('edit')
                     ->label('Chỉnh sửa')
                     ->icon('heroicon-o-pencil')
                     ->color('primary')
-                    ->url(fn(Quiz $record) => QuizResource::getUrl('edit', ['record' => $record]))
-                    ->visible(fn() => $user->hasRole(['super_admin', 'admin', 'manager', 'teacher'])),
+                    ->url(fn (Quiz $record) => QuizResource::getUrl('edit', ['record' => $record]))
+                    ->visible(fn () => $user->hasRole(['super_admin', 'admin', 'manager', 'teacher'])),
             ])
             ->defaultSort('start_at', 'desc');
     }
@@ -315,7 +316,7 @@ class QuizList extends ListRecords
     {
         $user = auth()->user();
 
-        if (!$user) {
+        if (! $user) {
             return null;
         }
 
@@ -331,6 +332,7 @@ class QuizList extends ListRecords
             if ($now >= $record->start_at && $now <= $record->end_at) {
                 return QuizResource::getUrl('take-quiz', ['record' => $record]);
             }
+
             return null; // No URL if can't take quiz
         }
 

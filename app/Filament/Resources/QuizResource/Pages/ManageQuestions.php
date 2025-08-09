@@ -4,22 +4,18 @@ namespace App\Filament\Resources\QuizResource\Pages;
 
 use App\Filament\Resources\QuizResource;
 use App\Models\Question;
-use App\Models\AnswerChoice;
 use App\Services\Interfaces\QuestionServiceInterface;
 use Filament\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
-use Filament\Forms\Get;
+use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 
 class ManageQuestions extends Page implements HasForms, HasTable
@@ -32,6 +28,7 @@ class ManageQuestions extends Page implements HasForms, HasTable
     protected static string $view = 'filament.resources.quiz-resource.pages.manage-questions';
 
     public $quiz;
+
     protected ?QuestionServiceInterface $questionService = null;
 
     protected function getQuestionService(): QuestionServiceInterface
@@ -39,6 +36,7 @@ class ManageQuestions extends Page implements HasForms, HasTable
         if ($this->questionService === null) {
             $this->questionService = app(QuestionServiceInterface::class);
         }
+
         return $this->questionService;
     }
 
@@ -47,7 +45,7 @@ class ManageQuestions extends Page implements HasForms, HasTable
         $this->quiz = $this->getResource()::resolveRecordRouteBinding($record);
     }
 
-    public function getTitle(): string | Htmlable
+    public function getTitle(): string|Htmlable
     {
         return "Quản lý câu hỏi: {$this->quiz->title}";
     }
@@ -87,12 +85,12 @@ class ManageQuestions extends Page implements HasForms, HasTable
                         ->live()
                         ->afterStateUpdated(function ($state, Forms\Set $set, Get $get) {
                             // When switching from multiple to single choice, keep only the first correct answer
-                            if (!$state) {
+                            if (! $state) {
                                 $answerChoices = $get('answer_choices') ?? [];
                                 $firstCorrectFound = false;
 
                                 foreach ($answerChoices as $index => $choice) {
-                                    if (($choice['is_correct'] ?? false) && !$firstCorrectFound) {
+                                    if (($choice['is_correct'] ?? false) && ! $firstCorrectFound) {
                                         $firstCorrectFound = true;
                                     } elseif ($choice['is_correct'] ?? false) {
                                         $set("answer_choices.{$index}.is_correct", false);
@@ -115,7 +113,7 @@ class ManageQuestions extends Page implements HasForms, HasTable
                                 ->live()
                                 ->afterStateUpdated(function ($state, Forms\Set $set, Get $get, $component) {
                                     // Only apply single-choice logic if the toggle is being turned ON
-                                    if ($state && !$get('../../is_multiple_response')) {
+                                    if ($state && ! $get('../../is_multiple_response')) {
                                         $answerChoices = $get('../../answer_choices') ?? [];
                                         $currentPath = $component->getStatePath();
 
@@ -138,7 +136,7 @@ class ManageQuestions extends Page implements HasForms, HasTable
                         ->defaultItems(2)
                         ->addActionLabel('Thêm lựa chọn')
                         ->deleteAction(
-                            fn(\Filament\Forms\Components\Actions\Action $action) => $action->label('Xóa lựa chọn')
+                            fn (\Filament\Forms\Components\Actions\Action $action) => $action->label('Xóa lựa chọn')
                         )
                         ->columnSpanFull()
                         ->collapsible(),
@@ -146,15 +144,16 @@ class ManageQuestions extends Page implements HasForms, HasTable
                 ->action(function (array $data) {
                     // Validate answer choices before creating
                     $isMultiple = $data['is_multiple_response'] ?? false;
-                    $correctAnswers = array_filter($data['answer_choices'] ?? [], fn($choice) => $choice['is_correct'] ?? false);
+                    $correctAnswers = array_filter($data['answer_choices'] ?? [], fn ($choice) => $choice['is_correct'] ?? false);
 
-                    if (!$isMultiple) {
+                    if (! $isMultiple) {
                         if (count($correctAnswers) > 1) {
                             Notification::make()
                                 ->danger()
                                 ->title('Lỗi câu hỏi')
                                 ->body('Câu hỏi một lựa chọn chỉ được có một đáp án đúng.')
                                 ->send();
+
                             return;
                         }
                         if (count($correctAnswers) === 0) {
@@ -163,6 +162,7 @@ class ManageQuestions extends Page implements HasForms, HasTable
                                 ->title('Lỗi câu hỏi')
                                 ->body('Phải có ít nhất một đáp án đúng.')
                                 ->send();
+
                             return;
                         }
                     } else {
@@ -172,6 +172,7 @@ class ManageQuestions extends Page implements HasForms, HasTable
                                 ->title('Lỗi câu hỏi')
                                 ->body('Câu hỏi nhiều lựa chọn phải có ít nhất 2 đáp án đúng.')
                                 ->send();
+
                             return;
                         }
                     }
@@ -202,7 +203,7 @@ class ManageQuestions extends Page implements HasForms, HasTable
 
             Actions\Action::make('backToQuiz')
                 ->label('Quay lại Quiz')
-                ->url(fn() => QuizResource::getUrl('index'))
+                ->url(fn () => QuizResource::getUrl('index'))
                 ->color('gray'),
         ];
     }
@@ -221,6 +222,7 @@ class ManageQuestions extends Page implements HasForms, HasTable
                         if (strlen($state) <= 50) {
                             return null;
                         }
+
                         return $state;
                     }),
 
@@ -243,6 +245,7 @@ class ManageQuestions extends Page implements HasForms, HasTable
                     ->label('Đáp án đúng')
                     ->getStateUsing(function (Question $record): string {
                         $correctChoices = $record->answerChoices->where('is_correct', true);
+
                         return $correctChoices->pluck('title')->join(', ');
                     })
                     ->limit(30)
@@ -251,6 +254,7 @@ class ManageQuestions extends Page implements HasForms, HasTable
                         if (strlen($state) <= 30) {
                             return null;
                         }
+
                         return $state;
                     }),
 
@@ -301,12 +305,12 @@ class ManageQuestions extends Page implements HasForms, HasTable
                             ->live()
                             ->afterStateUpdated(function ($state, Forms\Set $set, Get $get) {
                                 // When switching from multiple to single choice, keep only the first correct answer
-                                if (!$state) {
+                                if (! $state) {
                                     $answerChoices = $get('answer_choices') ?? [];
                                     $firstCorrectFound = false;
 
                                     foreach ($answerChoices as $index => $choice) {
-                                        if (($choice['is_correct'] ?? false) && !$firstCorrectFound) {
+                                        if (($choice['is_correct'] ?? false) && ! $firstCorrectFound) {
                                             $firstCorrectFound = true;
                                         } elseif ($choice['is_correct'] ?? false) {
                                             $set("answer_choices.{$index}.is_correct", false);
@@ -329,7 +333,7 @@ class ManageQuestions extends Page implements HasForms, HasTable
                                     ->live()
                                     ->afterStateUpdated(function ($state, Forms\Set $set, Get $get, $component) {
                                         // Only apply single-choice logic if the toggle is being turned ON
-                                        if ($state && !$get('../../is_multiple_response')) {
+                                        if ($state && ! $get('../../is_multiple_response')) {
                                             $answerChoices = $get('../../answer_choices') ?? [];
                                             $currentPath = $component->getStatePath();
 
@@ -351,7 +355,7 @@ class ManageQuestions extends Page implements HasForms, HasTable
                             ->maxItems(10)
                             ->addActionLabel('Thêm lựa chọn')
                             ->deleteAction(
-                                fn(\Filament\Forms\Components\Actions\Action $action) => $action->label('Xóa lựa chọn')
+                                fn (\Filament\Forms\Components\Actions\Action $action) => $action->label('Xóa lựa chọn')
                             )
                             ->columnSpanFull()
                             ->collapsible(),
@@ -360,15 +364,16 @@ class ManageQuestions extends Page implements HasForms, HasTable
                     ->action(function (Question $record, array $data) {
                         // Validate answer choices before updating
                         $isMultiple = $data['is_multiple_response'] ?? false;
-                        $correctAnswers = array_filter($data['answer_choices'] ?? [], fn($choice) => $choice['is_correct'] ?? false);
+                        $correctAnswers = array_filter($data['answer_choices'] ?? [], fn ($choice) => $choice['is_correct'] ?? false);
 
-                        if (!$isMultiple) {
+                        if (! $isMultiple) {
                             if (count($correctAnswers) > 1) {
                                 Notification::make()
                                     ->danger()
                                     ->title('Lỗi validation')
                                     ->body('Câu hỏi một lựa chọn chỉ được có một đáp án đúng.')
                                     ->send();
+
                                 return;
                             }
                             if (count($correctAnswers) === 0) {
@@ -377,6 +382,7 @@ class ManageQuestions extends Page implements HasForms, HasTable
                                     ->title('Lỗi validation')
                                     ->body('Phải có ít nhất một đáp án đúng.')
                                     ->send();
+
                                 return;
                             }
                         } else {
@@ -386,6 +392,7 @@ class ManageQuestions extends Page implements HasForms, HasTable
                                     ->title('Lỗi validation')
                                     ->body('Câu hỏi nhiều lựa chọn phải có ít nhất 2 đáp án đúng.')
                                     ->send();
+
                                 return;
                             }
                         }

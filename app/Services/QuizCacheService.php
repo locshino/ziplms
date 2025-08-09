@@ -2,21 +2,27 @@
 
 namespace App\Services;
 
+use App\Exceptions\Services\QuizServiceException;
+use App\Models\AnswerChoice;
+use App\Models\Question;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
-use App\Models\Question;
-use App\Exceptions\Services\QuizServiceException;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 class QuizCacheService
 {
     private const CACHE_TTL = 3600; // 1 hour
+
     private const QUIZ_PREFIX = 'quiz:';
+
     private const QUESTIONS_PREFIX = 'quiz_questions:';
+
     private const ATTEMPTS_PREFIX = 'quiz_attempts:';
+
     private const STUDENT_ATTEMPTS_PREFIX = 'student_attempts:';
+
     private const QUIZ_STATS_PREFIX = 'quiz_stats:';
 
     /**
@@ -26,9 +32,9 @@ class QuizCacheService
     {
         try {
             return Cache::remember(
-                self::QUIZ_PREFIX . $quizId,
+                self::QUIZ_PREFIX.$quizId,
                 self::CACHE_TTL,
-                fn() => Quiz::with(['course'])->find($quizId)
+                fn () => Quiz::with(['course'])->find($quizId)
             );
         } catch (\Exception $e) {
             Log::error('Quiz cache error', ['quiz_id' => $quizId, 'error' => $e->getMessage()]);
@@ -39,13 +45,13 @@ class QuizCacheService
     /**
      * Get quiz questions with caching.
      */
-    public function getQuizQuestions(string $quizId): array
+    public function getQuizQuestions(string $quizId)
     {
         try {
-            return Cache::remember(
-                self::QUESTIONS_PREFIX . $quizId,
+            $cachedData = Cache::remember(
+                self::QUESTIONS_PREFIX.$quizId,
                 self::CACHE_TTL,
-                fn() => Question::where('quiz_id', $quizId)
+                fn () => Question::where('quiz_id', $quizId)
                     ->with(['answerChoices' => function ($query) {
                         $query->orderBy('id');
                     }])
@@ -53,6 +59,42 @@ class QuizCacheService
                     ->get()
                     ->toArray()
             );
+
+            Log::info('Quiz questions cached data', [
+                'quiz_id' => $quizId,
+                'cached_data_count' => count($cachedData),
+                'first_question_structure' => $cachedData[0] ?? null,
+                'cached_data_keys' => array_keys($cachedData[0] ?? []),
+            ]);
+
+            // Convert array back to Eloquent Collection for compatibility
+            $questions = collect($cachedData)->map(function ($questionData) {
+                $question = new Question;
+                $question->fill($questionData);
+                $question->id = $questionData['id'];
+                $question->exists = true;
+
+                $answerChoicesKey = $questionData['answer_choices'] ?? $questionData['answerChoices'] ?? [];
+                $question->answerChoices = collect($answerChoicesKey)->map(function ($choiceData) {
+                    $choice = new AnswerChoice;
+                    $choice->fill($choiceData);
+                    $choice->id = $choiceData['id'];
+                    $choice->exists = true;
+
+                    return $choice;
+                });
+
+                Log::info('Question mapped', [
+                    'question_id' => $question->id,
+                    'question_id_type' => gettype($question->id),
+                    'answer_choices_count' => $question->answerChoices->count(),
+                ]);
+
+                return $question;
+            });
+
+            // Convert to Eloquent Collection
+            return new \Illuminate\Database\Eloquent\Collection($questions);
         } catch (\Exception $e) {
             Log::error('Quiz questions cache error', ['quiz_id' => $quizId, 'error' => $e->getMessage()]);
             throw QuizServiceException::cacheError('get_quiz_questions');
@@ -65,11 +107,12 @@ class QuizCacheService
     public function getStudentAttempts(string $quizId, string $studentId): array
     {
         try {
-            $cacheKey = self::STUDENT_ATTEMPTS_PREFIX . $quizId . ':' . $studentId;
+            $cacheKey = self::STUDENT_ATTEMPTS_PREFIX.$quizId.':'.$studentId;
+
             return Cache::remember(
                 $cacheKey,
                 300, // 5 minutes for attempts
-                fn() => QuizAttempt::where('quiz_id', $quizId)
+                fn () => QuizAttempt::where('quiz_id', $quizId)
                     ->where('student_id', $studentId)
                     ->orderBy('attempt_number', 'desc')
                     ->get()
@@ -79,7 +122,7 @@ class QuizCacheService
             Log::error('Student attempts cache error', [
                 'quiz_id' => $quizId,
                 'student_id' => $studentId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw QuizServiceException::cacheError('get_student_attempts');
         }
@@ -92,7 +135,7 @@ class QuizCacheService
     {
         try {
             return Cache::remember(
-                self::QUIZ_STATS_PREFIX . $quizId,
+                self::QUIZ_STATS_PREFIX.$quizId,
                 1800, // 30 minutes
                 function () use ($quizId) {
                     $attempts = QuizAttempt::where('quiz_id', $quizId)
@@ -103,7 +146,7 @@ class QuizCacheService
                     $averageScore = $totalAttempts > 0 ? $attempts->avg('score') : 0;
                     $maxScore = $totalAttempts > 0 ? $attempts->max('score') : 0;
                     $minScore = $totalAttempts > 0 ? $attempts->min('score') : 0;
-                    $passRate = $totalAttempts > 0 ? 
+                    $passRate = $totalAttempts > 0 ?
                         $attempts->where('score', '>=', 70)->count() / $totalAttempts * 100 : 0;
 
                     return [
@@ -112,7 +155,7 @@ class QuizCacheService
                         'max_score' => $maxScore,
                         'min_score' => $minScore,
                         'pass_rate' => round($passRate, 2),
-                        'updated_at' => Carbon::now()->toISOString()
+                        'updated_at' => Carbon::now()->toISOString(),
                     ];
                 }
             );
@@ -129,9 +172,9 @@ class QuizCacheService
     {
         try {
             $keys = [
-                self::QUIZ_PREFIX . $quizId,
-                self::QUESTIONS_PREFIX . $quizId,
-                self::QUIZ_STATS_PREFIX . $quizId,
+                self::QUIZ_PREFIX.$quizId,
+                self::QUESTIONS_PREFIX.$quizId,
+                self::QUIZ_STATS_PREFIX.$quizId,
             ];
 
             foreach ($keys as $key) {
@@ -139,7 +182,7 @@ class QuizCacheService
             }
 
             // Invalidate student attempts cache (pattern-based)
-            $this->invalidatePatternCache(self::STUDENT_ATTEMPTS_PREFIX . $quizId . ':*');
+            $this->invalidatePatternCache(self::STUDENT_ATTEMPTS_PREFIX.$quizId.':*');
         } catch (\Exception $e) {
             Log::error('Cache invalidation error', ['quiz_id' => $quizId, 'error' => $e->getMessage()]);
         }
@@ -151,16 +194,16 @@ class QuizCacheService
     public function invalidateStudentAttemptsCache(string $quizId, string $studentId): void
     {
         try {
-            $cacheKey = self::STUDENT_ATTEMPTS_PREFIX . $quizId . ':' . $studentId;
+            $cacheKey = self::STUDENT_ATTEMPTS_PREFIX.$quizId.':'.$studentId;
             Cache::forget($cacheKey);
-            
+
             // Also invalidate quiz stats as new attempt affects statistics
-            Cache::forget(self::QUIZ_STATS_PREFIX . $quizId);
+            Cache::forget(self::QUIZ_STATS_PREFIX.$quizId);
         } catch (\Exception $e) {
             Log::error('Student attempts cache invalidation error', [
                 'quiz_id' => $quizId,
                 'student_id' => $studentId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }
@@ -185,7 +228,7 @@ class QuizCacheService
      */
     public function getAttemptCacheKey(string $attemptId): string
     {
-        return self::ATTEMPTS_PREFIX . $attemptId;
+        return self::ATTEMPTS_PREFIX.$attemptId;
     }
 
     /**
@@ -193,7 +236,7 @@ class QuizCacheService
      */
     public function getStudentAttemptsCacheKey(string $quizId, string $studentId): string
     {
-        return self::STUDENT_ATTEMPTS_PREFIX . $quizId . ':' . $studentId;
+        return self::STUDENT_ATTEMPTS_PREFIX.$quizId.':'.$studentId;
     }
 
     /**
@@ -201,7 +244,7 @@ class QuizCacheService
      */
     public function getAttemptWithAnswersCacheKey(string $attemptId): string
     {
-        return 'attempt_with_answers:' . $attemptId;
+        return 'attempt_with_answers:'.$attemptId;
     }
 
     /**
@@ -209,7 +252,7 @@ class QuizCacheService
      */
     public function getQuestionsCacheKey(string $quizId): string
     {
-        return self::QUESTIONS_PREFIX . $quizId;
+        return self::QUESTIONS_PREFIX.$quizId;
     }
 
     /**
@@ -232,9 +275,11 @@ class QuizCacheService
     {
         try {
             $cacheKey = $this->getAttemptCacheKey($attemptId);
+
             return Cache::get($cacheKey);
         } catch (\Exception $e) {
             Log::error('Get cached attempt error', ['attempt_id' => $attemptId, 'error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -281,7 +326,7 @@ class QuizCacheService
                 'attempts' => self::ATTEMPTS_PREFIX,
                 'student_attempts' => self::STUDENT_ATTEMPTS_PREFIX,
                 'stats' => self::QUIZ_STATS_PREFIX,
-            ]
+            ],
         ];
     }
 }

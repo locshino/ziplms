@@ -11,7 +11,7 @@ use Promethys\Revive\Concerns\Recyclable;
 
 class BadgeCondition extends Model
 {
-    use HasFactory, HasUuids, SoftDeletes, Recyclable;
+    use HasFactory, HasUuids, Recyclable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

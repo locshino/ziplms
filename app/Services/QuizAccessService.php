@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Enrollment;
 use App\Models\Quiz;
 use App\Models\User;
-use Carbon\Carbon;
 
 class QuizAccessService
 {
@@ -19,7 +18,7 @@ class QuizAccessService
     public function canViewQuiz(User $user, Quiz $quiz): bool
     {
         // Check basic view_quizzes permission first
-        if (!$user->can('view_quizzes')) {
+        if (! $user->can('view_quizzes')) {
             return false;
         }
 
@@ -35,7 +34,7 @@ class QuizAccessService
 
         // Manager can only view quizzes in courses they have permission for
         if ($user->hasRole('manager')) {
-            return $user->can('manage-course-' . $quiz->course_id);
+            return $user->can('manage-course-'.$quiz->course_id);
         }
 
         // Teachers can view all quizzes for grading purposes
@@ -57,7 +56,7 @@ class QuizAccessService
     public function canTakeQuiz(User $user, Quiz $quiz): bool
     {
         // Check take_quizzes permission first
-        if (!$user->can('take_quizzes')) {
+        if (! $user->can('take_quizzes')) {
             return false;
         }
 
@@ -72,12 +71,12 @@ class QuizAccessService
         }
 
         // Only students can take quizzes (after admin checks)
-        if (!$user->hasRole('student')) {
+        if (! $user->hasRole('student')) {
             return false;
         }
 
         // Check enrollment for students
-        if (!$this->isStudentEnrolledInCourse($user->id, $quiz->course_id)) {
+        if (! $this->isStudentEnrolledInCourse($user->id, $quiz->course_id)) {
             return false;
         }
 
@@ -88,19 +87,19 @@ class QuizAccessService
     /**
      * Check if user can manage quiz (create, update, delete)
      */
-    public function canManageQuiz(User $user, Quiz $quiz = null, string $action = 'edit'): bool
+    public function canManageQuiz(User $user, ?Quiz $quiz = null, string $action = 'edit'): bool
     {
         // Check specific permission based on action
         $permissionMap = [
             'create' => 'create_quizzes',
             'edit' => 'edit_quizzes',
             'delete' => 'delete_quizzes',
-            'view' => 'view_quizzes'
+            'view' => 'view_quizzes',
         ];
 
         $permission = $permissionMap[$action] ?? 'edit_quizzes';
-        
-        if (!$user->can($permission)) {
+
+        if (! $user->can($permission)) {
             return false;
         }
 
@@ -117,8 +116,9 @@ class QuizAccessService
         // Manager can only manage quizzes in courses they have permission for
         if ($user->hasRole('manager')) {
             if ($quiz) {
-                return $user->can('manage-course-' . $quiz->course_id);
+                return $user->can('manage-course-'.$quiz->course_id);
             }
+
             // For creating new quiz, we'll need course_id from request
             return true; // Will be validated in controller with course_id
         }
@@ -133,7 +133,7 @@ class QuizAccessService
     public function canViewResults(User $user, Quiz $quiz): bool
     {
         // Check view_reports permission first
-        if (!$user->can('view_reports')) {
+        if (! $user->can('view_reports')) {
             return false;
         }
 
@@ -149,7 +149,7 @@ class QuizAccessService
 
         // Manager can view results for courses they have permission for
         if ($user->hasRole('manager')) {
-            return $user->can('manage-course-' . $quiz->course_id);
+            return $user->can('manage-course-'.$quiz->course_id);
         }
 
         // Teachers can view all quiz results for grading purposes
@@ -185,7 +185,7 @@ class QuizAccessService
             'can_take' => $this->canTakeQuiz($user, $quiz),
             'can_manage' => $this->canManageQuiz($user, $quiz),
             'can_view_results' => $this->canViewResults($user, $quiz),
-            'is_enrolled' => $user->hasRole('student') ? 
+            'is_enrolled' => $user->hasRole('student') ?
                 $this->isStudentEnrolledInCourse($user->id, $quiz->course_id) : null,
         ];
     }

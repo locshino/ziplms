@@ -6,21 +6,19 @@ use App\Filament\Resources\QuizResource;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Models\User;
+use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\DatePicker;
-use Illuminate\Database\Eloquent\Model;
 
 class ViewAttempts extends ListRecords
 {
-
     protected static string $resource = QuizResource::class;
 
     protected static string $view = 'filament.resources.quiz-resource.pages.view-attempts';
@@ -32,15 +30,15 @@ class ViewAttempts extends ListRecords
     public function mount(): void
     {
         parent::mount();
-        
+
         $this->record = Quiz::findOrFail(request()->route('record'));
-        
+
         // Check permissions
         $user = Auth::user();
-        if (!$user->hasRole(['super_admin', 'admin', 'manager', 'teacher'])) {
+        if (! $user->hasRole(['super_admin', 'admin', 'manager', 'teacher'])) {
             abort(403);
         }
-        
+
         // If teacher, check if they own this quiz
         if ($user->hasRole('teacher') && $this->record->course->teacher_id !== $user->id) {
             abort(403);
@@ -65,34 +63,43 @@ class ViewAttempts extends ListRecords
                     ->label('Học sinh')
                     ->searchable()
                     ->sortable(),
-                    
+
                 TextColumn::make('student.email')
                     ->label('Email')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                    
+
                 TextColumn::make('attempt_number')
                     ->label('Lần thử')
                     ->sortable(),
-                    
+
                 BadgeColumn::make('score')
                     ->label('Điểm số')
-                    ->formatStateUsing(fn ($state) => round($state, 1) . '%')
+                    ->formatStateUsing(fn ($state) => round($state, 1).'%')
                     ->colors([
                         'success' => fn ($state) => $state >= 80,
                         'warning' => fn ($state) => $state >= 60 && $state < 80,
                         'danger' => fn ($state) => $state < 60,
                     ])
                     ->sortable(),
-                    
+
                 BadgeColumn::make('grade')
                     ->label('Xếp loại')
                     ->getStateUsing(function (QuizAttempt $record) {
                         $score = $record->score;
-                        if ($score >= 90) return 'Xuất sắc';
-                        if ($score >= 80) return 'Giỏi';
-                        if ($score >= 70) return 'Khá';
-                        if ($score >= 60) return 'Trung bình';
+                        if ($score >= 90) {
+                            return 'Xuất sắc';
+                        }
+                        if ($score >= 80) {
+                            return 'Giỏi';
+                        }
+                        if ($score >= 70) {
+                            return 'Khá';
+                        }
+                        if ($score >= 60) {
+                            return 'Trung bình';
+                        }
+
                         return 'Yếu';
                     })
                     ->colors([
@@ -100,39 +107,39 @@ class ViewAttempts extends ListRecords
                         'warning' => fn ($state) => in_array($state, ['Khá', 'Trung bình']),
                         'danger' => fn ($state) => $state === 'Yếu',
                     ]),
-                    
+
                 TextColumn::make('time_taken')
                     ->label('Thời gian làm bài')
                     ->getStateUsing(function (QuizAttempt $record) {
-                        if (!$record->started_at || !$record->completed_at) {
+                        if (! $record->started_at || ! $record->completed_at) {
                             return 'N/A';
                         }
-                        
+
                         $minutes = $record->started_at->diffInMinutes($record->completed_at);
                         $hours = floor($minutes / 60);
                         $remainingMinutes = $minutes % 60;
-                        
+
                         if ($hours > 0) {
                             return sprintf('%d giờ %d phút', $hours, $remainingMinutes);
                         }
-                        
+
                         return sprintf('%d phút', $remainingMinutes);
                     })
                     ->sortable(query: function (Builder $query, string $direction): Builder {
-                        return $query->orderByRaw('TIMESTAMPDIFF(MINUTE, started_at, completed_at) ' . $direction);
+                        return $query->orderByRaw('TIMESTAMPDIFF(MINUTE, started_at, completed_at) '.$direction);
                     }),
-                    
+
                 TextColumn::make('started_at')
                     ->label('Bắt đầu')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                    
+
                 TextColumn::make('completed_at')
                     ->label('Hoàn thành')
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
-                    
+
                 BadgeColumn::make('status')
                     ->label('Trạng thái')
                     ->colors([
@@ -140,7 +147,7 @@ class ViewAttempts extends ListRecords
                         'warning' => 'in_progress',
                         'danger' => 'abandoned',
                     ])
-                    ->formatStateUsing(fn ($state) => match($state) {
+                    ->formatStateUsing(fn ($state) => match ($state) {
                         'completed' => 'Hoàn thành',
                         'in_progress' => 'Đang làm',
                         'abandoned' => 'Bỏ dở',
@@ -156,7 +163,7 @@ class ViewAttempts extends ListRecords
                         })->pluck('name', 'id');
                     })
                     ->searchable(),
-                    
+
                 SelectFilter::make('grade_range')
                     ->label('Xếp loại')
                     ->options([
@@ -167,11 +174,11 @@ class ViewAttempts extends ListRecords
                         'poor' => 'Yếu (<60%)',
                     ])
                     ->query(function (Builder $query, array $data) {
-                        if (!$data['value']) {
+                        if (! $data['value']) {
                             return $query;
                         }
-                        
-                        return match($data['value']) {
+
+                        return match ($data['value']) {
                             'excellent' => $query->where('score', '>=', 90),
                             'good' => $query->where('score', '>=', 80)->where('score', '<', 90),
                             'fair' => $query->where('score', '>=', 70)->where('score', '<', 80),
@@ -180,7 +187,7 @@ class ViewAttempts extends ListRecords
                             default => $query,
                         };
                     }),
-                    
+
                 Filter::make('completed_at')
                     ->form([
                         DatePicker::make('completed_from')
@@ -207,10 +214,10 @@ class ViewAttempts extends ListRecords
                     ->color('info')
                     ->url(fn (QuizAttempt $record) => QuizResource::getUrl('quiz-result', [
                         'record' => $this->record->id,
-                        'attempt' => $record->id
+                        'attempt' => $record->id,
                     ]))
                     ->openUrlInNewTab(),
-                    
+
                 Action::make('export_result')
                     ->label('Xuất kết quả')
                     ->icon('heroicon-o-document-arrow-down')
@@ -225,7 +232,7 @@ class ViewAttempts extends ListRecords
                     ->color('success')
                     ->action('exportAllResults')
                     ->visible(fn () => Auth::user()->hasRole(['admin', 'manager'])),
-                    
+
                 Action::make('statistics')
                     ->label('Thống kê')
                     ->icon('heroicon-o-chart-bar')
@@ -234,11 +241,11 @@ class ViewAttempts extends ListRecords
             ])
             ->defaultSort('completed_at', 'desc');
     }
-    
+
     public function getQuizStatistics()
     {
         $attempts = $this->getTableQuery()->get();
-        
+
         if ($attempts->isEmpty()) {
             return [
                 'total_attempts' => 0,
@@ -249,29 +256,29 @@ class ViewAttempts extends ListRecords
                 'average_time' => 'N/A',
             ];
         }
-        
+
         $totalAttempts = $attempts->count();
         $averageScore = $attempts->avg('score');
         $highestScore = $attempts->max('score');
         $lowestScore = $attempts->min('score');
         $passedAttempts = $attempts->where('score', '>=', 60)->count();
         $passRate = ($passedAttempts / $totalAttempts) * 100;
-        
+
         // Calculate average time
         $totalMinutes = $attempts->sum(function ($attempt) {
-            return $attempt->started_at && $attempt->completed_at 
+            return $attempt->started_at && $attempt->completed_at
                 ? $attempt->started_at->diffInMinutes($attempt->completed_at)
                 : 0;
         });
-        
+
         $averageMinutes = $totalMinutes / $totalAttempts;
         $averageHours = floor($averageMinutes / 60);
         $remainingMinutes = $averageMinutes % 60;
-        
-        $averageTime = $averageHours > 0 
+
+        $averageTime = $averageHours > 0
             ? sprintf('%d giờ %d phút', $averageHours, $remainingMinutes)
             : sprintf('%d phút', $remainingMinutes);
-        
+
         return [
             'total_attempts' => $totalAttempts,
             'average_score' => round($averageScore, 1),
@@ -281,25 +288,23 @@ class ViewAttempts extends ListRecords
             'average_time' => $averageTime,
         ];
     }
-    
+
     public function showStatistics()
     {
         $stats = $this->getQuizStatistics();
-        
+
         $this->dispatch('open-modal', id: 'quiz-statistics', data: $stats);
     }
-    
+
     public function exportResult(QuizAttempt $attempt)
     {
         // Implementation for exporting individual result
         // This would typically generate a PDF or Excel file
     }
-    
+
     public function exportAllResults()
     {
         // Implementation for exporting all results
         // This would typically generate a comprehensive report
     }
-
-
 }

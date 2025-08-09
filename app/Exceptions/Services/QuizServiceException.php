@@ -57,6 +57,11 @@ class QuizServiceException extends ServiceException
         return new static('exceptions_services_quizservice.quiz_time_limit_invalid');
     }
 
+    public static function databaseError(string $message): static
+    {
+        return new static('exceptions_services_quizservice.database_error', ['message' => $message]);
+    }
+
     /**
      * Create exception for invalid max attempts.
      */
@@ -193,12 +198,8 @@ class QuizServiceException extends ServiceException
         return new static('exceptions_services_quizservice.bulk_operation_failed', [
             'operation' => $operation,
             'failed' => $failed,
-            'total' => $total
+            'total' => $total,
         ]);
-    }
-    public static function quizAttemptTimeExpired(): static
-    {
-        return new static('exceptions_services_quizservice.quiz_attempt_time_expired');
     }
 
     /**

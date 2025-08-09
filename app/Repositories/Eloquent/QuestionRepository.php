@@ -18,9 +18,6 @@ class QuestionRepository extends EloquentRepository implements QuestionRepositor
 
     /**
      * Get questions by quiz ID.
-     *
-     * @param string $quizId
-     * @return Collection
      */
     public function getByQuizId(string $quizId): Collection
     {
@@ -31,9 +28,6 @@ class QuestionRepository extends EloquentRepository implements QuestionRepositor
 
     /**
      * Get question with answer choices.
-     *
-     * @param string $id
-     * @return Question|null
      */
     public function getWithAnswerChoices(string $id): ?Question
     {
@@ -44,9 +38,6 @@ class QuestionRepository extends EloquentRepository implements QuestionRepositor
 
     /**
      * Get questions with answer choices by quiz ID.
-     *
-     * @param string $quizId
-     * @return Collection
      */
     public function getWithAnswerChoicesByQuizId(string $quizId): Collection
     {

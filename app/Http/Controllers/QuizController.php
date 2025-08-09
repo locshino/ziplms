@@ -2,140 +2,345 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\Interfaces\QuizServiceInterface;
+use App\Exceptions\Services\QuizServiceException;
+use App\Http\Responses\QuizResponse;
 use App\Services\Interfaces\QuestionServiceInterface;
-use App\Services\QuizAccessService;
+use App\Services\Interfaces\QuizServiceInterface;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class QuizController extends Controller
 {
     protected QuizServiceInterface $quizService;
+
     protected QuestionServiceInterface $questionService;
-    protected QuizAccessService $quizAccessService;
 
     public function __construct(
         QuizServiceInterface $quizService,
-        QuestionServiceInterface $questionService,
-        QuizAccessService $quizAccessService
+        QuestionServiceInterface $questionService
     ) {
+        $this->middleware('auth');
         $this->quizService = $quizService;
         $this->questionService = $questionService;
-        $this->quizAccessService = $quizAccessService;
     }
 
     /**
-     * Display a listing of available quizzes for student.
+     * Display a listing of available quizzes.
+     *
+     * @return View|JsonResponse
      */
-    public function index(): View
+    public function index(Request $request)
     {
-        $quizzes = $this->quizService->getAvailableQuizzes(Auth::id());
-        
-        return view('quiz.index', compact('quizzes'));
+        try {
+            $user = Auth::user();
+            $quizzes = $this->quizService->getAvailableQuizzesForStudent($user->id);
+
+            if ($request->expectsJson()) {
+                return QuizResponse::success($quizzes, 'Quizzes retrieved successfully');
+            }
+
+            return view('quiz.index', compact('quizzes'));
+
+        } catch (QuizServiceException $e) {
+            Log::warning('Quiz index failed', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+
+            if ($request->expectsJson()) {
+                return QuizResponse::error($e->getMessage(), 400);
+            }
+
+            return view('quiz.index', ['quizzes' => collect()])
+                ->with('error', $e->getMessage());
+
+        } catch (\Exception $e) {
+            Log::error('Error loading quizzes', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            if ($request->expectsJson()) {
+                return QuizResponse::error('Không thể tải danh sách bài kiểm tra');
+            }
+
+            return view('quiz.index', ['quizzes' => collect()])
+                ->with('error', 'Không thể tải danh sách bài kiểm tra');
+        }
     }
 
     /**
-     * Show the quiz taking interface.
+     * Show a specific quiz.
+     *
+     * @return View|JsonResponse|RedirectResponse
      */
-    public function show(string $id): View
+    public function show(string $id, Request $request)
     {
-        $quiz = $this->quizService->findById($id);
-        $user = Auth::user();
-        
-        if (!$quiz) {
-            abort(404, 'Quiz không tồn tại.');
-        }
+        try {
+            $quiz = $this->quizService->findById($id);
 
-        // Check if user can take this quiz
-        if (!$this->quizAccessService->canTakeQuiz($user, $quiz)) {
-            abort(403, 'Bạn không thể làm bài quiz này.');
-        }
+            if (! $quiz) {
+                return QuizResponse::quizNotFound($request);
+            }
 
-        // Check for existing incomplete attempt
-        $existingAttempt = $this->quizService->continueQuizAttempt($id, Auth::id());
-        
-        return view('quiz.show', compact('quiz', 'existingAttempt'));
+            if (! $quiz->is_published) {
+                return QuizResponse::quizNotPublished($request);
+            }
+
+            $user = Auth::user();
+            if (! $this->quizService->canStudentTakeQuiz($id, $user->id)) {
+                return QuizResponse::cannotTakeQuiz($request);
+            }
+
+            // Check for existing incomplete attempt
+            $existingAttempt = $this->quizService->continueQuizAttempt($id, Auth::id());
+
+            if ($request->expectsJson()) {
+                return QuizResponse::success(compact('quiz', 'existingAttempt'), 'Quiz retrieved successfully');
+            }
+
+            return view('quiz.show', compact('quiz', 'existingAttempt'));
+
+        } catch (QuizServiceException $e) {
+            Log::warning('Quiz show failed', [
+                'quiz_id' => $id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+
+            return QuizResponse::errorWithRedirect($request, $e->getMessage(), 400);
+
+        } catch (\Exception $e) {
+            Log::error('Error showing quiz', [
+                'quiz_id' => $id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return QuizResponse::errorWithRedirect($request, 'Không thể hiển thị bài kiểm tra');
+        }
     }
 
     /**
      * Start a new quiz attempt.
+     *
+     * @return JsonResponse|RedirectResponse
      */
-    public function start(string $id)
+    public function start(string $id, Request $request)
     {
         try {
-            $attempt = $this->quizService->startQuizAttempt($id, Auth::id());
-            
-            return redirect()->route('quiz.take', $attempt->id)
-                ->with('success', 'Bài quiz đã được bắt đầu.');
+            $user = Auth::user();
+            $attempt = $this->quizService->startQuizAttempt($id, $user->id);
+
+            return QuizResponse::quizStarted($request, $attempt, $id);
+
+        } catch (QuizServiceException $e) {
+            Log::warning('Quiz start failed', [
+                'quiz_id' => $id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+
+            return QuizResponse::errorWithRedirect($request, $e->getMessage(), 400);
+
         } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
+            Log::error('Error starting quiz', [
+                'quiz_id' => $id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return QuizResponse::errorWithRedirect($request, 'Không thể bắt đầu bài kiểm tra');
         }
     }
 
     /**
      * Continue an existing quiz attempt.
+     *
+     * @return JsonResponse|RedirectResponse
      */
-    public function continue(string $id)
+    public function continue(string $id, Request $request)
     {
-        $attempt = $this->quizService->continueQuizAttempt($id, Auth::id());
-        
-        if (!$attempt) {
-            return back()->with('error', 'Không tìm thấy bài làm để tiếp tục.');
-        }
+        try {
+            $user = Auth::user();
+            $attempt = $this->quizService->continueQuizAttempt($id, $user->id);
 
-        return redirect()->route('quiz.take', $attempt->id);
+            if (! $attempt) {
+                $message = 'Không có phiên làm bài nào để tiếp tục';
+
+                if ($request->expectsJson()) {
+                    return QuizResponse::error($message, 404);
+                }
+
+                return redirect()->route('quiz.show', $id)->with('info', $message);
+            }
+
+            if ($request->expectsJson()) {
+                return QuizResponse::success($attempt, 'Tiếp tục phiên làm bài');
+            }
+
+            return redirect()->route('quiz.take', ['id' => $id, 'attempt' => $attempt->id]);
+
+        } catch (QuizServiceException $e) {
+            Log::warning('Quiz continue failed', [
+                'quiz_id' => $id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+
+            return QuizResponse::errorWithRedirect($request, $e->getMessage(), 400);
+
+        } catch (\Exception $e) {
+            Log::error('Error continuing quiz', [
+                'quiz_id' => $id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return QuizResponse::errorWithRedirect($request, 'Không thể tiếp tục bài kiểm tra');
+        }
     }
 
     /**
-     * Show quiz taking interface.
+     * Show the quiz taking interface.
+     *
+     * @return View|JsonResponse|RedirectResponse
      */
-    public function take(string $attemptId): View
+    public function take(string $id, string $attemptId, Request $request)
     {
-        $attempt = $this->quizService->getAttemptWithAnswers($attemptId);
-        
-        if (!$attempt || $attempt->student_id !== Auth::id()) {
-            abort(404, 'Bài làm không tồn tại.');
-        }
+        try {
+            $user = Auth::user();
+            $attempt = $this->quizService->getAttemptWithAnswers($attemptId);
 
-        if ($attempt->status !== 'in_progress') {
-            return redirect()->route('quiz.result', $attemptId);
-        }
+            if (! $attempt || $attempt->student_id !== $user->id) {
+                return QuizResponse::attemptNotFound($request);
+            }
 
-        $quiz = $attempt->quiz;
-        $quiz->load(['questions.answerChoices']);
-        
-        return view('quiz.take', compact('attempt', 'quiz'));
+            if ($attempt->status !== 'in_progress') {
+                if ($request->expectsJson()) {
+                    return QuizResponse::error('Bài kiểm tra đã hoàn thành', 400);
+                }
+
+                return redirect()->route('quiz.result', $attemptId);
+            }
+
+            $quiz = $attempt->quiz;
+            $quiz->load(['questions.answerChoices']);
+
+            if ($request->expectsJson()) {
+                return QuizResponse::success(compact('attempt', 'quiz'), 'Quiz attempt loaded');
+            }
+
+            return view('quiz.take', compact('attempt', 'quiz'));
+
+        } catch (QuizServiceException $e) {
+            Log::warning('Quiz take failed', [
+                'quiz_id' => $id,
+                'attempt_id' => $attemptId,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+
+            return QuizResponse::errorWithRedirect($request, $e->getMessage(), 400);
+
+        } catch (\Exception $e) {
+            Log::error('Error loading quiz attempt', [
+                'quiz_id' => $id,
+                'attempt_id' => $attemptId,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return QuizResponse::errorWithRedirect($request, 'Không thể tải bài kiểm tra');
+        }
     }
 
     /**
-     * Submit quiz attempt.
+     * Submit quiz answers.
+     *
+     * @return JsonResponse|RedirectResponse
      */
-    public function submit(Request $request, string $attemptId)
+    public function submit(Request $request, string $id, string $attemptId)
     {
         try {
             $answers = $request->input('answers', []);
+            $user = Auth::user();
             $attempt = $this->quizService->submitQuizAttempt($attemptId, $answers);
-            
-            return redirect()->route('quiz.result', $attemptId)
-                ->with('success', 'Bài quiz đã được nộp thành công.');
+
+            return QuizResponse::quizSubmitted($request, $attempt, $id);
+
+        } catch (QuizServiceException $e) {
+            Log::warning('Quiz submission failed', [
+                'quiz_id' => $id,
+                'attempt_id' => $attemptId,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+
+            return QuizResponse::errorWithRedirect($request, $e->getMessage(), 400);
+
         } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
+            Log::error('Error submitting quiz', [
+                'quiz_id' => $id,
+                'attempt_id' => $attemptId,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return QuizResponse::errorWithRedirect($request, 'Không thể nộp bài kiểm tra');
         }
     }
 
     /**
      * Show quiz result.
+     *
+     * @return View|JsonResponse
      */
-    public function result(string $attemptId): View
+    public function result(string $attemptId, Request $request)
     {
-        $attempt = $this->quizService->getAttemptWithAnswers($attemptId);
-        
-        if (!$attempt || $attempt->student_id !== Auth::id()) {
-            abort(404, 'Bài làm không tồn tại.');
-        }
+        try {
+            $user = Auth::user();
+            $attempt = $this->quizService->getAttemptWithAnswers($attemptId);
 
-        return view('quiz.result', compact('attempt'));
+            if (! $attempt || $attempt->student_id !== $user->id) {
+                return QuizResponse::attemptNotFound($request);
+            }
+
+            if ($request->expectsJson()) {
+                return QuizResponse::success($attempt, 'Quiz result retrieved successfully');
+            }
+
+            return view('quiz.result', compact('attempt'));
+
+        } catch (QuizServiceException $e) {
+            Log::warning('Quiz result failed', [
+                'attempt_id' => $attemptId,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+
+            return QuizResponse::errorWithRedirect($request, $e->getMessage(), 400);
+
+        } catch (\Exception $e) {
+            Log::error('Error loading quiz result', [
+                'attempt_id' => $attemptId,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return QuizResponse::errorWithRedirect($request, 'Không thể tải kết quả bài kiểm tra');
+        }
     }
 
     /**
@@ -144,29 +349,68 @@ class QuizController extends Controller
     public function history(string $id): View
     {
         $quiz = $this->quizService->findById($id);
-        
-        if (!$quiz) {
+
+        if (! $quiz) {
             abort(404, 'Quiz không tồn tại.');
         }
 
         $attempts = $this->quizService->getAttemptHistory($id, Auth::id());
-        
+
         return view('quiz.history', compact('quiz', 'attempts'));
     }
 
     /**
-     * Show quiz management interface.
+     * Show quiz management interface for instructors.
+     *
+     * @return View|JsonResponse|RedirectResponse
      */
-    public function manage(string $id): View
+    public function manage(string $id, Request $request)
     {
-        $quiz = $this->quizService->findById($id);
-        
-        if (!$quiz) {
-            abort(404, 'Quiz không tồn tại.');
-        }
+        try {
+            $quiz = $this->quizService->findById($id);
 
-        $questions = $this->questionService->getByQuizId($id);
-        
-        return view('quiz.manage', compact('quiz', 'questions'));
+            if (! $quiz) {
+                return QuizResponse::quizNotFound($request, 'quiz.index');
+            }
+
+            // Check if user can manage this quiz (instructor/admin)
+            $this->authorize('manage', $quiz);
+
+            $attempts = $this->quizService->getQuizAttempts($id);
+
+            if ($request->expectsJson()) {
+                return QuizResponse::success(compact('quiz', 'attempts'), 'Quiz management data retrieved');
+            }
+
+            return view('quiz.manage', compact('quiz', 'attempts'));
+
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            Log::warning('Quiz manage authorization failed', [
+                'quiz_id' => $id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+
+            return QuizResponse::errorWithRedirect($request, 'Bạn không có quyền quản lý bài kiểm tra này', 403);
+
+        } catch (QuizServiceException $e) {
+            Log::warning('Quiz manage failed', [
+                'quiz_id' => $id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+
+            return QuizResponse::errorWithRedirect($request, $e->getMessage(), 400);
+
+        } catch (\Exception $e) {
+            Log::error('Error loading quiz management', [
+                'quiz_id' => $id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return QuizResponse::errorWithRedirect($request, 'Không thể tải trang quản lý bài kiểm tra');
+        }
     }
 }

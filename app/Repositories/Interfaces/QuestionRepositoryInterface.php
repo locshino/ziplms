@@ -9,25 +9,16 @@ interface QuestionRepositoryInterface extends EloquentRepositoryInterface
 {
     /**
      * Get questions by quiz ID.
-     *
-     * @param string $quizId
-     * @return Collection
      */
     public function getByQuizId(string $quizId): Collection;
 
     /**
      * Get question with answer choices.
-     *
-     * @param string $id
-     * @return Question|null
      */
     public function getWithAnswerChoices(string $id): ?Question;
 
     /**
      * Get questions with answer choices by quiz ID.
-     *
-     * @param string $quizId
-     * @return Collection
      */
     public function getWithAnswerChoicesByQuizId(string $quizId): Collection;
 }

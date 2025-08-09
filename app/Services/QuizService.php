@@ -2,21 +2,21 @@
 
 namespace App\Services;
 
+use App\Exceptions\Services\QuizServiceException;
+use App\Models\Question;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Models\StudentQuizAnswer;
-use App\Models\Question;
-use App\Repositories\Interfaces\QuizRepositoryInterface;
 use App\Repositories\Interfaces\QuizAttemptRepositoryInterface;
+use App\Repositories\Interfaces\QuizRepositoryInterface;
 use App\Services\Interfaces\QuizServiceInterface;
-use App\Exceptions\Services\QuizServiceException;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
-use Exception;
 
 /**
  * Quiz service implementation.
@@ -29,14 +29,11 @@ use Exception;
 class QuizService extends BaseService implements QuizServiceInterface
 {
     protected QuizAttemptRepositoryInterface $quizAttemptRepository;
+
     protected QuizCacheService $cacheService;
 
     /**
      * Constructor.
-     *
-     * @param QuizRepositoryInterface $repository
-     * @param QuizAttemptRepositoryInterface $quizAttemptRepository
-     * @param QuizCacheService $cacheService
      */
     public function __construct(
         QuizRepositoryInterface $repository,
@@ -51,18 +48,16 @@ class QuizService extends BaseService implements QuizServiceInterface
     /**
      * Get available quizzes for student.
      *
-     * @param string $studentId
-     * @return Collection
      * @throws QuizServiceException When student not found or database error occurs
      */
     public function getAvailableQuizzes(string $studentId): Collection
     {
         try {
-            return $this->repository->getAvailableForStudent($studentId);
+            return $this->repository->getQuizzesByStudent($studentId);
         } catch (Exception $e) {
             Log::error('Failed to get available quizzes for student', [
                 'student_id' => $studentId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw QuizServiceException::databaseError($e->getMessage());
         }
@@ -71,9 +66,6 @@ class QuizService extends BaseService implements QuizServiceInterface
     /**
      * Start a new quiz attempt.
      *
-     * @param string $quizId
-     * @param string $studentId
-     * @return QuizAttempt
      * @throws QuizServiceException When quiz not found, not available, or attempt creation fails
      */
     public function startQuizAttempt(string $quizId, string $studentId): QuizAttempt
@@ -81,7 +73,7 @@ class QuizService extends BaseService implements QuizServiceInterface
         try {
             // Get quiz with caching
             $quiz = $this->cacheService->getQuiz($quizId);
-            if (!$quiz) {
+            if (! $quiz) {
                 throw QuizServiceException::quizNotFound($quizId);
             }
 
@@ -92,55 +84,62 @@ class QuizService extends BaseService implements QuizServiceInterface
             $this->validateStudentCanTakeQuiz($quiz, $studentId);
 
             return DB::transaction(function () use ($quiz, $studentId) {
-                // Get existing attempts
-                $existingAttempts = $this->cacheService->getStudentAttempts($quiz->id, $studentId);
+                try {
+                    // Get existing attempts
+                    $existingAttempts = $this->cacheService->getStudentAttempts($quiz->id, $studentId);
 
-                // Check for concurrent attempts
-                $activeAttempt = collect($existingAttempts)
-                    ->where('status', 'in_progress')
-                    ->first();
+                    // Check for concurrent attempts
+                    $activeAttempt = collect($existingAttempts)
+                        ->where('status', 'in_progress')
+                        ->first();
 
-                if ($activeAttempt) {
-                    throw QuizServiceException::concurrentAttemptNotAllowed();
+                    if ($activeAttempt) {
+                        throw QuizServiceException::concurrentAttemptNotAllowed();
+                    }
+
+                    // Calculate next attempt number
+                    $nextAttemptNumber = count($existingAttempts) + 1;
+
+                    // Check attempt limit
+                    if ($quiz->max_attempts && $nextAttemptNumber > $quiz->max_attempts) {
+                        throw QuizServiceException::maxAttemptsExceeded();
+                    }
+
+                    // Create new attempt
+                    $attempt = $this->quizAttemptRepository->create([
+                        'quiz_id' => $quiz->id,
+                        'student_id' => $studentId,
+                        'attempt_number' => $nextAttemptNumber,
+                        'status' => 'in_progress',
+                        'started_at' => Carbon::now(),
+                    ]);
+
+                    // Cache the attempt
+                    $this->cacheService->cacheAttempt($attempt);
+
+                    // Invalidate student attempts cache
+                    $this->cacheService->invalidateStudentAttemptsCache($quiz->id, $studentId);
+
+                    Log::info('Quiz attempt started', [
+                        'quiz_id' => $quiz->id,
+                        'student_id' => $studentId,
+                        'attempt_id' => $attempt->id,
+                        'attempt_number' => $nextAttemptNumber,
+                    ]);
+
+                    return $attempt;
+                } catch (\Exception $e) {
+                    Log::error('Failed to start quiz attempt', [
+                        'quiz_id' => $quiz->id,
+                        'student_id' => $studentId,
+                        'error' => $e->getMessage(),
+                    ]);
+                    throw $e;
                 }
-
-                // Calculate next attempt number
-                $nextAttemptNumber = count($existingAttempts) + 1;
-
-                // Check attempt limit
-                if ($quiz->max_attempts && $nextAttemptNumber > $quiz->max_attempts) {
-                    throw QuizServiceException::maxAttemptsExceeded();
-                }
-
-                // Create new attempt
-                $attempt = $this->quizAttemptRepository->create([
-                    'quiz_id' => $quiz->id,
-                    'student_id' => $studentId,
-                    'attempt_number' => $nextAttemptNumber,
-                    'status' => 'in_progress',
-                    'started_at' => Carbon::now(),
-                ]);
-
-                // Cache the attempt
-                $this->cacheService->cacheAttempt($attempt);
-
-                // Invalidate student attempts cache
-                $this->cacheService->invalidateStudentAttemptsCache($quiz->id, $studentId);
-
-                Log::info('Quiz attempt started', [
-                    'quiz_id' => $quiz->id,
-                    'student_id' => $studentId,
-                    'attempt_id' => $attempt->id,
-                    'attempt_number' => $nextAttemptNumber
-                ]);
-
-                return $attempt;
             });
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Failed to start quiz attempt', [
-                'quiz_id' => $quizId,
-                'student_id' => $studentId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw QuizServiceException::databaseError($e->getMessage());
         }
@@ -149,8 +148,6 @@ class QuizService extends BaseService implements QuizServiceInterface
     /**
      * Validate quiz availability.
      *
-     * @param Quiz $quiz
-     * @return void
      * @throws QuizServiceException When quiz is not available
      */
     private function validateQuizAvailability(Quiz $quiz): void
@@ -159,7 +156,7 @@ class QuizService extends BaseService implements QuizServiceInterface
             $now = Carbon::now();
 
             // Check if quiz is published
-            if (!$quiz->is_published) {
+            if (! $quiz->is_published) {
                 throw QuizServiceException::quizNotPublished();
             }
 
@@ -175,7 +172,7 @@ class QuizService extends BaseService implements QuizServiceInterface
         } catch (Exception $e) {
             Log::error('Quiz availability validation failed', [
                 'quiz_id' => $quiz->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -184,9 +181,6 @@ class QuizService extends BaseService implements QuizServiceInterface
     /**
      * Validate if student can take the quiz.
      *
-     * @param Quiz $quiz
-     * @param string $studentId
-     * @return void
      * @throws QuizServiceException When student cannot take the quiz
      */
     private function validateStudentCanTakeQuiz(Quiz $quiz, string $studentId): void
@@ -198,7 +192,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                 ->where('student_id', $studentId)
                 ->exists();
 
-            if (!$isEnrolled) {
+            if (! $isEnrolled) {
                 throw QuizServiceException::quizNotActive();
             }
 
@@ -208,7 +202,7 @@ class QuizService extends BaseService implements QuizServiceInterface
             Log::error('Student quiz validation failed', [
                 'quiz_id' => $quiz->id,
                 'student_id' => $studentId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -217,9 +211,6 @@ class QuizService extends BaseService implements QuizServiceInterface
     /**
      * Continue an existing quiz attempt.
      *
-     * @param string $quizId
-     * @param string $studentId
-     * @return QuizAttempt|null
      * @throws QuizServiceException When database error occurs
      */
     public function continueQuizAttempt(string $quizId, string $studentId): ?QuizAttempt
@@ -228,7 +219,7 @@ class QuizService extends BaseService implements QuizServiceInterface
             // Get incomplete attempt for the student
             $attempt = $this->quizAttemptRepository->getIncompleteAttempt($quizId, $studentId);
 
-            if (!$attempt) {
+            if (! $attempt) {
                 return null;
             }
 
@@ -237,7 +228,33 @@ class QuizService extends BaseService implements QuizServiceInterface
                 $timeElapsed = Carbon::now()->diffInMinutes($attempt->started_at);
                 if ($timeElapsed >= $attempt->quiz->time_limit) {
                     // Auto-submit if time limit exceeded
-                    $this->submitQuizAttempt($attempt->id, []);
+                    try {
+                        // Get existing answers before auto-submit
+                        $attemptWithAnswers = $this->quizAttemptRepository->getWithAnswers($attempt->id);
+                        $existingAnswers = [];
+                        if ($attemptWithAnswers && $attemptWithAnswers->answers) {
+                            foreach ($attemptWithAnswers->answers as $answer) {
+                                $existingAnswers[$answer->question_id] = $answer->answer_choice_id;
+                            }
+                        }
+                        $this->submitQuizAttempt($attempt->id, $existingAnswers);
+                    } catch (Exception $e) {
+                        // If auto-submit fails, mark as expired manually
+                        Log::warning('Auto-submit failed for expired attempt', [
+                            'attempt_id' => $attempt->id,
+                            'error' => $e->getMessage()
+                        ]);
+                        
+                        // Update attempt status to expired
+                        $this->quizAttemptRepository->updateById($attempt->id, [
+                            'status' => 'expired',
+                            'completed_at' => Carbon::now(),
+                        ]);
+                        
+                        // Clear cache
+                        $this->cacheService->invalidateStudentAttemptsCache($attempt->quiz_id, $attempt->student_id);
+                    }
+
                     return null;
                 }
             }
@@ -250,7 +267,7 @@ class QuizService extends BaseService implements QuizServiceInterface
             Log::error('Failed to continue quiz attempt', [
                 'quiz_id' => $quizId,
                 'student_id' => $studentId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw QuizServiceException::databaseError($e->getMessage());
         }
@@ -259,9 +276,6 @@ class QuizService extends BaseService implements QuizServiceInterface
     /**
      * Submit quiz attempt with optimized bulk operations.
      *
-     * @param string $attemptId
-     * @param array $answers
-     * @return QuizAttempt
      * @throws QuizServiceException When attempt not found, already completed, or submission fails
      */
     public function submitQuizAttempt(string $attemptId, array $answers): QuizAttempt
@@ -275,7 +289,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                     $attempt = new QuizAttempt($cachedAttempt);
                 } else {
                     $attempt = $this->quizAttemptRepository->findById($attemptId);
-                    if (!$attempt) {
+                    if (! $attempt) {
                         throw QuizServiceException::quizAttemptNotFound();
                     }
                 }
@@ -288,85 +302,97 @@ class QuizService extends BaseService implements QuizServiceInterface
                 // Validate answers format
                 $this->validateAnswersFormat($answers);
 
-                // Get quiz questions for validation
-                $quizQuestions = $this->cacheService->getQuizQuestions($attempt->quiz_id);
-                $questionIds = collect($quizQuestions)->pluck('id')->toArray();
+                try {
+                    // Get quiz questions for validation
+                    $quizQuestions = $this->cacheService->getQuizQuestions($attempt->quiz_id);
+                    $questionIds = collect($quizQuestions)->pluck('id')->toArray();
 
-                // Validate that all answers are for valid questions
-                foreach (array_keys($answers) as $questionId) {
-                    if (!in_array($questionId, $questionIds)) {
-                        throw QuizServiceException::invalidAnswerSubmission();
+                    // Validate that all answers are for valid questions
+                    foreach (array_keys($answers) as $questionId) {
+                        if (! in_array($questionId, $questionIds)) {
+                            throw QuizServiceException::invalidAnswerSubmission();
+                        }
                     }
-                }
 
-                // Delete existing answers in bulk
-                $existingAnswerIds = StudentQuizAnswer::where('quiz_attempt_id', $attemptId)
-                    ->pluck('id')
-                    ->toArray();
+                    // Delete existing answers in bulk
+                    $existingAnswerIds = StudentQuizAnswer::where('quiz_attempt_id', $attemptId)
+                        ->pluck('id')
+                        ->toArray();
 
-                if (!empty($existingAnswerIds)) {
-                    StudentQuizAnswer::whereIn('id', $existingAnswerIds)->delete();
-                }
+                    if (! empty($existingAnswerIds)) {
+                        StudentQuizAnswer::whereIn('id', $existingAnswerIds)->delete();
+                    }
 
-                // Prepare answers for bulk insert
-                $answersToInsert = [];
-                foreach ($answers as $questionId => $answerChoiceIds) {
-                    if (is_array($answerChoiceIds)) {
-                        foreach ($answerChoiceIds as $answerChoiceId) {
+                    // Prepare answers for bulk insert
+                    $answersToInsert = [];
+                    foreach ($answers as $questionId => $answerChoiceIds) {
+                        if (is_array($answerChoiceIds)) {
+                            foreach ($answerChoiceIds as $answerChoiceId) {
+                                $answersToInsert[] = [
+                                    'id' => (string) \Illuminate\Support\Str::uuid(),
+                                    'quiz_attempt_id' => $attemptId,
+                                    'question_id' => $questionId,
+                                    'answer_choice_id' => $answerChoiceId,
+                                    'created_at' => now(),
+                                    'updated_at' => now(),
+                                ];
+                            }
+                        } else {
                             $answersToInsert[] = [
                                 'id' => (string) \Illuminate\Support\Str::uuid(),
                                 'quiz_attempt_id' => $attemptId,
                                 'question_id' => $questionId,
-                                'answer_choice_id' => $answerChoiceId,
+                                'answer_choice_id' => $answerChoiceIds,
                                 'created_at' => now(),
                                 'updated_at' => now(),
                             ];
                         }
-                    } else {
-                        $answersToInsert[] = [
-                            'id' => (string) \Illuminate\Support\Str::uuid(),
-                            'quiz_attempt_id' => $attemptId,
-                            'question_id' => $questionId,
-                            'answer_choice_id' => $answerChoiceIds,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ];
                     }
+
+                    // Bulk insert answers
+                    if (! empty($answersToInsert)) {
+                        StudentQuizAnswer::insert($answersToInsert);
+                    }
+
+                    // Calculate score with optimized method
+                    $score = $this->calculateScoreOptimized($attempt, $quizQuestions, $answersToInsert);
+
+                    // Update attempt
+                    $this->quizAttemptRepository->updateById($attemptId, [
+                        'score' => $score,
+                        'status' => 'completed',
+                        'completed_at' => Carbon::now(),
+                    ]);
+                    
+                    // Get updated attempt
+                    $updatedAttempt = $this->quizAttemptRepository->findById($attemptId);
+
+                    // Invalidate caches
+                    $this->cacheService->invalidateStudentAttemptsCache($attempt->quiz_id, $attempt->student_id);
+                    Cache::forget($this->cacheService->getAttemptCacheKey($attemptId));
+
+                    Log::info('Quiz attempt submitted successfully', [
+                        'attempt_id' => $attemptId,
+                        'quiz_id' => $attempt->quiz_id,
+                        'student_id' => $attempt->student_id,
+                        'score' => $score,
+                        'answers_count' => count($answersToInsert),
+                    ]);
+
+                    return $updatedAttempt;
+                } catch (\Exception $e) {
+                    Log::error('Failed to submit quiz attempt', [
+                        'attempt_id' => $attemptId,
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                    ]);
+                    throw $e;
                 }
-
-                // Bulk insert answers
-                if (!empty($answersToInsert)) {
-                    StudentQuizAnswer::insert($answersToInsert);
-                }
-
-                // Calculate score with optimized method
-                $score = $this->calculateScoreOptimized($attempt, $quizQuestions, $answersToInsert);
-
-                // Update attempt
-                $updatedAttempt = $this->quizAttemptRepository->updateById($attemptId, [
-                    'score' => $score,
-                    'status' => 'completed',
-                    'completed_at' => Carbon::now(),
-                ]);
-
-                // Invalidate caches
-                $this->cacheService->invalidateStudentAttemptsCache($attempt->quiz_id, $attempt->student_id);
-                Cache::forget($this->cacheService->getAttemptCacheKey($attemptId));
-
-                Log::info('Quiz attempt submitted successfully', [
-                    'attempt_id' => $attemptId,
-                    'quiz_id' => $attempt->quiz_id,
-                    'student_id' => $attempt->student_id,
-                    'score' => $score,
-                    'answers_count' => count($answersToInsert)
-                ]);
-
-                return $updatedAttempt;
             });
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Failed to submit quiz attempt', [
                 'attempt_id' => $attemptId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw QuizServiceException::databaseError($e->getMessage());
         }
@@ -375,8 +401,6 @@ class QuizService extends BaseService implements QuizServiceInterface
     /**
      * Validate answers format.
      *
-     * @param array $answers
-     * @return void
      * @throws QuizServiceException When answers format is invalid
      */
     private function validateAnswersFormat(array $answers): void
@@ -409,7 +433,7 @@ class QuizService extends BaseService implements QuizServiceInterface
         } catch (Exception $e) {
             Log::error('Answer format validation failed', [
                 'answers' => $answers,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -418,9 +442,6 @@ class QuizService extends BaseService implements QuizServiceInterface
     /**
      * Get quiz attempt history for student.
      *
-     * @param string $quizId
-     * @param string $studentId
-     * @return Collection
      * @throws QuizServiceException When quiz or student not found or database error occurs
      */
     public function getAttemptHistory(string $quizId, string $studentId): Collection
@@ -429,13 +450,13 @@ class QuizService extends BaseService implements QuizServiceInterface
             $cacheKey = $this->cacheService->getStudentAttemptsCacheKey($quizId, $studentId);
 
             return Cache::remember($cacheKey, 3600, function () use ($quizId, $studentId) {
-                return $this->quizAttemptRepository->getStudentAttempts($quizId, $studentId);
+                return $this->repository->getQuizAttemptsByStudent($quizId, $studentId);
             });
         } catch (Exception $e) {
             Log::error('Failed to get attempt history', [
                 'quiz_id' => $quizId,
                 'student_id' => $studentId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw QuizServiceException::databaseError($e->getMessage());
         }
@@ -444,8 +465,6 @@ class QuizService extends BaseService implements QuizServiceInterface
     /**
      * Get quiz attempt with answers.
      *
-     * @param string $attemptId
-     * @return QuizAttempt|null
      * @throws QuizServiceException When attempt not found or database error occurs
      */
     public function getAttemptWithAnswers(string $attemptId): ?QuizAttempt
@@ -459,7 +478,7 @@ class QuizService extends BaseService implements QuizServiceInterface
         } catch (Exception $e) {
             Log::error('Failed to get attempt with answers', [
                 'attempt_id' => $attemptId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw QuizServiceException::databaseError($e->getMessage());
         }
@@ -468,9 +487,6 @@ class QuizService extends BaseService implements QuizServiceInterface
     /**
      * Check if student can take quiz.
      *
-     * @param string $quizId
-     * @param string $studentId
-     * @return bool
      * @throws QuizServiceException When database error occurs
      */
     public function canTakeQuiz(string $quizId, string $studentId): bool
@@ -478,7 +494,7 @@ class QuizService extends BaseService implements QuizServiceInterface
         try {
             $quiz = $this->repository->findById($quizId);
 
-            if (!$quiz) {
+            if (! $quiz) {
                 return false;
             }
 
@@ -512,7 +528,7 @@ class QuizService extends BaseService implements QuizServiceInterface
             Log::error('Failed to check if student can take quiz', [
                 'quiz_id' => $quizId,
                 'student_id' => $studentId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw QuizServiceException::databaseError($e->getMessage());
         }
@@ -521,10 +537,6 @@ class QuizService extends BaseService implements QuizServiceInterface
     /**
      * Calculate quiz score (optimized version).
      *
-     * @param QuizAttempt $attempt
-     * @param Collection $questions
-     * @param array $submittedAnswers
-     * @return float
      * @throws QuizServiceException When score calculation fails
      */
     private function calculateScoreOptimized(QuizAttempt $attempt, Collection $questions, array $submittedAnswers): float
@@ -537,7 +549,7 @@ class QuizService extends BaseService implements QuizServiceInterface
             $answersByQuestion = [];
             foreach ($submittedAnswers as $answer) {
                 $questionId = $answer['question_id'];
-                if (!isset($answersByQuestion[$questionId])) {
+                if (! isset($answersByQuestion[$questionId])) {
                     $answersByQuestion[$questionId] = [];
                 }
                 $answersByQuestion[$questionId][] = $answer['answer_choice_id'];
@@ -550,7 +562,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                     ->toArray();
 
                 $studentChoiceIds = $answersByQuestion[$question->id] ?? [];
-                
+
                 // Check if student answered correctly
                 if (
                     count($correctChoiceIds) === count($studentChoiceIds) &&
@@ -564,7 +576,7 @@ class QuizService extends BaseService implements QuizServiceInterface
         } catch (Exception $e) {
             Log::error('Failed to calculate quiz score', [
                 'attempt_id' => $attempt->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw QuizServiceException::calculationError($e->getMessage());
         }
@@ -573,8 +585,6 @@ class QuizService extends BaseService implements QuizServiceInterface
     /**
      * Calculate quiz score (legacy method).
      *
-     * @param QuizAttempt $attempt
-     * @return float
      * @throws QuizServiceException When score calculation fails
      */
     public function calculateScore(QuizAttempt $attempt): float
@@ -606,7 +616,7 @@ class QuizService extends BaseService implements QuizServiceInterface
         } catch (Exception $e) {
             Log::error('Failed to calculate quiz score (legacy method)', [
                 'attempt_id' => $attempt->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw QuizServiceException::calculationError($e->getMessage());
         }
@@ -615,8 +625,6 @@ class QuizService extends BaseService implements QuizServiceInterface
     /**
      * Get quizzes by course.
      *
-     * @param string $courseId
-     * @return Collection
      * @throws QuizServiceException When course not found or database error occurs
      */
     public function getQuizzesByCourse(string $courseId): Collection
@@ -626,7 +634,7 @@ class QuizService extends BaseService implements QuizServiceInterface
         } catch (Exception $e) {
             Log::error('Failed to get quizzes by course', [
                 'course_id' => $courseId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw QuizServiceException::databaseError($e->getMessage());
         }
@@ -635,7 +643,6 @@ class QuizService extends BaseService implements QuizServiceInterface
     /**
      * Get active quizzes.
      *
-     * @return Collection
      * @throws QuizServiceException When database error occurs
      */
     public function getActiveQuizzes(): Collection
@@ -644,7 +651,7 @@ class QuizService extends BaseService implements QuizServiceInterface
             return $this->repository->getActiveQuizzes();
         } catch (Exception $e) {
             Log::error('Failed to get active quizzes', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw QuizServiceException::databaseError($e->getMessage());
         }
@@ -653,8 +660,6 @@ class QuizService extends BaseService implements QuizServiceInterface
     /**
      * Get quiz with questions.
      *
-     * @param string $quizId
-     * @return Model|null
      * @throws QuizServiceException When quiz not found or database error occurs
      */
     public function getQuizWithQuestions(string $quizId): ?Model
@@ -664,7 +669,7 @@ class QuizService extends BaseService implements QuizServiceInterface
         } catch (Exception $e) {
             Log::error('Failed to get quiz with questions', [
                 'quiz_id' => $quizId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw QuizServiceException::databaseError($e->getMessage());
         }
@@ -673,8 +678,6 @@ class QuizService extends BaseService implements QuizServiceInterface
     /**
      * Get quiz with attempts and results.
      *
-     * @param string $quizId
-     * @return Model|null
      * @throws QuizServiceException When quiz not found or database error occurs
      */
     public function getQuizWithAttempts(string $quizId): ?Model
@@ -684,7 +687,7 @@ class QuizService extends BaseService implements QuizServiceInterface
         } catch (Exception $e) {
             Log::error('Failed to get quiz with attempts', [
                 'quiz_id' => $quizId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw QuizServiceException::databaseError($e->getMessage());
         }
@@ -693,7 +696,6 @@ class QuizService extends BaseService implements QuizServiceInterface
     /**
      * Get upcoming quizzes.
      *
-     * @return Collection
      * @throws QuizServiceException When database error occurs
      */
     public function getUpcomingQuizzes(): Collection
@@ -702,18 +704,14 @@ class QuizService extends BaseService implements QuizServiceInterface
             return $this->repository->getUpcomingQuizzes();
         } catch (Exception $e) {
             Log::error('Failed to get upcoming quizzes', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw QuizServiceException::databaseError($e->getMessage());
         }
     }
 
     /**
-     * Get quizzes for student (alias for getAvailableQuizzes for consistency).
-     *
-     * @param string $studentId
-     * @return Collection
-     * @throws QuizServiceException When student not found or database error occurs
+     * Get quizzes for student (alias for getAvailableQuizzes).
      */
     public function getQuizzesForStudent(string $studentId): Collection
     {
@@ -721,12 +719,7 @@ class QuizService extends BaseService implements QuizServiceInterface
     }
 
     /**
-     * Check if student can take quiz (alias for canTakeQuiz for consistency).
-     *
-     * @param string $quizId
-     * @param string $studentId
-     * @return bool
-     * @throws QuizServiceException When database error occurs
+     * Check if student can take quiz (alias for canTakeQuiz).
      */
     public function canStudentTakeQuiz(string $quizId, string $studentId): bool
     {
@@ -735,41 +728,48 @@ class QuizService extends BaseService implements QuizServiceInterface
 
     /**
      * Check if quiz is currently active.
-     *
-     * @param string $quizId
-     * @return bool
-     * @throws QuizServiceException When database error occurs
      */
     public function isQuizActive(string $quizId): bool
     {
         try {
             $quiz = $this->repository->findById($quizId);
 
-            if (!$quiz) {
-                return false;
-            }
-
-            $now = Carbon::now();
-
-            // Check if quiz is published
-            if (!$quiz->is_published) {
-                return false;
-            }
-
-            // Check time boundaries
-            if ($quiz->start_at && $now->lt($quiz->start_at)) {
-                return false;
-            }
-
-            if ($quiz->end_at && $now->gt($quiz->end_at)) {
-                return false;
-            }
-
-            return true;
+            return $quiz ? $quiz->is_active : false;
         } catch (Exception $e) {
             Log::error('Failed to check if quiz is active', [
                 'quiz_id' => $quizId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
+
+    /**
+     * Save quiz answers.
+     */
+    public function saveQuizAnswers(QuizAttempt $quizAttempt, array $answers): QuizAttempt
+    {
+        try {
+            return DB::transaction(function () use ($quizAttempt, $answers) {
+                foreach ($answers as $answer) {
+                    StudentQuizAnswer::updateOrCreate(
+                        [
+                            'quiz_attempt_id' => $quizAttempt->id,
+                            'question_id' => $answer['question_id'],
+                        ],
+                        [
+                            'answer_choice_id' => $answer['answer_choice_id'],
+                        ]
+                    );
+                }
+
+                return $quizAttempt->fresh();
+            });
+        } catch (Exception $e) {
+            Log::error('Failed to save quiz answers', [
+                'attempt_id' => $quizAttempt->id,
+                'error' => $e->getMessage(),
             ]);
             throw QuizServiceException::databaseError($e->getMessage());
         }
@@ -777,43 +777,73 @@ class QuizService extends BaseService implements QuizServiceInterface
 
     /**
      * Get student attempts for a quiz.
-     *
-     * @param string $quizId
-     * @param string $studentId
-     * @return Collection
-     * @throws QuizServiceException When database error occurs
      */
     public function getStudentAttempts(string $quizId, string $studentId): Collection
     {
-        return $this->getAttemptHistory($quizId, $studentId);
+        try {
+            return $this->quizAttemptRepository->getStudentAttempts($quizId, $studentId);
+        } catch (Exception $e) {
+            Log::error('Failed to get student attempts', [
+                'quiz_id' => $quizId,
+                'student_id' => $studentId,
+                'error' => $e->getMessage(),
+            ]);
+            throw QuizServiceException::databaseError($e->getMessage());
+        }
+    }
+
+    /**
+     * Get student's latest attempt for a quiz.
+     */
+    public function getLatestAttempt(string $quizId, string $studentId): ?QuizAttempt
+    {
+        try {
+            return $this->quizAttemptRepository->getLatestAttempt($quizId, $studentId);
+        } catch (Exception $e) {
+            Log::error('Failed to get latest attempt', [
+                'quiz_id' => $quizId,
+                'student_id' => $studentId,
+                'error' => $e->getMessage(),
+            ]);
+            throw QuizServiceException::databaseError($e->getMessage());
+        }
+    }
+
+    /**
+     * Get completed attempts for a quiz.
+     */
+    public function getCompletedAttemptsByQuiz(string $quizId): Collection
+    {
+        try {
+            return $this->quizAttemptRepository->getCompletedAttemptsByQuiz($quizId);
+        } catch (Exception $e) {
+            Log::error('Failed to get completed attempts', [
+                'quiz_id' => $quizId,
+                'error' => $e->getMessage(),
+            ]);
+            throw QuizServiceException::databaseError($e->getMessage());
+        }
     }
 
     /**
      * Get remaining attempts for student.
-     *
-     * @param string $quizId
-     * @param string $studentId
-     * @return int|null Returns null if unlimited attempts
-     * @throws QuizServiceException When database error occurs
      */
     public function getRemainingAttempts(string $quizId, string $studentId): ?int
     {
         try {
             $quiz = $this->repository->findById($quizId);
-
-            if (!$quiz || !$quiz->max_attempts) {
-                return null; // Unlimited attempts
+            if (! $quiz || ! $quiz->max_attempts) {
+                return null;
             }
 
             $attemptCount = $this->quizAttemptRepository->countStudentAttempts($quizId, $studentId);
-            $remaining = $quiz->max_attempts - $attemptCount;
 
-            return max(0, $remaining);
+            return max(0, $quiz->max_attempts - $attemptCount);
         } catch (Exception $e) {
             Log::error('Failed to get remaining attempts', [
                 'quiz_id' => $quizId,
                 'student_id' => $studentId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw QuizServiceException::databaseError($e->getMessage());
         }
@@ -821,48 +851,35 @@ class QuizService extends BaseService implements QuizServiceInterface
 
     /**
      * Get quiz performance statistics.
-     *
-     * @param string $quizId
-     * @return array
-     * @throws QuizServiceException When database error occurs
      */
     public function getQuizStats(string $quizId): array
     {
         try {
-            $quiz = $this->repository->findById($quizId);
-
-            if (!$quiz) {
-                throw QuizServiceException::quizNotFound($quizId);
-            }
-
             $attempts = $this->quizAttemptRepository->getCompletedAttemptsByQuiz($quizId);
-            $totalAttempts = $attempts->count();
 
-            if ($totalAttempts === 0) {
+            if ($attempts->isEmpty()) {
                 return [
                     'total_attempts' => 0,
                     'average_score' => 0,
                     'highest_score' => 0,
                     'lowest_score' => 0,
-                    'pass_rate' => 0,
+                    'completion_rate' => 0,
                 ];
             }
 
             $scores = $attempts->pluck('score')->filter();
-            $passThreshold = $quiz->pass_threshold ?? 60;
-            $passedAttempts = $scores->filter(fn($score) => $score >= $passThreshold)->count();
 
             return [
-                'total_attempts' => $totalAttempts,
-                'average_score' => round($scores->avg(), 2),
+                'total_attempts' => $attempts->count(),
+                'average_score' => $scores->avg(),
                 'highest_score' => $scores->max(),
                 'lowest_score' => $scores->min(),
-                'pass_rate' => $totalAttempts > 0 ? round(($passedAttempts / $totalAttempts) * 100, 2) : 0,
+                'completion_rate' => 100, // All attempts in this collection are completed
             ];
         } catch (Exception $e) {
             Log::error('Failed to get quiz stats', [
                 'quiz_id' => $quizId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw QuizServiceException::databaseError($e->getMessage());
         }
@@ -870,17 +887,12 @@ class QuizService extends BaseService implements QuizServiceInterface
 
     /**
      * Get student's best score for a quiz.
-     *
-     * @param string $quizId
-     * @param string $studentId
-     * @return float|null
-     * @throws QuizServiceException When database error occurs
      */
     public function getStudentBestScore(string $quizId, string $studentId): ?float
     {
         try {
-            $attempts = $this->getAttemptHistory($quizId, $studentId);
-            $completedAttempts = $attempts->where('status', 'completed');
+            $attempts = $this->quizAttemptRepository->getStudentAttempts($quizId, $studentId);
+            $completedAttempts = $attempts->whereIn('status', ['completed', 'submitted']);
 
             if ($completedAttempts->isEmpty()) {
                 return null;
@@ -891,7 +903,121 @@ class QuizService extends BaseService implements QuizServiceInterface
             Log::error('Failed to get student best score', [
                 'quiz_id' => $quizId,
                 'student_id' => $studentId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+            ]);
+            throw QuizServiceException::databaseError($e->getMessage());
+        }
+    }
+
+    /**
+     * Get quizzes by course ID.
+     */
+    public function getQuizzesByCourseId(string $courseId): Collection
+    {
+        return $this->getQuizzesByCourse($courseId);
+    }
+
+    /**
+     * Get paginated quizzes with course information.
+     */
+    public function getPaginatedQuizzesWithCourse(int $perPage = 15): \Illuminate\Pagination\LengthAwarePaginator
+    {
+        try {
+            return $this->repository->getPaginatedWithCourse($perPage);
+        } catch (Exception $e) {
+            Log::error('Failed to get paginated quizzes with course', [
+                'per_page' => $perPage,
+                'error' => $e->getMessage(),
+            ]);
+            throw QuizServiceException::databaseError($e->getMessage());
+        }
+    }
+
+    /**
+     * Get available quizzes for student (alias for getAvailableQuizzes).
+     */
+    public function getAvailableQuizzesForStudent(string $studentId): Collection
+    {
+        return $this->getAvailableQuizzes($studentId);
+    }
+
+    /**
+     * Get all quiz attempts for a quiz.
+     */
+    public function getQuizAttempts(string $quizId): Collection
+    {
+        try {
+            return $this->quizAttemptRepository->getQuizAttempts($quizId);
+        } catch (Exception $e) {
+            Log::error('Failed to get quiz attempts', [
+                'quiz_id' => $quizId,
+                'error' => $e->getMessage(),
+            ]);
+            throw QuizServiceException::databaseError($e->getMessage());
+        }
+    }
+
+    /**
+     * Get quiz with questions and answer choices.
+     */
+    public function getQuizWithQuestionsAndChoices(string $quizId): ?Quiz
+    {
+        try {
+            return $this->repository->getQuizWithQuestionsAndChoices($quizId);
+        } catch (Exception $e) {
+            Log::error('Failed to get quiz with questions and choices', [
+                'quiz_id' => $quizId,
+                'error' => $e->getMessage(),
+            ]);
+            throw QuizServiceException::databaseError($e->getMessage());
+        }
+    }
+
+    /**
+     * Get questions by quiz ID.
+     */
+    public function getQuestionsByQuizId(string $quizId): Collection
+    {
+        try {
+            return $this->repository->getQuestionsByQuizId($quizId);
+        } catch (Exception $e) {
+            Log::error('Failed to get questions by quiz ID', [
+                'quiz_id' => $quizId,
+                'error' => $e->getMessage(),
+            ]);
+            throw QuizServiceException::databaseError($e->getMessage());
+        }
+    }
+
+    /**
+     * Get question with answer choices.
+     */
+    public function getQuestionWithAnswerChoices(string $questionId): ?Question
+    {
+        try {
+            return Question::with('answerChoices')->find($questionId);
+        } catch (Exception $e) {
+            Log::error('Failed to get question with answer choices', [
+                'question_id' => $questionId,
+                'error' => $e->getMessage(),
+            ]);
+            throw QuizServiceException::databaseError($e->getMessage());
+        }
+    }
+
+    /**
+     * Get questions with answer choices by quiz ID.
+     */
+    public function getQuestionsWithAnswerChoicesByQuizId(string $quizId): Collection
+    {
+        try {
+            return Question::with('answerChoices')
+                ->where('quiz_id', $quizId)
+                ->get();
+        } catch (Exception $e) {
+            Log::error('Failed to get questions with answer choices by quiz ID', [
+                'quiz_id' => $quizId,
+                'error' => $e->getMessage(),
             ]);
             throw QuizServiceException::databaseError($e->getMessage());
         }

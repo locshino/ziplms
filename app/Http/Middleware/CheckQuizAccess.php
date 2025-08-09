@@ -22,8 +22,8 @@ class CheckQuizAccess
     public function handle(Request $request, Closure $next, string $action = 'view'): Response
     {
         $user = Auth::user();
-        
-        if (!$user) {
+
+        if (! $user) {
             abort(401, 'Unauthorized');
         }
 
@@ -40,12 +40,12 @@ class CheckQuizAccess
             'update' => 'edit_quizzes',
             'destroy' => 'delete_quizzes',
             'take' => 'take_quizzes',
-            'results' => 'view_reports'
+            'results' => 'view_reports',
         ];
 
         $requiredPermission = $permissionMap[$action] ?? 'view_quizzes';
-        
-        if (!$user->can($requiredPermission)) {
+
+        if (! $user->can($requiredPermission)) {
             abort(403, 'You do not have permission to perform this action.');
         }
 
@@ -61,9 +61,10 @@ class CheckQuizAccess
 
         // Manager can only access quizzes in courses they have permission for
         if ($user->hasRole('manager')) {
-            if (!$user->can('manage-course-' . $quiz->course_id)) {
+            if (! $user->can('manage-course-'.$quiz->course_id)) {
                 abort(403, 'You do not have permission to access this course.');
             }
+
             return $next($request);
         }
 
@@ -72,6 +73,7 @@ class CheckQuizAccess
             if (in_array($action, ['create', 'store', 'edit', 'update', 'destroy'])) {
                 abort(403, 'Teachers can only view and grade quizzes.');
             }
+
             return $next($request);
         }
 
@@ -82,18 +84,18 @@ class CheckQuizAccess
                 ->where('course_id', $quiz->course_id)
                 ->exists();
 
-            if (!$isEnrolled) {
+            if (! $isEnrolled) {
                 abort(403, 'You are not enrolled in this course.');
             }
 
             // Check if student can take the quiz
-            if (!$this->quizService->canTakeQuiz($quiz->id, $user->id)) {
+            if (! $this->quizService->canTakeQuiz($quiz->id, $user->id)) {
                 abort(403, 'You cannot take this quiz at this time.');
             }
 
             // Add quiz to request for controller use
             $request->merge(['quiz_instance' => $quiz]);
-            
+
             return $next($request);
         }
 

@@ -10,7 +10,7 @@ use Spatie\Permission\Models\Permission as SpatiePermission;
 
 class Permission extends SpatiePermission
 {
-    use HasFactory, HasUuids, SoftDeletes, Recyclable;
+    use HasFactory, HasUuids, Recyclable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

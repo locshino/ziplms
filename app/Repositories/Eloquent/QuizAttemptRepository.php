@@ -2,7 +2,6 @@
 
 namespace App\Repositories\Eloquent;
 
-use App\Enums\QuizAttemptStatus;
 use App\Models\QuizAttempt;
 use App\Repositories\Interfaces\QuizAttemptRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
@@ -19,10 +18,6 @@ class QuizAttemptRepository extends EloquentRepository implements QuizAttemptRep
 
     /**
      * Get student's attempts for a quiz.
-     *
-     * @param string $quizId
-     * @param string $studentId
-     * @return Collection
      */
     public function getStudentAttempts(string $quizId, string $studentId): Collection
     {
@@ -34,10 +29,6 @@ class QuizAttemptRepository extends EloquentRepository implements QuizAttemptRep
 
     /**
      * Get student's latest attempt for a quiz.
-     *
-     * @param string $quizId
-     * @param string $studentId
-     * @return QuizAttempt|null
      */
     public function getLatestAttempt(string $quizId, string $studentId): ?QuizAttempt
     {
@@ -49,25 +40,18 @@ class QuizAttemptRepository extends EloquentRepository implements QuizAttemptRep
 
     /**
      * Get attempt with answers.
-     *
-     * @param string $id
-     * @return QuizAttempt|null
      */
     public function getWithAnswers(string $id): ?QuizAttempt
     {
         return $this->model->with([
             'answers.question',
             'answers.answerChoice',
-            'quiz.questions.answerChoices'
+            'quiz.questions.answerChoices',
         ])->find($id);
     }
 
     /**
      * Count student attempts for a quiz.
-     *
-     * @param string $quizId
-     * @param string $studentId
-     * @return int
      */
     public function countStudentAttempts(string $quizId, string $studentId): int
     {
@@ -78,31 +62,44 @@ class QuizAttemptRepository extends EloquentRepository implements QuizAttemptRep
 
     /**
      * Get incomplete attempt for student.
-     *
-     * @param string $quizId
-     * @param string $studentId
-     * @return QuizAttempt|null
      */
     public function getIncompleteAttempt(string $quizId, string $studentId): ?QuizAttempt
     {
         return $this->model
             ->where('quiz_id', $quizId)
             ->where('student_id', $studentId)
-            ->where('status', QuizAttemptStatus::IN_PROGRESS)
+            ->where('status', 'in_progress')
             ->first();
     }
 
     /**
      * Get completed attempts for a quiz.
-     *
-     * @param string $quizId
-     * @return Collection
      */
     public function getCompletedAttemptsByQuiz(string $quizId): Collection
     {
         return $this->model
             ->where('quiz_id', $quizId)
-            ->where('status', QuizAttemptStatus::COMPLETED)
+            ->where('status', 'completed')
             ->get();
+    }
+
+    /**
+     * Get all attempts for a quiz.
+     */
+    public function getByQuizId(string $quizId): Collection
+    {
+        return $this->model
+            ->where('quiz_id', $quizId)
+            ->with(['user', 'quiz'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Get attempts by quiz ID (alias for getByQuizId).
+     */
+    public function getAttemptsByQuizId(string $quizId): Collection
+    {
+        return $this->getByQuizId($quizId);
     }
 }

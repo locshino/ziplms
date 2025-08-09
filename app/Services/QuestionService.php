@@ -2,22 +2,22 @@
 
 namespace App\Services;
 
+use App\Exceptions\Services\QuestionServiceException;
 use App\Models\AnswerChoice;
 use App\Models\Question;
 use App\Models\Quiz;
 use App\Repositories\Interfaces\QuestionRepositoryInterface;
 use App\Services\Interfaces\QuestionServiceInterface;
-use App\Exceptions\Services\QuestionServiceException;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Validation\ValidationException;
-use Carbon\Carbon;
 
 class QuestionService extends BaseService implements QuestionServiceInterface
 {
     protected QuestionRepositoryInterface $questionRepository;
+
     protected QuizCacheService $cacheService;
 
     public function __construct(
@@ -44,12 +44,12 @@ class QuestionService extends BaseService implements QuestionServiceInterface
         }
 
         // Validate points
-        if (!isset($data['points']) || $data['points'] <= 0) {
+        if (! isset($data['points']) || $data['points'] <= 0) {
             throw QuestionServiceException::invalidPoints();
         }
 
         // Validate answer choices
-        if (!isset($data['answer_choices']) || !is_array($data['answer_choices'])) {
+        if (! isset($data['answer_choices']) || ! is_array($data['answer_choices'])) {
             throw QuestionServiceException::insufficientAnswerChoices();
         }
 
@@ -68,8 +68,8 @@ class QuestionService extends BaseService implements QuestionServiceInterface
         }
 
         // Validate correct answers
-        $correctAnswers = array_filter($data['answer_choices'], fn($choice) => $choice['is_correct'] ?? false);
-        
+        $correctAnswers = array_filter($data['answer_choices'], fn ($choice) => $choice['is_correct'] ?? false);
+
         if (empty($correctAnswers)) {
             throw QuestionServiceException::noCorrectAnswer();
         }
@@ -83,13 +83,13 @@ class QuestionService extends BaseService implements QuestionServiceInterface
     private function validateQuizNotActive(string $quizId): void
     {
         $quiz = $this->cacheService->getQuiz($quizId);
-        
-        if (!$quiz) {
+
+        if (! $quiz) {
             throw QuestionServiceException::quizNotFound();
         }
 
         $now = Carbon::now();
-        if ($quiz->start_at && $quiz->end_at && 
+        if ($quiz->start_at && $quiz->end_at &&
             $now->between($quiz->start_at, $quiz->end_at)) {
             throw QuestionServiceException::quizIsActive();
         }
@@ -98,15 +98,13 @@ class QuestionService extends BaseService implements QuestionServiceInterface
     /**
      * Create question with answer choices.
      *
-     * @param array $data
-     * @return Question
      * @throws QuestionServiceException
      */
     public function createWithAnswerChoices(array $data): Question
     {
         // Validate input data
         $this->validateQuestionData($data);
-        
+
         // Check if quiz is not active
         $this->validateQuizNotActive($data['quiz_id']);
 
@@ -142,7 +140,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                 Log::info('Question created successfully', [
                     'question_id' => $question->id,
                     'quiz_id' => $data['quiz_id'],
-                    'answer_choices_count' => count($answerChoices)
+                    'answer_choices_count' => count($answerChoices),
                 ]);
 
                 return $question->load('answerChoices');
@@ -150,7 +148,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                 Log::error('Failed to create question', [
                     'quiz_id' => $data['quiz_id'],
                     'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
+                    'trace' => $e->getTraceAsString(),
                 ]);
                 throw $e;
             }
@@ -160,22 +158,19 @@ class QuestionService extends BaseService implements QuestionServiceInterface
     /**
      * Update question with answer choices.
      *
-     * @param string $id
-     * @param array $data
-     * @return Question
      * @throws QuestionServiceException
      */
     public function updateWithAnswerChoices(string $id, array $data): Question
     {
         // Get existing question
         $existingQuestion = $this->questionRepository->findById($id);
-        if (!$existingQuestion) {
+        if (! $existingQuestion) {
             throw QuestionServiceException::questionNotFound($id);
         }
 
         // Validate input data
         $this->validateQuestionData($data);
-        
+
         // Check if quiz is not active
         $this->validateQuizNotActive($existingQuestion->quiz_id);
 
@@ -183,7 +178,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
         $hasAnswers = DB::table('student_quiz_answers')
             ->where('question_id', $id)
             ->exists();
-            
+
         if ($hasAnswers) {
             throw QuestionServiceException::questionHasAnswers();
         }
@@ -196,7 +191,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                     'points' => $data['points'],
                     'is_multiple_response' => $data['is_multiple_response'] ?? false,
                 ]);
-                
+
                 // Get updated question
                 $question = $this->questionRepository->findById($id);
 
@@ -206,7 +201,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                     ->toArray();
 
                 // Delete existing answer choices in bulk
-                if (!empty($existingChoiceIds)) {
+                if (! empty($existingChoiceIds)) {
                     AnswerChoice::whereIn('id', $existingChoiceIds)->delete();
                 }
 
@@ -233,7 +228,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                     'question_id' => $id,
                     'quiz_id' => $existingQuestion->quiz_id,
                     'deleted_choices' => count($existingChoiceIds),
-                    'new_choices' => count($answerChoices)
+                    'new_choices' => count($answerChoices),
                 ]);
 
                 return $question->load('answerChoices');
@@ -241,7 +236,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                 Log::error('Failed to update question', [
                     'question_id' => $id,
                     'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
+                    'trace' => $e->getTraceAsString(),
                 ]);
                 throw $e;
             }
@@ -250,20 +245,18 @@ class QuestionService extends BaseService implements QuestionServiceInterface
 
     /**
      * Get questions by quiz ID.
-     *
-     * @param string $quizId
-     * @return Collection
      */
     public function getByQuizId(string $quizId): Collection
     {
         // Try to get from cache first
         $cachedQuestions = $this->cacheService->getQuizQuestions($quizId);
-        
-        if (!empty($cachedQuestions)) {
+
+        if (! empty($cachedQuestions)) {
             return collect($cachedQuestions)->map(function ($questionData) {
                 $question = new Question($questionData);
                 $question->answerChoices = collect($questionData['answer_choices'] ?? [])
-                    ->map(fn($choice) => new AnswerChoice($choice));
+                    ->map(fn ($choice) => new AnswerChoice($choice));
+
                 return $question;
             });
         }
@@ -273,9 +266,6 @@ class QuestionService extends BaseService implements QuestionServiceInterface
 
     /**
      * Get question with answer choices.
-     *
-     * @param string $id
-     * @return Question|null
      */
     public function getWithAnswerChoices(string $id): ?Question
     {
@@ -284,10 +274,6 @@ class QuestionService extends BaseService implements QuestionServiceInterface
 
     /**
      * Bulk create questions with answer choices.
-     *
-     * @param  string  $quizId
-     * @param  array  $questionsData
-     * @return array
      */
     public function bulkCreateQuestions(string $quizId, array $questionsData): array
     {
@@ -302,24 +288,24 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                 try {
                     $questionData['quiz_id'] = $quizId;
                     $this->validateQuestionData($questionData);
-                    
+
                     $question = $this->createWithAnswerChoices($questionData);
                     $createdQuestions[] = $question;
                 } catch (\Exception $e) {
                     $errors[] = [
                         'index' => $index,
                         'error' => $e->getMessage(),
-                        'data' => $questionData
+                        'data' => $questionData,
                     ];
                 }
             }
 
-            if (!empty($errors)) {
+            if (! empty($errors)) {
                 Log::warning('Bulk question creation had errors', [
                     'quiz_id' => $quizId,
                     'total' => count($questionsData),
                     'successful' => count($createdQuestions),
-                    'errors' => $errors
+                    'errors' => $errors,
                 ]);
             }
 
@@ -328,16 +314,13 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                 'errors' => $errors,
                 'total' => count($questionsData),
                 'success_count' => count($createdQuestions),
-                'error_count' => count($errors)
+                'error_count' => count($errors),
             ];
         });
     }
 
     /**
      * Bulk delete questions.
-     *
-     * @param  array  $questionIds
-     * @return array
      */
     public function bulkDeleteQuestions(array $questionIds): array
     {
@@ -349,12 +332,13 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             foreach ($questionIds as $questionId) {
                 try {
                     $question = $this->questionRepository->findById($questionId);
-                    
-                    if (!$question) {
+
+                    if (! $question) {
                         $errors[] = [
                             'question_id' => $questionId,
-                            'error' => 'Question not found'
+                            'error' => 'Question not found',
                         ];
+
                         continue;
                     }
 
@@ -362,31 +346,32 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                     $hasAnswers = DB::table('student_quiz_answers')
                         ->where('question_id', $questionId)
                         ->exists();
-                        
+
                     if ($hasAnswers) {
                         $errors[] = [
                             'question_id' => $questionId,
-                            'error' => 'Question has been answered and cannot be deleted'
+                            'error' => 'Question has been answered and cannot be deleted',
                         ];
+
                         continue;
                     }
 
                     // Check if quiz is not active
                     $this->validateQuizNotActive($question->quiz_id);
-                    
+
                     $quizIds[] = $question->quiz_id;
 
                     // Delete answer choices first
                     AnswerChoice::where('question_id', $questionId)->delete();
-                    
+
                     // Delete question
                     $this->questionRepository->deleteById($questionId);
                     $deletedCount++;
-                    
+
                 } catch (\Exception $e) {
                     $errors[] = [
                         'question_id' => $questionId,
-                        'error' => $e->getMessage()
+                        'error' => $e->getMessage(),
                     ];
                 }
             }
@@ -399,23 +384,20 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             Log::info('Bulk question deletion completed', [
                 'total' => count($questionIds),
                 'deleted' => $deletedCount,
-                'errors' => count($errors)
+                'errors' => count($errors),
             ]);
 
             return [
                 'deleted_count' => $deletedCount,
                 'errors' => $errors,
                 'total' => count($questionIds),
-                'error_count' => count($errors)
+                'error_count' => count($errors),
             ];
         });
     }
 
     /**
      * Get question statistics for a quiz.
-     *
-     * @param  string  $quizId
-     * @return array
      */
     public function getQuestionStatistics(string $quizId): array
     {
@@ -442,7 +424,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                     'single_choice_count' => $singleChoiceCount,
                     'multiple_choice_count' => $multipleChoiceCount,
                     'average_choices_per_question' => round($avgChoicesPerQuestion, 2),
-                    'updated_at' => Carbon::now()->toISOString()
+                    'updated_at' => Carbon::now()->toISOString(),
                 ];
             }
         );
@@ -450,10 +432,6 @@ class QuestionService extends BaseService implements QuestionServiceInterface
 
     /**
      * Duplicate questions from one quiz to another.
-     *
-     * @param  string  $sourceQuizId
-     * @param  string  $targetQuizId
-     * @return array
      */
     public function duplicateQuestions(string $sourceQuizId, string $targetQuizId): array
     {
@@ -473,9 +451,9 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                     'answer_choices' => $sourceQuestion->answerChoices->map(function ($choice) {
                         return [
                             'title' => $choice->title,
-                            'is_correct' => $choice->is_correct
+                            'is_correct' => $choice->is_correct,
                         ];
-                    })->toArray()
+                    })->toArray(),
                 ];
 
                 $duplicatedQuestion = $this->createWithAnswerChoices($questionData);
@@ -485,12 +463,12 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             Log::info('Questions duplicated successfully', [
                 'source_quiz_id' => $sourceQuizId,
                 'target_quiz_id' => $targetQuizId,
-                'duplicated_count' => count($duplicatedQuestions)
+                'duplicated_count' => count($duplicatedQuestions),
             ]);
 
             return [
                 'duplicated_questions' => $duplicatedQuestions,
-                'count' => count($duplicatedQuestions)
+                'count' => count($duplicatedQuestions),
             ];
         });
     }

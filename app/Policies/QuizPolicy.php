@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\User;
 use App\Models\Quiz;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class QuizPolicy
@@ -104,5 +104,19 @@ class QuizPolicy
     public function reorder(User $user): bool
     {
         return $user->can('reorder_quiz');
+    }
+
+    /**
+     * Determine whether the user can take the quiz.
+     */
+    public function take(User $user, Quiz $quiz): bool
+    {
+        // Check if user is a student
+        if (! $user->hasRole('student')) {
+            return false;
+        }
+
+        // Check if user is enrolled in the course
+        return $user->enrollments()->where('course_id', $quiz->course_id)->exists();
     }
 }
