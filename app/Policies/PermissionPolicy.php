@@ -3,6 +3,8 @@
 namespace App\Policies;
 
 use App\Models\Permission;
+use App\Libs\Roles\RoleHelper;
+use App\Libs\Permissions\PermissionHelper;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -15,6 +17,16 @@ class PermissionPolicy
      */
     public function viewAny(User $user): bool
     {
+        // Super admin can view all permissions
+        if (RoleHelper::isSuperAdmin($user)) {
+            return $user->can(PermissionHelper::make()->view()->permission()->all()->build());
+        }
+        
+        // Admin can view non-system permissions
+        if (RoleHelper::isAdmin($user)) {
+            return $user->can(PermissionHelper::make()->view()->permission()->public()->build());
+        }
+        
         return $user->can('view_any_permission');
     }
 
@@ -23,6 +35,16 @@ class PermissionPolicy
      */
     public function view(User $user, Permission $permission): bool
     {
+        // Super admin can view all permissions
+        if (RoleHelper::isSuperAdmin($user)) {
+            return $user->can(PermissionHelper::make()->view()->permission()->all()->build());
+        }
+        
+        // Admin can view non-system permissions
+        if (RoleHelper::isAdmin($user) && !$permission->is_system) {
+            return $user->can(PermissionHelper::make()->view()->permission()->public()->build());
+        }
+        
         return $user->can('view_permission');
     }
 
@@ -31,6 +53,11 @@ class PermissionPolicy
      */
     public function create(User $user): bool
     {
+        // Only super admin can create permissions
+        if (RoleHelper::isSuperAdmin($user)) {
+            return $user->can(PermissionHelper::make()->create()->permission()->all()->build());
+        }
+        
         return $user->can('create_permission');
     }
 
@@ -39,6 +66,16 @@ class PermissionPolicy
      */
     public function update(User $user, Permission $permission): bool
     {
+        // Only super admin can update system permissions
+        if ($permission->is_system) {
+            return RoleHelper::isSuperAdmin($user) && $user->can(PermissionHelper::make()->configure()->permission()->all()->build());
+        }
+        
+        // Super admin can update all permissions
+        if (RoleHelper::isSuperAdmin($user)) {
+            return $user->can(PermissionHelper::make()->update()->permission()->all()->build());
+        }
+        
         return $user->can('update_permission');
     }
 
@@ -47,6 +84,16 @@ class PermissionPolicy
      */
     public function delete(User $user, Permission $permission): bool
     {
+        // Only super admin can delete system permissions
+        if ($permission->is_system) {
+            return RoleHelper::isSuperAdmin($user) && $user->can(PermissionHelper::make()->configure()->permission()->all()->build());
+        }
+        
+        // Super admin can delete all permissions
+        if (RoleHelper::isSuperAdmin($user)) {
+            return $user->can(PermissionHelper::make()->delete()->permission()->all()->build());
+        }
+        
         return $user->can('delete_permission');
     }
 
@@ -63,6 +110,16 @@ class PermissionPolicy
      */
     public function forceDelete(User $user, Permission $permission): bool
     {
+        // Only super admin can force delete system permissions
+        if ($permission->is_system) {
+            return RoleHelper::isSuperAdmin($user) && $user->can(PermissionHelper::make()->configure()->permission()->all()->build());
+        }
+        
+        // Super admin can force delete all permissions
+        if (RoleHelper::isSuperAdmin($user)) {
+            return $user->can(PermissionHelper::make()->delete()->permission()->all()->build());
+        }
+        
         return $user->can('force_delete_permission');
     }
 
@@ -79,6 +136,16 @@ class PermissionPolicy
      */
     public function restore(User $user, Permission $permission): bool
     {
+        // Only super admin can restore system permissions
+        if ($permission->is_system) {
+            return RoleHelper::isSuperAdmin($user) && $user->can(PermissionHelper::make()->configure()->permission()->all()->build());
+        }
+        
+        // Super admin can restore all permissions
+        if (RoleHelper::isSuperAdmin($user)) {
+            return $user->can(PermissionHelper::make()->restore()->permission()->all()->build());
+        }
+        
         return $user->can('restore_permission');
     }
 

@@ -56,11 +56,11 @@ return [
         'pages' => true,
         'widgets' => true,
         'resources' => true,
-        'custom_permissions' => false,
+        'custom_permissions' => true,
     ],
 
     'generator' => [
-        'option' => 'policies_and_permissions',
+        'option' => 'permissions', // policies_and_permissions, permissions
         'policy_directory' => 'Policies',
         'policy_namespace' => 'Policies',
     ],

@@ -6,7 +6,8 @@ use App\Filament\Resources\RoleResource\Pages;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use BezhanSalleh\FilamentShield\Forms\ShieldSelectAllToggle;
 use BezhanSalleh\FilamentShield\Support\Utils;
-use BezhanSalleh\FilamentShield\Traits\HasShieldFormComponents;
+use App\Services\Interfaces\RoleServiceInterface;
+use App\Libs\Roles\RoleHelper;
 use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -21,6 +22,9 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use HayderHatem\FilamentExcelImport\Actions\Concerns\CanImportExcelRecords;
+use App\Filament\Imports\RoleImporter;
+use App\Filament\Resources\RoleResource\Concerns\HasShieldFormComponents;
 
 class RoleResource extends Resource implements HasShieldPermissions
 {
@@ -41,6 +45,15 @@ class RoleResource extends Resource implements HasShieldPermissions
         ];
     }
 
+    /**
+     * Get the Eloquent query builder for the resource.
+     * Show all roles including system roles.
+     */
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery();
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -56,13 +69,30 @@ class RoleResource extends Resource implements HasShieldPermissions
                                         modifyRuleUsing: fn (Unique $rule) => Utils::isTenancyEnabled() ? $rule->where(Utils::getTenantModelForeignKey(), Filament::getTenant()?->id) : $rule
                                     )
                                     ->required()
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->regex('/^[\p{Ll}_]+$/u')
+                                    ->helperText(__('role_resource.helpers.name'))
+                                    ->disabled(function ($record) {
+                                        if (!$record?->is_system) {
+                                            return false;
+                                        }
+
+                                        return !RoleHelper::isSuperAdmin();
+                                    }),
 
                                 Forms\Components\TextInput::make('guard_name')
                                     ->label(__('filament-shield::filament-shield.field.guard_name'))
                                     ->default(Utils::getFilamentAuthGuard())
                                     ->nullable()
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->helperText(__('role_resource.helpers.guard_name'))
+                                    ->disabled(function ($record) {
+                                        if (!$record?->is_system) {
+                                            return false;
+                                        }
+
+                                        return !RoleHelper::isSuperAdmin();
+                                    }),
 
                                 Forms\Components\Select::make(config('permission.column_names.team_foreign_key'))
                                     ->label(__('filament-shield::filament-shield.field.team'))
@@ -119,6 +149,14 @@ class RoleResource extends Resource implements HasShieldPermissions
                     ->label(__('role_resource.columns.permissions_count'))
                     ->counts('permissions')
                     ->colors(['success']),
+                Tables\Columns\IconColumn::make('is_system')
+                    ->label(__('role_resource.columns.is_system'))
+                    ->boolean()
+                    ->trueIcon('heroicon-o-shield-check')
+                    ->falseIcon('heroicon-o-user-group')
+                    ->trueColor('danger')
+                    ->falseColor('success')
+                    ->tooltip(fn ($record) => $record->is_system ? 'System Role (Cannot be modified)' : 'User Role'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('role_resource.columns.created_at'))
                     ->dateTime()
@@ -134,12 +172,40 @@ class RoleResource extends Resource implements HasShieldPermissions
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn ($record) => $record->name !== 'super_admin' || RoleHelper::isSuperAdmin()),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn ($record) => ! $record->is_system && $record->name !== 'super_admin')
+                    ->requiresConfirmation()
+                    ->modalHeading('Delete Role')
+                    ->modalDescription('Are you sure you want to delete this role? This action cannot be undone.')
+                    ->modalSubmitActionLabel('Yes, delete it'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->action(function ($records) {
+                            $roleService = app(RoleServiceInterface::class);
+                            $deletedCount = 0;
+                            $skippedCount = 0;
+
+                            foreach ($records as $record) {
+                                if ($roleService->canDeleteRole($record->id) && ! $record->is_system && $record->name !== 'super_admin') {
+                                    $roleService->deleteRole($record->id);
+                                    $deletedCount++;
+                                } else {
+                                    $skippedCount++;
+                                }
+                            }
+
+                            if ($skippedCount > 0) {
+                                \Filament\Notifications\Notification::make()
+                                    ->warning()
+                                    ->title('Some roles were skipped')
+                                    ->body("{$skippedCount} system roles or super_admin role cannot be deleted. {$deletedCount} roles were deleted.")
+                                    ->send();
+                            }
+                        }),
                     ExportBulkAction::make()->exports([
                         ExcelExport::make()
                             ->queue()
