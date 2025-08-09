@@ -4,6 +4,8 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Badge;
+use App\Libs\Roles\RoleHelper;
+use App\Libs\Permissions\PermissionHelper;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class BadgePolicy
@@ -31,7 +33,12 @@ class BadgePolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_badge');
+        // Only super admin, admin, and managers can create badges
+        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user) || RoleHelper::isManager($user)) {
+            return $user->can('create_badge');
+        }
+        
+        return false;
     }
 
     /**
@@ -39,7 +46,12 @@ class BadgePolicy
      */
     public function update(User $user, Badge $badge): bool
     {
-        return $user->can('update_badge');
+        // Only super admin, admin, and managers can update badges
+        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user) || RoleHelper::isManager($user)) {
+            return $user->can('update_badge');
+        }
+        
+        return false;
     }
 
     /**
@@ -47,7 +59,12 @@ class BadgePolicy
      */
     public function delete(User $user, Badge $badge): bool
     {
-        return $user->can('delete_badge');
+        // Only super admin and admin can delete badges
+        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
+            return $user->can('delete_badge');
+        }
+        
+        return false;
     }
 
     /**

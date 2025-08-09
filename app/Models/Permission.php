@@ -22,4 +22,13 @@ class Permission extends SpatiePermission
         'guard_name',
         'is_system', // Add our custom column here
     ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'is_system' => 'boolean',
+    ];
 }

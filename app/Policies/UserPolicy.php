@@ -3,7 +3,8 @@
 namespace App\Policies;
 
 use App\Models\User;
-
+use App\Libs\Roles\RoleHelper;
+use App\Libs\Permissions\PermissionHelper;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class UserPolicy
@@ -18,6 +19,21 @@ class UserPolicy
      */
     public function viewAny(User $user): bool
     {
+        // Super admin can view all users
+        if (RoleHelper::isSuperAdmin($user)) {
+            return $user->can(PermissionHelper::make()->view()->user()->all()->build());
+        }
+        
+        // Admin can view non-super-admin users
+        if (RoleHelper::isAdmin($user)) {
+            return $user->can(PermissionHelper::make()->view()->user()->admin()->build());
+        }
+        
+        // Manager can view users in their department
+        if (RoleHelper::isManager($user)) {
+            return $user->can(PermissionHelper::make()->view()->user()->department()->build());
+        }
+        
         return $user->can('view_any_user');
     }
 
@@ -29,7 +45,8 @@ class UserPolicy
      */
     public function view(User $user): bool
     {
-        return $user->can('view_user');
+        // Users can view themselves
+        return $user->can(PermissionHelper::make()->view()->user()->self()->build()) || $user->can('view_user');
     }
 
     /**
@@ -40,6 +57,21 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
+        // Super admin can create all types of users
+        if (RoleHelper::isSuperAdmin($user)) {
+            return $user->can(PermissionHelper::make()->create()->user()->all()->build());
+        }
+        
+        // Admin can create non-super-admin users
+        if (RoleHelper::isAdmin($user)) {
+            return $user->can(PermissionHelper::make()->create()->user()->admin()->build());
+        }
+        
+        // Manager can invite users to their department
+        if (RoleHelper::isManager($user)) {
+            return $user->can(PermissionHelper::make()->invite()->user()->department()->build());
+        }
+        
         return $user->can('create_user');
     }
 
@@ -47,10 +79,31 @@ class UserPolicy
      * Determine whether the user can update the model.
      *
      * @param  \App\Models\User  $user
+     * @param  \App\Models\User  $targetUser
      * @return bool
      */
-    public function update(User $user): bool
+    public function update(User $user, User $targetUser): bool
     {
+        // Super admin can update anyone
+        if (RoleHelper::isSuperAdmin($user)) {
+            return $user->can(PermissionHelper::make()->update()->user()->all()->build());
+        }
+        
+        // Users can update themselves
+        if ($user->id === $targetUser->id) {
+            return $user->can(PermissionHelper::make()->update()->user()->self()->build());
+        }
+        
+        // Admin can update non-super-admin users
+        if (RoleHelper::isAdmin($user) && !RoleHelper::isSuperAdmin($targetUser)) {
+            return $user->can(PermissionHelper::make()->update()->user()->admin()->build());
+        }
+        
+        // Manager can update users in their department
+        if (RoleHelper::isManager($user)) {
+            return $user->can(PermissionHelper::make()->update()->user()->department()->build());
+        }
+        
         return $user->can('update_user');
     }
 
@@ -58,10 +111,36 @@ class UserPolicy
      * Determine whether the user can delete the model.
      *
      * @param  \App\Models\User  $user
+     * @param  \App\Models\User  $targetUser
      * @return bool
      */
-    public function delete(User $user): bool
+    public function delete(User $user, User $targetUser): bool
     {
+        // Prevent users from deleting themselves
+        if ($user->id === $targetUser->id) {
+            return false;
+        }
+        
+        // Super admin can delete anyone (except themselves)
+        if (RoleHelper::isSuperAdmin($user)) {
+            return $user->can(PermissionHelper::make()->delete()->user()->all()->build());
+        }
+        
+        // Prevent deleting super admin users unless user is super admin
+        if (RoleHelper::isSuperAdmin($targetUser)) {
+            return false;
+        }
+        
+        // Admin can delete non-super-admin users
+        if (RoleHelper::isAdmin($user)) {
+            return $user->can(PermissionHelper::make()->delete()->user()->admin()->build());
+        }
+        
+        // Manager can suspend users in their department
+        if (RoleHelper::isManager($user)) {
+            return $user->can(PermissionHelper::make()->suspend()->user()->department()->build());
+        }
+        
         return $user->can('delete_user');
     }
 

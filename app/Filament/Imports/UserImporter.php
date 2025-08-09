@@ -14,26 +14,18 @@ class UserImporter extends Importer
     public static function getColumns(): array
     {
         return [
-            ImportColumn::make('name')
-                ->requiredMapping()
-                ->rules(['required', 'max:255']),
-            ImportColumn::make('email')
-                ->requiredMapping()
-                ->rules(['required', 'email', 'unique:users,email']),
-            ImportColumn::make('password')
-                ->rules(['nullable', 'min:8'])
-                ->castStateUsing(function (string $state): string {
-                    return bcrypt($state);
-                }),
+            //
         ];
     }
 
     public function resolveRecord(): ?User
     {
-        return User::firstOrNew([
-            // Update existing records, matching them by email
-            'email' => $this->data['email'],
-        ]);
+        // return User::firstOrNew([
+        //     // Update existing records, matching them by `$this->data['column_name']`
+        //     'email' => $this->data['email'],
+        // ]);
+
+        return new User();
     }
 
     public static function getCompletedNotificationBody(Import $import): string

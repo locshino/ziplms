@@ -25,6 +25,7 @@ use Jeffgreco13\FilamentBreezy\BreezyCore;
 use FilamentWebpush\FilamentWebpushPlugin;
 use Asmit\ResizedColumn\ResizedColumnPlugin;
 use Awcodes\LightSwitch\LightSwitchPlugin;
+use TomatoPHP\FilamentPWA\FilamentPWAPlugin;
 
 class AppPanelProvider extends PanelProvider
 {
@@ -80,6 +81,8 @@ class AppPanelProvider extends PanelProvider
                 ResizedColumnPlugin::make()
                     ->preserveOnDB(),
                 LightSwitchPlugin::make(),
+
+                FilamentPWAPlugin::make(),
             ])
             ->authMiddleware([
                 Authenticate::class,
