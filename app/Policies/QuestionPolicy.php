@@ -2,9 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\Question;
 use App\Libs\Roles\RoleHelper;
-use App\Libs\Permissions\PermissionHelper;
+use App\Models\Question;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -29,12 +28,12 @@ class QuestionPolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return true;
         }
-        
+
         // Teachers can view questions in quizzes they manage
         if (RoleHelper::isTeacher($user) && $question->quiz && $question->quiz->course && $question->quiz->course->teachers()->where('user_id', $user->id)->exists()) {
             return true;
         }
-        
+
         return $user->can('view_question');
     }
 
@@ -47,7 +46,7 @@ class QuestionPolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user) || RoleHelper::isTeacher($user)) {
             return $user->can('create_question');
         }
-        
+
         return false;
     }
 
@@ -60,12 +59,12 @@ class QuestionPolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return $user->can('update_question');
         }
-        
+
         // Teachers can update questions in quizzes they manage
         if (RoleHelper::isTeacher($user) && $question->quiz && $question->quiz->course && $question->quiz->course->teachers()->where('user_id', $user->id)->exists()) {
             return $user->can('update_question');
         }
-        
+
         return $user->can('update_question');
     }
 
@@ -78,12 +77,12 @@ class QuestionPolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return $user->can('delete_question');
         }
-        
+
         // Teachers can delete questions in quizzes they manage
         if (RoleHelper::isTeacher($user) && $question->quiz && $question->quiz->course && $question->quiz->course->teachers()->where('user_id', $user->id)->exists()) {
             return $user->can('delete_question');
         }
-        
+
         return false;
     }
 

@@ -61,7 +61,7 @@ class UserDetail extends Page
 
     public function addUserToCourse()
     {
-        if (!$this->selectedCourseId || !$this->record) {
+        if (! $this->selectedCourseId || ! $this->record) {
             return;
         }
 
@@ -79,7 +79,7 @@ class UserDetail extends Page
             return;
         }
 
-        if (!$exists) {
+        if (! $exists) {
             Enrollment::create([
                 'student_id' => $userId,
                 'course_id' => $courseId,

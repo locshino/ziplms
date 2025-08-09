@@ -2,9 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\AnswerChoice;
 use App\Libs\Roles\RoleHelper;
-use App\Libs\Permissions\PermissionHelper;
+use App\Models\AnswerChoice;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -29,12 +28,12 @@ class AnswerChoicePolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return true;
         }
-        
+
         // Teachers can view answer choices in questions they manage
         if (RoleHelper::isTeacher($user) && $answerChoice->question && $answerChoice->question->quiz && $answerChoice->question->quiz->course && $answerChoice->question->quiz->course->teachers()->where('user_id', $user->id)->exists()) {
             return true;
         }
-        
+
         return $user->can('view_answer::choice');
     }
 
@@ -47,7 +46,7 @@ class AnswerChoicePolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user) || RoleHelper::isTeacher($user)) {
             return $user->can('create_answer::choice');
         }
-        
+
         return false;
     }
 
@@ -60,12 +59,12 @@ class AnswerChoicePolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return $user->can('update_answer::choice');
         }
-        
+
         // Teachers can update answer choices in questions they manage
         if (RoleHelper::isTeacher($user) && $answerChoice->question && $answerChoice->question->quiz && $answerChoice->question->quiz->course && $answerChoice->question->quiz->course->teachers()->where('user_id', $user->id)->exists()) {
             return $user->can('update_answer::choice');
         }
-        
+
         return false;
     }
 
@@ -78,12 +77,12 @@ class AnswerChoicePolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return $user->can('delete_answer::choice');
         }
-        
+
         // Teachers can delete answer choices in questions they manage
         if (RoleHelper::isTeacher($user) && $answerChoice->question && $answerChoice->question->quiz && $answerChoice->question->quiz->course && $answerChoice->question->quiz->course->teachers()->where('user_id', $user->id)->exists()) {
             return $user->can('delete_answer::choice');
         }
-        
+
         return false;
     }
 

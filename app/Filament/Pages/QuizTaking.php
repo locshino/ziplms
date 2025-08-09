@@ -364,8 +364,8 @@ class QuizTaking extends Page
                 ->requiresConfirmation()
                 ->modalHeading('Xác nhận nộp bài')
                 ->modalDescription('Bạn có chắc chắn muốn nộp bài? Bạn không thể thay đổi sau khi nộp.')
-                ->action(fn() => $this->submitQuiz())
-                ->disabled(fn() => $this->submitting),
+                ->action(fn () => $this->submitQuiz())
+                ->disabled(fn () => $this->submitting),
         ];
     }
 }

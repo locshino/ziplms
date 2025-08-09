@@ -2,17 +2,16 @@
 
 namespace App\Filament\Resources\RoleResource\Pages;
 
+use App\Enums\Permissions\PermissionContextEnum;
+use App\Enums\Permissions\PermissionNounEnum;
+use App\Enums\Permissions\PermissionVerbEnum;
 use App\Filament\Resources\RoleResource;
-use App\Services\Interfaces\RoleServiceInterface;
+use App\Libs\Permissions\PermissionHelper;
+use App\Models\Permission;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use App\Models\Permission;
-use App\Enums\Permissions\PermissionVerbEnum;
-use App\Enums\Permissions\PermissionNounEnum;
-use App\Enums\Permissions\PermissionContextEnum;
-use App\Libs\Permissions\PermissionHelper;
 
 class CreateRole extends CreateRecord
 {
@@ -67,12 +66,12 @@ class CreateRole extends CreateRecord
      */
     protected function handleNewPermissions(array $data): void
     {
-        if (!isset($data['new_permissions']) || !is_array($data['new_permissions'])) {
+        if (! isset($data['new_permissions']) || ! is_array($data['new_permissions'])) {
             return;
         }
 
         foreach ($data['new_permissions'] as $newPermission) {
-            if (!isset($newPermission['verb'], $newPermission['noun'], $newPermission['context'])) {
+            if (! isset($newPermission['verb'], $newPermission['noun'], $newPermission['context'])) {
                 continue;
             }
 
@@ -92,7 +91,7 @@ class CreateRole extends CreateRecord
                 $builder->context($contextEnum);
 
                 // Add attribute value if needed
-                if (in_array($newPermission['context'], [PermissionContextEnum::ID->value, PermissionContextEnum::TAG->value]) && !empty($newPermission['attribute_value'])) {
+                if (in_array($newPermission['context'], [PermissionContextEnum::ID->value, PermissionContextEnum::TAG->value]) && ! empty($newPermission['attribute_value'])) {
                     $builder->withAttribute($newPermission['attribute_value']);
                 }
 

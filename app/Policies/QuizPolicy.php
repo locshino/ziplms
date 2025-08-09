@@ -2,9 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\Quiz;
 use App\Libs\Roles\RoleHelper;
-use App\Libs\Permissions\PermissionHelper;
+use App\Models\Quiz;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -29,17 +28,17 @@ class QuizPolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return true;
         }
-        
+
         // Teachers can view quizzes in courses they teach
         if (RoleHelper::isTeacher($user) && $quiz->course && $quiz->course->teachers()->where('user_id', $user->id)->exists()) {
             return true;
         }
-        
+
         // Students can view quizzes in courses they are enrolled in
         if (RoleHelper::isStudent($user) && $quiz->course && $quiz->course->enrollments()->where('user_id', $user->id)->exists()) {
             return true;
         }
-        
+
         return $user->can('view_quiz');
     }
 
@@ -60,12 +59,12 @@ class QuizPolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return $user->can('update_quiz');
         }
-        
+
         // Teachers can update quizzes in courses they teach
         if (RoleHelper::isTeacher($user) && $quiz->course && $quiz->course->teachers()->where('user_id', $user->id)->exists()) {
             return $user->can('update_quiz');
         }
-        
+
         return $user->can('update_quiz');
     }
 
@@ -78,12 +77,12 @@ class QuizPolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return $user->can('delete_quiz');
         }
-        
+
         // Teachers can delete quizzes in courses they teach
         if (RoleHelper::isTeacher($user) && $quiz->course && $quiz->course->teachers()->where('user_id', $user->id)->exists()) {
             return $user->can('delete_quiz');
         }
-        
+
         return false;
     }
 

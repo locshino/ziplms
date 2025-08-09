@@ -2,6 +2,11 @@
 
 namespace App\Filament\Resources\RoleResource\Concerns;
 
+use App\Enums\Permissions\PermissionContextEnum;
+use App\Enums\Permissions\PermissionNounEnum;
+use App\Enums\Permissions\PermissionVerbEnum;
+use App\Libs\Permissions\PermissionHelper;
+use App\Models\Permission;
 use BezhanSalleh\FilamentShield\Facades\FilamentShield;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Support\Utils;
@@ -10,11 +15,6 @@ use Filament\Forms\Components\Component;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
-use App\Enums\Permissions\PermissionVerbEnum;
-use App\Enums\Permissions\PermissionNounEnum;
-use App\Enums\Permissions\PermissionContextEnum;
-use App\Libs\Permissions\PermissionHelper;
-use App\Models\Permission;
 
 trait HasShieldFormComponents
 {
@@ -44,7 +44,7 @@ trait HasShieldFormComponents
                 );
 
                 return Forms\Components\Section::make($sectionLabel)
-                    ->description(fn () => new HtmlString('<span style="word-break: break-word;">' . Utils::showModelPath($entity['fqcn']) . '</span>'))
+                    ->description(fn () => new HtmlString('<span style="word-break: break-word;">'.Utils::showModelPath($entity['fqcn']).'</span>'))
                     ->compact()
                     ->schema([
                         static::getCheckBoxListComponentForResource($entity),
@@ -66,7 +66,7 @@ trait HasShieldFormComponents
     {
         return collect(Utils::getResourcePermissionPrefixes($entity['fqcn']))
             ->flatMap(function ($permission) use ($entity) {
-                $name = $permission . '_' . $entity['resource'];
+                $name = $permission.'_'.$entity['resource'];
                 $label = static::shield()->hasLocalizedPermissionLabels()
                     ? FilamentShield::getLocalizedResourcePermissionLabel($permission)
                     : $name;
@@ -224,7 +224,7 @@ trait HasShieldFormComponents
             ]);
     }
 
-    public static function getCheckboxListFormComponent(string $name, array $options, bool $searchable = true, array | int | string | null $columns = null, array | int | string | null $columnSpan = null): Component
+    public static function getCheckboxListFormComponent(string $name, array $options, bool $searchable = true, array|int|string|null $columns = null, array|int|string|null $columnSpan = null): Component
     {
         return Forms\Components\CheckboxList::make($name)
             ->label('')
@@ -333,7 +333,7 @@ trait HasShieldFormComponents
                             // Handle saving new permissions
                             if (isset($data['new_permissions']) && is_array($data['new_permissions'])) {
                                 foreach ($data['new_permissions'] as $permissionData) {
-                                    if (!empty($permissionData['permission_name'])) {
+                                    if (! empty($permissionData['permission_name'])) {
                                         Permission::firstOrCreate(
                                             ['name' => $permissionData['permission_name']],
                                             [
@@ -344,18 +344,18 @@ trait HasShieldFormComponents
                                     }
                                 }
                             }
-                            
+
                             // Show success notification
                             Notification::make()
                                 ->title(__('role_resource.permission_management.save_success'))
                                 ->success()
                                 ->send();
-                            
+
                             // Refresh the form to update existing permissions list
                             $livewire->form->fill($livewire->form->getState());
                         })
-                        ->visible(fn (callable $get) => !empty($get('new_permissions')))
-                ])
+                        ->visible(fn (callable $get) => ! empty($get('new_permissions'))),
+                ]),
             ]);
     }
 
@@ -366,6 +366,7 @@ trait HasShieldFormComponents
     {
         if (! $verb || ! $noun || ! $context) {
             $set('permission_name', '');
+
             return;
         }
 
@@ -402,7 +403,7 @@ trait HasShieldFormComponents
     protected static function getExistingCustomPermissions(): array
     {
         $permissionService = app(\App\Services\Interfaces\PermissionServiceInterface::class);
-        
+
         return $permissionService->getExistingCustomPermissions()
             ->mapWithKeys(function ($permissionName) {
                 return [$permissionName => static::formatPermissionLabel($permissionName)];
@@ -418,15 +419,15 @@ trait HasShieldFormComponents
         // Check if there's a specific translation for this permission
         $translationKey = "permissions.{$permissionName}";
         $translation = __($translationKey);
-        
+
         // If translation exists and is different from the key, use it
         if ($translation !== $translationKey) {
             return $translation;
         }
-        
+
         // Otherwise, format the permission name to be more readable
         $parts = explode('_', $permissionName);
-        
+
         // Capitalize each part and join with spaces
         $formatted = collect($parts)
             ->map(function ($part) {
@@ -446,7 +447,7 @@ trait HasShieldFormComponents
                 };
             })
             ->join(' ');
-            
+
         return $formatted;
     }
 

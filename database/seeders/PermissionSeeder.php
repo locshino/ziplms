@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Libs\Permissions\PermissionHelper;
 use App\Models\Permission;
 use App\Models\Role;
 use Illuminate\Database\Seeder;
-use App\Libs\Permissions\PermissionHelper;
 
 class PermissionSeeder extends Seeder
 {
@@ -205,49 +205,49 @@ class PermissionSeeder extends Seeder
                 // User Management
                 'view_user_all', 'create_user_all', 'update_user_all', 'delete_user_all',
                 'invite_user_all', 'suspend_user_all', 'activate_user_all', 'deactivate_user_all',
-                
+
                 // Role & Permission Management
                 'view_role_all', 'create_role_all', 'update_role_all', 'delete_role_all', 'assign_role_all',
                 'view_permission_all', 'create_permission_all', 'update_permission_all', 'delete_permission_all',
-                
+
                 // Course Management
                 'view_course_all', 'create_course_all', 'update_course_all', 'delete_course_all',
                 'manage_course_all', 'publish_course_all', 'unpublish_course_all', 'archive_course_all', 'restore_course_all',
-                
+
                 // Quiz Management
                 'view_quiz_all', 'create_quiz_all', 'update_quiz_all', 'delete_quiz_all', 'manage_quiz_all',
                 'view_results_quiz_all',
-                
+
                 // Assignment Management
                 'view_assignment_all', 'create_assignment_all', 'update_assignment_all', 'delete_assignment_all',
                 'manage_assignment_all', 'distribute_assignment_all', 'collect_assignment_all', 'extend_assignment_all',
-                
+
                 // Submission Management
                 'view_submission_all', 'grade_submission_all', 'review_submission_all', 'approve_submission_all', 'reject_submission_all',
-                
+
                 // Enrollment Management
                 'view_enrollment_all', 'create_enrollment_all', 'update_enrollment_all', 'delete_enrollment_all', 'manage_enrollment_all',
-                
+
                 // Badge Management
                 'view_badge_all', 'create_badge_all', 'update_badge_all', 'delete_badge_all',
                 'manage_badge_all', 'award_badge_all', 'revoke_badge_all',
-                
+
                 // Media Management
                 'view_media_all', 'create_media_all', 'update_media_all', 'delete_media_all',
                 'upload_media_all', 'download_media_all', 'stream_media_all',
-                
+
                 // Question Management
                 'view_question_all', 'create_question_all', 'update_question_all', 'delete_question_all', 'manage_question_all',
-                
+
                 // Tag Management
                 'view_tag_all', 'create_tag_all', 'update_tag_all', 'delete_tag_all',
-                
+
                 // Communication
                 'notify_user_all', 'message_user_all', 'announce_course_all',
-                
+
                 // Monitoring & Analytics
                 'monitor_user_all', 'track_user_all', 'evaluate_user_all', 'generate_media_all', 'analyze_media_all',
-                
+
                 // System Administration
                 'configure_user_all', 'backup_user_all', 'export_user_all', 'import_user_all', 'reset_user_all',
             ];
@@ -259,37 +259,37 @@ class PermissionSeeder extends Seeder
             $managerPermissions = [
                 // User Management (limited)
                 'view_user_all', 'update_user_all', 'invite_user_all',
-                
+
                 // Course Management
                 'view_course_all', 'create_course_all', 'update_course_all',
                 'manage_course_all', 'publish_course_all', 'unpublish_course_all',
-                
+
                 // Quiz Management
                 'view_quiz_all', 'create_quiz_all', 'update_quiz_all',
                 'manage_quiz_all', 'view_results_quiz_all',
-                
+
                 // Assignment Management
                 'view_assignment_all', 'create_assignment_all', 'update_assignment_all',
                 'manage_assignment_all', 'distribute_assignment_all', 'collect_assignment_all',
-                
+
                 // Submission Management
                 'view_submission_all', 'grade_submission_all', 'review_submission_all',
-                
+
                 // Enrollment Management
                 'view_enrollment_all', 'create_enrollment_all', 'update_enrollment_all', 'manage_enrollment_all',
-                
+
                 // Badge Management
                 'view_badge_all', 'create_badge_all', 'update_badge_all', 'award_badge_all',
-                
+
                 // Media Management
                 'view_media_all', 'upload_media_all', 'download_media_all', 'stream_media_all',
-                
+
                 // Question Management
                 'view_question_all', 'create_question_all', 'update_question_all', 'manage_question_all',
-                
+
                 // Communication
                 'notify_user_all', 'message_user_all', 'announce_course_all',
-                
+
                 // Monitoring & Analytics
                 'monitor_user_all', 'track_user_all', 'evaluate_user_all', 'generate_media_all', 'analyze_media_all',
             ];
@@ -301,36 +301,36 @@ class PermissionSeeder extends Seeder
             $teacherPermissions = [
                 // User Management (self only)
                 'view_user_self', 'update_user_self',
-                
+
                 // Course Management (assigned courses)
                 'view_course_all', 'view_course_assigned', 'update_course_assigned', 'teach_course_assigned',
-                
+
                 // Quiz Management (assigned courses)
                 'view_quiz_all', 'view_quiz_assigned', 'update_quiz_assigned', 'create_quiz_all', 'update_quiz_all',
                 'view_results_quiz_all',
-                
+
                 // Assignment Management (assigned courses)
                 'view_assignment_all', 'view_assignment_assigned', 'update_assignment_assigned',
                 'create_assignment_all', 'update_assignment_all', 'distribute_assignment_all', 'collect_assignment_all',
-                
+
                 // Submission Management
                 'view_submission_all', 'grade_submission_all', 'review_submission_all', 'approve_submission_all', 'reject_submission_all',
-                
+
                 // Enrollment Management (view only)
                 'view_enrollment_all',
-                
+
                 // Badge Management (award only)
                 'view_badge_all', 'award_badge_all',
-                
+
                 // Media Management
                 'view_media_all', 'upload_media_all', 'download_media_all', 'stream_media_all',
-                
+
                 // Question Management
                 'view_question_all', 'create_question_all', 'update_question_all', 'manage_question_all',
-                
+
                 // Communication
                 'notify_user_all', 'message_user_all', 'announce_course_all',
-                
+
                 // Monitoring (assigned students)
                 'track_user_all', 'evaluate_user_all',
             ];
@@ -342,27 +342,27 @@ class PermissionSeeder extends Seeder
             $studentPermissions = [
                 // User Management (self only)
                 'view_user_self', 'update_user_self',
-                
+
                 // Course Management (enrolled courses)
                 'view_course_enrolled', 'attend_course_enrolled',
-                
+
                 // Quiz Management (enrolled courses)
                 'view_quiz_enrolled', 'take_quiz_enrolled', 'retake_quiz_enrolled',
                 'start_quiz_enrolled', 'finish_quiz_enrolled', 'pause_quiz_enrolled', 'resume_quiz_enrolled',
                 'view_results_quiz_self',
-                
+
                 // Assignment Management (enrolled courses)
                 'view_assignment_enrolled',
-                
+
                 // Submission Management (own submissions)
                 'view_submission_self', 'create_submission_all', 'update_submission_all', 'submit_submission_enrolled',
-                
+
                 // Enrollment Management (self only)
                 'view_enrollment_self',
-                
+
                 // Badge Management (view own badges)
                 'view_badge_self', 'earn_badge_all',
-                
+
                 // Media Management (view and download)
                 'view_media_all', 'download_media_all', 'stream_media_all',
             ];

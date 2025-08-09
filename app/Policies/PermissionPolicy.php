@@ -2,9 +2,9 @@
 
 namespace App\Policies;
 
-use App\Models\Permission;
-use App\Libs\Roles\RoleHelper;
 use App\Libs\Permissions\PermissionHelper;
+use App\Libs\Roles\RoleHelper;
+use App\Models\Permission;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -21,12 +21,12 @@ class PermissionPolicy
         if (RoleHelper::isSuperAdmin($user)) {
             return $user->can(PermissionHelper::make()->view()->permission()->all()->build());
         }
-        
+
         // Admin can view non-system permissions
         if (RoleHelper::isAdmin($user)) {
             return $user->can(PermissionHelper::make()->view()->permission()->public()->build());
         }
-        
+
         return $user->can('view_any_permission');
     }
 
@@ -39,12 +39,12 @@ class PermissionPolicy
         if (RoleHelper::isSuperAdmin($user)) {
             return $user->can(PermissionHelper::make()->view()->permission()->all()->build());
         }
-        
+
         // Admin can view non-system permissions
-        if (RoleHelper::isAdmin($user) && !$permission->is_system) {
+        if (RoleHelper::isAdmin($user) && ! $permission->is_system) {
             return $user->can(PermissionHelper::make()->view()->permission()->public()->build());
         }
-        
+
         return $user->can('view_permission');
     }
 
@@ -57,7 +57,7 @@ class PermissionPolicy
         if (RoleHelper::isSuperAdmin($user)) {
             return $user->can(PermissionHelper::make()->create()->permission()->all()->build());
         }
-        
+
         return $user->can('create_permission');
     }
 
@@ -70,12 +70,12 @@ class PermissionPolicy
         if ($permission->is_system) {
             return RoleHelper::isSuperAdmin($user) && $user->can(PermissionHelper::make()->configure()->permission()->all()->build());
         }
-        
+
         // Super admin can update all permissions
         if (RoleHelper::isSuperAdmin($user)) {
             return $user->can(PermissionHelper::make()->update()->permission()->all()->build());
         }
-        
+
         return $user->can('update_permission');
     }
 
@@ -88,12 +88,12 @@ class PermissionPolicy
         if ($permission->is_system) {
             return RoleHelper::isSuperAdmin($user) && $user->can(PermissionHelper::make()->configure()->permission()->all()->build());
         }
-        
+
         // Super admin can delete all permissions
         if (RoleHelper::isSuperAdmin($user)) {
             return $user->can(PermissionHelper::make()->delete()->permission()->all()->build());
         }
-        
+
         return $user->can('delete_permission');
     }
 
@@ -114,12 +114,12 @@ class PermissionPolicy
         if ($permission->is_system) {
             return RoleHelper::isSuperAdmin($user) && $user->can(PermissionHelper::make()->configure()->permission()->all()->build());
         }
-        
+
         // Super admin can force delete all permissions
         if (RoleHelper::isSuperAdmin($user)) {
             return $user->can(PermissionHelper::make()->delete()->permission()->all()->build());
         }
-        
+
         return $user->can('force_delete_permission');
     }
 
@@ -140,12 +140,12 @@ class PermissionPolicy
         if ($permission->is_system) {
             return RoleHelper::isSuperAdmin($user) && $user->can(PermissionHelper::make()->configure()->permission()->all()->build());
         }
-        
+
         // Super admin can restore all permissions
         if (RoleHelper::isSuperAdmin($user)) {
             return $user->can(PermissionHelper::make()->restore()->permission()->all()->build());
         }
-        
+
         return $user->can('restore_permission');
     }
 

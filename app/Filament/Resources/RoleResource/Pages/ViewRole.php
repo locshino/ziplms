@@ -13,12 +13,12 @@ class ViewRole extends ViewRecord
     protected function getActions(): array
     {
         $actions = [];
-        
+
         // Only show edit action for non-system roles
-        if (!$this->record->is_system) {
+        if (! $this->record->is_system) {
             $actions[] = Actions\EditAction::make();
         }
-        
+
         return $actions;
     }
 }
