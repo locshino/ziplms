@@ -3,16 +3,17 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
-use Filament\Actions;
-use Filament\Resources\Pages\CreateRecord;
 use App\Services\Interfaces\UserServiceInterface;
+use Filament\Resources\Pages\CreateRecord;
 
 class CreateUser extends CreateRecord
 {
     protected static string $resource = UserResource::class;
+
     protected function mutateFormDataBeforeSave(array $data): array
     {
         unset($data['avatar']);
+
         return $data;
     }
 

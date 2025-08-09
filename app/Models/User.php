@@ -16,7 +16,8 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class User extends Authenticatable implements HasMedia
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasUuids, Notifiable, SoftDeletes, Recyclable;
+    use HasFactory, HasUuids, Notifiable, Recyclable, SoftDeletes;
+
     use InteractsWithMedia;
 
     /**
@@ -120,5 +121,4 @@ class User extends Authenticatable implements HasMedia
             ->withPivot('awarded_at')
             ->withTimestamps();
     }
-
 }

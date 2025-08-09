@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as BaseAuthenticatable;
-use Spatie\Permission\Traits\HasRoles;
 use Jeffgreco13\FilamentBreezy\Traits\TwoFactorAuthenticatable;
+use Spatie\Permission\Traits\HasRoles;
 
 class Authenticatable extends BaseAuthenticatable
 {

@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\BadgeConditionResource\Pages;
 
 use App\Filament\Resources\BadgeConditionResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateBadgeCondition extends CreateRecord

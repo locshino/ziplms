@@ -3,32 +3,27 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
+use App\Models\Role;
 use App\Models\User;
-use Filament\Forms;
+use Filament\Forms\Components\Card;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
-use HayderHatem\FilamentExcelImport\Actions\FullImportAction;
-use HayderHatem\FilamentExcelImport\Actions\Concerns\CanImportExcelRecords;
-use App\Filament\Imports\UserImporter;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Filters\SelectFilter;
-use App\Models\Role;
+use Filament\Tables\Table;
+use HayderHatem\FilamentExcelImport\Actions\Concerns\CanImportExcelRecords;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Card;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use Filament\Forms\Components\Placeholder;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
+
 class UserResource extends Resource
 {
     use CanImportExcelRecords;
@@ -84,10 +79,10 @@ class UserResource extends Resource
                                             ->label(__('user_resource.fields.password'))
                                             ->password()
                                             ->required()
-                                            ->visible(fn(string $context) => $context === 'create')
+                                            ->visible(fn (string $context) => $context === 'create')
                                             ->maxLength(255),
                                     ])
-                                    ->columns(1)
+                                    ->columns(1),
                             ]),
 
                         // Vai trò
@@ -109,9 +104,9 @@ class UserResource extends Resource
                                                 $record->syncRoles($state);
                                             }),
                                     ])
-                                    ->columns(1)
+                                    ->columns(1),
                             ]),
-                    ])
+                    ]),
             ]);
 
     }
@@ -122,7 +117,7 @@ class UserResource extends Resource
             ->columns([
                 ImageColumn::make('avatar')
                     ->label(__('user_resource.columns.avatar'))
-                    ->getStateUsing(fn($record) => $record->getFirstMediaUrl('avatars') ?: 'https://jbagy.me/wp-content/uploads/2025/03/hinh-anh-cute-avatar-vo-tri-2.jpg')
+                    ->getStateUsing(fn ($record) => $record->getFirstMediaUrl('avatars') ?: 'https://jbagy.me/wp-content/uploads/2025/03/hinh-anh-cute-avatar-vo-tri-2.jpg')
                     ->circular()
                     ->size(60),
 
@@ -179,7 +174,7 @@ class UserResource extends Resource
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
-                    ->visible(fn($record) => $record->id !== Auth::id()),
+                    ->visible(fn ($record) => $record->id !== Auth::id()),
                 Tables\Actions\ForceDeleteAction::make(),
                 Tables\Actions\RestoreAction::make(),
             ])

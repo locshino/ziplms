@@ -9,33 +9,23 @@ interface UserRepositoryInterface extends EloquentRepositoryInterface
 {
     /**
      * Find user by email.
-     *
-     * @param string $email
-     * @return Model|null
      */
     public function findByEmail(string $email): ?Model;
 
     /**
      * Get users by role.
-     *
-     * @param string $role
-     * @return Collection
      */
     public function getUsersByRole(string $role): Collection;
 
     /**
      * Get active users.
-     *
-     * @return Collection
      */
     public function getActiveUsers(): Collection;
 
     /**
      * Search users by name or email.
-     *
-     * @param string $search
-     * @return Collection
      */
     public function searchUsers(string $search): Collection;
+
     public function getEnrolledCoursesByUserId(string $userId): Collection;
 }

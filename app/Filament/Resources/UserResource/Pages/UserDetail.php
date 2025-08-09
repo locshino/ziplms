@@ -3,14 +3,13 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
-use Filament\Resources\Pages\Page;
-use App\Models\User;
-use App\Services\Interfaces\UserServiceInterface;
-use Filament\Pages\Actions\EditAction;
 use App\Models\Course;
 use App\Models\Enrollment;
-use Filament\Notifications\Notification;
+use App\Models\User;
+use App\Services\Interfaces\UserServiceInterface;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\Page;
 
 class UserDetail extends Page
 {
@@ -19,14 +18,21 @@ class UserDetail extends Page
     protected static string $resource = UserResource::class;
 
     protected static string $view = 'filament.resources.user-resource.pages.user-detail';
+
     public $activeTab = 'course_number';
+
     public $record;
+
     public int $courseCount = 0;
 
     public $enrolledCourses = [];
+
     public $courseService;
+
     public $badges;
+
     public $enrolledCoursesAll;
+
     public $selectedCourseId;
 
     public function mount($record): void
@@ -40,9 +46,6 @@ class UserDetail extends Page
             $this->courseCount = 0;
         }
 
-
-
-
         $userRepository = app(UserServiceInterface::class);
         if ($this->record->hasRole('student')) {
             $this->enrolledCourses = $userRepository->getEnrolledCourses($this->record->id)->pluck('course');
@@ -55,9 +58,10 @@ class UserDetail extends Page
         $this->enrolledCoursesAll = Course::all();
 
     }
+
     public function addUserToCourse()
     {
-        if (!$this->selectedCourseId || !$this->record) {
+        if (! $this->selectedCourseId || ! $this->record) {
             return;
         }
 
@@ -71,10 +75,11 @@ class UserDetail extends Page
                 ->title('Người dùng đã được ghi danh vào khóa học này')
                 ->warning()
                 ->send();
+
             return;
         }
 
-        if (!$exists) {
+        if (! $exists) {
             Enrollment::create([
                 'student_id' => $userId,
                 'course_id' => $courseId,
@@ -90,8 +95,11 @@ class UserDetail extends Page
             ->pluck('course');
         $this->selectedCourseId = null;
     }
+
     public $name;
+
     public $email;
+
     public $avatarFile;
 
     public function updateUser()
@@ -114,7 +122,4 @@ class UserDetail extends Page
 
         $this->avatarFile = null;
     }
-
-
-
 }

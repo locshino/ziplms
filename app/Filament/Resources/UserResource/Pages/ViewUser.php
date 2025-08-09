@@ -16,9 +16,10 @@ class ViewUser extends ViewRecord
             Actions\EditAction::make(),
         ];
     }
+
     public function addUserToCourse()
     {
-        if (!$this->selectedCourseId || !$this->record) {
+        if (! $this->selectedCourseId || ! $this->record) {
             return;
         }
 
@@ -30,7 +31,7 @@ class ViewUser extends ViewRecord
             ->where('course_id', $courseId)
             ->exists();
 
-        if (!$exists) {
+        if (! $exists) {
             Enrollment::create([
                 'user_id' => $userId,
                 'course_id' => $courseId,
