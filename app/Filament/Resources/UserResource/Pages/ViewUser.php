@@ -16,32 +16,4 @@ class ViewUser extends ViewRecord
             Actions\EditAction::make(),
         ];
     }
-
-    public function addUserToCourse()
-    {
-        if (! $this->selectedCourseId || ! $this->record) {
-            return;
-        }
-
-        $courseId = $this->selectedCourseId;
-        $userId = $this->record->id;
-
-        // Kiểm tra nếu đã tồn tại thì không thêm nữa
-        $exists = Enrollment::where('user_id', $userId)
-            ->where('course_id', $courseId)
-            ->exists();
-
-        if (! $exists) {
-            Enrollment::create([
-                'user_id' => $userId,
-                'course_id' => $courseId,
-            ]);
-        }
-
-        // Reset dropdown
-        $this->selectedCourseId = null;
-
-        // Reload danh sách khóa học của user (nếu có hiển thị ở dưới)
-        $this->enrolledCourses = $this->userRepository->getEnrolledCourses($userId);
-    }
 }
