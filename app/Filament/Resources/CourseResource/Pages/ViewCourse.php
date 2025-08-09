@@ -12,20 +12,16 @@ use Filament\Resources\Pages\ViewRecord;
 use Nben\FilamentRecordNav;
 class ViewCourse extends ViewRecord
 {
-    use ViewRecord\Concerns\Translatable;
-
     protected static string $resource = CourseResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
             Actions\EditAction::make(),
-            Actions\LocaleSwitcher::make(),
             Actions\DeleteAction::make(),
             Actions\ForceDeleteAction::make(),
             Actions\RestoreAction::make(),
-            FilamentRecordNav\Actions\PreviousRecordAction::make(),
-            FilamentRecordNav\Actions\NextRecordAction::make(),
+
         ];
     }
 
@@ -40,13 +36,13 @@ class ViewCourse extends ViewRecord
                             ->label('Số lượng học viên')
                             ->badge()
                             ->color('success')
-                            ->state(fn (Course $record): int => $record->students()->count()),
+                            ->state(fn(Course $record): int => $record->students()->count()),
 
                         TextEntry::make('staff_count')
                             ->label('Số lượng nhân viên/giáo viên')
                             ->badge()
                             ->color('info')
-                            ->state(fn (Course $record): int => $record->staff()->count()),
+                            ->state(fn(Course $record): int => $record->staff()->count()),
                     ]),
 
                 Section::make('Thông tin môn học')

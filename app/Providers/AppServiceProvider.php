@@ -15,11 +15,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // ... các binding khác có thể đã có
-
-        // Đăng ký các repository
-        $this->app->bind(ScheduleRepositoryInterface::class, ScheduleRepository::class);
-        $this->app->bind(CourseRepositoryInterface::class, CourseRepository::class);
+        
     }
 
     /**
