@@ -9,10 +9,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Promethys\Revive\Concerns\Recyclable;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\Tags\HasTags;
 
-class Course extends Model
+class Course extends Model implements HasMedia
 {
-    use HasFactory, HasUuids, SoftDeletes, Recyclable;
+    use HasFactory, HasUuids, SoftDeletes, Recyclable, InteractsWithMedia, HasTags;
 
     /**
      * The attributes that are mass assignable.
@@ -26,42 +30,57 @@ class Course extends Model
     ];
 
     /**
-     * Get the teacher that owns the course.
+     * The "booted" method of the model.
      */
+    protected static function booted(): void
+    {
+        static::deleting(function (Course $course) {
+            $course->students()->detach();
+        });
+    }
+
+    /**
+     * Định nghĩa các biến đổi cho media.
+     */
+    public function registerMediaConversions(Media $media = null): void
+    {
+        $this
+            ->addMediaConversion('thumbnail')
+            ->width(400)
+            ->height(250)
+            ->sharpen(10);
+    }
+
+    /**
+     * Helper để lấy URL của ảnh thumbnail một cách tiện lợi.
+     */
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        return $this->getFirstMediaUrl('course_thumbnail', 'thumbnail');
+    }
+
     public function teacher(): BelongsTo
     {
         return $this->belongsTo(User::class, 'teacher_id');
     }
 
-    /**
-     * Get the enrollments for the course.
-     */
     public function enrollments(): HasMany
     {
         return $this->hasMany(Enrollment::class);
     }
 
-    /**
-     * Get the students enrolled in the course.
-     */
     public function students()
     {
         return $this->belongsToMany(User::class, 'enrollments', 'course_id', 'student_id')
-            ->withPivot('enrolled_at')
+            ->using(Enrollment::class)
             ->withTimestamps();
     }
 
-    /**
-     * Get the assignments for the course.
-     */
     public function assignments(): HasMany
     {
         return $this->hasMany(Assignment::class);
     }
 
-    /**
-     * Get the quizzes for the course.
-     */
     public function quizzes(): HasMany
     {
         return $this->hasMany(Quiz::class);
