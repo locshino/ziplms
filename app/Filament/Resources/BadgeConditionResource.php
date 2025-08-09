@@ -3,19 +3,15 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\BadgeConditionResource\Pages;
-use App\Filament\Resources\BadgeConditionResource\RelationManagers;
 use App\Models\BadgeCondition;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use HayderHatem\FilamentExcelImport\Actions\Concerns\CanImportExcelRecords;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
-use HayderHatem\FilamentExcelImport\Actions\Concerns\CanImportExcelRecords;
-use App\Filament\Imports\BadgeConditionImporter;
 
 class BadgeConditionResource extends Resource
 {
@@ -24,9 +20,9 @@ class BadgeConditionResource extends Resource
     protected static ?string $model = BadgeCondition::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
-    
+
     protected static ?string $navigationGroup = 'Quản lý';
-    
+
     protected static ?int $navigationSort = 10;
 
     public static function form(Form $form): Form

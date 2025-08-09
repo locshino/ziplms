@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('status');
             $table->timestamp('started_at')->useCurrent();
             $table->timestamp('completed_at')->nullable();
+            $table->timestamps();
         });
     }
 

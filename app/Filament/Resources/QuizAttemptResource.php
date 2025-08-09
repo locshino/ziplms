@@ -10,21 +10,15 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
-use HayderHatem\FilamentExcelImport\Actions\ImportAction;
-use HayderHatem\FilamentExcelImport\Actions\ImportField;
 
 class QuizAttemptResource extends Resource
 {
     protected static ?string $model = QuizAttempt::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clock';
-    
+
     protected static ?string $navigationGroup = 'Quản lý';
-    
+
     protected static ?int $navigationSort = 13;
 
     public static function form(Form $form): Form
@@ -109,7 +103,7 @@ class QuizAttemptResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\StudentQuizAnswersRelationManager::class,
         ];
     }
 

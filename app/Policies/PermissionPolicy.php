@@ -2,10 +2,10 @@
 
 namespace App\Policies;
 
-use App\Models\User;
 use App\Models\Permission;
 use App\Libs\Roles\RoleHelper;
 use App\Libs\Permissions\PermissionHelper;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class PermissionPolicy
