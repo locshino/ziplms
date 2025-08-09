@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Repositories\Contracts\ScheduleRepositoryInterface;
+use App\Repositories\ScheduleRepository;
+use App\Repositories\Contracts\CourseRepositoryInterface;
+use App\Repositories\CourseRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -11,7 +15,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        
     }
 
     /**
