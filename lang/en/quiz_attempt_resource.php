@@ -12,7 +12,7 @@ return [
         'completed_at' => 'Completed At',
         'created_at' => 'Created At',
         'updated_at' => 'Updated At',
-    ],
+],
     'fields' => [
         'quiz_id' => 'Quiz',
         'user_id' => 'User',
@@ -22,7 +22,7 @@ return [
         'student_id' => 'Student',
         'attempt_number' => 'Attempt Number',
         'status' => 'Status',
-    ],
+],
     'model' => [
         'singular' => 'Quiz Attempt',
         'plural' => 'Quiz Attempts',

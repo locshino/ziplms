@@ -8,26 +8,30 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('media', function (Blueprint $table) {
+        Schema::create('tags', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            $table->uuidMorphs('model');
+            $table->json('name');
+            $table->json('slug');
+            $table->string('type')->nullable();
+            $table->integer('order_column')->nullable();
 
-            $table->uuid()->nullable()->unique();
-            $table->string('collection_name');
-            $table->string('name');
-            $table->string('file_name');
-            $table->string('mime_type')->nullable();
-            $table->string('disk');
-            $table->string('conversions_disk')->nullable();
-            $table->unsignedBigInteger('size');
-            $table->json('manipulations');
-            $table->json('custom_properties');
-            $table->json('generated_conversions');
-            $table->json('responsive_images');
-            $table->unsignedInteger('order_column')->nullable()->index();
-
-            $table->nullableTimestamps();
+            $table->timestamps();
         });
+
+        Schema::create('taggables', function (Blueprint $table) {
+            $table->uuid('tag_id');
+            $table->foreign('tag_id')->references('id')->on('tags')->cascadeOnDelete();
+
+            $table->uuidMorphs('taggable');
+
+            $table->unique(['tag_id', 'taggable_id', 'taggable_type']);
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('taggables');
+        Schema::dropIfExists('tags');
     }
 };

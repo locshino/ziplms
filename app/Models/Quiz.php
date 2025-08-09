@@ -12,7 +12,7 @@ use Promethys\Revive\Concerns\Recyclable;
 
 class Quiz extends Model
 {
-    use HasFactory, HasUuids, Recyclable, SoftDeletes;
+    use HasFactory, HasUuids, SoftDeletes, Recyclable;
 
     /**
      * The attributes that are mass assignable.

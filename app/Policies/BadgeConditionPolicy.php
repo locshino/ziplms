@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\BadgeCondition;
 use App\Models\User;
+use App\Models\BadgeCondition;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class BadgeConditionPolicy

@@ -12,7 +12,7 @@ return [
         'completed_at' => 'Hoàn thành lúc',
         'created_at' => 'Ngày tạo',
         'updated_at' => 'Ngày cập nhật',
-    ],
+],
     'fields' => [
         'quiz_id' => 'Bài kiểm tra',
         'user_id' => 'Người dùng',
@@ -22,7 +22,7 @@ return [
         'student_id' => 'Học sinh',
         'attempt_number' => 'Lần thử',
         'status' => 'Trạng thái',
-    ],
+],
     'model' => [
         'singular' => 'Lần làm bài',
         'plural' => 'Lần làm bài',

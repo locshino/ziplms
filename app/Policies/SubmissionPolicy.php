@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\Submission;
 use App\Models\User;
+use App\Models\Submission;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class SubmissionPolicy

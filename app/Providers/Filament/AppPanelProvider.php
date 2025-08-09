@@ -2,12 +2,8 @@
 
 namespace App\Providers\Filament;
 
-use Afsakar\FilamentOtpLogin\FilamentOtpLoginPlugin;
-use Asmit\ResizedColumn\ResizedColumnPlugin;
-use Awcodes\LightSwitch\LightSwitchPlugin;
-use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
 use Filament\Http\Middleware\Authenticate;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -16,15 +12,19 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
-use FilamentWebpush\FilamentWebpushPlugin;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Jeffgreco13\FilamentBreezy\BreezyCore;
 use Promethys\Revive\RevivePlugin;
+use Afsakar\FilamentOtpLogin\FilamentOtpLoginPlugin;
+use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
+use Jeffgreco13\FilamentBreezy\BreezyCore;
+use FilamentWebpush\FilamentWebpushPlugin;
+use Asmit\ResizedColumn\ResizedColumnPlugin;
+use Awcodes\LightSwitch\LightSwitchPlugin;
 
 class AppPanelProvider extends PanelProvider
 {

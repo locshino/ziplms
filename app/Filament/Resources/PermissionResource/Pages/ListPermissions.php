@@ -2,12 +2,12 @@
 
 namespace App\Filament\Resources\PermissionResource\Pages;
 
-use App\Filament\Imports\PermissionImporter;
 use App\Filament\Resources\PermissionResource;
-use Asmit\ResizedColumn\HasResizableColumn;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use HayderHatem\FilamentExcelImport\Actions\FullImportAction;
+use App\Filament\Imports\PermissionImporter;
+use Asmit\ResizedColumn\HasResizableColumn;
 
 class ListPermissions extends ListRecords
 {

@@ -2,12 +2,12 @@
 
 namespace App\Filament\Resources\BadgeResource\Pages;
 
-use App\Filament\Imports\BadgeImporter;
 use App\Filament\Resources\BadgeResource;
-use Asmit\ResizedColumn\HasResizableColumn;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use HayderHatem\FilamentExcelImport\Actions\FullImportAction;
+use App\Filament\Imports\BadgeImporter;
+use Asmit\ResizedColumn\HasResizableColumn;
 
 class ListBadges extends ListRecords
 {

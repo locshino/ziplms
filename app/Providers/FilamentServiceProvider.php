@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
-use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
 use BezhanSalleh\FilamentShield\Facades\FilamentShield;
-use Illuminate\Support\ServiceProvider;
 use pxlrbt\FilamentExcel\FilamentExport;
+use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
+use Illuminate\Support\ServiceProvider;
 
 class FilamentServiceProvider extends ServiceProvider
 {

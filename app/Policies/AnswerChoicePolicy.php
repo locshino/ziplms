@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\AnswerChoice;
 use App\Models\User;
+use App\Models\AnswerChoice;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class AnswerChoicePolicy

@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\Badge;
 use App\Models\User;
+use App\Models\Badge;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class BadgePolicy
