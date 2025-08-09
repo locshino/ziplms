@@ -13,7 +13,6 @@ return [
     'fields' => [
         'name' => 'Name',
         'guard_name' => 'Guard Name',
-        'is_system' => 'System Permission',
     ],
     'model' => [
         'singular' => 'Permission',

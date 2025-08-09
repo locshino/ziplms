@@ -16,7 +16,7 @@ class StudentQuizAnswer extends Model
      *
      * @var bool
      */
-    public $timestamps = false;
+    public $timestamps = true;
 
     /**
      * The attributes that are mass assignable.
@@ -24,6 +24,8 @@ class StudentQuizAnswer extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'user_id',
+        'quiz_id',
         'quiz_attempt_id',
         'question_id',
         'answer_choice_id',

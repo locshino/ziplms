@@ -3,19 +3,20 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PermissionResource\Pages;
-use App\Filament\Resources\PermissionResource\RelationManagers;
 use App\Models\Permission;
+use App\Services\PermissionService;
+use App\Libs\Permissions\PermissionHelper;
+use App\Enums\Permissions\PermissionVerbEnum;
+use App\Enums\Permissions\PermissionNounEnum;
+use App\Enums\Permissions\PermissionContextEnum;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use HayderHatem\FilamentExcelImport\Actions\Concerns\CanImportExcelRecords;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
-use HayderHatem\FilamentExcelImport\Actions\Concerns\CanImportExcelRecords;
-use App\Filament\Imports\PermissionImporter;
 
 class PermissionResource extends Resource
 {
@@ -24,24 +25,111 @@ class PermissionResource extends Resource
     protected static ?string $model = Permission::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-key';
-    
+
     protected static ?string $navigationGroup = 'Quản lý';
-    
+
     protected static ?int $navigationSort = 12;
+
+    /**
+     * Get the Eloquent query builder for the resource.
+     * Only show non-system permissions.
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->where('is_system', false);
+    }
+
+    /**
+     * Update permission name based on verb-noun-context pattern.
+     */
+    protected static function updatePermissionName(?string $verb, ?string $noun, ?string $context, ?string $attributeValue, callable $set): void
+    {
+        if (! $verb || ! $noun || ! $context) {
+            $set('name', '');
+            return;
+        }
+
+        try {
+            $builder = PermissionHelper::make();
+
+            // Set verb
+            $verbEnum = PermissionVerbEnum::from($verb);
+            $builder->verb($verbEnum);
+
+            // Set noun
+            $nounEnum = PermissionNounEnum::from($noun);
+            $builder->noun($nounEnum);
+
+            // Set context
+            $contextEnum = PermissionContextEnum::from($context);
+            $builder->context($contextEnum);
+
+            // Add attribute value if needed
+            if (in_array($context, [PermissionContextEnum::ID->value, PermissionContextEnum::TAG->value]) && $attributeValue) {
+                $builder->withAttribute($attributeValue);
+            }
+
+            $permissionName = $builder->build();
+            $set('name', $permissionName);
+        } catch (\Exception $e) {
+            $set('name', 'Invalid combination');
+        }
+    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label(__('permission_resource.fields.name'))
-                    ->required(),
-                Forms\Components\TextInput::make('guard_name')
-                    ->label(__('permission_resource.fields.guard_name'))
-                    ->required(),
-                Forms\Components\Toggle::make('is_system')
-                    ->label(__('permission_resource.fields.is_system'))
-                    ->required(),
+                Forms\Components\Section::make('Permission Builder')
+                    ->description('Build permission following verb-noun-context pattern')
+                    ->schema([
+                        Forms\Components\Select::make('verb')
+                            ->label('Verb')
+                            ->options(PermissionVerbEnum::optionsWithLabels())
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(fn ($state, callable $set, callable $get) => self::updatePermissionName($state, $get('noun'), $get('context'), $get('attribute_value'), $set)),
+
+                        Forms\Components\Select::make('noun')
+                            ->label('Noun')
+                            ->options(PermissionNounEnum::optionsWithLabels())
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(fn ($state, callable $set, callable $get) => self::updatePermissionName($get('verb'), $state, $get('context'), $get('attribute_value'), $set)),
+
+                        Forms\Components\Select::make('context')
+                            ->label('Context')
+                            ->options(PermissionContextEnum::optionsWithLabels())
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(fn ($state, callable $set, callable $get) => self::updatePermissionName($get('verb'), $get('noun'), $state, $get('attribute_value'), $set)),
+
+                        Forms\Components\TextInput::make('attribute_value')
+                            ->label('Attribute Value')
+                            ->helperText('Required when context is ID or Tag')
+                            ->visible(fn (callable $get) => in_array($get('context'), [PermissionContextEnum::ID->value, PermissionContextEnum::TAG->value]))
+                            ->required(fn (callable $get) => in_array($get('context'), [PermissionContextEnum::ID->value, PermissionContextEnum::TAG->value]))
+                            ->reactive()
+                            ->afterStateUpdated(fn ($state, callable $set, callable $get) => self::updatePermissionName($get('verb'), $get('noun'), $get('context'), $state, $set)),
+                    ])
+                    ->columns(2),
+
+                Forms\Components\Section::make('Generated Permission')
+                    ->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->label('Permission Name')
+                            ->helperText('Auto-generated from verb-noun-context pattern')
+                            ->disabled()
+                            ->dehydrated(),
+
+                        Forms\Components\TextInput::make('guard_name')
+                            ->label('Guard Name')
+                            ->default('web')
+                            ->required(),
+
+                        Forms\Components\Hidden::make('is_system')
+                            ->default(false),
+                    ]),
             ]);
     }
 
@@ -60,9 +148,7 @@ class PermissionResource extends Resource
                 Tables\Columns\TextColumn::make('guard_name')
                     ->label(__('permission_resource.columns.guard_name'))
                     ->searchable(),
-                Tables\Columns\IconColumn::make('is_system')
-                    ->label(__('permission_resource.columns.is_system'))
-                    ->boolean(),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('permission_resource.columns.created_at'))
                     ->dateTime()

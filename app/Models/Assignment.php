@@ -9,10 +9,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Promethys\Revive\Concerns\Recyclable;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Assignment extends Model
+class Assignment extends Model implements HasMedia
 {
-    use HasFactory, HasUuids, SoftDeletes, Recyclable;
+    use HasFactory, HasUuids, InteractsWithMedia, Recyclable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

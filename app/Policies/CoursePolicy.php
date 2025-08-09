@@ -2,8 +2,10 @@
 
 namespace App\Policies;
 
-use App\Models\User;
 use App\Models\Course;
+use App\Libs\Roles\RoleHelper;
+use App\Libs\Permissions\PermissionHelper;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class CoursePolicy
@@ -23,6 +25,21 @@ class CoursePolicy
      */
     public function view(User $user, Course $course): bool
     {
+        // Super admin and admin can view all courses
+        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
+            return true;
+        }
+        
+        // Teachers can view courses they are assigned to
+        if (RoleHelper::isTeacher($user) && $course->teachers()->where('user_id', $user->id)->exists()) {
+            return true;
+        }
+        
+        // Students can view courses they are enrolled in
+        if (RoleHelper::isStudent($user) && $course->enrollments()->where('user_id', $user->id)->exists()) {
+            return true;
+        }
+        
         return $user->can('view_course');
     }
 
@@ -39,6 +56,16 @@ class CoursePolicy
      */
     public function update(User $user, Course $course): bool
     {
+        // Super admin and admin can update all courses
+        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
+            return $user->can('update_course');
+        }
+        
+        // Teachers can update courses they are assigned to
+        if (RoleHelper::isTeacher($user) && $course->teachers()->where('user_id', $user->id)->exists()) {
+            return $user->can('update_course');
+        }
+        
         return $user->can('update_course');
     }
 
@@ -47,7 +74,12 @@ class CoursePolicy
      */
     public function delete(User $user, Course $course): bool
     {
-        return $user->can('delete_course');
+        // Only super admin and admin can delete courses
+        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
+            return $user->can('delete_course');
+        }
+        
+        return false;
     }
 
     /**

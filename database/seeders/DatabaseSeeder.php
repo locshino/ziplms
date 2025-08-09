@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             CourseSeeder::class,
             EnrollmentSeeder::class,
             AssignmentSeeder::class,
+            SubmissionSeeder::class,
             QuizSeeder::class,
             BadgeSeeder::class,
         ]);

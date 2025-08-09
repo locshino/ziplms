@@ -35,6 +35,17 @@ class UserSeeder extends Seeder
         );
         $admin->assignRole('admin');
 
+        // Create Sample Manager
+        $manager = User::firstOrCreate(
+            ['email' => 'manager@ziplms.com'],
+            [
+                'name' => 'Manager',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ]
+        );
+        $manager->assignRole('manager');
+
         // Create Sample Teacher
         $teacher = User::firstOrCreate(
             ['email' => 'teacher@ziplms.com'],
