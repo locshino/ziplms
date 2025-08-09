@@ -10,7 +10,7 @@ return [
         'created_at' => 'Created At',
         'updated_at' => 'Updated At',
         'deleted_at' => 'Deleted At',
-],
+    ],
     'fields' => [
         'condition_type' => 'Condition Type',
         'condition_value' => 'Condition Value',
@@ -19,7 +19,7 @@ return [
         'type' => 'Type',
         'operator' => 'Operator',
         'parameters' => 'Parameters',
-],
+    ],
     'model' => [
         'singular' => 'Badge Condition',
         'plural' => 'Badge Conditions',

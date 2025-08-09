@@ -3,28 +3,21 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserBadgeResource\Pages;
-use App\Filament\Resources\UserBadgeResource\RelationManagers;
 use App\Models\UserBadge;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
-use HayderHatem\FilamentExcelImport\Actions\ImportAction;
-use HayderHatem\FilamentExcelImport\Actions\ImportField;
 
 class UserBadgeResource extends Resource
 {
     protected static ?string $model = UserBadge::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-trophy';
-    
+
     protected static ?string $navigationGroup = 'Quản lý';
-    
+
     protected static ?int $navigationSort = 15;
 
     public static function form(Form $form): Form

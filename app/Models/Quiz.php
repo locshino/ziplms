@@ -12,7 +12,7 @@ use Promethys\Revive\Concerns\Recyclable;
 
 class Quiz extends Model
 {
-    use HasFactory, HasUuids, SoftDeletes, Recyclable;
+    use HasFactory, HasUuids, Recyclable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -70,5 +70,35 @@ class Quiz extends Model
     public function attempts(): HasMany
     {
         return $this->hasMany(QuizAttempt::class);
+    }
+
+    /**
+     * Determine if the quiz is currently active.
+     */
+    public function getIsActiveAttribute(): bool
+    {
+        $now = now();
+
+        // If no start time is set, consider it active
+        if (! $this->start_at) {
+            return ! $this->end_at || $now->lte($this->end_at);
+        }
+
+        // If no end time is set, check if it has started
+        if (! $this->end_at) {
+            return $now->gte($this->start_at);
+        }
+
+        // Check if current time is between start and end
+        return $now->gte($this->start_at) && $now->lte($this->end_at);
+    }
+
+    /**
+     * Determine if the quiz is published and available.
+     */
+    public function getIsPublishedAttribute(): bool
+    {
+        // A quiz is published if it's active (within time bounds)
+        return $this->is_active;
     }
 }

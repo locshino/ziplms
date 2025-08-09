@@ -57,6 +57,11 @@ class QuizServiceException extends ServiceException
         return new static('exceptions_services_quizservice.quiz_time_limit_invalid');
     }
 
+    public static function databaseError(string $message): static
+    {
+        return new static('exceptions_services_quizservice.database_error', ['message' => $message]);
+    }
+
     /**
      * Create exception for invalid max attempts.
      */
@@ -151,6 +156,50 @@ class QuizServiceException extends ServiceException
     public static function quizAttemptTimeExpired(): static
     {
         return new static('exceptions_services_quizservice.quiz_attempt_time_expired');
+    }
+
+    /**
+     * Create exception for maximum attempts exceeded.
+     */
+    public static function maxAttemptsExceeded(): static
+    {
+        return new static('exceptions_services_quizservice.max_attempts_exceeded');
+    }
+
+    /**
+     * Create exception for invalid answer submission.
+     */
+    public static function invalidAnswerSubmission(): static
+    {
+        return new static('exceptions_services_quizservice.invalid_answer_submission');
+    }
+
+    /**
+     * Create exception for concurrent quiz attempt.
+     */
+    public static function concurrentAttemptNotAllowed(): static
+    {
+        return new static('exceptions_services_quizservice.concurrent_attempt_not_allowed');
+    }
+
+    /**
+     * Create exception for quiz cache error.
+     */
+    public static function cacheError(string $operation): static
+    {
+        return new static('exceptions_services_quizservice.cache_error', ['operation' => $operation]);
+    }
+
+    /**
+     * Create exception for bulk operation failure.
+     */
+    public static function bulkOperationFailed(string $operation, int $failed, int $total): static
+    {
+        return new static('exceptions_services_quizservice.bulk_operation_failed', [
+            'operation' => $operation,
+            'failed' => $failed,
+            'total' => $total,
+        ]);
     }
 
     /**

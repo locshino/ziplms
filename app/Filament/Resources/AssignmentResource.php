@@ -3,29 +3,26 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\AssignmentResource\Pages;
-use App\Filament\Resources\AssignmentResource\RelationManagers;
 use App\Models\Assignment;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use HayderHatem\FilamentExcelImport\Actions\Concerns\CanImportExcelRecords;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
-use HayderHatem\FilamentExcelImport\Actions\Concerns\CanImportExcelRecords;
-use App\Filament\Imports\AssignmentImporter;
 
 class AssignmentResource extends Resource
 {
     use CanImportExcelRecords;
+
     protected static ?string $model = Assignment::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    
+
     protected static ?string $navigationGroup = 'Quản lý';
-    
+
     protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
