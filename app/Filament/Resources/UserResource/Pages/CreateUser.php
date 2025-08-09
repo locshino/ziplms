@@ -3,19 +3,26 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
-use Filament\Notifications\Notification;
+use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use App\Services\Interfaces\UserServiceInterface;
 
 class CreateUser extends CreateRecord
 {
     protected static string $resource = UserResource::class;
-
-    protected function getCreatedNotification(): ?Notification
+    protected function mutateFormDataBeforeSave(array $data): array
     {
+        unset($data['avatar']);
+        return $data;
+    }
 
-        return Notification::make()
-            ->success()
-            ->title('Tạo người dùng thành công')
-            ->body('Người dùng mới đã được thêm vào hệ thống.');
+    // Sau khi user được tạo (đã có $this->record), xử lý upload ảnh
+    protected function afterCreate(): void
+    {
+        $photo = $this->form->getState()['avatar'] ?? null;
+
+        if ($photo instanceof \Illuminate\Http\UploadedFile) {
+            app(UserServiceInterface::class)->updateAvatar($this->record, $photo);
+        }
     }
 }

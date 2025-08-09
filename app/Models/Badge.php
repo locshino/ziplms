@@ -2,77 +2,52 @@
 
 namespace App\Models;
 
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use Spatie\Translatable\HasTranslations;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Promethys\Revive\Concerns\Recyclable;
 
-/**
- * @property string $id
- * @property string|null $organization_id
- * @property array<array-key, mixed> $name
- * @property array<array-key, mixed>|null $description
- * @property array<array-key, mixed>|null $criteria_description
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\Organization|null $organization
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
- * @property-read int|null $users_count
- *
- * @method static \Database\Factories\BadgeFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge whereCriteriaDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge whereOrganizationId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge withoutTrashed()
- *
- * @mixin \Eloquent
- */
-class Badge extends Base\Model implements HasMedia
+class Badge extends Model
 {
-    use HasTranslations,
-        InteractsWithMedia;
+    use HasFactory, HasUuids, SoftDeletes, Recyclable;
 
-    protected $casts = [
-        'name' => 'json',
-        'description' => 'json',
-        'criteria_description' => 'json',
-    ];
-
-    public array $translatable = [
-        'name',
-        'description',
-        'criteria_description',
-    ];
-
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
-        'name',
+        'title',
         'description',
-        'criteria_description',
-        'organization_id',
+        'award_status',
     ];
 
-    public function registerMediaCollections(): void
+    /**
+     * Get the conditions for the badge.
+     */
+    public function conditions(): BelongsToMany
     {
-        $this->addMediaCollection('image_badge')->singleFile();
+        return $this->belongsToMany(BadgeCondition::class, 'badge_has_conditions', 'badge_id', 'condition_id');
     }
 
-    public function organization()
+    /**
+     * Get the user badges for the badge.
+     */
+    public function userBadges(): HasMany
     {
-        return $this->belongsTo(Organization::class);
+        return $this->hasMany(UserBadge::class);
     }
 
-    public function users()
+    /**
+     * Get the users who have earned this badge.
+     */
+    public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'user_badges');
+        return $this->belongsToMany(User::class, 'user_badges')
+            ->withPivot('awarded_at')
+            ->withTimestamps();
     }
 }

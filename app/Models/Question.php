@@ -2,95 +2,64 @@
 
 namespace App\Models;
 
-use Spatie\Tags\HasTags;
-use Spatie\Translatable\HasTranslations;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Promethys\Revive\Concerns\Recyclable;
 
-/**
- * @property string $id
- * @property string|null $organization_id
- * @property array<array-key, mixed> $question_text
- * @property array<array-key, mixed>|null $explanation
- * @property string|null $created_by
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\QuestionChoice> $choices
- * @property-read int|null $choices_count
- * @property-read \App\Models\User|null $creator
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Exam> $exams
- * @property-read int|null $exams_count
- * @property-read \App\Models\Organization|null $organization
- * @property \Illuminate\Database\Eloquent\Collection<int, \Spatie\Tags\Tag> $tags
- * @property-read int|null $tags_count
- * @property-read mixed $translations
- *
- * @method static \Database\Factories\QuestionFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question whereExplanation($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question whereJsonContainsLocale(string $column, string $locale, ?mixed $value, string $operand = '=')
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question whereJsonContainsLocales(string $column, array $locales, ?mixed $value, string $operand = '=')
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question whereLocale(string $column, string $locale)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question whereLocales(string $column, array $locales)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question whereOrganizationId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question whereQuestionText($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question withAllTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question withAllTagsOfAnyType($tags)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question withAnyTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question withAnyTagsOfAnyType($tags)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question withAnyTagsOfType(array|string $type)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question withoutTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Question withoutTrashed()
- *
- * @mixin \Eloquent
- */
-class Question extends Base\Model
+class Question extends Model
 {
-    use HasTags,
-        HasTranslations;
+    use HasFactory, HasUuids, SoftDeletes, Recyclable;
 
-    protected $casts = [
-        'question_text' => 'json',
-        'explanation' => 'json',
-    ];
-
-    public $translatable = [
-        'question_text',
-        'explanation',
-    ];
-
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
-        'organization_id',
-        'question_text',
-        'explanation',
-        'created_by',
+        'quiz_id',
+        'title',
+        'points',
+        'is_multiple_response',
     ];
 
-    public function organization()
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
     {
-        return $this->belongsTo(Organization::class);
+        return [
+            'points' => 'decimal:2',
+            'is_multiple_response' => 'boolean',
+        ];
     }
 
-    public function creator()
+    /**
+     * Get the quiz that owns the question.
+     */
+    public function quiz(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(Quiz::class);
     }
 
-    public function choices()
+    /**
+     * Get the answer choices for the question.
+     */
+    public function answerChoices(): HasMany
     {
-        return $this->hasMany(QuestionChoice::class);
+        return $this->hasMany(AnswerChoice::class);
     }
 
-    public function exams()
+    /**
+     * Get the student quiz answers for the question.
+     */
+    public function studentAnswers(): HasMany
     {
-        return $this->belongsToMany(Exam::class, 'exam_questions');
+        return $this->hasMany(StudentQuizAnswer::class);
     }
 }

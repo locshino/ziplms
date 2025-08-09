@@ -2,12 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Enums\PermissionEnum;
-use App\Enums\RoleEnum;
 use App\Models\Permission;
-use App\Models\Role;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\PermissionRegistrar;
 
 class PermissionSeeder extends Seeder
 {
@@ -16,106 +12,81 @@ class PermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        // Reset cached roles and permissions
-        app()[PermissionRegistrar::class]->forgetCachedPermissions();
-
-        // Create permissions from PermissionEnum
-        foreach (PermissionEnum::cases() as $permission) {
-            Permission::findOrCreate($permission->value, 'web');
-        }
-
-        $this->command->info('Permissions created successfully!');
-
-        // Assign permissions to roles
-        $adminRole = Role::findByName(RoleEnum::Admin->value);
-        $managerRole = Role::findByName(RoleEnum::Manager->value);
-        $teacherRole = Role::findByName(RoleEnum::Teacher->value);
-        $studentRole = Role::findByName(RoleEnum::Student->value);
-
-        // --- Assign all permissions to Admin ---
-        $adminRole->givePermissionTo(PermissionEnum::cases());
-        $this->command->info('Admin permissions assigned.');
-
-        // --- Assign permissions to Manager ---
-        $managerRole->givePermissionTo([
+        $permissions = [
             // User Management
-            PermissionEnum::ViewAnyUsers,
-            PermissionEnum::ViewUser,
-            PermissionEnum::CreateUser,
-            PermissionEnum::UpdateUser,
-            PermissionEnum::DeleteUser,
-            PermissionEnum::ImportUsers,
+            'view_users',
+            'create_users',
+            'edit_users',
+            'delete_users',
 
-            // Role viewing & assignment (but not creation/deletion)
-            PermissionEnum::ViewAnyRoles,
-            PermissionEnum::ViewRole,
-            PermissionEnum::AssignRole,
+            // Role Management
+            'view_roles',
+            'create_roles',
+            'edit_roles',
+            'delete_roles',
 
-            // Academic Structure
-            PermissionEnum::ViewAnyClassesMajors,
-            PermissionEnum::ViewClassMajor,
-            PermissionEnum::CreateClassMajor,
-            PermissionEnum::UpdateClassMajor,
-            PermissionEnum::DeleteClassMajor,
-            PermissionEnum::EnrollUserInClassMajor,
+            // Permission Management
+            'view_permissions',
+            'create_permissions',
+            'edit_permissions',
+            'delete_permissions',
 
             // Course Management
-            PermissionEnum::ViewAnyCourses,
-            PermissionEnum::ViewCourse,
-            PermissionEnum::CreateCourse,
-            PermissionEnum::UpdateCourse,
-            PermissionEnum::DeleteCourse,
-            PermissionEnum::EnrollStudentInCourse,
-            PermissionEnum::AssignStaffToCourse,
+            'view_courses',
+            'create_courses',
+            'edit_courses',
+            'delete_courses',
+            'manage_own_courses',
 
-            // Scheduling & Attendance
-            PermissionEnum::ViewAnySchedules,
-            PermissionEnum::CreateSchedule,
-            PermissionEnum::UpdateSchedule,
-            PermissionEnum::DeleteSchedule,
-            PermissionEnum::ManageAttendance,
+            // Enrollment Management
+            'view_enrollments',
+            'create_enrollments',
+            'edit_enrollments',
+            'delete_enrollments',
 
-            // Reporting
-            PermissionEnum::ViewReports,
-        ]);
-        $this->command->info('Manager permissions assigned.');
+            // Assignment Management
+            'view_assignments',
+            'create_assignments',
+            'edit_assignments',
+            'delete_assignments',
+            'grade_assignments',
 
-        // --- Assign permissions to Teacher ---
-        $teacherRole->givePermissionTo([
-            // Can view users in their context (e.g., their students)
-            PermissionEnum::ViewAnyUsers,
-            PermissionEnum::ViewUser,
+            // Submission Management
+            'view_submissions',
+            'create_submissions',
+            'edit_submissions',
+            'delete_submissions',
 
-            // Course & Content Management for their courses
-            PermissionEnum::ViewAnyCourses,
-            PermissionEnum::ViewCourse,
-            PermissionEnum::UpdateCourse, // Can update courses they are assigned to
-            PermissionEnum::ViewAnyLectures,
-            PermissionEnum::CreateLecture,
-            PermissionEnum::UpdateLecture,
-            PermissionEnum::DeleteLecture,
-            PermissionEnum::ManageLectureMaterials,
+            // Quiz Management
+            'view_quizzes',
+            'create_quizzes',
+            'edit_quizzes',
+            'delete_quizzes',
+            'take_quizzes',
 
-            // Assessment
-            PermissionEnum::ManageQuestionBank, // Often teachers contribute to question banks
-            PermissionEnum::ManageExams,
-            PermissionEnum::ManageAssignments,
-            PermissionEnum::GradeSubmissions,
+            // Question Management
+            'view_questions',
+            'create_questions',
+            'edit_questions',
+            'delete_questions',
 
-            // Scheduling & Attendance for their classes/courses
-            PermissionEnum::ViewAnySchedules,
-            PermissionEnum::CreateSchedule,
-            PermissionEnum::UpdateSchedule,
-            PermissionEnum::DeleteSchedule,
-            PermissionEnum::ManageAttendance,
-        ]);
-        $this->command->info('Teacher permissions assigned.');
+            // Badge Management
+            'view_badges',
+            'create_badges',
+            'edit_badges',
+            'delete_badges',
+            'award_badges',
 
-        // --- Student Permissions ---
-        $studentRole->givePermissionTo([
-            PermissionEnum::ViewAnyCourses, // To see the course catalog
-            PermissionEnum::ViewAnySchedules, // To see their own schedule
-        ]);
-        $this->command->info('Student permissions assigned.');
+            // Reports and Analytics
+            'view_reports',
+            'export_data',
+        ];
+
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(
+                ['name' => $permission, 'guard_name' => 'web'],
+                ['is_system' => true]
+            );
+        }
     }
 }

@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Course;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -10,20 +11,24 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class CourseFactory extends Factory
 {
-    use Concerns\HasFakesStatus,
-        Concerns\HasFakesTranslations;
-
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
     protected $model = Course::class;
 
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
         return [
-            'name' => $this->fakeSentenceTranslations(),
-            'code' => strtoupper(fake()->unique()->bothify('??-###')),
-            'description' => $this->fakeParagraphTranslations(),
-            'start_date' => fake()->dateTimeBetween('-1 month', '+1 month'),
-            'end_date' => fake()->dateTimeBetween('+3 months', '+6 months'),
-            'status' => $this->fakeStatus(),
+            'teacher_id' => User::factory(),
+            'title' => $this->faker->sentence(3),
+            'description' => $this->faker->paragraph(3),
         ];
     }
 }

@@ -19,13 +19,14 @@ return [
         'echo' => [
             'broadcaster' => 'reverb',
             'key' => env('VITE_REVERB_APP_KEY'),
+            'cluster' => env('VITE_REVERB_APP_CLUSTER'),
             'wsHost' => env('VITE_REVERB_HOST'),
             'wsPort' => env('VITE_REVERB_PORT'),
             'wssPort' => env('VITE_REVERB_PORT'),
             'authEndpoint' => '/broadcasting/auth',
             'disableStats' => true,
-            'enabledTransports' => ['ws', 'wss'],
-            'forceTLS' => env('VITE_REVERB_SCHEME') === 'https',
+            'encrypted' => true,
+            'forceTLS' => env('REVERB_SCHEME') === 'https',
         ],
 
     ],
@@ -84,17 +85,5 @@ return [
     */
 
     'livewire_loading_delay' => 'default',
-
-    /*
-    |--------------------------------------------------------------------------
-    | System Route Prefix
-    |--------------------------------------------------------------------------
-    |
-    | This is the prefix used for the system routes that Filament registers,
-    | such as the routes for downloading exports and failed import rows.
-    |
-    */
-
-    'system_route_prefix' => 'filament',
 
 ];

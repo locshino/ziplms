@@ -3,14 +3,15 @@
 namespace App\Filament\Resources\QuestionResource\Pages;
 
 use App\Filament\Resources\QuestionResource;
-use Asmit\ResizedColumn\HasResizableColumn;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use HayderHatem\FilamentExcelImport\Actions\FullImportAction;
+use App\Filament\Imports\QuestionImporter;
+use Asmit\ResizedColumn\HasResizableColumn;
 
 class ListQuestions extends ListRecords
 {
-    use HasResizableColumn,
-        ListRecords\Concerns\Translatable;
+    use HasResizableColumn;
 
     protected static string $resource = QuestionResource::class;
 
@@ -18,11 +19,7 @@ class ListQuestions extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+            FullImportAction::make()->importer(QuestionImporter::class),
         ];
-    }
-
-    public static function getTranslatableLocales(): array
-    {
-        return ['vi', 'en'];
     }
 }

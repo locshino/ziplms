@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use BezhanSalleh\FilamentShield\Facades\FilamentShield;
+use pxlrbt\FilamentExcel\FilamentExport;
+use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
 use Illuminate\Support\ServiceProvider;
 
 class FilamentServiceProvider extends ServiceProvider
@@ -11,17 +14,7 @@ class FilamentServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $providers = [
-            \Studio15\FilamentTree\FilamentTreeServiceProvider::class,
-            \App\Providers\LanguageSwitchProvider::class,
-            \App\Providers\LaravelHealthProvider::class,
-            \App\Providers\FilamentColorProvider::class,
-            \App\Providers\FilamentExcelServiceProvider::class,
-        ];
-
-        foreach ($providers as $provider) {
-            $this->app->register($provider);
-        }
+        //
     }
 
     /**
@@ -29,6 +22,27 @@ class FilamentServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        /** @var \Illuminate\Foundation\Application $app */
+        $app = $this->app;
+
+        FilamentShield::prohibitDestructiveCommands($app->isProduction());
+
+        FilamentExport::createExportUrlUsing(function ($export) {
+            $fileInfo = pathinfo($export['filename']);
+            $filenameWithoutExtension = $fileInfo['filename'];
+            $extension = $fileInfo['extension'];
+
+            return \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                'filament-excel.exports.download',
+                now()->addHours(2),
+                ['path' => $filenameWithoutExtension, 'extension' => $extension]
+            );
+        });
+
+        LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
+            $switch
+                ->visible(outsidePanels: true)
+                ->locales(['vi', 'en']); // also accepts a closure
+        });
     }
 }

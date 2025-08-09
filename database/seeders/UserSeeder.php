@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Enums\RoleEnum;
-use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
@@ -14,32 +13,66 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Tạo người dùng quản trị viên mặc định và gán vai trò 'Admin'
-        $adminUser = User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'password' => 'password', // Mật khẩu mặc định
-        ]);
+        // Create Super Admin
+        $superAdmin = User::firstOrCreate(
+            ['email' => 'superadmin@ziplms.com'],
+            [
+                'name' => 'Super Administrator',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ]
+        );
+        $superAdmin->assignRole('super_admin');
 
-        $adminUserRoles = [
-            RoleEnum::Admin,
-            RoleEnum::Dev,
-        ];
+        // Create Admin
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@ziplms.com'],
+            [
+                'name' => 'Administrator',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ]
+        );
+        $admin->assignRole('admin');
+        $manager = User::firstOrCreate(
+            ['email' => 'manager@ziplms.com'],
+            [
+                'name' => 'Manager User',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ]
+        );
+        $manager->assignRole('manager');
 
-        $adminUser->assignRole($adminUserRoles);
+        // Create Sample Teacher
+        $teacher = User::firstOrCreate(
+            ['email' => 'teacher@ziplms.com'],
+            [
+                'name' => 'John Teacher',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ]
+        );
+        $teacher->assignRole('teacher');
 
-        // 2. Lấy các vai trò khác để gán ngẫu nhiên
-        $otherRoles = Role::whereIn('name', RoleEnum::values(...$adminUserRoles))->get();
+        // Create Sample Student
+        $student = User::firstOrCreate(
+            ['email' => 'student@ziplms.com'],
+            [
+                'name' => 'Jane Student',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ]
+        );
+        $student->assignRole('student');
 
-        if ($otherRoles->isEmpty()) {
-            $this->command->warn('Không tìm thấy vai trò Manager, Teacher, hoặc Student. Sẽ tạo người dùng mà không có các vai trò này.');
-        }
+        // Create additional random users
+        User::factory(10)->create()->each(function ($user) {
+            $user->assignRole('student');
+        });
 
-        // 3. Tạo các người dùng khác và gán vai trò ngẫu nhiên từ danh sách
-        User::factory()->count(20)->create()->each(function (User $user) use ($otherRoles) {
-            if ($otherRoles->isNotEmpty()) {
-                $user->assignRole($otherRoles->random());
-            }
+        User::factory(3)->create()->each(function ($user) {
+            $user->assignRole('teacher');
         });
     }
 }

@@ -5,24 +5,23 @@ namespace App\Filament\Resources\AssignmentResource\Pages;
 use App\Filament\Resources\AssignmentResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
-use Illuminate\Support\Facades\Auth;
+use HayderHatem\FilamentExcelImport\Actions\FullImportAction;
+use App\Filament\Imports\AssignmentImporter;
+use Asmit\ResizedColumn\HasResizableColumn;
 
 class ListAssignments extends ListRecords
 {
-    use ListRecords\Concerns\Translatable;
+    use HasResizableColumn;
+    
+    protected static string $resource = AssignmentResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\LocaleSwitcher::make(),
             Actions\CreateAction::make(),
+            
+            FullImportAction::make()
+                ->importer(AssignmentImporter::class),
         ];
     }
-
-    protected function canCreate(): bool
-    {
-        return ! Auth::user()->hasRole('student');
-    }
-
-    protected static string $resource = AssignmentResource::class;
 }

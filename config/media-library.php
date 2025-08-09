@@ -12,19 +12,19 @@ return [
      * The maximum file size of an item in bytes.
      * Adding a larger file will result in an exception.
      */
-    'max_file_size' => env('MEDIA_MAX_FILE_SIZE', 1024 * 1024 * 10), // 10MB
+    'max_file_size' => 1024 * 1024 * 10, // 10MB
 
     /*
      * This queue connection will be used to generate derived and responsive images.
      * Leave empty to use the default queue connection.
      */
-    'queue_connection_name' => env('QUEUE_MEDIA_CONNECTION', 'redis'),
+    'queue_connection_name' => env('QUEUE_CONNECTION', 'sync'),
 
     /*
      * This queue will be used to generate derived and responsive images.
      * Leave empty to use the default queue.
      */
-    'queue_name' => env('QUEUE_MEDIA_NAME', 'ziplms_media'),
+    'queue_name' => env('MEDIA_QUEUE', ''),
 
     /*
      * By default all conversions will be performed on a queue.
@@ -39,7 +39,7 @@ return [
     /*
      * The fully qualified class name of the media model.
      */
-    'media_model' => \App\Models\SpatieMedia::class,
+    'media_model' => App\Models\Media::class,
 
     /*
      * The fully qualified class name of the media observer.
@@ -59,29 +59,29 @@ return [
      *
      * This model is only used in Media Library Pro (https://medialibrary.pro)
      */
-    'temporary_upload_model' => env('MEDIA_PRO_TEMPORARY_UPLOAD_MODEL', \Spatie\MediaLibraryPro\Models\TemporaryUpload::class),
+    // 'temporary_upload_model' => Spatie\MediaLibraryPro\Models\TemporaryUpload::class,
 
     /*
      * When enabled, Media Library Pro will only process temporary uploads that were uploaded
      * in the same session. You can opt to disable this for stateless usage of
      * the pro components.
      */
-    'enable_temporary_uploads_session_affinity' => env('MEDIA_PRO_ENABLE_TEMPORARY_UPLOADS_SESSION_AFFINITY', true),
+    'enable_temporary_uploads_session_affinity' => true,
 
     /*
      * When enabled, Media Library pro will generate thumbnails for uploaded file.
      */
-    'generate_thumbnails_for_temporary_uploads' => env('MEDIA_PRO_GENERATE_THUMBNAILS_FOR_TEMPORARY_UPLOADS', true),
+    'generate_thumbnails_for_temporary_uploads' => true,
 
     /*
      * This is the class that is responsible for naming generated files.
      */
-    'file_namer' => env('MEDIA_FILE_NAMER', Spatie\MediaLibrary\Support\FileNamer\DefaultFileNamer::class),
+    'file_namer' => Spatie\MediaLibrary\Support\FileNamer\DefaultFileNamer::class,
 
     /*
      * The class that contains the strategy for determining a media file's path.
      */
-    'path_generator' => env('MEDIA_PATH_GENERATOR', Spatie\MediaLibrary\Support\PathGenerator\DefaultPathGenerator::class),
+    'path_generator' => Spatie\MediaLibrary\Support\PathGenerator\DefaultPathGenerator::class,
 
     /*
      * The class that contains the strategy for determining how to remove files.
@@ -176,7 +176,7 @@ return [
      * The path where to store temporary files while performing image conversions.
      * If set to null, storage_path('media-library/temp') will be used.
      */
-    'temporary_directory_path' => storage_path('app/temporary/media-library'),
+    'temporary_directory_path' => null,
 
     /*
      * The engine that should perform the image conversions.
@@ -258,8 +258,7 @@ return [
      * the Media Library Pro Vue and React components to move uploaded files
      * in a S3 bucket to their right place.
      */
-    'enable_vapor_uploads' => env('ENABLE_MEDIA_LIBRARY_VAPOR_UPLOADS')
-        ?? env('MEDIA_PRO_ENABLE_VAPOR_UPLOADS', false),
+    'enable_vapor_uploads' => env('ENABLE_MEDIA_LIBRARY_VAPOR_UPLOADS', false),
 
     /*
      * When converting Media instances to response the media library will add
@@ -276,7 +275,7 @@ return [
      * You can specify a prefix for that is used for storing all media.
      * If you set this to `/my-subdir`, all your media will be stored in a `/my-subdir` directory.
      */
-    'prefix' => env('MEDIA_PREFIX', 'media'),
+    'prefix' => env('MEDIA_PREFIX', ''),
 
     /*
      * When forcing lazy loading, media will be loaded even if you don't eager load media and you have
