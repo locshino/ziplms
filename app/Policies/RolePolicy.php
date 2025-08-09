@@ -2,9 +2,9 @@
 
 namespace App\Policies;
 
-use App\Models\Role;
-use App\Libs\Roles\RoleHelper;
 use App\Libs\Permissions\PermissionHelper;
+use App\Libs\Roles\RoleHelper;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -21,12 +21,12 @@ class RolePolicy
         if (RoleHelper::isSuperAdmin($user)) {
             return $user->can(PermissionHelper::make()->view()->role()->all()->build());
         }
-        
+
         // Admin can view non-system roles
         if (RoleHelper::isAdmin($user)) {
             return $user->can(PermissionHelper::make()->view()->role()->public()->build());
         }
-        
+
         return $user->can('view_any_role');
     }
 
@@ -39,12 +39,12 @@ class RolePolicy
         if (RoleHelper::isSuperAdmin($user)) {
             return $user->can(PermissionHelper::make()->view()->role()->all()->build());
         }
-        
+
         // Admin can view non-system roles
-        if (RoleHelper::isAdmin($user) && !$role->is_system) {
+        if (RoleHelper::isAdmin($user) && ! $role->is_system) {
             return $user->can(PermissionHelper::make()->view()->role()->public()->build());
         }
-        
+
         return $user->can('view_role');
     }
 
@@ -57,7 +57,7 @@ class RolePolicy
         if (RoleHelper::isSuperAdmin($user)) {
             return $user->can(PermissionHelper::make()->create()->role()->all()->build());
         }
-        
+
         return $user->can('create_role');
     }
 
@@ -70,12 +70,12 @@ class RolePolicy
         if ($role->is_system) {
             return RoleHelper::isSuperAdmin($user) && $user->can(PermissionHelper::make()->configure()->role()->all()->build());
         }
-        
+
         // Super admin can update all roles
         if (RoleHelper::isSuperAdmin($user)) {
             return $user->can(PermissionHelper::make()->update()->role()->all()->build());
         }
-        
+
         return $user->can('update_role');
     }
 
@@ -88,12 +88,12 @@ class RolePolicy
         if ($role->is_system) {
             return RoleHelper::isSuperAdmin($user) && $user->can(PermissionHelper::make()->configure()->role()->all()->build());
         }
-        
+
         // Super admin can delete all roles
         if (RoleHelper::isSuperAdmin($user)) {
             return $user->can(PermissionHelper::make()->delete()->role()->all()->build());
         }
-        
+
         return $user->can('delete_role');
     }
 
@@ -114,12 +114,12 @@ class RolePolicy
         if ($role->is_system) {
             return RoleHelper::isSuperAdmin($user) && $user->can(PermissionHelper::make()->configure()->role()->all()->build());
         }
-        
+
         // Super admin can force delete all roles
         if (RoleHelper::isSuperAdmin($user)) {
             return $user->can(PermissionHelper::make()->delete()->role()->all()->build());
         }
-        
+
         return $user->can('force_delete_role');
     }
 
@@ -140,12 +140,12 @@ class RolePolicy
         if ($role->is_system) {
             return RoleHelper::isSuperAdmin($user) && $user->can(PermissionHelper::make()->configure()->role()->all()->build());
         }
-        
+
         // Super admin can restore all roles
         if (RoleHelper::isSuperAdmin($user)) {
             return $user->can(PermissionHelper::make()->restore()->role()->all()->build());
         }
-        
+
         return $user->can('restore_role');
     }
 

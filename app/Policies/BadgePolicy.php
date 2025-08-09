@@ -2,9 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\Badge;
 use App\Libs\Roles\RoleHelper;
-use App\Libs\Permissions\PermissionHelper;
+use App\Models\Badge;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -37,7 +36,7 @@ class BadgePolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user) || RoleHelper::isManager($user)) {
             return $user->can('create_badge');
         }
-        
+
         return false;
     }
 
@@ -50,7 +49,7 @@ class BadgePolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user) || RoleHelper::isManager($user)) {
             return $user->can('update_badge');
         }
-        
+
         return false;
     }
 
@@ -63,7 +62,7 @@ class BadgePolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return $user->can('delete_badge');
         }
-        
+
         return false;
     }
 

@@ -21,8 +21,6 @@ class RoleRepository extends EloquentRepository implements RoleRepositoryInterfa
 {
     /**
      * Get the model class name.
-     *
-     * @return string
      */
     protected function model(): string
     {
@@ -52,6 +50,7 @@ class RoleRepository extends EloquentRepository implements RoleRepositoryInterfa
     {
         try {
             $role = $this->model->find($id);
+
             return $role ? (bool) $role->is_system : false;
         } catch (Exception $e) {
             throw RepositoryException::databaseError($e->getMessage());
@@ -74,7 +73,7 @@ class RoleRepository extends EloquentRepository implements RoleRepositoryInterfa
 
             // Ensure is_system is always false for new roles
             $data['is_system'] = false;
-            
+
             return $this->model->create($data);
         } catch (RoleRepositoryException $e) {
             throw $e;
@@ -93,7 +92,7 @@ class RoleRepository extends EloquentRepository implements RoleRepositoryInterfa
     {
         try {
             $role = $this->model->find($id);
-            if (!$role) {
+            if (! $role) {
                 throw RoleRepositoryException::notFound($id);
             }
 
@@ -118,8 +117,6 @@ class RoleRepository extends EloquentRepository implements RoleRepositoryInterfa
     /**
      * Override create method to ensure is_system = false.
      *
-     * @param array $data
-     * @return Role
      * @throws RoleRepositoryException
      */
     public function create(array $data): Role
@@ -130,8 +127,6 @@ class RoleRepository extends EloquentRepository implements RoleRepositoryInterfa
     /**
      * Override delete method to prevent system role deletion.
      *
-     * @param string $id
-     * @return bool
      * @throws RoleRepositoryException
      */
     public function delete(string $id): bool

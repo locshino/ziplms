@@ -5,8 +5,8 @@ namespace App\Filament\Resources\RoleResource\Pages;
 use App\Filament\Resources\RoleResource;
 use App\Services\Interfaces\RoleServiceInterface;
 use Filament\Actions;
-use Filament\Resources\Pages\EditRecord;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\EditRecord;
 
 class EditRole extends EditRecord
 {
@@ -49,9 +49,10 @@ class EditRole extends EditRecord
     protected function mutateFormDataBeforeSave(array $data): array
     {
         try {
-            /**  @var \App\Models\Role $role  */
+            /** @var \App\Models\Role $role */
             $role = $this->record;
             $this->processedData = $this->roleService->processFormDataBeforeSave($role, $data);
+
             return $this->processedData;
         } catch (\App\Exceptions\Services\RoleServiceException $e) {
             Notification::make()
@@ -61,13 +62,14 @@ class EditRole extends EditRecord
                 ->send();
 
             $this->halt();
+
             return $data; // Return original data if exception occurs
         }
     }
 
     protected function afterSave(): void
     {
-        /**  @var \App\Models\Role $role  */
+        /** @var \App\Models\Role $role */
         $role = $this->record;
         $this->roleService->syncPermissionsAfterSave($role, $this->processedData);
     }

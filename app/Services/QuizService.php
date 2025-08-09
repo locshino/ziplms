@@ -242,15 +242,15 @@ class QuizService extends BaseService implements QuizServiceInterface
                         // If auto-submit fails, mark as expired manually
                         Log::warning('Auto-submit failed for expired attempt', [
                             'attempt_id' => $attempt->id,
-                            'error' => $e->getMessage()
+                            'error' => $e->getMessage(),
                         ]);
-                        
+
                         // Update attempt status to expired
                         $this->quizAttemptRepository->updateById($attempt->id, [
                             'status' => 'expired',
                             'completed_at' => Carbon::now(),
                         ]);
-                        
+
                         // Clear cache
                         $this->cacheService->invalidateStudentAttemptsCache($attempt->quiz_id, $attempt->student_id);
                     }
@@ -363,7 +363,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                         'status' => 'completed',
                         'completed_at' => Carbon::now(),
                     ]);
-                    
+
                     // Get updated attempt
                     $updatedAttempt = $this->quizAttemptRepository->findById($attemptId);
 

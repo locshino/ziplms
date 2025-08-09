@@ -2,13 +2,12 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PermissionResource\Pages;
-use App\Models\Permission;
-use App\Services\PermissionService;
-use App\Libs\Permissions\PermissionHelper;
-use App\Enums\Permissions\PermissionVerbEnum;
-use App\Enums\Permissions\PermissionNounEnum;
 use App\Enums\Permissions\PermissionContextEnum;
+use App\Enums\Permissions\PermissionNounEnum;
+use App\Enums\Permissions\PermissionVerbEnum;
+use App\Filament\Resources\PermissionResource\Pages;
+use App\Libs\Permissions\PermissionHelper;
+use App\Models\Permission;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -46,6 +45,7 @@ class PermissionResource extends Resource
     {
         if (! $verb || ! $noun || ! $context) {
             $set('name', '');
+
             return;
         }
 
