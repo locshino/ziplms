@@ -31,9 +31,11 @@
         "leandrocfe/filament-apex-charts": "*",
         "marcelweidum/filament-expiration-notice": "^1.0",
         "martinpetricko/filament-restore-or-create": "^1.0",
+        "predis/predis": "^3.2",
         "promethys/revive": "^1.2",
         "pxlrbt/filament-excel": "^2.4",
-        "spatie/laravel-permission": "^6.21"
+        "spatie/laravel-permission": "^6.21",
+        "tomatophp/filament-pwa": "^1.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

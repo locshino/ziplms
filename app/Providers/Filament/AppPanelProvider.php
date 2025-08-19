@@ -25,6 +25,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
 use Promethys\Revive\RevivePlugin;
+use TomatoPHP\FilamentPWA\FilamentPWAPlugin;
 
 class AppPanelProvider extends PanelProvider
 {
@@ -80,6 +81,8 @@ class AppPanelProvider extends PanelProvider
                 ResizedColumnPlugin::make()
                     ->preserveOnDB(),
                 LightSwitchPlugin::make(),
+
+                FilamentPWAPlugin::make(),
             ])
             ->authMiddleware([
                 Authenticate::class,

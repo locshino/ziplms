@@ -24,6 +24,11 @@ class RoleSeeder extends Seeder
                 'is_system' => true,
             ],
             [
+                'name' => 'manager',
+                'guard_name' => 'web',
+                'is_system' => true,
+            ],
+            [
                 'name' => 'teacher',
                 'guard_name' => 'web',
                 'is_system' => true,
