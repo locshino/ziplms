@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Services\Interfaces\QuizServiceInterface;
+use BackedEnum;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Pages\Page;
@@ -14,9 +15,9 @@ use Livewire\Attributes\Url;
 
 class QuizResults extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar';
 
-    protected static string $view = 'filament.pages.quiz-results';
+    protected string $view = 'filament.pages.quiz-results';
 
     protected static ?string $title = 'Kết quả Quiz';
 

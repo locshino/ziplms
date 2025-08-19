@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\System\RoleSystem;
+
 return [
     'shield_resource' => [
         'should_register_navigation' => true,
@@ -22,7 +24,7 @@ return [
 
     'super_admin' => [
         'enabled' => true,
-        'name' => 'super_admin',
+        'name' => RoleSystem::SUPER_ADMIN->value,
         'define_via_gate' => false,
         'intercept_gate' => 'before', // after
     ],
@@ -60,7 +62,7 @@ return [
     ],
 
     'generator' => [
-        'option' => 'permissions', // policies_and_permissions, permissions
+        'option' => 'policies_and_permissions',
         'policy_directory' => 'Policies',
         'policy_namespace' => 'Policies',
     ],

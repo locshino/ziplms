@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\Assignment;
 use App\Models\Course;
 use App\Models\Submission;
+use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -12,20 +13,21 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
+use UnitEnum;
 
 class MyAssignmentsPage extends Page
 {
     use WithPagination, WithFileUploads, HasPageShield;
 
-    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
-    protected static ?string $navigationGroup = 'Student Section';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-academic-cap';
+    protected static UnitEnum|string|null $navigationGroup = 'Student Section';
     protected static ?string $navigationLabel = 'My Assignments';
     protected static ?string $title = 'My Assignments';
     protected static ?string $slug = 'my-assignments';
-    protected static string $view = 'filament.pages.my-assignments';
+    protected string $view = 'filament.pages.my-assignments';
 
     /*
-    |--------------------------------------------------------------------------
+    |                                   --------------------------------------------------------------------------
     | Thuộc tính Trạng thái của Component (Component State Properties)
     |--------------------------------------------------------------------------
     |

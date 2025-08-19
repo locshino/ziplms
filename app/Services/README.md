@@ -43,7 +43,7 @@ Handles user-related business operations:
 - `updatePassword(string $userId, string $newPassword)` - Secure password updates
 - `findByEmail(string $email)` - Find user by email address
 - `getUsersByRole(string $role)` - Get users by specific role
-- `getInstructors()` / `getStudents()` - Get users by role shortcuts
+- `getTeachers()` / `getStudents()` - Get users by role shortcuts
 - `searchUsers(string $query)` - Search users by name or email
 - `toggleUserStatus(string $userId)` - Activate/deactivate users
 - `assignRole(string $userId, string $role)` - Role management
@@ -55,7 +55,7 @@ Manages course-related business logic:
 **Key Methods:**
 
 - `createCourse(array $payload)` - Create course with validation and defaults
-- `getCoursesByInstructor(string $instructorId)` - Get instructor's courses
+- `getCoursesByTeacher(string $teacherId)` - Get teacher's courses
 - `getPublishedCourses()` - Get all published courses
 - `getCoursesWithStats()` - Get courses with enrollment statistics
 - `searchCourses(string $query)` - Search courses by title/description

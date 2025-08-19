@@ -2,10 +2,8 @@
 
 namespace App\Policies;
 
-use App\Libs\Permissions\PermissionHelper;
-use App\Libs\Roles\RoleHelper;
-use App\Models\Assignment;
 use App\Models\User;
+use App\Models\Assignment;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class AssignmentPolicy
@@ -17,7 +15,7 @@ class AssignmentPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_assignment');
+        return $user->can('view_any_assignments::assignment');
     }
 
     /**
@@ -25,22 +23,7 @@ class AssignmentPolicy
      */
     public function view(User $user, Assignment $assignment): bool
     {
-        // Super admin and admin can view all assignments
-        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
-            return $user->can(PermissionHelper::make()->view()->assignment()->all()->build());
-        }
-
-        // Teachers can view assignments in courses they teach
-        if (RoleHelper::isTeacher($user) && $assignment->course && $assignment->course->teachers()->where('user_id', $user->id)->exists()) {
-            return $user->can(PermissionHelper::make()->view()->assignment()->assigned()->build());
-        }
-
-        // Students can view assignments in courses they are enrolled in
-        if (RoleHelper::isStudent($user) && $assignment->course && $assignment->course->enrollments()->where('user_id', $user->id)->exists()) {
-            return $user->can(PermissionHelper::make()->view()->assignment()->enrolled()->build());
-        }
-
-        return $user->can(PermissionHelper::make()->view()->assignment()->public()->build());
+        return $user->can('view_assignments::assignment');
     }
 
     /**
@@ -48,17 +31,7 @@ class AssignmentPolicy
      */
     public function create(User $user): bool
     {
-        // Super admin, admin, and managers can create assignments
-        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user) || RoleHelper::isManager($user)) {
-            return $user->can(PermissionHelper::make()->create()->assignment()->all()->build());
-        }
-
-        // Teachers can create assignments in courses they teach
-        if (RoleHelper::isTeacher($user)) {
-            return $user->can(PermissionHelper::make()->create()->assignment()->assigned()->build());
-        }
-
-        return $user->can(PermissionHelper::make()->create()->assignment()->owner()->build());
+        return $user->can('create_assignments::assignment');
     }
 
     /**
@@ -66,17 +39,7 @@ class AssignmentPolicy
      */
     public function update(User $user, Assignment $assignment): bool
     {
-        // Super admin and admin can update all assignments
-        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
-            return $user->can(PermissionHelper::make()->update()->assignment()->all()->build());
-        }
-
-        // Teachers can update assignments in courses they teach
-        if (RoleHelper::isTeacher($user) && $assignment->course && $assignment->course->teachers()->where('user_id', $user->id)->exists()) {
-            return $user->can(PermissionHelper::make()->update()->assignment()->assigned()->build());
-        }
-
-        return $user->can(PermissionHelper::make()->update()->assignment()->owner()->build());
+        return $user->can('update_assignments::assignment');
     }
 
     /**
@@ -84,17 +47,7 @@ class AssignmentPolicy
      */
     public function delete(User $user, Assignment $assignment): bool
     {
-        // Super admin and admin can delete all assignments
-        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
-            return $user->can(PermissionHelper::make()->delete()->assignment()->all()->build());
-        }
-
-        // Teachers can delete assignments in courses they teach
-        if (RoleHelper::isTeacher($user) && $assignment->course && $assignment->course->teachers()->where('user_id', $user->id)->exists()) {
-            return $user->can(PermissionHelper::make()->delete()->assignment()->assigned()->build());
-        }
-
-        return $user->can(PermissionHelper::make()->delete()->assignment()->owner()->build());
+        return $user->can('delete_assignments::assignment');
     }
 
     /**
@@ -102,7 +55,7 @@ class AssignmentPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_assignment');
+        return $user->can('delete_any_assignments::assignment');
     }
 
     /**
@@ -110,7 +63,7 @@ class AssignmentPolicy
      */
     public function forceDelete(User $user, Assignment $assignment): bool
     {
-        return $user->can('force_delete_assignment');
+        return $user->can('force_delete_assignments::assignment');
     }
 
     /**
@@ -118,7 +71,7 @@ class AssignmentPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_assignment');
+        return $user->can('force_delete_any_assignments::assignment');
     }
 
     /**
@@ -126,7 +79,7 @@ class AssignmentPolicy
      */
     public function restore(User $user, Assignment $assignment): bool
     {
-        return $user->can('restore_assignment');
+        return $user->can('restore_assignments::assignment');
     }
 
     /**
@@ -134,7 +87,7 @@ class AssignmentPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_assignment');
+        return $user->can('restore_any_assignments::assignment');
     }
 
     /**
@@ -142,7 +95,7 @@ class AssignmentPolicy
      */
     public function replicate(User $user, Assignment $assignment): bool
     {
-        return $user->can('replicate_assignment');
+        return $user->can('replicate_assignments::assignment');
     }
 
     /**
@@ -150,6 +103,6 @@ class AssignmentPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_assignment');
+        return $user->can('reorder_assignments::assignment');
     }
 }

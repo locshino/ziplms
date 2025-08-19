@@ -2,7 +2,7 @@
 
 namespace App\Libs\Roles;
 
-use App\Enums\Roles\RoleSystemEnum;
+use App\Enums\System\RoleSystem as RoleSystemEnum;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -10,216 +10,181 @@ use Illuminate\Support\Facades\Auth;
 /**
  * RoleHelper
  *
- * A static helper class for role-related operations and checks.
- * Provides convenient static methods to check user roles without repeating logic.
+ * Static utility class for role-based operations and checks.
+ * Provides optimized static methods for role validation and retrieval.
  */
 class RoleHelper
 {
     /**
-     * Check if the current authenticated user is a super admin.
+     * Safely resolve the user instance.
      *
-     * @param  Authenticatable|null  $user  Optional user instance, defaults to current authenticated user
+     * @param  Authenticatable|null  $user  Optional user, defaults to currently authenticated user.
+     * @return Authenticatable|null
      */
-    public static function isSuperAdmin(?Authenticatable $user = null): bool
+    protected static function resolveUser(?Authenticatable $user = null): ?Authenticatable
     {
-        if ($user === null) {
-            try {
-                $user = Auth::user();
-            } catch (\Exception $e) {
-                return false;
-            }
+        if ($user !== null) {
+            return $user;
         }
-
-        if (! $user) {
-            return false;
+        try {
+            return Auth::user();
+        } catch (\Exception $e) {
+            return null;
         }
-
-        $superAdminRole = config('filament-shield.super_admin.name', RoleSystemEnum::SUPER_ADMIN->value);
-
-        return method_exists($user, 'hasRole') ? $user->hasRole($superAdminRole) : false;
     }
 
     /**
-     * Check if the current authenticated user is an admin.
+     * Check if a user has a specific role by role value.
      *
-     * @param  Authenticatable|null  $user  Optional user instance, defaults to current authenticated user
+     * @param  string  $role
+     * @param  Authenticatable|null  $user
+     * @return bool
      */
-    public static function isAdmin(?Authenticatable $user = null): bool
+    protected static function checkRole(string $role, ?Authenticatable $user = null): bool
     {
-        if ($user === null) {
-            try {
-                $user = Auth::user();
-            } catch (\Exception $e) {
-                return false;
-            }
-        }
-
-        if (! $user) {
-            return false;
-        }
-
-        return method_exists($user, 'hasRole') ? $user->hasRole(RoleSystemEnum::ADMIN->value) : false;
+        $user = static::resolveUser($user);
+        return $user && method_exists($user, 'hasRole') && $user->hasRole($role);
     }
 
     /**
-     * Check if the current authenticated user is a manager.
+     * Check if a user has any of the specified roles.
      *
-     * @param  Authenticatable|null  $user  Optional user instance, defaults to current authenticated user
+     * @param  array|string  $roles
+     * @param  Authenticatable|null  $user
+     * @return bool
      */
-    public static function isManager(?Authenticatable $user = null): bool
+    protected static function checkAnyRole(array|string $roles, ?Authenticatable $user = null): bool
     {
-        if ($user === null) {
-            try {
-                $user = Auth::user();
-            } catch (\Exception $e) {
-                return false;
-            }
-        }
-
-        if (! $user) {
-            return false;
-        }
-
-        return method_exists($user, 'hasRole') ? $user->hasRole(RoleSystemEnum::MANAGER->value) : false;
+        $user = static::resolveUser($user);
+        return $user && method_exists($user, 'hasAnyRole') && $user->hasAnyRole($roles);
     }
 
     /**
-     * Check if the current authenticated user is a teacher.
+     * Check if a user has all of the specified roles.
      *
-     * @param  Authenticatable|null  $user  Optional user instance, defaults to current authenticated user
+     * @param  array|string  $roles
+     * @param  Authenticatable|null  $user
+     * @return bool
      */
-    public static function isTeacher(?Authenticatable $user = null): bool
+    protected static function checkAllRoles(array|string $roles, ?Authenticatable $user = null): bool
     {
-        if ($user === null) {
-            try {
-                $user = Auth::user();
-            } catch (\Exception $e) {
-                return false;
-            }
-        }
-
-        if (! $user) {
-            return false;
-        }
-
-        return method_exists($user, 'hasRole') ? $user->hasRole(RoleSystemEnum::TEACHER->value) : false;
+        $user = static::resolveUser($user);
+        return $user && method_exists($user, 'hasAllRoles') && $user->hasAllRoles($roles);
     }
 
     /**
-     * Check if the current authenticated user is a student.
+     * Get all roles of the user.
      *
-     * @param  Authenticatable|null  $user  Optional user instance, defaults to current authenticated user
-     */
-    public static function isStudent(?Authenticatable $user = null): bool
-    {
-        if ($user === null) {
-            try {
-                $user = Auth::user();
-            } catch (\Exception $e) {
-                return false;
-            }
-        }
-
-        if (! $user) {
-            return false;
-        }
-
-        return method_exists($user, 'hasRole') ? $user->hasRole(RoleSystemEnum::STUDENT->value) : false;
-    }
-
-    /**
-     * Check if the current authenticated user has any of the specified roles.
-     *
-     * @param  Authenticatable|null  $user  Optional user instance, defaults to current authenticated user
-     */
-    public static function hasAnyRole(array|string $roles, ?Authenticatable $user = null): bool
-    {
-        if ($user === null) {
-            try {
-                $user = Auth::user();
-            } catch (\Exception $e) {
-                return false;
-            }
-        }
-
-        if (! $user) {
-            return false;
-        }
-
-        return method_exists($user, 'hasAnyRole') ? $user->hasAnyRole($roles) : false;
-    }
-
-    /**
-     * Check if the current authenticated user has all of the specified roles.
-     *
-     * @param  Authenticatable|null  $user  Optional user instance, defaults to current authenticated user
-     */
-    public static function hasAllRoles(array|string $roles, ?Authenticatable $user = null): bool
-    {
-        if ($user === null) {
-            try {
-                $user = Auth::user();
-            } catch (\Exception $e) {
-                return false;
-            }
-        }
-
-        if (! $user) {
-            return false;
-        }
-
-        return method_exists($user, 'hasAllRoles') ? $user->hasAllRoles($roles) : false;
-    }
-
-    /**
-     * Check if the current authenticated user has a specific role.
-     *
-     * @param  Authenticatable|null  $user  Optional user instance, defaults to current authenticated user
-     */
-    public static function hasRole(string $role, ?Authenticatable $user = null): bool
-    {
-        if ($user === null) {
-            try {
-                $user = Auth::user();
-            } catch (\Exception $e) {
-                return false;
-            }
-        }
-
-        if (! $user) {
-            return false;
-        }
-
-        return method_exists($user, 'hasRole') ? $user->hasRole($role) : false;
-    }
-
-    /**
-     * Get all roles of the current authenticated user.
-     *
-     * @param  Authenticatable|null  $user  Optional user instance, defaults to current authenticated user
+     * @param  Authenticatable|null  $user
+     * @return Collection
      */
     public static function getRoles(?Authenticatable $user = null): Collection
     {
-        if ($user === null) {
-            try {
-                $user = Auth::user();
-            } catch (\Exception $e) {
-                return new Collection;
-            }
-        }
-
-        if (! $user) {
-            return new Collection;
-        }
-
-        return $user->roles ?? new Collection;
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = static::resolveUser($user);
+        return $user && property_exists($user, 'roles') ? $user->roles : new Collection;
     }
 
     /**
-     * Check if the current authenticated user can modify system roles.
+     * Check if the user is a super admin.
+     *
+     * @param  Authenticatable|null  $user
+     * @return bool
+     */
+    public static function isSuperAdmin(?Authenticatable $user = null): bool
+    {
+        $superAdminRole = config('filament-shield.super_admin.name', RoleSystemEnum::SUPER_ADMIN->value);
+        return static::checkRole($superAdminRole, $user);
+    }
+
+    /**
+     * Check if the user is an admin.
+     *
+     * @param  Authenticatable|null  $user
+     * @return bool
+     */
+    public static function isAdmin(?Authenticatable $user = null): bool
+    {
+        return static::checkRole(RoleSystemEnum::ADMIN->value, $user);
+    }
+
+    /**
+     * Check if the user is a manager.
+     *
+     * @param  Authenticatable|null  $user
+     * @return bool
+     */
+    public static function isManager(?Authenticatable $user = null): bool
+    {
+        return static::checkRole(RoleSystemEnum::MANAGER->value, $user);
+    }
+
+    /**
+     * Check if the user is a teacher.
+     *
+     * @param  Authenticatable|null  $user
+     * @return bool
+     */
+    public static function isTeacher(?Authenticatable $user = null): bool
+    {
+        return static::checkRole(RoleSystemEnum::TEACHER->value, $user);
+    }
+
+    /**
+     * Check if the user is a student.
+     *
+     * @param  Authenticatable|null  $user
+     * @return bool
+     */
+    public static function isStudent(?Authenticatable $user = null): bool
+    {
+        return static::checkRole(RoleSystemEnum::STUDENT->value, $user);
+    }
+
+    /**
+     * Check if the user has any of the specified roles.
+     *
+     * @param  array|string  $roles
+     * @param  Authenticatable|null  $user
+     * @return bool
+     */
+    public static function hasAnyRole(array|string $roles, ?Authenticatable $user = null): bool
+    {
+        return static::checkAnyRole($roles, $user);
+    }
+
+    /**
+     * Check if the user has all of the specified roles.
+     *
+     * @param  array|string  $roles
+     * @param  Authenticatable|null  $user
+     * @return bool
+     */
+    public static function hasAllRoles(array|string $roles, ?Authenticatable $user = null): bool
+    {
+        return static::checkAllRoles($roles, $user);
+    }
+
+    /**
+     * Check if the user has a specific role.
+     *
+     * @param  string  $role
+     * @param  Authenticatable|null  $user
+     * @return bool
+     */
+    public static function hasRole(string $role, ?Authenticatable $user = null): bool
+    {
+        return static::checkRole($role, $user);
+    }
+
+    /**
+     * Check if the user can modify system roles.
      * Only super admin can modify system roles.
      *
-     * @param  Authenticatable|null  $user  Optional user instance, defaults to current authenticated user
+     * @param  Authenticatable|null  $user
+     * @return bool
      */
     public static function canModifySystemRoles(?Authenticatable $user = null): bool
     {
@@ -227,12 +192,28 @@ class RoleHelper
     }
 
     /**
-     * Check if the current authenticated user has administrative privileges.
-     * This includes super admin, admin, and manager roles.
+     * Check if the user has administrative privileges.
+     * Includes super admin and admin roles.
      *
-     * @param  Authenticatable|null  $user  Optional user instance, defaults to current authenticated user
+     * @param  Authenticatable|null  $user
+     * @return bool
      */
     public static function isAdministrative(?Authenticatable $user = null): bool
+    {
+        return static::hasAnyRole([
+            RoleSystemEnum::SUPER_ADMIN->value,
+            RoleSystemEnum::ADMIN->value,
+        ], $user);
+    }
+
+    /**
+     * Check if the user has management privileges.
+     * Includes super admin, admin, and manager roles.
+     *
+     * @param  Authenticatable|null  $user
+     * @return bool
+     */
+    public static function isManageable(?Authenticatable $user = null): bool
     {
         return static::hasAnyRole([
             RoleSystemEnum::SUPER_ADMIN->value,
@@ -242,21 +223,26 @@ class RoleHelper
     }
 
     /**
-     * Get the highest role of the current authenticated user.
-     * Returns the role with the highest priority (super_admin > admin > manager > teacher > student).
+     * Check if the user is a LMS user.
      *
-     * @param  Authenticatable|null  $user  Optional user instance, defaults to current authenticated user
+     * @param  Authenticatable|null  $user
+     * @return bool
+     */
+    public static function isLMSUsers(?Authenticatable $user = null): bool
+    {
+        return static::hasAnyRole(static::getSystemRoles(), $user);
+    }
+
+    /**
+     * Get the user's highest role based on role hierarchy.
+     * Returns the role name with the highest priority (super_admin > admin > manager > teacher > student).
+     *
+     * @param  Authenticatable|null  $user
+     * @return string|null
      */
     public static function getHighestRole(?Authenticatable $user = null): ?string
     {
-        if ($user === null) {
-            try {
-                $user = Auth::user();
-            } catch (\Exception $e) {
-                return null;
-            }
-        }
-
+        $user = static::resolveUser($user);
         if (! $user) {
             return null;
         }
@@ -270,7 +256,7 @@ class RoleHelper
         ];
 
         foreach ($roleHierarchy as $role) {
-            if (method_exists($user, 'hasRole') ? $user->hasRole($role) : false) {
+            if (method_exists($user, 'hasRole') && $user->hasRole($role)) {
                 return $role;
             }
         }
@@ -279,23 +265,20 @@ class RoleHelper
     }
 
     /**
-     * Check if a role is a system role.
+     * Check if a role name is a system role.
+     *
+     * @param  string  $roleName
+     * @return bool
      */
     public static function isSystemRole(string $roleName): bool
     {
-        $systemRoles = [
-            RoleSystemEnum::SUPER_ADMIN->value,
-            RoleSystemEnum::ADMIN->value,
-            RoleSystemEnum::MANAGER->value,
-            RoleSystemEnum::TEACHER->value,
-            RoleSystemEnum::STUDENT->value,
-        ];
-
-        return in_array($roleName, $systemRoles);
+        return in_array($roleName, static::getSystemRoles());
     }
 
     /**
      * Get all system role names.
+     *
+     * @return array
      */
     public static function getSystemRoles(): array
     {

@@ -112,4 +112,37 @@ class EnrollmentRepository extends EloquentRepository implements EnrollmentRepos
             ->with(['student', 'course'])
             ->find($enrollmentId);
     }
+
+    /**
+     * Delete enrollment by student and course
+     */
+    public function deleteEnrollment(int $studentId, int $courseId): bool
+    {
+        return $this->model
+            ->where('student_id', $studentId)
+            ->where('course_id', $courseId)
+            ->delete() > 0;
+    }
+
+    /**
+     * Get enrolled user IDs for a course
+     */
+    public function getEnrolledUserIds(string $courseId): Collection
+    {
+        return $this->model
+            ->where('course_id', $courseId)
+            ->pluck('student_id');
+    }
+
+    /**
+     * Get user enrollments excluding a specific course
+     */
+    public function getUserEnrollmentsExcludingCourse(int $userId, int $excludeCourseId): Collection
+    {
+        return $this->model
+            ->where('student_id', $userId)
+            ->where('course_id', '!=', $excludeCourseId)
+            ->with(['course'])
+            ->get();
+    }
 }

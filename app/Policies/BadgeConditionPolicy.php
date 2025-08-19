@@ -2,9 +2,8 @@
 
 namespace App\Policies;
 
-use App\Libs\Roles\RoleHelper;
-use App\Models\BadgeCondition;
 use App\Models\User;
+use App\Models\BadgeCondition;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class BadgeConditionPolicy
@@ -16,7 +15,7 @@ class BadgeConditionPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_badge::condition');
+        return $user->can('view_any_badge::conditions::badge::condition');
     }
 
     /**
@@ -24,7 +23,7 @@ class BadgeConditionPolicy
      */
     public function view(User $user, BadgeCondition $badgeCondition): bool
     {
-        return $user->can('view_badge::condition');
+        return $user->can('view_badge::conditions::badge::condition');
     }
 
     /**
@@ -32,12 +31,7 @@ class BadgeConditionPolicy
      */
     public function create(User $user): bool
     {
-        // Only super admin, admin, and manager can create badge conditions
-        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user) || RoleHelper::isManager($user)) {
-            return $user->can('create_badge::condition');
-        }
-
-        return false;
+        return $user->can('create_badge::conditions::badge::condition');
     }
 
     /**
@@ -45,12 +39,7 @@ class BadgeConditionPolicy
      */
     public function update(User $user, BadgeCondition $badgeCondition): bool
     {
-        // Only super admin, admin, and manager can update badge conditions
-        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user) || RoleHelper::isManager($user)) {
-            return $user->can('update_badge::condition');
-        }
-
-        return false;
+        return $user->can('update_badge::conditions::badge::condition');
     }
 
     /**
@@ -58,12 +47,7 @@ class BadgeConditionPolicy
      */
     public function delete(User $user, BadgeCondition $badgeCondition): bool
     {
-        // Only super admin and admin can delete badge conditions
-        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
-            return $user->can('delete_badge::condition');
-        }
-
-        return false;
+        return $user->can('delete_badge::conditions::badge::condition');
     }
 
     /**
@@ -71,7 +55,7 @@ class BadgeConditionPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_badge::condition');
+        return $user->can('delete_any_badge::conditions::badge::condition');
     }
 
     /**
@@ -79,7 +63,7 @@ class BadgeConditionPolicy
      */
     public function forceDelete(User $user, BadgeCondition $badgeCondition): bool
     {
-        return $user->can('force_delete_badge::condition');
+        return $user->can('force_delete_badge::conditions::badge::condition');
     }
 
     /**
@@ -87,7 +71,7 @@ class BadgeConditionPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_badge::condition');
+        return $user->can('force_delete_any_badge::conditions::badge::condition');
     }
 
     /**
@@ -95,7 +79,7 @@ class BadgeConditionPolicy
      */
     public function restore(User $user, BadgeCondition $badgeCondition): bool
     {
-        return $user->can('restore_badge::condition');
+        return $user->can('restore_badge::conditions::badge::condition');
     }
 
     /**
@@ -103,7 +87,7 @@ class BadgeConditionPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_badge::condition');
+        return $user->can('restore_any_badge::conditions::badge::condition');
     }
 
     /**
@@ -111,7 +95,7 @@ class BadgeConditionPolicy
      */
     public function replicate(User $user, BadgeCondition $badgeCondition): bool
     {
-        return $user->can('replicate_badge::condition');
+        return $user->can('replicate_badge::conditions::badge::condition');
     }
 
     /**
@@ -119,6 +103,6 @@ class BadgeConditionPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_badge::condition');
+        return $user->can('reorder_badge::conditions::badge::condition');
     }
 }

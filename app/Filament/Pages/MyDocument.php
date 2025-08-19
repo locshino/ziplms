@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\Assignment;
 use App\Models\Course;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Collection;
@@ -11,9 +12,9 @@ use Illuminate\Support\Facades\Auth;
 
 class MyDocument extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
 
-    protected static string $view = 'filament.pages.my-document';
+    protected string $view = 'filament.pages.my-document';
 
     protected static ?string $navigationLabel = 'Tài liệu của tôi';
 
@@ -31,10 +32,11 @@ class MyDocument extends Page
      */
     public function getDocuments(): Collection
     {
+        /** @var User $user */
         $user = Auth::user();
 
         // Get courses the user is enrolled in
-        $enrolledCourseIds = $user->enrollments()->pluck('course_id');
+        $enrolledCourseIds = $user->courses()->pluck('course_id');
 
         $query = Assignment::with(['course', 'media'])
             ->whereIn('course_id', $enrolledCourseIds)
@@ -56,9 +58,7 @@ class MyDocument extends Page
     {
         $user = Auth::user();
 
-        return Course::whereHas('enrollments', function ($query) use ($user) {
-            $query->where('student_id', $user->id);
-        })->get();
+        return Course::where('users', $user->id)->get();
     }
 
     /**

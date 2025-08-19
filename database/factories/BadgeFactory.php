@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\Status\BadgeStatus;
 use App\Models\Badge;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -11,13 +12,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class BadgeFactory extends Factory
 {
     /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $model = Badge::class;
-
-    /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
@@ -25,39 +19,50 @@ class BadgeFactory extends Factory
     public function definition(): array
     {
         return [
-            'title' => $this->faker->words(3, true),
-            'description' => $this->faker->sentence(),
-            'award_status' => $this->faker->randomElement(['automatic', 'manual', 'conditional']),
+            'title' => $this->faker->words(2, true),
+            'slug' => $this->faker->unique()->slug(2),
+            'description' => $this->faker->paragraph(2),
+            'status' => BadgeStatus::ACTIVE->value,
         ];
     }
 
     /**
-     * Indicate that the badge is automatically awarded.
+     * Indicate that the badge has a specific status.
      */
-    public function automatic(): static
+    public function withStatus(BadgeStatus $status): static
     {
         return $this->state(fn (array $attributes) => [
-            'award_status' => 'automatic',
+            'status' => $status->value,
         ]);
     }
 
     /**
-     * Indicate that the badge is manually awarded.
+     * Indicate that the badge is active.
      */
-    public function manual(): static
+    public function active(): static
     {
         return $this->state(fn (array $attributes) => [
-            'award_status' => 'manual',
+            'status' => BadgeStatus::ACTIVE->value,
         ]);
     }
 
     /**
-     * Indicate that the badge is conditionally awarded.
+     * Indicate that the badge is inactive.
      */
-    public function conditional(): static
+    public function inactive(): static
     {
         return $this->state(fn (array $attributes) => [
-            'award_status' => 'conditional',
+            'status' => BadgeStatus::INACTIVE->value,
         ]);
     }
+
+    /**
+     * Indicate that the badge is archived.
+     */
+    public function archived(): static
+    {
+        return $this->withStatus(BadgeStatus::ARCHIVED);
+    }
+
+
 }

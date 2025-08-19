@@ -30,9 +30,9 @@ interface UserServiceInterface extends BaseServiceInterface
     public function getUsersByRole(string $role): Collection;
 
     /**
-     * Get all instructors.
+     * Get all teachers.
      */
-    public function getInstructors(): Collection;
+    public function getTeachers(): Collection;
 
     /**
      * Get all students.

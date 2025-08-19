@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Course;
 use App\Models\User;
 use Spatie\Permission\Models\Permission;
+use App\Libs\Roles\RoleHelper;
 
 class CoursePermissionService
 {
@@ -13,7 +14,7 @@ class CoursePermissionService
      */
     public function grantCoursePermission(User $manager, Course $course): bool
     {
-        if (! $manager->hasRole('manager')) {
+        if (! RoleHelper::isManager($manager)) {
             return false;
         }
 
@@ -54,7 +55,7 @@ class CoursePermissionService
      */
     public function hasPermissionToManageCourse(User $manager, Course $course): bool
     {
-        if (! $manager->hasRole('manager')) {
+        if (! RoleHelper::isManager($manager)) {
             return false;
         }
 
@@ -66,7 +67,7 @@ class CoursePermissionService
      */
     public function getManagerCourses(User $manager): array
     {
-        if (! $manager->hasRole('manager')) {
+        if (! RoleHelper::isManager($manager)) {
             return [];
         }
 
@@ -89,7 +90,7 @@ class CoursePermissionService
      */
     public function grantMultipleCoursePermissions(User $manager, array $courseIds): bool
     {
-        if (! $manager->hasRole('manager')) {
+        if (! RoleHelper::isManager($manager)) {
             return false;
         }
 

@@ -1,0 +1,16 @@
+@import "../../../../vendor/filament/filament/resources/css/theme.css";
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+@source '../../../../resources/views/components/**/*.blade.php';
+
+@source '../../../../vendor/zpmlabs/filament-api-docs-builder/resources/views/filament/**/*';
+@source '../../../../vendor/guava/calendar/resources/**/*.blade.php';
+@source '../../../../vendor/cmsmaxinc/filament-error-pages/resources/**/*.blade.php';
+@source '../../../../vendor/devonab/filament-easy-footer/resources/views/**/*';
+@source '../../../../vendor/bezhansalleh/filament-language-switch/resources/views/**/*.blade.php';
+@source '../../../../vendor/wire-elements/**/*.blade.php';
+
+@import "../../../../vendor/pxlrbt/filament-activity-log/resources/css/styles.css";
+/* @import "../../../../vendor/malzariey/filament-lexical-editor/resources/css/index.css"; */
+@import "../../../../vendor/malzariey/filament-daterangepicker-filter/resources/css/filament-daterangepicker.css";

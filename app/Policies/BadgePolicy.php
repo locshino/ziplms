@@ -2,9 +2,8 @@
 
 namespace App\Policies;
 
-use App\Libs\Roles\RoleHelper;
-use App\Models\Badge;
 use App\Models\User;
+use App\Models\Badge;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class BadgePolicy
@@ -16,7 +15,7 @@ class BadgePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_badge');
+        return $user->can('view_any_badges::badge');
     }
 
     /**
@@ -24,7 +23,7 @@ class BadgePolicy
      */
     public function view(User $user, Badge $badge): bool
     {
-        return $user->can('view_badge');
+        return $user->can('view_badges::badge');
     }
 
     /**
@@ -32,12 +31,7 @@ class BadgePolicy
      */
     public function create(User $user): bool
     {
-        // Only super admin, admin, and managers can create badges
-        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user) || RoleHelper::isManager($user)) {
-            return $user->can('create_badge');
-        }
-
-        return false;
+        return $user->can('create_badges::badge');
     }
 
     /**
@@ -45,12 +39,7 @@ class BadgePolicy
      */
     public function update(User $user, Badge $badge): bool
     {
-        // Only super admin, admin, and managers can update badges
-        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user) || RoleHelper::isManager($user)) {
-            return $user->can('update_badge');
-        }
-
-        return false;
+        return $user->can('update_badges::badge');
     }
 
     /**
@@ -58,12 +47,7 @@ class BadgePolicy
      */
     public function delete(User $user, Badge $badge): bool
     {
-        // Only super admin and admin can delete badges
-        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
-            return $user->can('delete_badge');
-        }
-
-        return false;
+        return $user->can('delete_badges::badge');
     }
 
     /**
@@ -71,7 +55,7 @@ class BadgePolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_badge');
+        return $user->can('delete_any_badges::badge');
     }
 
     /**
@@ -79,7 +63,7 @@ class BadgePolicy
      */
     public function forceDelete(User $user, Badge $badge): bool
     {
-        return $user->can('force_delete_badge');
+        return $user->can('force_delete_badges::badge');
     }
 
     /**
@@ -87,7 +71,7 @@ class BadgePolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_badge');
+        return $user->can('force_delete_any_badges::badge');
     }
 
     /**
@@ -95,7 +79,7 @@ class BadgePolicy
      */
     public function restore(User $user, Badge $badge): bool
     {
-        return $user->can('restore_badge');
+        return $user->can('restore_badges::badge');
     }
 
     /**
@@ -103,7 +87,7 @@ class BadgePolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_badge');
+        return $user->can('restore_any_badges::badge');
     }
 
     /**
@@ -111,7 +95,7 @@ class BadgePolicy
      */
     public function replicate(User $user, Badge $badge): bool
     {
-        return $user->can('replicate_badge');
+        return $user->can('replicate_badges::badge');
     }
 
     /**
@@ -119,6 +103,6 @@ class BadgePolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_badge');
+        return $user->can('reorder_badges::badge');
     }
 }

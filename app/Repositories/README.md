@@ -33,7 +33,7 @@ app/Repositories/
 
 ### 2. CourseRepository
 
-- `getCoursesByInstructor(string $instructorId)`: Lấy khóa học theo giảng viên
+- `getCoursesByTeacher(string $teacherId)`: Lấy khóa học theo giảng viên
 - `getPublishedCourses()`: Lấy khóa học đã xuất bản
 - `getCoursesWithEnrollmentsCount()`: Lấy khóa học kèm số lượng đăng ký
 - `searchCourses(string $search)`: Tìm kiếm khóa học
