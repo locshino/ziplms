@@ -21,8 +21,6 @@ class PermissionRepository extends EloquentRepository implements PermissionRepos
 {
     /**
      * Get the model class name.
-     *
-     * @return string
      */
     protected function model(): string
     {
@@ -32,9 +30,6 @@ class PermissionRepository extends EloquentRepository implements PermissionRepos
     /**
      * Get all non-system permissions.
      *
-     * @param array $columns
-     * @param array $relations
-     * @return Collection
      * @throws RepositoryException When database error occurs
      */
     public function getAllNonSystemPermissions(array $columns = ['*'], array $relations = []): Collection
@@ -42,7 +37,7 @@ class PermissionRepository extends EloquentRepository implements PermissionRepos
         try {
             $query = $this->model->where('is_system', false);
 
-            if (!empty($relations)) {
+            if (! empty($relations)) {
                 $query->with($relations);
             }
 
@@ -55,10 +50,6 @@ class PermissionRepository extends EloquentRepository implements PermissionRepos
     /**
      * Get permissions by guard name (non-system only).
      *
-     * @param string $guardName
-     * @param array $columns
-     * @param array $relations
-     * @return Collection
      * @throws PermissionRepositoryException When invalid guard name provided
      * @throws RepositoryException When database error occurs
      */
@@ -70,9 +61,9 @@ class PermissionRepository extends EloquentRepository implements PermissionRepos
             }
 
             $query = $this->model->where('guard_name', $guardName)
-                               ->where('is_system', false);
+                ->where('is_system', false);
 
-            if (!empty($relations)) {
+            if (! empty($relations)) {
                 $query->with($relations);
             }
 
@@ -87,9 +78,6 @@ class PermissionRepository extends EloquentRepository implements PermissionRepos
     /**
      * Check if permission exists by name (non-system only).
      *
-     * @param string $name
-     * @param string|null $guardName
-     * @return bool
      * @throws PermissionRepositoryException When invalid permission format provided
      * @throws RepositoryException When database error occurs
      */
@@ -101,7 +89,7 @@ class PermissionRepository extends EloquentRepository implements PermissionRepos
             }
 
             $query = $this->model->where('name', $name)
-                               ->where('is_system', false);
+                ->where('is_system', false);
 
             if ($guardName) {
                 $query->where('guard_name', $guardName);
@@ -117,10 +105,6 @@ class PermissionRepository extends EloquentRepository implements PermissionRepos
 
     /**
      * Override the base all method to exclude system permissions by default.
-     *
-     * @param array $columns
-     * @param array $relations
-     * @return Collection
      */
     public function all(array $columns = ['*'], array $relations = []): Collection
     {
@@ -130,8 +114,6 @@ class PermissionRepository extends EloquentRepository implements PermissionRepos
     /**
      * Override create method to ensure is_system = false and validate permission name.
      *
-     * @param array $data
-     * @return Permission
      * @throws PermissionRepositoryException When permission name already exists or invalid format
      * @throws RepositoryException When database error occurs
      */
@@ -144,7 +126,7 @@ class PermissionRepository extends EloquentRepository implements PermissionRepos
             }
 
             // Validate permission format if needed
-            if (empty($data['name']) || !is_string($data['name'])) {
+            if (empty($data['name']) || ! is_string($data['name'])) {
                 throw PermissionRepositoryException::invalidPermissionFormat($data['name'] ?? null);
             }
 
@@ -162,9 +144,6 @@ class PermissionRepository extends EloquentRepository implements PermissionRepos
     /**
      * Update a permission.
      *
-     * @param string $id
-     * @param array $data
-     * @return Permission
      * @throws PermissionRepositoryException When permission not found, name already exists, or invalid format
      * @throws RepositoryException When database error occurs
      */
@@ -172,7 +151,7 @@ class PermissionRepository extends EloquentRepository implements PermissionRepos
     {
         try {
             $permission = $this->model->find($id);
-            if (!$permission) {
+            if (! $permission) {
                 throw PermissionRepositoryException::notFound($id);
             }
 
@@ -184,7 +163,7 @@ class PermissionRepository extends EloquentRepository implements PermissionRepos
             }
 
             // Validate permission format if name is being updated
-            if (isset($data['name']) && (empty($data['name']) || !is_string($data['name']))) {
+            if (isset($data['name']) && (empty($data['name']) || ! is_string($data['name']))) {
                 throw PermissionRepositoryException::invalidPermissionFormat($data['name']);
             }
 
@@ -192,6 +171,7 @@ class PermissionRepository extends EloquentRepository implements PermissionRepos
             $data['is_system'] = false;
 
             $permission->update($data);
+
             return $permission->fresh();
         } catch (PermissionRepositoryException $e) {
             throw $e;
@@ -203,8 +183,6 @@ class PermissionRepository extends EloquentRepository implements PermissionRepos
     /**
      * Delete a permission.
      *
-     * @param string $id
-     * @return bool
      * @throws PermissionRepositoryException When permission not found or in use by roles
      * @throws RepositoryException When database error or deletion fails
      */
@@ -212,7 +190,7 @@ class PermissionRepository extends EloquentRepository implements PermissionRepos
     {
         try {
             $permission = $this->model->find($id);
-            if (!$permission) {
+            if (! $permission) {
                 throw PermissionRepositoryException::notFound($id);
             }
 
@@ -223,7 +201,7 @@ class PermissionRepository extends EloquentRepository implements PermissionRepos
                 );
             }
 
-            if (!$permission->delete()) {
+            if (! $permission->delete()) {
                 throw RepositoryException::deleteFailed($permission->id, 'Failed to delete permission');
             }
 

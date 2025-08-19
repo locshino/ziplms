@@ -2,9 +2,9 @@
 
 namespace App\Policies;
 
-use App\Models\Enrollment;
-use App\Libs\Roles\RoleHelper;
 use App\Libs\Permissions\PermissionHelper;
+use App\Libs\Roles\RoleHelper;
+use App\Models\Enrollment;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -21,22 +21,22 @@ class EnrollmentPolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return $user->can(PermissionHelper::make()->view()->enrollment()->all()->build());
         }
-        
+
         // Manager can view all enrollments
         if (RoleHelper::isManager($user)) {
             return $user->can(PermissionHelper::make()->view()->enrollment()->all()->build());
         }
-        
+
         // Teachers can view enrollments in courses they teach
         if (RoleHelper::isTeacher($user)) {
             return $user->can(PermissionHelper::make()->view()->enrollment()->assigned()->build());
         }
-        
+
         // Students can view their own enrollments
         if (RoleHelper::isStudent($user)) {
             return $user->can(PermissionHelper::make()->view()->enrollment()->self()->build());
         }
-        
+
         return $user->can('view_any_enrollment');
     }
 
@@ -49,22 +49,22 @@ class EnrollmentPolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return $user->can(PermissionHelper::make()->view()->enrollment()->all()->build());
         }
-        
+
         // Manager can view all enrollments
         if (RoleHelper::isManager($user)) {
             return $user->can(PermissionHelper::make()->view()->enrollment()->all()->build());
         }
-        
+
         // Teachers can view enrollments in courses they teach
         if (RoleHelper::isTeacher($user) && $enrollment->course && $enrollment->course->teachers()->where('user_id', $user->id)->exists()) {
             return $user->can(PermissionHelper::make()->view()->enrollment()->assigned()->build());
         }
-        
+
         // Students can view their own enrollments
         if (RoleHelper::isStudent($user) && $enrollment->user_id === $user->id) {
             return $user->can(PermissionHelper::make()->view()->enrollment()->owner()->build());
         }
-        
+
         return $user->can('view_enrollment');
     }
 
@@ -77,17 +77,17 @@ class EnrollmentPolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user) || RoleHelper::isManager($user)) {
             return $user->can(PermissionHelper::make()->create()->enrollment()->all()->build());
         }
-        
+
         // Teachers can create enrollments for courses they teach
         if (RoleHelper::isTeacher($user)) {
             return $user->can(PermissionHelper::make()->create()->enrollment()->assigned()->build());
         }
-        
+
         // Students can enroll themselves
         if (RoleHelper::isStudent($user)) {
             return $user->can(PermissionHelper::make()->enroll()->course()->self()->build());
         }
-        
+
         return $user->can('create_enrollment');
     }
 
@@ -100,17 +100,17 @@ class EnrollmentPolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return $user->can(PermissionHelper::make()->update()->enrollment()->all()->build());
         }
-        
+
         // Manager can update all enrollments
         if (RoleHelper::isManager($user)) {
             return $user->can(PermissionHelper::make()->update()->enrollment()->all()->build());
         }
-        
+
         // Teachers can update enrollments in courses they teach
         if (RoleHelper::isTeacher($user) && $enrollment->course && $enrollment->course->teachers()->where('user_id', $user->id)->exists()) {
             return $user->can(PermissionHelper::make()->update()->enrollment()->assigned()->build());
         }
-        
+
         return $user->can('update_enrollment');
     }
 
@@ -123,22 +123,22 @@ class EnrollmentPolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return $user->can(PermissionHelper::make()->delete()->enrollment()->all()->build());
         }
-        
+
         // Manager can delete all enrollments
         if (RoleHelper::isManager($user)) {
             return $user->can(PermissionHelper::make()->delete()->enrollment()->all()->build());
         }
-        
+
         // Teachers can delete enrollments in courses they teach
         if (RoleHelper::isTeacher($user) && $enrollment->course && $enrollment->course->teachers()->where('user_id', $user->id)->exists()) {
             return $user->can(PermissionHelper::make()->delete()->enrollment()->assigned()->build());
         }
-        
+
         // Students can withdraw from their own enrollments
         if (RoleHelper::isStudent($user) && $enrollment->user_id === $user->id) {
             return $user->can(PermissionHelper::make()->withdraw()->course()->self()->build());
         }
-        
+
         return false;
     }
 

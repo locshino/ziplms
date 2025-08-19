@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Exceptions\Repositories\RepositoryException;
-use App\Exceptions\Services\ServiceException;
 use App\Exceptions\Services\RoleServiceException;
+use App\Exceptions\Services\ServiceException;
 use App\Libs\Roles\RoleHelper;
 use App\Models\Role;
 use App\Repositories\Interfaces\RoleRepositoryInterface;
@@ -14,7 +14,6 @@ use BezhanSalleh\FilamentShield\Support\Utils;
 use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -30,9 +29,6 @@ class RoleService extends BaseService implements RoleServiceInterface
 {
     /**
      * RoleService constructor.
-     *
-     * @param RoleRepositoryInterface $roleRepository
-     * @param PermissionServiceInterface $permissionService
      */
     public function __construct(
         private RoleRepositoryInterface $roleRepository,
@@ -44,7 +40,6 @@ class RoleService extends BaseService implements RoleServiceInterface
     /**
      * Get all non-system roles.
      *
-     * @return Collection
      * @throws RepositoryException When database error occurs
      */
     public function getAllNonSystemRoles(): Collection
@@ -61,8 +56,6 @@ class RoleService extends BaseService implements RoleServiceInterface
     /**
      * Create a new role.
      *
-     * @param array $data
-     * @return Role
      * @throws RoleServiceException When role creation fails
      * @throws RepositoryException When repository operations fail
      */
@@ -91,9 +84,6 @@ class RoleService extends BaseService implements RoleServiceInterface
     /**
      * Update a role.
      *
-     * @param string $id
-     * @param array $data
-     * @return Role
      * @throws RoleServiceException When role update fails or system role modification attempted
      * @throws RepositoryException When repository operations fail
      */
@@ -119,9 +109,10 @@ class RoleService extends BaseService implements RoleServiceInterface
             return DB::transaction(function () use ($id, $data, $isSystemRole) {
                 // Only set is_system = false for non-system roles
                 // System roles should maintain their is_system status
-                if (!$isSystemRole) {
+                if (! $isSystemRole) {
                     $data['is_system'] = false;
                 }
+
                 return $this->roleRepository->updateById($id, $data);
             });
         } catch (RepositoryException $e) {
@@ -139,8 +130,6 @@ class RoleService extends BaseService implements RoleServiceInterface
     /**
      * Delete a role.
      *
-     * @param string $id
-     * @return bool
      * @throws RoleServiceException When role deletion fails
      * @throws RepositoryException When repository operations fail
      */
@@ -165,8 +154,6 @@ class RoleService extends BaseService implements RoleServiceInterface
     /**
      * Check if a role can be deleted.
      *
-     * @param string $id
-     * @return bool
      * @throws RepositoryException When database error occurs
      */
     public function canDeleteRole(string $id): bool
@@ -197,8 +184,6 @@ class RoleService extends BaseService implements RoleServiceInterface
     /**
      * Get role with its permissions.
      *
-     * @param string $id
-     * @return Role|null
      * @throws RepositoryException When database error occurs
      */
     public function getRoleWithPermissions(string $id): ?Role
@@ -221,8 +206,8 @@ class RoleService extends BaseService implements RoleServiceInterface
     /**
      * Validate role data.
      *
-     * @param array $data
-     * @param string|null $roleId For update validation
+     * @param  string|null  $roleId  For update validation
+     *
      * @throws RoleServiceException When validation fails
      */
     private function validateRoleData(array $data, ?string $roleId = null): void
@@ -252,7 +237,6 @@ class RoleService extends BaseService implements RoleServiceInterface
     /**
      * Override the base all method to return non-system roles only.
      *
-     * @return Collection
      * @throws RepositoryException When database error occurs
      */
     public function all(): Collection
@@ -269,15 +253,14 @@ class RoleService extends BaseService implements RoleServiceInterface
     /**
      * Process form data before saving role.
      *
-     * @param Role $role
-     * @param array $data
      * @return array Processed data
+     *
      * @throws RoleServiceException When system role modification attempted
      */
     public function processFormDataBeforeSave(Role $role, array $data): array
     {
         // Prevent editing system roles unless user is super admin
-        if ($role->is_system && !RoleHelper::isSuperAdmin()) {
+        if ($role->is_system && ! RoleHelper::isSuperAdmin()) {
             throw RoleServiceException::systemRoleModificationAttempt('update', $role->name);
         }
 
@@ -287,10 +270,10 @@ class RoleService extends BaseService implements RoleServiceInterface
         // Filter permissions from data
         $permissions = collect($data)
             ->filter(function ($permission, $key) {
-                return !in_array($key, [
-                    'name', 'guard_name', 'select_all', 'is_system', 
-                    'new_permissions', 'existing_custom_permissions', 
-                    Utils::getTenantModelForeignKey()
+                return ! in_array($key, [
+                    'name', 'guard_name', 'select_all', 'is_system',
+                    'new_permissions', 'existing_custom_permissions',
+                    Utils::getTenantModelForeignKey(),
                 ]);
             })
             ->values()
@@ -309,7 +292,7 @@ class RoleService extends BaseService implements RoleServiceInterface
         $data['_processed_permissions'] = $permissions;
 
         // Only set is_system = false for non-system roles
-        if (!$role->is_system) {
+        if (! $role->is_system) {
             $data['is_system'] = false;
         }
 
@@ -323,20 +306,16 @@ class RoleService extends BaseService implements RoleServiceInterface
 
     /**
      * Sync permissions to role after save.
-     *
-     * @param Role $role
-     * @param array $processedData
-     * @return void
      */
     public function syncPermissionsAfterSave(Role $role, array $processedData): void
     {
-        if (!isset($processedData['_processed_permissions'])) {
+        if (! isset($processedData['_processed_permissions'])) {
             return;
         }
 
         $permissions = $processedData['_processed_permissions'];
         $permissionModels = collect();
-        
+
         $permissions->each(function ($permission) use ($permissionModels, $processedData) {
             $permissionModels->push(Utils::getPermissionModel()::firstOrCreate([
                 'name' => $permission,
@@ -349,18 +328,13 @@ class RoleService extends BaseService implements RoleServiceInterface
 
     /**
      * Handle creation of new permissions from form data.
-     *
-     * @param array $data
-     * @return Collection
      */
     private function handleNewPermissions(array $data): Collection
     {
-        if (!isset($data['new_permissions']) || !is_array($data['new_permissions'])) {
+        if (! isset($data['new_permissions']) || ! is_array($data['new_permissions'])) {
             return collect();
         }
 
         return $this->permissionService->createNewPermissions($data['new_permissions']);
     }
-
-
 }

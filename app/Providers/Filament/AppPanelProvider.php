@@ -24,11 +24,8 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
-use FilamentWebpush\FilamentWebpushPlugin;
-use Asmit\ResizedColumn\ResizedColumnPlugin;
-use Awcodes\LightSwitch\LightSwitchPlugin;
-use TomatoPHP\FilamentPWA\FilamentPWAPlugin;
 use Promethys\Revive\RevivePlugin;
+use TomatoPHP\FilamentPWA\FilamentPWAPlugin;
 
 class AppPanelProvider extends PanelProvider
 {

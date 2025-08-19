@@ -2,9 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\Submission;
 use App\Libs\Roles\RoleHelper;
-use App\Libs\Permissions\PermissionHelper;
+use App\Models\Submission;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -29,17 +28,17 @@ class SubmissionPolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return true;
         }
-        
+
         // Teachers can view submissions in assignments/courses they teach
         if (RoleHelper::isTeacher($user) && $submission->assignment && $submission->assignment->course && $submission->assignment->course->teachers()->where('user_id', $user->id)->exists()) {
             return true;
         }
-        
+
         // Students can view their own submissions
         if (RoleHelper::isStudent($user) && $submission->user_id === $user->id) {
             return true;
         }
-        
+
         return $user->can('view_submission');
     }
 
@@ -60,17 +59,17 @@ class SubmissionPolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return $user->can('update_submission');
         }
-        
+
         // Teachers can update submissions in assignments/courses they teach (for grading)
         if (RoleHelper::isTeacher($user) && $submission->assignment && $submission->assignment->course && $submission->assignment->course->teachers()->where('user_id', $user->id)->exists()) {
             return $user->can('update_submission');
         }
-        
+
         // Students can update their own submissions (if not yet graded)
-        if (RoleHelper::isStudent($user) && $submission->user_id === $user->id && !$submission->is_graded) {
+        if (RoleHelper::isStudent($user) && $submission->user_id === $user->id && ! $submission->is_graded) {
             return $user->can('update_submission');
         }
-        
+
         return $user->can('update_submission');
     }
 
@@ -83,17 +82,17 @@ class SubmissionPolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return $user->can('delete_submission');
         }
-        
+
         // Teachers can delete submissions in assignments/courses they teach
         if (RoleHelper::isTeacher($user) && $submission->assignment && $submission->assignment->course && $submission->assignment->course->teachers()->where('user_id', $user->id)->exists()) {
             return $user->can('delete_submission');
         }
-        
+
         // Students can delete their own submissions (if not yet graded)
-        if (RoleHelper::isStudent($user) && $submission->user_id === $user->id && !$submission->is_graded) {
+        if (RoleHelper::isStudent($user) && $submission->user_id === $user->id && ! $submission->is_graded) {
             return $user->can('delete_submission');
         }
-        
+
         return false;
     }
 

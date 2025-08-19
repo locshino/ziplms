@@ -6,8 +6,8 @@ use App\Enums\Permissions\PermissionContextEnum;
 use App\Enums\Permissions\PermissionNounEnum;
 use App\Enums\Permissions\PermissionVerbEnum;
 use App\Exceptions\Repositories\RepositoryException;
-use App\Exceptions\Services\ServiceException;
 use App\Exceptions\Services\PermissionServiceException;
+use App\Exceptions\Services\ServiceException;
 use App\Libs\Permissions\PermissionHelper;
 use App\Models\Permission;
 use App\Repositories\Interfaces\PermissionRepositoryInterface;
@@ -20,9 +20,9 @@ use Illuminate\Support\Facades\Validator;
 
 /**
  * Permission service implementation.
- * 
+ *
  * Handles permission-related business logic operations.
- * 
+ *
  * @throws ServiceException When permission service operations fail
  * @throws RepositoryException When repository operations fail
  */
@@ -30,8 +30,6 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
 {
     /**
      * PermissionService constructor.
-     *
-     * @param PermissionRepositoryInterface $permissionRepository
      */
     public function __construct(
         private PermissionRepositoryInterface $permissionRepository
@@ -42,7 +40,6 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
     /**
      * Get all non-system permissions.
      *
-     * @return Collection
      * @throws RepositoryException When database error occurs
      */
     public function getAllNonSystemPermissions(): Collection
@@ -52,15 +49,13 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
         } catch (RepositoryException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to retrieve non-system permissions: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to retrieve non-system permissions: '.$e->getMessage());
         }
     }
 
     /**
      * Get permissions by guard name (non-system only).
      *
-     * @param string $guardName
-     * @return Collection
      * @throws RepositoryException When database error occurs
      */
     public function getByGuardName(string $guardName): Collection
@@ -70,16 +65,13 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
         } catch (RepositoryException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to retrieve permissions by guard name: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to retrieve permissions by guard name: '.$e->getMessage());
         }
     }
 
     /**
      * Check if permission exists by name (non-system only).
      *
-     * @param string $name
-     * @param string|null $guardName
-     * @return bool
      * @throws RepositoryException When database error occurs
      */
     public function existsByName(string $name, ?string $guardName = null): bool
@@ -89,15 +81,13 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
         } catch (RepositoryException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to check permission existence: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to check permission existence: '.$e->getMessage());
         }
     }
 
     /**
      * Create a new permission.
      *
-     * @param array $data
-     * @return Permission
      * @throws PermissionServiceException When permission creation fails
      * @throws RepositoryException When repository operations fail
      */
@@ -126,9 +116,6 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
     /**
      * Update a permission.
      *
-     * @param string $id
-     * @param array $data
-     * @return Permission
      * @throws PermissionServiceException When permission update fails
      * @throws RepositoryException When repository operations fail
      */
@@ -156,8 +143,6 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
     /**
      * Delete a permission.
      *
-     * @param string $id
-     * @return bool
      * @throws PermissionServiceException When permission deletion fails
      * @throws RepositoryException When repository operations fail
      */
@@ -181,8 +166,8 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
     /**
      * Validate permission data.
      *
-     * @param array $data
-     * @param string|null $permissionId For update validation
+     * @param  string|null  $permissionId  For update validation
+     *
      * @throws PermissionServiceException When validation fails
      */
     private function validatePermissionData(array $data, ?string $permissionId = null): void
@@ -212,7 +197,6 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
     /**
      * Get permissions for dropdown/select options (non-system only).
      *
-     * @return array
      * @throws RepositoryException When database error occurs
      */
     public function getPermissionOptions(): array
@@ -224,22 +208,23 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
         } catch (RepositoryException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to get permission options: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to get permission options: '.$e->getMessage());
         }
     }
 
     /**
      * Create new permissions from form data.
      *
-     * @param array $newPermissions Array of permission data
+     * @param  array  $newPermissions  Array of permission data
      * @return Collection Collection of created permission names
+     *
      * @throws ServiceException When permission creation fails
      */
     public function createNewPermissions(array $newPermissions): Collection
     {
         $createdPermissions = collect();
 
-        if (empty($newPermissions) || !is_array($newPermissions)) {
+        if (empty($newPermissions) || ! is_array($newPermissions)) {
             return $createdPermissions;
         }
 
@@ -255,9 +240,9 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
         } catch (Exception $e) {
             Log::error('Failed to create new permissions', [
                 'error' => $e->getMessage(),
-                'permissions' => $newPermissions
+                'permissions' => $newPermissions,
             ]);
-            throw ServiceException::operationFailed('Failed to create new permissions: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to create new permissions: '.$e->getMessage());
         }
 
         return $createdPermissions;
@@ -266,12 +251,11 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
     /**
      * Create a single permission from permission data.
      *
-     * @param array $permissionData
      * @return string|null Permission name if created successfully
      */
     private function createSinglePermission(array $permissionData): ?string
     {
-        if (!isset($permissionData['verb'], $permissionData['noun'], $permissionData['context'])) {
+        if (! isset($permissionData['verb'], $permissionData['noun'], $permissionData['context'])) {
             return null;
         }
 
@@ -291,8 +275,8 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
             $builder->context($contextEnum);
 
             // Add attribute value if needed
-            if (in_array($permissionData['context'], [PermissionContextEnum::ID->value, PermissionContextEnum::TAG->value]) 
-                && !empty($permissionData['attribute_value'])) {
+            if (in_array($permissionData['context'], [PermissionContextEnum::ID->value, PermissionContextEnum::TAG->value])
+                && ! empty($permissionData['attribute_value'])) {
                 $builder->withAttribute($permissionData['attribute_value']);
             }
 
@@ -311,8 +295,9 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
         } catch (Exception $e) {
             Log::warning('Failed to create single permission', [
                 'error' => $e->getMessage(),
-                'permission_data' => $permissionData
+                'permission_data' => $permissionData,
             ]);
+
             return null;
         }
     }
@@ -320,7 +305,6 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
     /**
      * Get existing custom permissions (non-system permissions).
      *
-     * @return Collection
      * @throws ServiceException When retrieval fails
      */
     public function getExistingCustomPermissions(): Collection
@@ -331,22 +315,19 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
                 ->sort()
                 ->values();
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to retrieve custom permissions: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to retrieve custom permissions: '.$e->getMessage());
         }
     }
 
     /**
      * Validate permission data structure.
-     *
-     * @param array $permissionData
-     * @return bool
      */
     public function validatePermissionStructure(array $permissionData): bool
     {
         $requiredFields = ['verb', 'noun', 'context'];
-        
+
         foreach ($requiredFields as $field) {
-            if (!isset($permissionData[$field]) || empty($permissionData[$field])) {
+            if (! isset($permissionData[$field]) || empty($permissionData[$field])) {
                 return false;
             }
         }
@@ -366,7 +347,6 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
     /**
      * Override the base all method to return non-system permissions only.
      *
-     * @return Collection
      * @throws RepositoryException When database error occurs
      */
     public function all(): Collection
@@ -376,7 +356,7 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
         } catch (RepositoryException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to retrieve all permissions: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to retrieve all permissions: '.$e->getMessage());
         }
     }
 }

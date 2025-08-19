@@ -2,9 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\QuizAttempt;
 use App\Libs\Roles\RoleHelper;
-use App\Libs\Permissions\PermissionHelper;
+use App\Models\QuizAttempt;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -29,17 +28,17 @@ class QuizAttemptPolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return true;
         }
-        
+
         // Teachers can view quiz attempts in courses they teach
         if (RoleHelper::isTeacher($user) && $quizAttempt->quiz && $quizAttempt->quiz->course && $quizAttempt->quiz->course->teachers()->where('user_id', $user->id)->exists()) {
             return true;
         }
-        
+
         // Students can view their own quiz attempts
         if (RoleHelper::isStudent($user) && $quizAttempt->user_id === $user->id) {
             return true;
         }
-        
+
         return $user->can('view_quiz::attempt');
     }
 
@@ -52,7 +51,7 @@ class QuizAttemptPolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user) || RoleHelper::isStudent($user)) {
             return $user->can('create_quiz::attempt');
         }
-        
+
         return false;
     }
 
@@ -65,17 +64,17 @@ class QuizAttemptPolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return $user->can('update_quiz::attempt');
         }
-        
+
         // Teachers can update quiz attempts in courses they teach (for grading)
         if (RoleHelper::isTeacher($user) && $quizAttempt->quiz && $quizAttempt->quiz->course && $quizAttempt->quiz->course->teachers()->where('user_id', $user->id)->exists()) {
             return $user->can('update_quiz::attempt');
         }
-        
+
         // Students can update their own quiz attempts (if not completed)
-        if (RoleHelper::isStudent($user) && $quizAttempt->user_id === $user->id && !$quizAttempt->completed_at) {
+        if (RoleHelper::isStudent($user) && $quizAttempt->user_id === $user->id && ! $quizAttempt->completed_at) {
             return $user->can('update_quiz::attempt');
         }
-        
+
         return false;
     }
 
@@ -88,17 +87,17 @@ class QuizAttemptPolicy
         if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
             return $user->can('delete_quiz::attempt');
         }
-        
+
         // Teachers can delete quiz attempts in courses they teach
         if (RoleHelper::isTeacher($user) && $quizAttempt->quiz && $quizAttempt->quiz->course && $quizAttempt->quiz->course->teachers()->where('user_id', $user->id)->exists()) {
             return $user->can('delete_quiz::attempt');
         }
-        
+
         // Students can delete their own quiz attempts (if not completed)
-        if (RoleHelper::isStudent($user) && $quizAttempt->user_id === $user->id && !$quizAttempt->completed_at) {
+        if (RoleHelper::isStudent($user) && $quizAttempt->user_id === $user->id && ! $quizAttempt->completed_at) {
             return $user->can('delete_quiz::attempt');
         }
-        
+
         return false;
     }
 

@@ -2,9 +2,9 @@
 
 namespace App\Libs\Permissions;
 
-use App\Enums\Permissions\PermissionVerbEnum;
-use App\Enums\Permissions\PermissionNounEnum;
 use App\Enums\Permissions\PermissionContextEnum;
+use App\Enums\Permissions\PermissionNounEnum;
+use App\Enums\Permissions\PermissionVerbEnum;
 use InvalidArgumentException;
 
 /**
@@ -12,8 +12,6 @@ use InvalidArgumentException;
  *
  * A helper class that extends PermissionBuilder with fluent interface methods
  * for creating permission strings with convenient helper methods.
- *
- * @package App\Libs\Permissions
  */
 class PermissionHelper extends PermissionBuilder
 {
@@ -53,15 +51,13 @@ class PermissionHelper extends PermissionBuilder
      */
     public static function make(): static
     {
-        return new static();
+        return new static;
     }
 
     // ========== VERB HELPER METHODS ==========
 
     /**
      * Set verb to CREATE.
-     *
-     * @return self
      */
     public function create(): self
     {
@@ -70,8 +66,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to VIEW.
-     *
-     * @return self
      */
     public function view(): self
     {
@@ -80,8 +74,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to UPDATE.
-     *
-     * @return self
      */
     public function update(): self
     {
@@ -90,8 +82,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to DELETE.
-     *
-     * @return self
      */
     public function delete(): self
     {
@@ -100,8 +90,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to ASSIGN.
-     *
-     * @return self
      */
     public function assign(): self
     {
@@ -110,8 +98,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to MANAGE.
-     *
-     * @return self
      */
     public function manage(): self
     {
@@ -120,8 +106,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to VIEW_LIST.
-     *
-     * @return self
      */
     public function viewList(): self
     {
@@ -130,8 +114,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to GRADE.
-     *
-     * @return self
      */
     public function gradeVerb(): self
     {
@@ -140,8 +122,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to ATTEMPT.
-     *
-     * @return self
      */
     public function attempt(): self
     {
@@ -150,8 +130,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to SUBMIT.
-     *
-     * @return self
      */
     public function submit(): self
     {
@@ -160,8 +138,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to VIEW_RESULTS.
-     *
-     * @return self
      */
     public function viewResults(): self
     {
@@ -172,8 +148,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to ENROLL.
-     *
-     * @return self
      */
     public function enroll(): self
     {
@@ -182,8 +156,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to TEACH.
-     *
-     * @return self
      */
     public function teach(): self
     {
@@ -192,8 +164,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to REVIEW.
-     *
-     * @return self
      */
     public function review(): self
     {
@@ -202,8 +172,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to APPROVE.
-     *
-     * @return self
      */
     public function approve(): self
     {
@@ -212,8 +180,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to REJECT.
-     *
-     * @return self
      */
     public function reject(): self
     {
@@ -222,8 +188,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to PUBLISH.
-     *
-     * @return self
      */
     public function publish(): self
     {
@@ -232,8 +196,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to UNPUBLISH.
-     *
-     * @return self
      */
     public function unpublish(): self
     {
@@ -242,8 +204,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to ARCHIVE.
-     *
-     * @return self
      */
     public function archive(): self
     {
@@ -252,8 +212,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to RESTORE.
-     *
-     * @return self
      */
     public function restore(): self
     {
@@ -264,8 +222,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to CONFIGURE.
-     *
-     * @return self
      */
     public function configure(): self
     {
@@ -274,8 +230,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to MONITOR.
-     *
-     * @return self
      */
     public function monitor(): self
     {
@@ -284,8 +238,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to EXPORT.
-     *
-     * @return self
      */
     public function export(): self
     {
@@ -294,8 +246,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to IMPORT.
-     *
-     * @return self
      */
     public function import(): self
     {
@@ -304,8 +254,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to BACKUP.
-     *
-     * @return self
      */
     public function backup(): self
     {
@@ -314,8 +262,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to RESET.
-     *
-     * @return self
      */
     public function reset(): self
     {
@@ -326,8 +272,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to NOTIFY.
-     *
-     * @return self
      */
     public function notify(): self
     {
@@ -336,8 +280,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to MESSAGE.
-     *
-     * @return self
      */
     public function message(): self
     {
@@ -346,8 +288,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to ANNOUNCE.
-     *
-     * @return self
      */
     public function announce(): self
     {
@@ -358,8 +298,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to TRACK.
-     *
-     * @return self
      */
     public function track(): self
     {
@@ -368,8 +306,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to EVALUATE.
-     *
-     * @return self
      */
     public function evaluate(): self
     {
@@ -378,8 +314,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to CERTIFY.
-     *
-     * @return self
      */
     public function certify(): self
     {
@@ -390,8 +324,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to TAKE.
-     *
-     * @return self
      */
     public function take(): self
     {
@@ -400,8 +332,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to RETAKE.
-     *
-     * @return self
      */
     public function retake(): self
     {
@@ -410,8 +340,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to START.
-     *
-     * @return self
      */
     public function start(): self
     {
@@ -420,8 +348,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to FINISH.
-     *
-     * @return self
      */
     public function finish(): self
     {
@@ -430,8 +356,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to PAUSE.
-     *
-     * @return self
      */
     public function pause(): self
     {
@@ -440,8 +364,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to RESUME.
-     *
-     * @return self
      */
     public function resume(): self
     {
@@ -452,8 +374,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to DISTRIBUTE.
-     *
-     * @return self
      */
     public function distribute(): self
     {
@@ -462,8 +382,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to COLLECT.
-     *
-     * @return self
      */
     public function collect(): self
     {
@@ -472,8 +390,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to EXTEND.
-     *
-     * @return self
      */
     public function extend(): self
     {
@@ -484,8 +400,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to ATTEND.
-     *
-     * @return self
      */
     public function attend(): self
     {
@@ -494,8 +408,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to COMPLETE.
-     *
-     * @return self
      */
     public function complete(): self
     {
@@ -504,8 +416,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to WITHDRAW.
-     *
-     * @return self
      */
     public function withdraw(): self
     {
@@ -514,8 +424,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to TRANSFER.
-     *
-     * @return self
      */
     public function transfer(): self
     {
@@ -526,8 +434,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to INVITE.
-     *
-     * @return self
      */
     public function invite(): self
     {
@@ -536,8 +442,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to SUSPEND.
-     *
-     * @return self
      */
     public function suspend(): self
     {
@@ -546,8 +450,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to ACTIVATE.
-     *
-     * @return self
      */
     public function activate(): self
     {
@@ -556,8 +458,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to DEACTIVATE.
-     *
-     * @return self
      */
     public function deactivate(): self
     {
@@ -568,8 +468,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to EARN.
-     *
-     * @return self
      */
     public function earn(): self
     {
@@ -578,8 +476,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to AWARD.
-     *
-     * @return self
      */
     public function award(): self
     {
@@ -588,8 +484,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to REVOKE.
-     *
-     * @return self
      */
     public function revoke(): self
     {
@@ -600,8 +494,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to UPLOAD.
-     *
-     * @return self
      */
     public function upload(): self
     {
@@ -610,8 +502,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to DOWNLOAD.
-     *
-     * @return self
      */
     public function download(): self
     {
@@ -620,8 +510,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to STREAM.
-     *
-     * @return self
      */
     public function stream(): self
     {
@@ -632,8 +520,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to GENERATE.
-     *
-     * @return self
      */
     public function generate(): self
     {
@@ -642,8 +528,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to SCHEDULE.
-     *
-     * @return self
      */
     public function schedule(): self
     {
@@ -652,8 +536,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set verb to ANALYZE.
-     *
-     * @return self
      */
     public function analyze(): self
     {
@@ -664,8 +546,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to ALL.
-     *
-     * @return self
      */
     public function all(): self
     {
@@ -674,8 +554,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to OWNER.
-     *
-     * @return self
      */
     public function owner(): self
     {
@@ -684,8 +562,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to PUBLIC.
-     *
-     * @return self
      */
     public function public(): self
     {
@@ -694,8 +570,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to AUTHENTICATION.
-     *
-     * @return self
      */
     public function authentication(): self
     {
@@ -704,8 +578,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to SELF.
-     *
-     * @return self
      */
     public function self(): self
     {
@@ -715,8 +587,7 @@ class PermissionHelper extends PermissionBuilder
     /**
      * Set context to ID with optional attribute value.
      *
-     * @param string|null $value The ID value
-     * @return self
+     * @param  string|null  $value  The ID value
      */
     public function id(?string $value = null): self
     {
@@ -724,14 +595,14 @@ class PermissionHelper extends PermissionBuilder
         if ($value !== null) {
             $this->withAttribute($value);
         }
+
         return $this;
     }
 
     /**
      * Set context to TAG with optional attribute value, or set noun to TAG if no noun is set.
      *
-     * @param string|null $value The tag value
-     * @return self
+     * @param  string|null  $value  The tag value
      */
     public function tag(?string $value = null): self
     {
@@ -745,14 +616,14 @@ class PermissionHelper extends PermissionBuilder
         if ($value !== null) {
             $this->withAttribute($value);
         }
+
         return $this;
     }
 
     /**
      * Set context to GRADE with optional attribute value.
      *
-     * @param string|null $value The grade value
-     * @return self
+     * @param  string|null  $value  The grade value
      */
     public function grade(?string $value = null): self
     {
@@ -760,14 +631,14 @@ class PermissionHelper extends PermissionBuilder
         if ($value !== null) {
             $this->withAttribute($value);
         }
+
         return $this;
     }
 
     /**
      * Set context to LEVEL with optional attribute value.
      *
-     * @param string|null $value The level value
-     * @return self
+     * @param  string|null  $value  The level value
      */
     public function level(?string $value = null): self
     {
@@ -775,6 +646,7 @@ class PermissionHelper extends PermissionBuilder
         if ($value !== null) {
             $this->withAttribute($value);
         }
+
         return $this;
     }
 
@@ -782,8 +654,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to ADMIN.
-     *
-     * @return self
      */
     public function admin(): self
     {
@@ -792,8 +662,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to MANAGER.
-     *
-     * @return self
      */
     public function manager(): self
     {
@@ -802,8 +670,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to TEACHER.
-     *
-     * @return self
      */
     public function teacher(): self
     {
@@ -812,8 +678,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to STUDENT.
-     *
-     * @return self
      */
     public function student(): self
     {
@@ -824,8 +688,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to ENROLLED.
-     *
-     * @return self
      */
     public function enrolled(): self
     {
@@ -834,8 +696,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to ASSIGNED.
-     *
-     * @return self
      */
     public function assigned(): self
     {
@@ -844,8 +704,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to SUPERVISED.
-     *
-     * @return self
      */
     public function supervised(): self
     {
@@ -854,8 +712,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to DEPARTMENT.
-     *
-     * @return self
      */
     public function department(): self
     {
@@ -864,8 +720,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to INSTITUTION.
-     *
-     * @return self
      */
     public function institution(): self
     {
@@ -876,8 +730,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to ACTIVE.
-     *
-     * @return self
      */
     public function active(): self
     {
@@ -886,8 +738,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to INACTIVE.
-     *
-     * @return self
      */
     public function inactive(): self
     {
@@ -896,8 +746,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to PENDING.
-     *
-     * @return self
      */
     public function pending(): self
     {
@@ -906,8 +754,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to COMPLETED.
-     *
-     * @return self
      */
     public function completed(): self
     {
@@ -916,8 +762,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to IN_PROGRESS.
-     *
-     * @return self
      */
     public function inProgress(): self
     {
@@ -926,8 +770,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to DRAFT.
-     *
-     * @return self
      */
     public function draft(): self
     {
@@ -936,8 +778,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to PUBLISHED.
-     *
-     * @return self
      */
     public function published(): self
     {
@@ -946,8 +786,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to ARCHIVED.
-     *
-     * @return self
      */
     public function archived(): self
     {
@@ -958,8 +796,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to CURRENT.
-     *
-     * @return self
      */
     public function current(): self
     {
@@ -968,8 +804,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to PAST.
-     *
-     * @return self
      */
     public function past(): self
     {
@@ -978,8 +812,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to FUTURE.
-     *
-     * @return self
      */
     public function future(): self
     {
@@ -990,8 +822,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to TIMED.
-     *
-     * @return self
      */
     public function timed(): self
     {
@@ -1000,8 +830,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to UNLIMITED.
-     *
-     * @return self
      */
     public function unlimited(): self
     {
@@ -1010,8 +838,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to LIMITED_ATTEMPTS.
-     *
-     * @return self
      */
     public function limitedAttempts(): self
     {
@@ -1020,8 +846,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to RANDOMIZED.
-     *
-     * @return self
      */
     public function randomized(): self
     {
@@ -1030,8 +854,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to SEQUENTIAL.
-     *
-     * @return self
      */
     public function sequential(): self
     {
@@ -1042,8 +864,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to GROUP.
-     *
-     * @return self
      */
     public function group(): self
     {
@@ -1052,8 +872,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to INDIVIDUAL.
-     *
-     * @return self
      */
     public function individual(): self
     {
@@ -1062,8 +880,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to PEER_REVIEW.
-     *
-     * @return self
      */
     public function peerReview(): self
     {
@@ -1072,8 +888,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to AUTO_GRADED.
-     *
-     * @return self
      */
     public function autoGraded(): self
     {
@@ -1082,8 +896,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to MANUAL_GRADED.
-     *
-     * @return self
      */
     public function manualGraded(): self
     {
@@ -1094,8 +906,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to PREREQUISITE.
-     *
-     * @return self
      */
     public function prerequisite(): self
     {
@@ -1104,8 +914,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to ELECTIVE.
-     *
-     * @return self
      */
     public function elective(): self
     {
@@ -1114,8 +922,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to MANDATORY.
-     *
-     * @return self
      */
     public function mandatory(): self
     {
@@ -1124,8 +930,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to ONLINE.
-     *
-     * @return self
      */
     public function online(): self
     {
@@ -1134,8 +938,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to OFFLINE.
-     *
-     * @return self
      */
     public function offline(): self
     {
@@ -1144,8 +946,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to HYBRID.
-     *
-     * @return self
      */
     public function hybrid(): self
     {
@@ -1156,8 +956,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to VERIFIED.
-     *
-     * @return self
      */
     public function verified(): self
     {
@@ -1166,8 +964,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to UNVERIFIED.
-     *
-     * @return self
      */
     public function unverified(): self
     {
@@ -1176,8 +972,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to FIRST_TIME.
-     *
-     * @return self
      */
     public function firstTime(): self
     {
@@ -1186,8 +980,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to RETURNING.
-     *
-     * @return self
      */
     public function returning(): self
     {
@@ -1196,8 +988,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to GUEST.
-     *
-     * @return self
      */
     public function guest(): self
     {
@@ -1208,8 +998,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to ON_TIME.
-     *
-     * @return self
      */
     public function onTime(): self
     {
@@ -1218,8 +1006,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to LATE.
-     *
-     * @return self
      */
     public function late(): self
     {
@@ -1228,8 +1014,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to EARLY.
-     *
-     * @return self
      */
     public function early(): self
     {
@@ -1238,8 +1022,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to RESUBMISSION.
-     *
-     * @return self
      */
     public function resubmission(): self
     {
@@ -1250,8 +1032,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to ACHIEVEMENT.
-     *
-     * @return self
      */
     public function achievement(): self
     {
@@ -1260,8 +1040,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to PARTICIPATION.
-     *
-     * @return self
      */
     public function participation(): self
     {
@@ -1270,8 +1048,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to COMPLETION.
-     *
-     * @return self
      */
     public function completion(): self
     {
@@ -1280,8 +1056,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to EXCELLENCE.
-     *
-     * @return self
      */
     public function excellence(): self
     {
@@ -1292,8 +1066,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to VIDEO.
-     *
-     * @return self
      */
     public function video(): self
     {
@@ -1302,8 +1074,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to AUDIO.
-     *
-     * @return self
      */
     public function audio(): self
     {
@@ -1312,8 +1082,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to DOCUMENT.
-     *
-     * @return self
      */
     public function document(): self
     {
@@ -1322,8 +1090,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to IMAGE.
-     *
-     * @return self
      */
     public function image(): self
     {
@@ -1332,8 +1098,6 @@ class PermissionHelper extends PermissionBuilder
 
     /**
      * Set context to INTERACTIVE.
-     *
-     * @return self
      */
     public function interactive(): self
     {
@@ -1345,9 +1109,9 @@ class PermissionHelper extends PermissionBuilder
     /**
      * Magic method to handle noun method calls.
      *
-     * @param string $name The method name
-     * @param array $arguments The method arguments
-     * @return self
+     * @param  string  $name  The method name
+     * @param  array  $arguments  The method arguments
+     *
      * @throws InvalidArgumentException If the noun is not found
      */
     public function __call(string $name, array $arguments): self
