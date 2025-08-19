@@ -125,20 +125,20 @@ class UserService extends BaseService implements UserServiceInterface
     }
 
     /**
-     * Get all instructors.
+     * Get all teachers.
      *
      * @throws RepositoryException When database error occurs
      */
-    public function getInstructors(): Collection
+    public function getTeachers(): Collection
     {
         try {
-            return $this->getUsersByRole('instructor');
+            return $this->getUsersByRole('teacher');
         } catch (RepositoryException $e) {
             throw $e;
         } catch (ServiceException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to get instructors: '.$e->getMessage());
+            throw ServiceException::operationFailed('Failed to get teachers: '.$e->getMessage());
         }
     }
 

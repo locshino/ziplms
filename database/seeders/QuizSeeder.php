@@ -2,91 +2,138 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Status\QuestionStatus;
+use App\Enums\Status\QuizAttemptStatus;
+use App\Enums\Status\QuizStatus;
+use App\Enums\System\RoleSystem;
 use App\Models\AnswerChoice;
 use App\Models\Course;
 use App\Models\Question;
 use App\Models\Quiz;
+use App\Models\QuizAttempt;
+use App\Models\User;
+use Database\Seeders\Contracts\HasCacheSeeder;
 use Illuminate\Database\Seeder;
 
 class QuizSeeder extends Seeder
 {
+    use HasCacheSeeder;
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        $courses = Course::all();
-
-        if ($courses->isEmpty()) {
-            $this->command->warn('No courses found. Please run CourseSeeder first.');
-
+        // Skip if quizzes already exist and cache is valid
+        if ($this->shouldSkipSeeding('quizzes', 'quizzes')) {
             return;
         }
 
-        // Create 1-3 quizzes for each course
-        foreach ($courses as $course) {
-            $numQuizzes = rand(1, 3);
+        // Get or create quizzes with caching
+        $this->getCachedData('quizzes', function () {
+            // Get child courses (courses with parent_id not null)
+            $childCourses = Course::all();
+            $teachers = User::role(RoleSystem::TEACHER->value)->get();
 
-            for ($i = 1; $i <= $numQuizzes; $i++) {
-                $quiz = Quiz::create([
-                    'course_id' => $course->id,
-                    'title' => "Quiz {$i} - {$course->title}",
-                    'description' => fake()->paragraph(),
-                    'max_points' => 100.00,
-                    'max_attempts' => rand(0, 1) ? rand(1, 3) : null,
-                    'is_single_session' => fake()->boolean(30),
-                    'time_limit_minutes' => rand(0, 1) ? rand(30, 120) : null,
-                    'start_at' => now()->addDays(rand(1, 30)),
-                    'end_at' => now()->addDays(rand(31, 90)),
-                ]);
+            foreach ($childCourses as $course) {
+                // Get students enrolled in this course
+                $enrolledStudents = $course->students;
 
-                // Create 5-10 questions for each quiz
-                $numQuestions = rand(5, 10);
-
-                for ($j = 1; $j <= $numQuestions; $j++) {
-                    $question = Question::create([
-                        'quiz_id' => $quiz->id,
-                        'title' => "Question {$j}: ".fake()->sentence().'?',
-                        'points' => fake()->randomFloat(2, 1, 10),
-                        'is_multiple_response' => fake()->boolean(20),
+                // Create 12 quizzes for each child course
+                for ($i = 1; $i <= 12; $i++) {
+                    $quiz = Quiz::factory()->create([
+                        'status' => $i <= 10 ? QuizStatus::PUBLISHED->value : QuizStatus::DRAFT->value,
                     ]);
 
-                    // Create 4 answer choices for each question
-                    $correctAnswerIndex = rand(0, 3);
+                    // Create pivot record in course_quizzes
+                    $startAt = fake()->dateTimeBetween('-2 months', '+1 month');
+                    $endAt = fake()->dateTimeBetween($startAt, '+2 months');
 
-                    for ($k = 0; $k < 4; $k++) {
-                        AnswerChoice::create([
-                            'question_id' => $question->id,
-                            'title' => fake()->sentence(4),
-                            'is_correct' => $k === $correctAnswerIndex,
-                        ]);
+                    // Special case: 1 quiz should be closed (ended)
+                    if ($i === 1) {
+                        $startAt = fake()->dateTimeBetween('-3 months', '-2 months');
+                        $endAt = fake()->dateTimeBetween($startAt, '-1 month');
+                        $quiz->update(['status' => QuizStatus::CLOSED->value]);
                     }
 
-                    // For multiple response questions, make 1-2 additional answers correct
-                    if ($question->is_multiple_response && rand(0, 1)) {
-                        $additionalCorrectIndex = ($correctAnswerIndex + rand(1, 3)) % 4;
-                        AnswerChoice::where('question_id', $question->id)
-                            ->skip($additionalCorrectIndex)
-                            ->first()
-                            ->update(['is_correct' => true]);
+                    $course->quizzes()->attach($quiz->id, [
+                        'start_at' => $startAt,
+                        'end_at' => $endAt,
+                    ]);
+
+                    // Create questions and answer choices for this quiz
+                    $this->createQuestionsAndAnswers($quiz);
+
+                    // Create quiz attempts only for published quizzes that are not closed
+                    if ($quiz->status === QuizStatus::PUBLISHED->value && $i !== 1) {
+                        $this->createQuizAttempts($quiz, $enrolledStudents, $teachers);
                     }
                 }
             }
-        }
 
-        // Create additional random quizzes with questions and answers
-        Quiz::factory(10)->create()->each(function ($quiz) {
-            Question::factory(rand(3, 8))->create([
-                'quiz_id' => $quiz->id,
-            ])->each(function ($question) {
-                AnswerChoice::factory(4)->create([
-                    'question_id' => $question->id,
-                ])->each(function ($choice, $index) {
-                    if ($index === 0) {
-                        $choice->update(['is_correct' => true]);
-                    }
-                });
-            });
+            return true;
         });
+    }
+
+    /**
+     * Create questions and answer choices for a quiz.
+     */
+    private function createQuestionsAndAnswers(Quiz $quiz): void
+    {
+        $questionCount = fake()->numberBetween(5, 10);
+
+        for ($i = 1; $i <= $questionCount; $i++) {
+            // Create question without quiz_id since it's a many-to-many relationship
+            $question = Question::factory()->create([
+                'status' => QuestionStatus::PUBLISHED->value,
+            ]);
+
+            // Attach question to quiz with pivot data (points)
+            $points = fake()->randomFloat(2, 1, 10);
+            $quiz->questions()->attach($question->id, [
+                'points' => $points,
+            ]);
+
+            // Create answer choices for each question
+            $choiceCount = fake()->numberBetween(3, 4);
+            $correctChoiceIndex = fake()->numberBetween(0, $choiceCount - 1);
+
+            for ($j = 0; $j < $choiceCount; $j++) {
+                AnswerChoice::factory()->create([
+                    'question_id' => $question->id,
+                    'is_correct' => $j === $correctChoiceIndex,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Create quiz attempts for a quiz.
+     */
+    private function createQuizAttempts(Quiz $quiz, $enrolledStudents, $teachers): void
+    {
+        // Select 15 random students to attempt this quiz
+        $attemptingStudents = $enrolledStudents->random(min(15, $enrolledStudents->count()));
+
+        foreach ($attemptingStudents as $index => $student) {
+            $startAt = fake()->dateTimeBetween('-1 month', 'now');
+
+            // Determine attempt status
+            if ($index < 10) {
+                // 10 attempts completed, waiting for grading
+                $attempt = QuizAttempt::factory()->completed()->create([
+                    'quiz_id' => $quiz->id,
+                    'student_id' => $student->id,
+                    'start_at' => $startAt,
+                ]);
+            } else {
+                // 5 attempts graded
+                $attempt = QuizAttempt::factory()->graded()->create([
+                    'quiz_id' => $quiz->id,
+                    'student_id' => $student->id,
+                    'start_at' => $startAt,
+                    'points' => fake()->randomFloat(2, 0, $quiz->max_points),
+                ]);
+            }
+        }
     }
 }

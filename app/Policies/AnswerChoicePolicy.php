@@ -2,9 +2,8 @@
 
 namespace App\Policies;
 
-use App\Libs\Roles\RoleHelper;
-use App\Models\AnswerChoice;
 use App\Models\User;
+use App\Models\AnswerChoice;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class AnswerChoicePolicy
@@ -16,7 +15,7 @@ class AnswerChoicePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_answer::choice');
+        return $user->can('view_any_answer::choices::answer::choice');
     }
 
     /**
@@ -24,17 +23,7 @@ class AnswerChoicePolicy
      */
     public function view(User $user, AnswerChoice $answerChoice): bool
     {
-        // Super admin and admin can view all answer choices
-        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
-            return true;
-        }
-
-        // Teachers can view answer choices in questions they manage
-        if (RoleHelper::isTeacher($user) && $answerChoice->question && $answerChoice->question->quiz && $answerChoice->question->quiz->course && $answerChoice->question->quiz->course->teachers()->where('user_id', $user->id)->exists()) {
-            return true;
-        }
-
-        return $user->can('view_answer::choice');
+        return $user->can('view_answer::choices::answer::choice');
     }
 
     /**
@@ -42,12 +31,7 @@ class AnswerChoicePolicy
      */
     public function create(User $user): bool
     {
-        // Only super admin, admin, and teachers can create answer choices
-        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user) || RoleHelper::isTeacher($user)) {
-            return $user->can('create_answer::choice');
-        }
-
-        return false;
+        return $user->can('create_answer::choices::answer::choice');
     }
 
     /**
@@ -55,17 +39,7 @@ class AnswerChoicePolicy
      */
     public function update(User $user, AnswerChoice $answerChoice): bool
     {
-        // Super admin and admin can update all answer choices
-        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
-            return $user->can('update_answer::choice');
-        }
-
-        // Teachers can update answer choices in questions they manage
-        if (RoleHelper::isTeacher($user) && $answerChoice->question && $answerChoice->question->quiz && $answerChoice->question->quiz->course && $answerChoice->question->quiz->course->teachers()->where('user_id', $user->id)->exists()) {
-            return $user->can('update_answer::choice');
-        }
-
-        return false;
+        return $user->can('update_answer::choices::answer::choice');
     }
 
     /**
@@ -73,17 +47,7 @@ class AnswerChoicePolicy
      */
     public function delete(User $user, AnswerChoice $answerChoice): bool
     {
-        // Super admin and admin can delete all answer choices
-        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
-            return $user->can('delete_answer::choice');
-        }
-
-        // Teachers can delete answer choices in questions they manage
-        if (RoleHelper::isTeacher($user) && $answerChoice->question && $answerChoice->question->quiz && $answerChoice->question->quiz->course && $answerChoice->question->quiz->course->teachers()->where('user_id', $user->id)->exists()) {
-            return $user->can('delete_answer::choice');
-        }
-
-        return false;
+        return $user->can('delete_answer::choices::answer::choice');
     }
 
     /**
@@ -91,7 +55,7 @@ class AnswerChoicePolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_answer::choice');
+        return $user->can('delete_any_answer::choices::answer::choice');
     }
 
     /**
@@ -99,7 +63,7 @@ class AnswerChoicePolicy
      */
     public function forceDelete(User $user, AnswerChoice $answerChoice): bool
     {
-        return $user->can('force_delete_answer::choice');
+        return $user->can('force_delete_answer::choices::answer::choice');
     }
 
     /**
@@ -107,7 +71,7 @@ class AnswerChoicePolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_answer::choice');
+        return $user->can('force_delete_any_answer::choices::answer::choice');
     }
 
     /**
@@ -115,7 +79,7 @@ class AnswerChoicePolicy
      */
     public function restore(User $user, AnswerChoice $answerChoice): bool
     {
-        return $user->can('restore_answer::choice');
+        return $user->can('restore_answer::choices::answer::choice');
     }
 
     /**
@@ -123,7 +87,7 @@ class AnswerChoicePolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_answer::choice');
+        return $user->can('restore_any_answer::choices::answer::choice');
     }
 
     /**
@@ -131,7 +95,7 @@ class AnswerChoicePolicy
      */
     public function replicate(User $user, AnswerChoice $answerChoice): bool
     {
-        return $user->can('replicate_answer::choice');
+        return $user->can('replicate_answer::choices::answer::choice');
     }
 
     /**
@@ -139,6 +103,6 @@ class AnswerChoicePolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_answer::choice');
+        return $user->can('reorder_answer::choices::answer::choice');
     }
 }

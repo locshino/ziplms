@@ -28,4 +28,19 @@ interface UserRepositoryInterface extends EloquentRepositoryInterface
     public function searchUsers(string $search): Collection;
 
     public function getEnrolledCoursesByUserId(string $userId): Collection;
+
+    /**
+     * Get users who don't have a specific permission.
+     */
+    public function getUsersWithoutPermission(string $permission): Collection;
+
+    /**
+     * Get users who have a specific permission.
+     */
+    public function getUsersWithPermission(string $permission): Collection;
+
+    /**
+     * Get users not in the given IDs array.
+     */
+    public function getUsersNotInIds(array $excludedIds): Collection;
 }

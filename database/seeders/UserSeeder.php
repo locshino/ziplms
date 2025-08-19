@@ -2,79 +2,119 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Status\UserStatus;
+use App\Enums\System\RoleSystem;
 use App\Models\User;
+use Database\Seeders\Contracts\HasCacheSeeder;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Role;
 
 class UserSeeder extends Seeder
 {
+    use HasCacheSeeder;
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        // Create Super Admin
-        $superAdmin = User::firstOrCreate(
-            ['email' => 'superadmin@ziplms.com'],
-            [
+        // Create roles first (always check, not cached separately)
+        $this->createRoles();
+
+        // Skip if users already exist and cache is valid
+        if ($this->shouldSkipSeeding('users', 'users')) {
+            return;
+        }
+
+        // Get or create users with caching
+        $this->getCachedData('users', function () {
+            // Create Super Admin (1 default user)
+            $superAdmin = User::factory()->create([
                 'name' => 'Super Administrator',
-                'password' => Hash::make('password'),
+                'email' => 'superadmin@example.com',
                 'email_verified_at' => now(),
-            ]
-        );
-        $superAdmin->assignRole('super_admin');
+                'status' => UserStatus::ACTIVE->value,
+            ]);
+            $superAdmin->assignRole(RoleSystem::SUPER_ADMIN->value);
 
-        // Create Admin
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@ziplms.com'],
-            [
+            // Create Admin (1 default user)
+            $admin = User::factory()->create([
                 'name' => 'Administrator',
-                'password' => Hash::make('password'),
+                'email' => 'admin@example.com',
                 'email_verified_at' => now(),
-            ]
-        );
-        $admin->assignRole('admin');
+                'status' => UserStatus::ACTIVE->value,
+            ]);
+            $admin->assignRole(RoleSystem::ADMIN->value);
 
-        // Create Sample Manager
-        $manager = User::firstOrCreate(
-            ['email' => 'manager@ziplms.com'],
-            [
-                'name' => 'Manager',
-                'password' => Hash::make('password'),
+            // Create Manager (1 default user + 9 additional users)
+            $defaultManager = User::factory()->create([
+                'name' => 'Default Manager',
+                'email' => 'manager@example.com',
                 'email_verified_at' => now(),
-            ]
-        );
-        $manager->assignRole('manager');
+                'status' => UserStatus::ACTIVE->value,
+            ]);
+            $defaultManager->assignRole(RoleSystem::MANAGER->value);
 
-        // Create Sample Teacher
-        $teacher = User::firstOrCreate(
-            ['email' => 'teacher@ziplms.com'],
-            [
-                'name' => 'John Teacher',
-                'password' => Hash::make('password'),
+            $managers = User::factory(9)->create([
                 'email_verified_at' => now(),
-            ]
-        );
-        $teacher->assignRole('teacher');
+                'status' => UserStatus::ACTIVE->value,
+            ]);
+            foreach ($managers as $manager) {
+                $manager->assignRole(RoleSystem::MANAGER->value);
+            }
 
-        // Create Sample Student
-        $student = User::firstOrCreate(
-            ['email' => 'student@ziplms.com'],
-            [
-                'name' => 'Jane Student',
-                'password' => Hash::make('password'),
+            // Create Teacher (1 default user + 29 additional users)
+            $defaultTeacher = User::factory()->create([
+                'name' => 'Default Teacher',
+                'email' => 'teacher@example.com',
                 'email_verified_at' => now(),
-            ]
-        );
-        $student->assignRole('student');
+                'status' => UserStatus::ACTIVE->value,
+            ]);
+            $defaultTeacher->assignRole(RoleSystem::TEACHER->value);
 
-        // Create additional random users
-        User::factory(10)->create()->each(function ($user) {
-            $user->assignRole('student');
+            $teachers = User::factory(29)->create([
+                'email_verified_at' => now(),
+                'status' => UserStatus::ACTIVE->value,
+            ]);
+            foreach ($teachers as $teacher) {
+                $teacher->assignRole(RoleSystem::TEACHER->value);
+            }
+
+            // Create Student (1 default user + 599 additional users)
+            $defaultStudent = User::factory()->create([
+                'name' => 'Default Student',
+                'email' => 'student@example.com',
+                'email_verified_at' => now(),
+                'status' => UserStatus::ACTIVE->value,
+            ]);
+            $defaultStudent->assignRole(RoleSystem::STUDENT->value);
+
+            $students = User::factory(599)->create([
+                'email_verified_at' => now(),
+                'status' => UserStatus::ACTIVE->value,
+            ]);
+            foreach ($students as $student) {
+                $student->assignRole(RoleSystem::STUDENT->value);
+            }
+
+            return true;
         });
+    }
 
-        User::factory(3)->create()->each(function ($user) {
-            $user->assignRole('teacher');
-        });
+    /**
+     * Create roles if they don't exist.
+     */
+    private function createRoles(): void
+    {
+        $roles = [
+            RoleSystem::SUPER_ADMIN->value,
+            RoleSystem::ADMIN->value,
+            RoleSystem::MANAGER->value,
+            RoleSystem::TEACHER->value,
+            RoleSystem::STUDENT->value,
+        ];
+
+        foreach ($roles as $role) {
+            Role::firstOrCreate(['name' => $role]);
+        }
     }
 }

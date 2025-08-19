@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Course;
+use App\Enums\Status\QuizStatus;
 use App\Models\Quiz;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -12,62 +12,63 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class QuizFactory extends Factory
 {
     /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $model = Quiz::class;
-
-    /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
-        $startAt = $this->faker->dateTimeBetween('now', '+1 month');
-        $endAt = $this->faker->dateTimeBetween($startAt, '+2 months');
-
         return [
-            'course_id' => Course::factory(),
             'title' => $this->faker->sentence(3),
-            'description' => $this->faker->optional(0.8)->paragraph(),
-            'max_points' => $this->faker->randomFloat(2, 50, 100),
-            'max_attempts' => $this->faker->optional(0.6)->numberBetween(1, 5),
-            'is_single_session' => $this->faker->boolean(30),
-            'time_limit_minutes' => $this->faker->optional(0.7)->numberBetween(15, 120),
-            'start_at' => $startAt,
-            'end_at' => $endAt,
+            'description' => $this->faker->paragraph(2),
+            'max_attempts' => $this->faker->numberBetween(1, 3),
+            'is_single_session' => $this->faker->boolean(70), // 70% chance of single session
+            'time_limit_minutes' => $this->faker->randomElement([30, 45, 60, 90, 120]),
+            'status' => QuizStatus::PUBLISHED->value,
         ];
     }
 
     /**
-     * Indicate that the quiz has unlimited attempts.
+     * Indicate that the quiz has a specific status.
      */
-    public function unlimitedAttempts(): static
+    public function withStatus(QuizStatus $status): static
     {
         return $this->state(fn (array $attributes) => [
-            'max_attempts' => null,
+            'status' => $status->value,
         ]);
     }
 
     /**
-     * Indicate that the quiz has no time limit.
+     * Indicate that the quiz is a draft.
      */
-    public function noTimeLimit(): static
+    public function draft(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'time_limit_minutes' => null,
-        ]);
+        return $this->withStatus(QuizStatus::DRAFT);
     }
 
     /**
-     * Indicate that the quiz is a single session quiz.
+     * Indicate that the quiz is published.
      */
-    public function singleSession(): static
+    public function published(): static
+    {
+        return $this->withStatus(QuizStatus::PUBLISHED);
+    }
+
+    /**
+     * Indicate that the quiz is closed.
+     */
+    public function closed(): static
+    {
+        return $this->withStatus(QuizStatus::CLOSED);
+    }
+
+    /**
+     * Indicate that the quiz allows multiple sessions.
+     */
+    public function multipleSession(): static
     {
         return $this->state(fn (array $attributes) => [
-            'is_single_session' => true,
+            'is_single_session' => false,
         ]);
     }
 }
