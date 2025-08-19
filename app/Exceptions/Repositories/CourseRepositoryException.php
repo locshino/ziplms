@@ -2,362 +2,228 @@
 
 namespace App\Exceptions\Repositories;
 
+use App\Enums\HttpStatusCode;
+use Exception;
+
 /**
  * Exception for course repository-related errors.
  *
- * This exception class provides localized error messages specific to course operations.
+ * This exception class provides specialized error messages for course operations
+ * in the LMS system, including course access, enrollment, and management.
  *
- * @throws CourseRepositoryException When course repository operations fail
+ * @throws CourseRepositoryException When course-specific repository operations fail
  */
 class CourseRepositoryException extends RepositoryException
 {
     /**
-     * Create exception for course not found.
+     * The default language key for course repository exceptions.
      *
-     * @param  string|null  $reason  The failure reason
+     * @var string
      */
-    public static function courseNotFound(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.course_not_found_with_reason'
-            : 'exceptions_repositories_courserepository.course_not_found';
-
-        return new static($key, ['reason' => $reason]);
-    }
-
-    /**
-     * Create exception for course title required.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function courseTitleRequired(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.course_title_required_with_reason'
-            : 'exceptions_repositories_courserepository.course_title_required';
-
-        return new static($key, ['reason' => $reason]);
-    }
-
-    /**
-     * Create exception for course title too long.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function courseTitleTooLong(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.course_title_too_long_with_reason'
-            : 'exceptions_repositories_courserepository.course_title_too_long';
-
-        return new static($key, ['reason' => $reason]);
-    }
-
-    /**
-     * Create exception for course description required.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function courseDescriptionRequired(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.course_description_required_with_reason'
-            : 'exceptions_repositories_courserepository.course_description_required';
-
-        return new static($key, ['reason' => $reason]);
-    }
-
-    /**
-     * Create exception for invalid instructor.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function invalidInstructor(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.invalid_instructor_with_reason'
-            : 'exceptions_repositories_courserepository.invalid_instructor';
-
-        return new static($key, ['reason' => $reason]);
-    }
-
-    /**
-     * Create exception for course already published.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function courseAlreadyPublished(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.course_already_published_with_reason'
-            : 'exceptions_repositories_courserepository.course_already_published';
-
-        return new static($key, ['reason' => $reason]);
-    }
+    protected static string $defaultKey = 'exceptions.repositories.course.course_not_found';
 
     /**
      * Create exception for course not published.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string|null  $courseId  The course ID
+     * @return static
      */
-    public static function courseNotPublished(?string $reason = null): static
+    public static function notPublished(?string $courseId = null): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.course_not_published_with_reason'
-            : 'exceptions_repositories_courserepository.course_not_published';
+        $key = $courseId
+            ? 'exceptions.repositories.course.course_not_published_with_id'
+            : 'exceptions.repositories.course.course_not_published';
 
-        return new static($key, ['reason' => $reason]);
-    }
-
-    /**
-     * Create exception for cannot delete published course.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function cannotDeletePublishedCourse(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.cannot_delete_published_course_with_reason'
-            : 'exceptions_repositories_courserepository.cannot_delete_published_course';
-
-        return new static($key, ['reason' => $reason]);
-    }
-
-    /**
-     * Create exception for course has enrollments.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function courseHasEnrollments(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.course_has_enrollments_with_reason'
-            : 'exceptions_repositories_courserepository.course_has_enrollments';
-
-        return new static($key, ['reason' => $reason]);
-    }
-
-    /**
-     * Create exception for course has assignments.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function courseHasAssignments(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.course_has_assignments_with_reason'
-            : 'exceptions_repositories_courserepository.course_has_assignments';
-
-        return new static($key, ['reason' => $reason]);
-    }
-
-    /**
-     * Create exception for course has quizzes.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function courseHasQuizzes(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.course_has_quizzes_with_reason'
-            : 'exceptions_repositories_courserepository.course_has_quizzes';
-
-        return new static($key, ['reason' => $reason]);
-    }
-
-    /**
-     * Create exception for invalid course status.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function invalidCourseStatus(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.invalid_course_status_with_reason'
-            : 'exceptions_repositories_courserepository.invalid_course_status';
-
-        return new static($key, ['reason' => $reason]);
-    }
-
-    /**
-     * Create exception for invalid course category.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function invalidCourseCategory(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.invalid_course_category_with_reason'
-            : 'exceptions_repositories_courserepository.invalid_course_category';
-
-        return new static($key, ['reason' => $reason]);
-    }
-
-    /**
-     * Create exception for course capacity exceeded.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function courseCapacityExceeded(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.course_capacity_exceeded_with_reason'
-            : 'exceptions_repositories_courserepository.course_capacity_exceeded';
-
-        return new static($key, ['reason' => $reason]);
-    }
-
-    /**
-     * Create exception for course enrollment closed.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function courseEnrollmentClosed(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.course_enrollment_closed_with_reason'
-            : 'exceptions_repositories_courserepository.course_enrollment_closed';
-
-        return new static($key, ['reason' => $reason]);
+        return new static($key, ['id' => $courseId], HttpStatusCode::FORBIDDEN);
     }
 
     /**
      * Create exception for course not available.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string|null  $courseId  The course ID
+     * @return static
      */
-    public static function courseNotAvailable(?string $reason = null): static
+    public static function notAvailable(?string $courseId = null): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.course_not_available_with_reason'
-            : 'exceptions_repositories_courserepository.course_not_available';
+        $key = $courseId
+            ? 'exceptions.repositories.course.course_not_available_with_id'
+            : 'exceptions.repositories.course.course_not_available';
 
-        return new static($key, ['reason' => $reason]);
+        return new static($key, ['id' => $courseId], HttpStatusCode::FORBIDDEN);
     }
 
     /**
-     * Create exception for duplicate course title.
+     * Create exception for course enrollment closed.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string|null  $courseId  The course ID
+     * @return static
      */
-    public static function duplicateCourseTitle(?string $reason = null): static
+    public static function enrollmentClosed(?string $courseId = null): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.duplicate_course_title_with_reason'
-            : 'exceptions_repositories_courserepository.duplicate_course_title';
+        $key = $courseId
+            ? 'exceptions.repositories.course.enrollment_closed_with_id'
+            : 'exceptions.repositories.course.enrollment_closed';
 
-        return new static($key, ['reason' => $reason]);
+        return new static($key, ['id' => $courseId], HttpStatusCode::FORBIDDEN);
     }
 
     /**
-     * Create exception for invalid course duration.
+     * Create exception for course capacity full.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string|null  $courseId  The course ID
+     * @param  int|null  $capacity  The course capacity
+     * @return static
      */
-    public static function invalidCourseDuration(?string $reason = null): static
+    public static function capacityFull(?string $courseId = null, ?int $capacity = null): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.invalid_course_duration_with_reason'
-            : 'exceptions_repositories_courserepository.invalid_course_duration';
-
-        return new static($key, ['reason' => $reason]);
+        return new static(
+            'exceptions.repositories.course.capacity_full',
+            ['id' => $courseId, 'capacity' => $capacity],
+            HttpStatusCode::FORBIDDEN
+        );
     }
 
     /**
-     * Create exception for invalid course price.
+     * Create exception for student already enrolled.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string  $courseId  The course ID
+     * @param  string  $studentId  The student ID
+     * @return static
      */
-    public static function invalidCoursePrice(?string $reason = null): static
+    public static function alreadyEnrolled(string $courseId, string $studentId): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.invalid_course_price_with_reason'
-            : 'exceptions_repositories_courserepository.invalid_course_price';
-
-        return new static($key, ['reason' => $reason]);
+        return new static(
+            'exceptions.repositories.course.already_enrolled',
+            ['course_id' => $courseId, 'student_id' => $studentId],
+            HttpStatusCode::CONFLICT
+        );
     }
 
     /**
-     * Create exception for course dates conflict.
+     * Create exception for student not enrolled.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string  $courseId  The course ID
+     * @param  string  $studentId  The student ID
+     * @return static
      */
-    public static function courseDatesConflict(?string $reason = null): static
+    public static function notEnrolled(string $courseId, string $studentId): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.course_dates_conflict_with_reason'
-            : 'exceptions_repositories_courserepository.course_dates_conflict';
-
-        return new static($key, ['reason' => $reason]);
+        return new static(
+            'exceptions.repositories.course.not_enrolled',
+            ['course_id' => $courseId, 'student_id' => $studentId],
+            HttpStatusCode::FORBIDDEN
+        );
     }
 
     /**
-     * Create exception for create course failed.
+     * Create exception for enrollment failure.
      *
+     * @param  string  $courseId  The course ID
+     * @param  string  $studentId  The student ID
      * @param  string|null  $reason  The failure reason
+     * @return static
      */
-    public static function createCourseFailed(?string $reason = null): static
+    public static function enrollmentFailed(string $courseId, string $studentId, ?string $reason = null): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.create_course_failed_with_reason'
-            : 'exceptions_repositories_courserepository.create_course_failed';
-
-        return new static($key, ['reason' => $reason]);
+        return new static(
+            'exceptions.repositories.course.enrollment_failed',
+            ['course_id' => $courseId, 'student_id' => $studentId, 'reason' => $reason],
+            HttpStatusCode::BAD_REQUEST
+        );
     }
 
     /**
-     * Create exception for update course failed.
+     * Create exception for unenrollment failure.
      *
+     * @param  string  $courseId  The course ID
+     * @param  string  $studentId  The student ID
      * @param  string|null  $reason  The failure reason
+     * @return static
      */
-    public static function updateCourseFailed(?string $reason = null): static
+    public static function unenrollmentFailed(string $courseId, string $studentId, ?string $reason = null): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.update_course_failed_with_reason'
-            : 'exceptions_repositories_courserepository.update_course_failed';
-
-        return new static($key, ['reason' => $reason]);
+        return new static(
+            'exceptions.repositories.course.unenrollment_failed',
+            ['course_id' => $courseId, 'student_id' => $studentId, 'reason' => $reason],
+            HttpStatusCode::BAD_REQUEST
+        );
     }
 
     /**
-     * Create exception for delete course failed.
+     * Create exception for instructor not assigned.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string  $courseId  The course ID
+     * @param  string  $instructorId  The instructor ID
+     * @return static
      */
-    public static function deleteCourseFailed(?string $reason = null): static
+    public static function instructorNotAssigned(string $courseId, string $instructorId): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.delete_course_failed_with_reason'
-            : 'exceptions_repositories_courserepository.delete_course_failed';
-
-        return new static($key, ['reason' => $reason]);
+        return new static(
+            'exceptions.repositories.course.instructor_not_assigned',
+            ['course_id' => $courseId, 'instructor_id' => $instructorId],
+            HttpStatusCode::FORBIDDEN
+        );
     }
 
     /**
-     * Create exception for publish course failed.
+     * Create exception for instructor already assigned.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string  $courseId  The course ID
+     * @param  string  $instructorId  The instructor ID
+     * @return static
      */
-    public static function publishCourseFailed(?string $reason = null): static
+    public static function instructorAlreadyAssigned(string $courseId, string $instructorId): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_courserepository.publish_course_failed_with_reason'
-            : 'exceptions_repositories_courserepository.publish_course_failed';
-
-        return new static($key, ['reason' => $reason]);
+        return new static(
+            'exceptions.repositories.course.instructor_already_assigned',
+            ['course_id' => $courseId, 'instructor_id' => $instructorId],
+            HttpStatusCode::CONFLICT
+        );
     }
 
     /**
-     * Create exception for unpublish course failed.
+     * Create exception for course progress calculation failure.
+     *
+     * @param  string  $courseId  The course ID
+     * @param  string|null  $reason  The failure reason
+     * @return static
+     */
+    public static function progressCalculationFailed(string $courseId, ?string $reason = null): static
+    {
+        return new static(
+            'exceptions.repositories.course.progress_calculation_failed',
+            ['course_id' => $courseId, 'reason' => $reason],
+            HttpStatusCode::INTERNAL_SERVER_ERROR
+        );
+    }
+
+    /**
+     * Create exception for statistics calculation failure.
      *
      * @param  string|null  $reason  The failure reason
+     * @return static
      */
-    public static function unpublishCourseFailed(?string $reason = null): static
+    public static function statisticsCalculationFailed(?string $reason = null): static
     {
         $key = $reason
-            ? 'exceptions_repositories_courserepository.unpublish_course_failed_with_reason'
-            : 'exceptions_repositories_courserepository.unpublish_course_failed';
+            ? 'exceptions.repositories.course.statistics_calculation_failed_with_reason'
+            : 'exceptions.repositories.course.statistics_calculation_failed';
 
-        return new static($key, ['reason' => $reason]);
+        return new static($key, ['reason' => $reason], HttpStatusCode::INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * Create exception for insufficient permissions.
+     *
+     * @param  string|null  $action  The action being attempted
+     * @return static
+     */
+    public static function insufficientPermissions(?string $action = null): static
+    {
+        $key = $action
+            ? 'exceptions.repositories.course.insufficient_permissions_with_action'
+            : 'exceptions.repositories.course.insufficient_permissions';
+
+        return new static($key, ['action' => $action], HttpStatusCode::FORBIDDEN);
     }
 }

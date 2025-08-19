@@ -2,30 +2,37 @@
 
 namespace App\Providers\Filament;
 
-use Afsakar\FilamentOtpLogin\FilamentOtpLoginPlugin;
-use Asmit\ResizedColumn\ResizedColumnPlugin;
-use Awcodes\LightSwitch\LightSwitchPlugin;
+use App\Filament\Pages\Auth\RenewPassword;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
+use Cmsmaxinc\FilamentErrorPages\FilamentErrorPagesPlugin;
+use Devonab\FilamentEasyFooter\EasyFooterPlugin;
+use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
+use DutchCodingCompany\FilamentSocialite\Provider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages;
+use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets;
-use FilamentWebpush\FilamentWebpushPlugin;
+use Filament\Widgets\AccountWidget;
+use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Jeffgreco13\FilamentBreezy\BreezyCore;
-use Promethys\Revive\RevivePlugin;
-use TomatoPHP\FilamentPWA\FilamentPWAPlugin;
+use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
+use pxlrbt\FilamentEnvironmentIndicator\EnvironmentIndicatorPlugin;
+use pxlrbt\FilamentSpotlight\SpotlightPlugin;
+use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
+use Swis\Filament\Backgrounds\ImageProviders\CuratedBySwis;
+use Tapp\FilamentAuthenticationLog\FilamentAuthenticationLogPlugin;
+use Tapp\FilamentMailLog\FilamentMailLogPlugin;
+use Yebor974\Filament\RenewPassword\RenewPasswordPlugin;
+use ZPMLabs\FilamentApiDocsBuilder\FilamentApiDocsBuilderPlugin;
 
 class AppPanelProvider extends PanelProvider
 {
@@ -36,18 +43,19 @@ class AppPanelProvider extends PanelProvider
             ->id('app')
             ->path('app')
             ->login()
+            ->passwordReset()
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
+            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                AccountWidget::class,
+                FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -60,34 +68,81 @@ class AppPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
-            ->plugins([
-                FilamentShieldPlugin::make(),
-            ])
-            ->plugins(plugins: [
-                // FilamentOtpLoginPlugin::make(),
-                // GlobalSearchModalPlugin::make()
-                // ->closeButton(enabled: true)
-                // ->localStorageMaxItemsAllowed(50),
-
-                FilamentShieldPlugin::make(),
-
-                BreezyCore::make()
-                    // ->customMyProfilePage(AccountSettingsPage::class)
-                    ->enableTwoFactorAuthentication()
-                    ->myProfile(),
-                RevivePlugin::make(),
-                FilamentWebpushPlugin::make(),
-
-                ResizedColumnPlugin::make()
-                    ->preserveOnDB(),
-                LightSwitchPlugin::make(),
-
-                FilamentPWAPlugin::make(),
-            ])
             ->authMiddleware([
                 Authenticate::class,
             ])
+            ->plugins($this->setPlugins())
+            ->viteTheme('resources/css/filament/app/theme.css')
+            // ->strictAuthorization()
             ->sidebarCollapsibleOnDesktop()
+            ->spa(hasPrefetching: true)
             ->databaseNotifications();
+    }
+
+    /**
+     * Sets up and returns the array of plugins for the panel.
+     * This method is refactored for conciseness and maintainability.
+     */
+    public function setPlugins(): array
+    {
+        $config = config('ziplms.plugins');
+
+        $plugins = [
+            // Authentication
+            FilamentShieldPlugin::make(),
+
+            // Logs
+            FilamentAuthenticationLogPlugin::make(),
+            FilamentMailLogPlugin::make(),
+
+            // UI
+            FilamentApexChartsPlugin::make(),
+            FilamentErrorPagesPlugin::make(),
+            SpotlightPlugin::make(),
+
+            // Pages
+            FilamentApiDocsBuilderPlugin::make(),
+        ];
+
+        // Authentication
+        if ($config['renew_password']['enabled']) {
+            $plugins[] = RenewPasswordPlugin::make()
+                ->passwordExpiresIn(days: $config['renew_password']['password_expires_in'])
+                ->renewPage(RenewPassword::class)
+                ->forceRenewPassword($config['renew_password']['force_renew_password']);
+        }
+
+        // UI
+        if ($config['backgrounds']['enabled']) {
+            $plugins[] = FilamentBackgroundsPlugin::make()
+                ->remember($config['backgrounds']['remember_in_seconds'])
+                ->imageProvider(CuratedBySwis::make());
+        }
+
+        // UI
+        if ($config['easy_footer']['enabled']) {
+            $plugins[] = EasyFooterPlugin::make();
+        }
+
+        // Authentication
+        if ($config['socialite']['enabled']) {
+            $plugins[] = FilamentSocialitePlugin::make()
+                ->registration($config['socialite']['allow_registration'] == true)
+                ->providers([
+                    Provider::make('google')
+                        ->label('Google')
+                        ->icon('fab-google'),
+                ]);
+        }
+
+        // UI
+        if ($config['environment_indicator']['enabled']) {
+            $plugins[] = EnvironmentIndicatorPlugin::make()
+                ->showBadge(true)
+                ->showBorder(false)
+                ->showDebugModeWarningInProduction();
+        }
+
+        return $plugins;
     }
 }

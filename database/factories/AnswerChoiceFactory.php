@@ -12,13 +12,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class AnswerChoiceFactory extends Factory
 {
     /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $model = AnswerChoice::class;
-
-    /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
@@ -27,8 +20,9 @@ class AnswerChoiceFactory extends Factory
     {
         return [
             'question_id' => Question::factory(),
-            'title' => $this->faker->sentence(4),
-            'is_correct' => $this->faker->boolean(25), // 25% chance of being correct
+            'title' => $this->faker->sentence(3),
+            'description' => $this->faker->optional()->paragraph(1),
+            'is_correct' => false,
         ];
     }
 

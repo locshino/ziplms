@@ -2,16 +2,53 @@
 
 namespace App\Models;
 
+use App\Enums\Status\BadgeConditionStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Promethys\Revive\Concerns\Recyclable;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class BadgeCondition extends Model
+/**
+ * @property string $id
+ * @property string $title
+ * @property string|null $description
+ * @property string $condition_type
+ * @property array<array-key, mixed>|null $condition_data
+ * @property BadgeConditionStatus $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Audit> $audits
+ * @property-read int|null $audits_count
+ * @property-read \App\Models\BadgeHasCondition|null $pivot
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Badge> $badges
+ * @property-read int|null $badges_count
+ * @method static \Database\Factories\BadgeConditionFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition whereConditionData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition whereConditionType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition withoutTrashed()
+ * @mixin \Eloquent
+ */
+class BadgeCondition extends Model implements Auditable
 {
-    use HasFactory, HasUuids, Recyclable, SoftDeletes;
+    use HasFactory,
+        HasUuids,
+        SoftDeletes,
+        \OwenIt\Auditing\Auditable;
 
     /**
      * The attributes that are mass assignable.
@@ -19,10 +56,11 @@ class BadgeCondition extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'type',
-        'operator',
-        'parameters',
+        'title',
+        'description',
+        'condition_type',
+        'condition_data',
+        'status',
     ];
 
     /**
@@ -33,15 +71,16 @@ class BadgeCondition extends Model
     protected function casts(): array
     {
         return [
-            'parameters' => 'array',
+            'condition_data' => 'array',
+            'status' => BadgeConditionStatus::class,
         ];
     }
 
-    /**
-     * Get the badges that use this condition.
-     */
+    // Badge relationships
     public function badges(): BelongsToMany
     {
-        return $this->belongsToMany(Badge::class, 'badge_has_conditions', 'condition_id', 'badge_id');
+        return $this->belongsToMany(Badge::class, 'badge_has_conditions')
+            ->using(BadgeHasCondition::class)
+            ->withTimestamps();
     }
 }

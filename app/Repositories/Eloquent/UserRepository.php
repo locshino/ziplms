@@ -103,4 +103,52 @@ class UserRepository extends EloquentRepository implements UserRepositoryInterfa
             throw UserRepositoryException::databaseError($e->getMessage());
         }
     }
+
+    /**
+     * Get users who don't have a specific permission.
+     *
+     * @throws UserRepositoryException When database error occurs
+     */
+    public function getUsersWithoutPermission(string $permission): Collection
+    {
+        try {
+            return $this->model->whereDoesntHave('permissions', function ($query) use ($permission) {
+                $query->where('name', $permission);
+            })->get();
+        } catch (Exception $e) {
+            throw UserRepositoryException::databaseError($e->getMessage());
+        }
+    }
+
+    /**
+     * Get users who have a specific permission.
+     *
+     * @throws UserRepositoryException When database error occurs
+     */
+    public function getUsersWithPermission(string $permission): Collection
+    {
+        try {
+            return $this->model->permission($permission)->with('roles')->get();
+        } catch (Exception $e) {
+            throw UserRepositoryException::databaseError($e->getMessage());
+        }
+    }
+
+    /**
+     * Get users not in the given IDs array.
+     *
+     * @throws UserRepositoryException When database error occurs
+     */
+    public function getUsersNotInIds(array $excludedIds): Collection
+    {
+        try {
+            if (empty($excludedIds)) {
+                return $this->model->get();
+            }
+            
+            return $this->model->whereNotIn('id', $excludedIds)->get();
+        } catch (Exception $e) {
+            throw UserRepositoryException::databaseError($e->getMessage());
+        }
+    }
 }

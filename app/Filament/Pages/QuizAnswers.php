@@ -6,6 +6,7 @@ namespace App\Filament\Pages;
 
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
+use BackedEnum;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Collection;
@@ -13,9 +14,9 @@ use Illuminate\Support\Facades\Auth;
 
 class QuizAnswers extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-academic-cap';
 
-    protected static string $view = 'filament.pages.quiz-answers';
+    protected string $view = 'filament.pages.quiz-answers';
 
     protected static bool $shouldRegisterNavigation = false;
 

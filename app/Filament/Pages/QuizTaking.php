@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Services\Interfaces\QuizServiceInterface;
+use BackedEnum;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -16,10 +17,10 @@ use Livewire\Attributes\Url;
 
 class QuizTaking extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-academic-cap';
 
     // [SỬA LỖI 1] - Trỏ đến đúng file view, không phải tên route
-    protected static string $view = 'filament.pages.quiz-taking';
+    protected string $view = 'filament.pages.quiz-taking';
 
     protected static ?string $title = 'Làm bài Quiz';
 

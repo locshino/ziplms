@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\Status\AssignmentStatus;
 use App\Models\Assignment;
-use App\Models\Course;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -12,34 +12,44 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class AssignmentFactory extends Factory
 {
     /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $model = Assignment::class;
-
-    /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
-        $startAt = $this->faker->dateTimeBetween('now', '+1 month');
-        $dueAt = $this->faker->dateTimeBetween($startAt, $startAt->format('Y-m-d H:i:s').' +2 months');
-        $gradingAt = $this->faker->dateTimeBetween($dueAt, $dueAt->format('Y-m-d H:i:s').' +1 week');
-        $endAt = $this->faker->dateTimeBetween($gradingAt, $gradingAt->format('Y-m-d H:i:s').' +2 weeks');
-
         return [
-            'course_id' => Course::factory(),
             'title' => $this->faker->sentence(4),
-            'instructions' => $this->faker->paragraphs(3, true),
-            'max_points' => $this->faker->randomFloat(2, 50, 100),
-            'late_penalty_percentage' => $this->faker->optional(0.7)->randomFloat(2, 5, 25),
-            'start_at' => $startAt,
-            'due_at' => $dueAt,
-            'grading_at' => $gradingAt,
-            'end_at' => $endAt,
+            'description' => $this->faker->paragraph(2),
+            'max_points' => $this->faker->randomFloat(2, 10, 100),
+            'max_attempts' => $this->faker->numberBetween(1, 5),
+            'status' => AssignmentStatus::PUBLISHED->value,
         ];
+    }
+
+    /**
+     * Indicate that the assignment has a specific status.
+     */
+    public function withStatus(AssignmentStatus $status): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => $status->value,
+        ]);
+    }
+
+    /**
+     * Indicate that the assignment is a draft.
+     */
+    public function draft(): static
+    {
+        return $this->withStatus(AssignmentStatus::DRAFT);
+    }
+
+    /**
+     * Indicate that the assignment is published.
+     */
+    public function published(): static
+    {
+        return $this->withStatus(AssignmentStatus::PUBLISHED);
     }
 }
