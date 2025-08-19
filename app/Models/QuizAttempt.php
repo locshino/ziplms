@@ -2,22 +2,53 @@
 
 namespace App\Models;
 
+use App\Enums\Status\QuizAttemptStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
+/**
+ * @property string $id
+ * @property string $quiz_id
+ * @property string $student_id
+ * @property numeric|null $points
+ * @property array<array-key, mixed>|null $answers
+ * @property \Illuminate\Support\Carbon|null $start_at
+ * @property \Illuminate\Support\Carbon|null $end_at
+ * @property QuizAttemptStatus $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\Quiz $quiz
+ * @property-read \App\Models\User $student
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\StudentQuizAnswer> $studentAnswers
+ * @property-read int|null $student_answers_count
+ * @method static \Database\Factories\QuizAttemptFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt whereAnswers($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt whereEndAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt wherePoints($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt whereQuizId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt whereStartAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt whereStudentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt withoutTrashed()
+ * @mixin \Eloquent
+ */
 class QuizAttempt extends Model
 {
-    use HasFactory, HasUuids;
-
-    /**
-     * Indicates if the model should be timestamped.
-     *
-     * @var bool
-     */
-    public $timestamps = true;
+    use HasFactory, HasUuids, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -27,11 +58,11 @@ class QuizAttempt extends Model
     protected $fillable = [
         'quiz_id',
         'student_id',
-        'attempt_number',
-        'score',
+        'points',
+        'answers',
+        'start_at',
+        'end_at',
         'status',
-        'started_at',
-        'completed_at',
     ];
 
     /**
@@ -42,33 +73,28 @@ class QuizAttempt extends Model
     protected function casts(): array
     {
         return [
-            'attempt_number' => 'integer',
-            'score' => 'decimal:2',
-            'started_at' => 'datetime',
-            'completed_at' => 'datetime',
+            'points' => 'decimal:2',
+            'answers' => 'json',
+            'start_at' => 'datetime',
+            'end_at' => 'datetime',
+            'status' => QuizAttemptStatus::class,
         ];
     }
 
-    /**
-     * Get the quiz that owns the attempt.
-     */
+    // Quiz relationship
     public function quiz(): BelongsTo
     {
         return $this->belongsTo(Quiz::class);
     }
 
-    /**
-     * Get the student that owns the attempt.
-     */
+    // Student relationship
     public function student(): BelongsTo
     {
         return $this->belongsTo(User::class, 'student_id');
     }
 
-    /**
-     * Get the student quiz answers for the attempt.
-     */
-    public function answers(): HasMany
+    // Student quiz answer relationships
+    public function studentAnswers(): HasMany
     {
         return $this->hasMany(StudentQuizAnswer::class);
     }

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\Status\BadgeConditionStatus;
 use App\Models\BadgeCondition;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -11,86 +12,83 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class BadgeConditionFactory extends Factory
 {
     /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $model = BadgeCondition::class;
-
-    /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
-        $type = $this->faker->randomElement(['course_completion', 'quiz_score', 'assignment_grade', 'enrollment_count']);
-        $operator = $this->faker->randomElement(['>=', '>', '=', '<', '<=']);
+        $conditionTypes = [
+            'course_completion',
+            'quiz_score',
+            'assignment_submission',
+            'login_streak',
+            'points_earned',
+        ];
 
-        $parameters = match ($type) {
-            'course_completion' => [
-                'course_count' => $this->faker->numberBetween(1, 10),
-            ],
-            'quiz_score' => [
-                'min_score' => $this->faker->numberBetween(70, 100),
-                'quiz_count' => $this->faker->numberBetween(1, 5),
-            ],
-            'assignment_grade' => [
-                'min_grade' => $this->faker->numberBetween(80, 100),
-                'assignment_count' => $this->faker->numberBetween(1, 5),
-            ],
-            'enrollment_count' => [
-                'min_enrollments' => $this->faker->numberBetween(5, 50),
-            ],
-            default => [],
-        };
+        $conditionType = $this->faker->randomElement($conditionTypes);
 
         return [
-            'name' => $this->faker->words(3, true),
-            'type' => $type,
-            'operator' => $operator,
-            'parameters' => $parameters,
+            'title' => $this->faker->sentence(3),
+            'description' => $this->faker->paragraph(2),
+            'condition_type' => $conditionType,
+            'condition_data' => $this->generateConditionData($conditionType),
+            'status' => BadgeConditionStatus::ACTIVE->value,
         ];
     }
 
     /**
-     * Create a course completion condition.
+     * Generate condition data based on condition type.
      */
-    public function courseCompletion(): static
+    private function generateConditionData(string $conditionType): array
+    {
+        return match ($conditionType) {
+            'course_completion' => [
+                'required_courses' => $this->faker->numberBetween(1, 5),
+                'specific_course_ids' => [],
+            ],
+            'quiz_score' => [
+                'minimum_score' => $this->faker->numberBetween(80, 100),
+                'quiz_count' => $this->faker->numberBetween(1, 10),
+            ],
+            'assignment_submission' => [
+                'required_submissions' => $this->faker->numberBetween(5, 20),
+                'on_time_only' => $this->faker->boolean(70),
+            ],
+            'login_streak' => [
+                'consecutive_days' => $this->faker->numberBetween(7, 30),
+            ],
+            'points_earned' => [
+                'minimum_points' => $this->faker->numberBetween(100, 1000),
+                'time_period' => $this->faker->randomElement(['week', 'month', 'all_time']),
+            ],
+            default => [],
+        };
+    }
+
+    /**
+     * Indicate that the badge condition has a specific status.
+     */
+    public function withStatus(BadgeConditionStatus $status): static
     {
         return $this->state(fn (array $attributes) => [
-            'type' => 'course_completion',
-            'parameters' => [
-                'course_count' => $this->faker->numberBetween(1, 10),
-            ],
+            'status' => $status->value,
         ]);
     }
 
     /**
-     * Create a quiz score condition.
+     * Indicate that the badge condition is active.
      */
-    public function quizScore(): static
+    public function active(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'type' => 'quiz_score',
-            'parameters' => [
-                'min_score' => $this->faker->numberBetween(70, 100),
-                'quiz_count' => $this->faker->numberBetween(1, 5),
-            ],
-        ]);
+        return $this->withStatus(BadgeConditionStatus::ACTIVE);
     }
 
     /**
-     * Create an assignment grade condition.
+     * Indicate that the badge condition is inactive.
      */
-    public function assignmentGrade(): static
+    public function inactive(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'type' => 'assignment_grade',
-            'parameters' => [
-                'min_grade' => $this->faker->numberBetween(80, 100),
-                'assignment_count' => $this->faker->numberBetween(1, 5),
-            ],
-        ]);
+        return $this->withStatus(BadgeConditionStatus::INACTIVE);
     }
 }

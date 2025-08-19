@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\Status\QuestionStatus;
 use App\Models\Question;
 use App\Models\Quiz;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -12,13 +13,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class QuestionFactory extends Factory
 {
     /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $model = Question::class;
-
-    /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
@@ -26,30 +20,49 @@ class QuestionFactory extends Factory
     public function definition(): array
     {
         return [
-            'quiz_id' => Quiz::factory(),
-            'title' => $this->faker->sentence().'?',
-            'points' => $this->faker->randomFloat(2, 1, 10),
-            'is_multiple_response' => $this->faker->boolean(20),
+            'title' => $this->faker->sentence() . '?',
+            'description' => $this->faker->paragraph(2),
+            'status' => QuestionStatus::PUBLISHED->value,
         ];
     }
 
     /**
-     * Indicate that the question allows multiple responses.
+     * Indicate that the question has a specific status.
      */
-    public function multipleResponse(): static
+    public function withStatus(QuestionStatus $status): static
     {
         return $this->state(fn (array $attributes) => [
-            'is_multiple_response' => true,
+            'status' => $status->value,
         ]);
     }
 
     /**
-     * Indicate that the question allows single response only.
+     * Indicate that the question is a multiple choice question.
      */
-    public function singleResponse(): static
+    public function multipleChoice(): static
     {
         return $this->state(fn (array $attributes) => [
-            'is_multiple_response' => false,
+            'is_multi_choice' => true,
+        ]);
+    }
+
+    /**
+     * Indicate that the question is a true/false question.
+     */
+    public function trueFalse(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'question_type' => 'true_false',
+        ]);
+    }
+
+    /**
+     * Indicate that the question is a short answer question.
+     */
+    public function shortAnswer(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'question_type' => 'short_answer',
         ]);
     }
 }

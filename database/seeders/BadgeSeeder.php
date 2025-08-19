@@ -2,108 +2,96 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Status\BadgeStatus;
+use App\Enums\System\RoleSystem;
 use App\Models\Badge;
-use App\Models\BadgeCondition;
+use App\Models\User;
+use Database\Seeders\Contracts\HasCacheSeeder;
 use Illuminate\Database\Seeder;
 
 class BadgeSeeder extends Seeder
 {
+    use HasCacheSeeder;
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        // Create badge conditions first
-        $conditions = [
-            [
-                'name' => 'Complete 5 Courses',
-                'type' => 'course_completion',
-                'operator' => '>=',
-                'parameters' => ['course_count' => 5],
-            ],
-            [
-                'name' => 'Score 90+ on Quiz',
-                'type' => 'quiz_score',
-                'operator' => '>=',
-                'parameters' => ['min_score' => 90, 'quiz_count' => 1],
-            ],
-            [
-                'name' => 'Perfect Assignment Grade',
-                'type' => 'assignment_grade',
-                'operator' => '=',
-                'parameters' => ['min_grade' => 100, 'assignment_count' => 1],
-            ],
-            [
-                'name' => 'High Enrollment',
-                'type' => 'enrollment_count',
-                'operator' => '>=',
-                'parameters' => ['min_enrollments' => 20],
-            ],
-        ];
-
-        $createdConditions = [];
-        foreach ($conditions as $conditionData) {
-            $createdConditions[] = BadgeCondition::create($conditionData);
+        // Skip if badges already exist and cache is valid
+        if ($this->shouldSkipSeeding('badges', 'badges')) {
+            return;
         }
 
-        // Create badges
-        $badges = [
-            [
-                'title' => 'Course Master',
-                'description' => 'Awarded for completing multiple courses successfully.',
-                'award_status' => 'automatic',
-                'conditions' => [$createdConditions[0]], // Complete 5 Courses
-            ],
-            [
-                'title' => 'Quiz Champion',
-                'description' => 'Awarded for achieving excellent quiz scores.',
-                'award_status' => 'automatic',
-                'conditions' => [$createdConditions[1]], // Score 90+ on Quiz
-            ],
-            [
-                'title' => 'Perfect Student',
-                'description' => 'Awarded for perfect assignment submissions.',
-                'award_status' => 'automatic',
-                'conditions' => [$createdConditions[2]], // Perfect Assignment Grade
-            ],
-            [
-                'title' => 'Popular Teacher',
-                'description' => 'Awarded to teachers with high student enrollment.',
-                'award_status' => 'automatic',
-                'conditions' => [$createdConditions[3]], // High Enrollment
-            ],
-            [
-                'title' => 'Outstanding Achievement',
-                'description' => 'Manually awarded for exceptional performance.',
-                'award_status' => 'manual',
-                'conditions' => [],
-            ],
-            [
-                'title' => 'Academic Excellence',
-                'description' => 'Awarded for meeting multiple academic criteria.',
-                'award_status' => 'conditional',
-                'conditions' => [$createdConditions[1], $createdConditions[2]], // Quiz + Assignment
-            ],
-        ];
+        // Get or create badges with caching
+        $this->getCachedData('badges', function () {
+            // Create 8 badges
+            $badgeData = [
+                [
+                    'title' => 'First Steps',
+                    'description' => 'Complete your first course',
+                ],
+                [
+                    'title' => 'Quiz Master',
+                    'description' => 'Score 100% on 5 quizzes',
+                ],
+                [
+                    'title' => 'Assignment Ace',
+                    'description' => 'Submit 10 assignments on time',
+                ],
+                [
+                    'title' => 'Course Completionist',
+                    'description' => 'Complete 5 courses',
+                ],
+                [
+                    'title' => 'Learning Streak',
+                    'description' => 'Login for 30 consecutive days',
+                ],
+                [
+                    'title' => 'Knowledge Seeker',
+                    'description' => 'Complete 100 quiz attempts',
+                ],
+                [
+                    'title' => 'Perfect Score',
+                    'description' => 'Achieve perfect scores on 3 assignments',
+                ],
+                [
+                    'title' => 'Early Bird',
+                    'description' => 'Submit 20 assignments before deadline',
+                ],
+            ];
 
-        foreach ($badges as $badgeData) {
-            $conditions = $badgeData['conditions'];
-            unset($badgeData['conditions']);
-
-            $badge = Badge::create($badgeData);
-
-            // Attach conditions to badge
-            foreach ($conditions as $condition) {
-                $badge->conditions()->attach($condition->id);
+            $badges = collect();
+            foreach ($badgeData as $data) {
+                $badge = Badge::factory()->create([
+                    'title' => $data['title'],
+                    'description' => $data['description'],
+                    'status' => BadgeStatus::ACTIVE->value,
+                ]);
+                $badges->push($badge);
             }
-        }
 
-        // Create additional random badges and conditions
-        BadgeCondition::factory(10)->create();
-        Badge::factory(15)->create()->each(function ($badge) {
-            // Randomly attach 1-3 conditions to each badge
-            $conditions = BadgeCondition::inRandomOrder()->limit(rand(1, 3))->get();
-            $badge->conditions()->attach($conditions->pluck('id'));
+            // Get students to assign badges to
+            $students = User::role(RoleSystem::STUDENT->value)->get();
+
+            // Randomly assign badges to 50-100 students
+            $studentsToReceiveBadges = $students->random(fake()->numberBetween(50, 100));
+
+            foreach ($studentsToReceiveBadges as $student) {
+                // Each student gets 1-3 random badges
+                $studentBadges = $badges->random(fake()->numberBetween(1, 3));
+
+                foreach ($studentBadges as $badge) {
+                    // Check if student already has this badge
+                    if (! $student->badges()->where('badge_id', $badge->id)->exists()) {
+                        $student->badges()->attach($badge->id, [
+                            'earned_at' => fake()->dateTimeBetween('-3 months', 'now'),
+                            'status' => BadgeStatus::ACTIVE->value,
+                        ]);
+                    }
+                }
+            }
+
+            return true;
         });
     }
 }

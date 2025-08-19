@@ -2,293 +2,220 @@
 
 namespace App\Exceptions\Repositories;
 
+use App\Enums\HttpStatusCode;
+use Exception;
+
 /**
  * Exception for user repository-related errors.
  *
- * This exception class provides localized error messages specific to user operations.
+ * This exception class provides specialized error messages for user operations
+ * in the LMS system, including authentication, authorization, and user status checks.
  *
- * @throws UserRepositoryException When user repository operations fail
+ * @throws UserRepositoryException When user-specific repository operations fail
  */
 class UserRepositoryException extends RepositoryException
 {
     /**
-     * Create exception for user not found.
+     * The default language key for user repository exceptions.
      *
-     * @param  string|null  $reason  The failure reason
+     * @var string
      */
-    public static function userNotFound(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_userrepository.user_not_found_with_reason'
-            : 'exceptions_repositories_userrepository.user_not_found';
-
-        return new static($key, ['reason' => $reason]);
-    }
+    protected static string $defaultKey = 'exceptions.repositories.user.user_not_found';
 
     /**
      * Create exception for user not found by email.
      *
-     * @param  string  $email  The email address
-     * @param  string|null  $reason  The failure reason
+     * @param  string  $email  The user email
+     * @return static
      */
-    public static function userNotFoundByEmail(string $email, ?string $reason = null): static
+    public static function userNotFoundByEmail(string $email): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_userrepository.user_not_found_with_email_and_reason'
-            : 'exceptions_repositories_userrepository.user_not_found_with_email';
-
-        return new static($key, ['email' => $email, 'reason' => $reason]);
-    }
-
-    /**
-     * Create exception for email already exists.
-     *
-     * @param  string|null  $email  The email address
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function emailAlreadyExists(?string $email = null, ?string $reason = null): static
-    {
-        if ($reason) {
-            $key = $email
-                ? 'exceptions_repositories_userrepository.email_already_taken_with_reason'
-                : 'exceptions_repositories_userrepository.email_already_exists_with_reason';
-        } else {
-            $key = $email
-                ? 'exceptions_repositories_userrepository.email_already_taken'
-                : 'exceptions_repositories_userrepository.email_already_exists';
-        }
-
-        return new static($key, ['email' => $email, 'reason' => $reason]);
-    }
-
-    /**
-     * Create exception for invalid email format.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function invalidEmailFormat(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_userrepository.invalid_email_format_with_reason'
-            : 'exceptions_repositories_userrepository.invalid_email_format';
-
-        return new static($key, ['reason' => $reason]);
-    }
-
-    /**
-     * Create exception for weak password.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function passwordTooWeak(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_userrepository.password_too_weak_with_reason'
-            : 'exceptions_repositories_userrepository.password_too_weak';
-
-        return new static($key, ['reason' => $reason]);
-    }
-
-    /**
-     * Create exception for invalid role.
-     *
-     * @param  string|null  $role  The role name
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function invalidRole(?string $role = null, ?string $reason = null): static
-    {
-        if ($reason) {
-            $key = $role
-                ? 'exceptions_repositories_userrepository.role_not_found_with_reason'
-                : 'exceptions_repositories_userrepository.invalid_role_with_reason';
-        } else {
-            $key = $role
-                ? 'exceptions_repositories_userrepository.role_not_found'
-                : 'exceptions_repositories_userrepository.invalid_role';
-        }
-
-        return new static($key, ['role' => $role, 'reason' => $reason]);
-    }
-
-    /**
-     * Create exception for user already has role.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function userAlreadyHasRole(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_userrepository.user_already_has_role_with_reason'
-            : 'exceptions_repositories_userrepository.user_already_has_role';
-
-        return new static($key, ['reason' => $reason]);
-    }
-
-    /**
-     * Create exception for user does not have role.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function userDoesNotHaveRole(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_userrepository.user_does_not_have_role_with_reason'
-            : 'exceptions_repositories_userrepository.user_does_not_have_role';
-
-        return new static($key, ['reason' => $reason]);
-    }
-
-    /**
-     * Create exception for cannot delete admin.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function cannotDeleteAdmin(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_userrepository.cannot_delete_admin_with_reason'
-            : 'exceptions_repositories_userrepository.cannot_delete_admin';
-
-        return new static($key, ['reason' => $reason]);
-    }
-
-    /**
-     * Create exception for cannot modify own role.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function cannotModifyOwnRole(?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_userrepository.cannot_modify_own_role_with_reason'
-            : 'exceptions_repositories_userrepository.cannot_modify_own_role';
-
-        return new static($key, ['reason' => $reason]);
+        return new static(
+            'exceptions.repositories.user.user_not_found_by_email',
+            ['email' => $email],
+            HttpStatusCode::NOT_FOUND
+        );
     }
 
     /**
      * Create exception for inactive user.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string|null  $userId  The user ID
+     * @return static
      */
-    public static function userIsInactive(?string $reason = null): static
+    public static function userNotActive(?string $userId = null): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_userrepository.user_is_inactive_with_reason'
-            : 'exceptions_repositories_userrepository.user_is_inactive';
+        $key = $userId
+            ? 'exceptions.repositories.user.user_not_active_with_id'
+            : 'exceptions.repositories.user.user_not_active';
 
-        return new static($key, ['reason' => $reason]);
+        return new static($key, ['id' => $userId], HttpStatusCode::FORBIDDEN);
+    }
+
+    /**
+     * Create exception for banned user.
+     *
+     * @param  string|null  $userId  The user ID
+     * @return static
+     */
+    public static function userBanned(?string $userId = null): static
+    {
+        $key = $userId
+            ? 'exceptions.repositories.user.user_banned_with_id'
+            : 'exceptions.repositories.user.user_banned';
+
+        return new static($key, ['id' => $userId], HttpStatusCode::FORBIDDEN);
     }
 
     /**
      * Create exception for suspended user.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string|null  $userId  The user ID
+     * @return static
      */
-    public static function userIsSuspended(?string $reason = null): static
+    public static function userSuspended(?string $userId = null): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_userrepository.user_is_suspended_with_reason'
-            : 'exceptions_repositories_userrepository.user_is_suspended';
+        $key = $userId
+            ? 'exceptions.repositories.user.user_suspended_with_id'
+            : 'exceptions.repositories.user.user_suspended';
 
-        return new static($key, ['reason' => $reason]);
+        return new static($key, ['id' => $userId], HttpStatusCode::FORBIDDEN);
     }
 
     /**
-     * Create exception for invalid user status.
+     * Create exception for invalid credentials.
      *
-     * @param  string|null  $reason  The failure reason
+     * @return static
      */
-    public static function invalidUserStatus(?string $reason = null): static
+    public static function invalidCredentials(): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_userrepository.invalid_user_status_with_reason'
-            : 'exceptions_repositories_userrepository.invalid_user_status';
-
-        return new static($key, ['reason' => $reason]);
+        return new static(
+            'exceptions.repositories.user.invalid_credentials',
+            [],
+            HttpStatusCode::UNAUTHORIZED
+        );
     }
 
     /**
-     * Create exception for user has active enrollments.
+     * Create exception for insufficient permissions.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string|null  $action  The action being attempted
+     * @return static
      */
-    public static function userHasActiveEnrollments(?string $reason = null): static
+    public static function insufficientPermissions(?string $action = null): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_userrepository.user_has_active_enrollments_with_reason'
-            : 'exceptions_repositories_userrepository.user_has_active_enrollments';
+        $key = $action
+            ? 'exceptions.repositories.user.insufficient_permissions_with_action'
+            : 'exceptions.repositories.user.insufficient_permissions';
 
-        return new static($key, ['reason' => $reason]);
+        return new static($key, ['action' => $action], HttpStatusCode::FORBIDDEN);
     }
 
     /**
-     * Create exception for user has pending assignments.
+     * Create exception for user not enrolled in course.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string  $userId  The user ID
+     * @param  string  $courseId  The course ID
+     * @return static
      */
-    public static function userHasPendingAssignments(?string $reason = null): static
+    public static function notEnrolledInCourse(string $userId, string $courseId): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_userrepository.user_has_pending_assignments_with_reason'
-            : 'exceptions_repositories_userrepository.user_has_pending_assignments';
-
-        return new static($key, ['reason' => $reason]);
+        return new static(
+            'exceptions.repositories.user.not_enrolled_in_course',
+            ['user_id' => $userId, 'course_id' => $courseId],
+            HttpStatusCode::FORBIDDEN
+        );
     }
 
     /**
-     * Create exception for instructor has active courses.
+     * Create exception for user not teaching course.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string  $userId  The user ID
+     * @param  string  $courseId  The course ID
+     * @return static
      */
-    public static function instructorHasActiveCourses(?string $reason = null): static
+    public static function notTeachingCourse(string $userId, string $courseId): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_userrepository.instructor_has_active_courses_with_reason'
-            : 'exceptions_repositories_userrepository.instructor_has_active_courses';
-
-        return new static($key, ['reason' => $reason]);
+        return new static(
+            'exceptions.repositories.user.not_teaching_course',
+            ['user_id' => $userId, 'course_id' => $courseId],
+            HttpStatusCode::FORBIDDEN
+        );
     }
 
     /**
-     * Create exception for create user failed.
+     * Create exception for user not managing course.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string  $userId  The user ID
+     * @param  string  $courseId  The course ID
+     * @return static
      */
-    public static function createUserFailed(?string $reason = null): static
+    public static function notManagingCourse(string $userId, string $courseId): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_userrepository.create_user_failed_with_reason'
-            : 'exceptions_repositories_userrepository.create_user_failed';
-
-        return new static($key, ['reason' => $reason]);
+        return new static(
+            'exceptions.repositories.user.not_managing_course',
+            ['user_id' => $userId, 'course_id' => $courseId],
+            HttpStatusCode::FORBIDDEN
+        );
     }
 
     /**
-     * Create exception for update user failed.
+     * Create exception for avatar upload failure.
      *
      * @param  string|null  $reason  The failure reason
+     * @return static
      */
-    public static function updateUserFailed(?string $reason = null): static
+    public static function avatarUploadFailed(?string $reason = null): static
     {
         $key = $reason
-            ? 'exceptions_repositories_userrepository.update_user_failed_with_reason'
-            : 'exceptions_repositories_userrepository.update_user_failed';
+            ? 'exceptions.repositories.user.avatar_upload_failed_with_reason'
+            : 'exceptions.repositories.user.avatar_upload_failed';
 
-        return new static($key, ['reason' => $reason]);
+        return new static($key, ['reason' => $reason], HttpStatusCode::BAD_REQUEST);
     }
 
     /**
-     * Create exception for delete user failed.
+     * Create exception for avatar not found.
+     *
+     * @param  string  $userId  The user ID
+     * @return static
+     */
+    public static function avatarNotFound(string $userId): static
+    {
+        return new static(
+            'exceptions.repositories.user.avatar_not_found',
+            ['user_id' => $userId],
+            HttpStatusCode::NOT_FOUND
+        );
+    }
+
+    /**
+     * Create exception for email already exists.
+     *
+     * @param  string  $email  The email address
+     * @return static
+     */
+    public static function emailAlreadyExists(string $email): static
+    {
+        return new static(
+            'exceptions.repositories.user.email_already_exists',
+            ['email' => $email],
+            HttpStatusCode::CONFLICT
+        );
+    }
+
+    /**
+     * Create exception for role assignment failure.
      *
      * @param  string|null  $reason  The failure reason
+     * @return static
      */
-    public static function deleteUserFailed(?string $reason = null): static
+    public static function roleAssignmentFailed(?string $reason = null): static
     {
         $key = $reason
-            ? 'exceptions_repositories_userrepository.delete_user_failed_with_reason'
-            : 'exceptions_repositories_userrepository.delete_user_failed';
+            ? 'exceptions.repositories.user.role_assignment_failed_with_reason'
+            : 'exceptions.repositories.user.role_assignment_failed';
 
-        return new static($key, ['reason' => $reason]);
+        return new static($key, ['reason' => $reason], HttpStatusCode::BAD_REQUEST);
     }
 }

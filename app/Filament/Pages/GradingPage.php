@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\Assignment;
 use App\Models\Course;
 use App\Models\Submission;
+use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -12,16 +13,17 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Livewire\WithPagination;
+use UnitEnum;
 
 class GradingPage extends Page
 {
     use WithPagination, HasPageShield;
 
     // --- Page Configuration ---
-    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-academic-cap';
     protected static ?string $navigationLabel = 'Bài tập của học sinh';
-    protected static ?string $navigationGroup = 'Quản lý Giảng dạy';
-    protected static string $view = 'filament.pages.grading-page';
+    protected static UnitEnum|string|null $navigationGroup = 'Quản lý Giảng dạy';
+    protected string $view = 'filament.pages.grading-page';
     protected static ?string $slug = 'grading';
     protected static ?string $title = 'Chấm điểm bài tập';
 
@@ -97,7 +99,7 @@ class GradingPage extends Page
         $this->filter = $filter;
         $this->resetPage();
     }
-    
+
     public function openInstructionsModal(string $assignmentId): void
     {
         $this->selectedAssignment = Assignment::with('course')->find($assignmentId);
@@ -126,7 +128,7 @@ class GradingPage extends Page
         }
 
         $this->submissions = $this->selectedAssignment->submissions()->with('student')->get();
-        
+
         // Khởi tạo giá trị điểm và feedback cho form
         $this->grades = $this->submissions->pluck('grade', 'id')->toArray();
         // Lấy feedback của giáo viên từ trong mảng feedback
@@ -142,7 +144,7 @@ class GradingPage extends Page
         $this->submissions = [];
         $this->reset('grades', 'feedbackNotes');
     }
-    
+
     /**
      * Lưu điểm và phản hồi cho một bài nộp cụ thể.
      * Cập nhật: Cập nhật phản hồi của giáo viên vào trong cấu trúc JSON của cột 'feedback'
@@ -155,7 +157,7 @@ class GradingPage extends Page
             Notification::make()->title('Lỗi')->body('Không tìm thấy bài nộp.')->danger()->send();
             return;
         }
-        
+
         $grade = $this->grades[$submissionId] ?? null;
         $teacherFeedback = $this->feedbackNotes[$submissionId] ?? '';
 

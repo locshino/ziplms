@@ -56,6 +56,11 @@ interface PermissionServiceInterface extends BaseServiceInterface
     public function getExistingCustomPermissions(): \Illuminate\Support\Collection;
 
     /**
+     * Ensure a permission exists, create it if it doesn't.
+     */
+    public function ensurePermissionExists(string $permissionName, ?string $guardName = null): \App\Models\Permission;
+
+    /**
      * Validate permission data structure.
      */
     public function validatePermissionStructure(array $permissionData): bool;

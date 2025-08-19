@@ -2,511 +2,219 @@
 
 namespace App\Exceptions\Repositories;
 
+use App\Enums\HttpStatusCode;
+use Exception;
+
 /**
- * Assignment repository exception class.
+ * Exception for assignment repository-related errors.
  *
- * Handles assignment-specific repository exceptions with localized messages.
+ * This exception class provides specialized error messages for assignment operations
+ * in the LMS system, including assignment access, submissions, and status management.
+ *
+ * @throws AssignmentRepositoryException When assignment-specific repository operations fail
  */
 class AssignmentRepositoryException extends RepositoryException
 {
     /**
-     * Assignment not found exception.
+     * The default language key for assignment repository exceptions.
      *
-     * @param  string|null  $reason  The failure reason
+     * @var string
      */
-    public static function notFound(?string $id = null, ?string $reason = null): static
+    protected static string $defaultKey = 'exceptions.repositories.assignment.assignment_not_found';
+
+    /**
+     * Create exception for assignment not published.
+     *
+     * @param  string|null  $assignmentId  The assignment ID
+     * @return static
+     */
+    public static function notPublished(?string $assignmentId = null): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.not_found_with_reason'
-            : 'exceptions_repositories_assignmentrepository.not_found';
+        $key = $assignmentId
+            ? 'exceptions.repositories.assignment.assignment_not_published_with_id'
+            : 'exceptions.repositories.assignment.assignment_not_published';
 
-        if ($reason) {
-            $replace['reason'] = $reason;
-        }
-
-        if ($id) {
-            $replace['id'] = $id;
-        }
-
-        return new static($key, $replace, 404);
+        return new static($key, ['id' => $assignmentId], HttpStatusCode::FORBIDDEN);
     }
 
     /**
-     * Assignment not found by ID exception.
+     * Create exception for assignment not available.
      *
-     * @param  string  $id  The assignment ID
-     * @param  string|null  $reason  The failure reason
+     * @param  string|null  $assignmentId  The assignment ID
+     * @return static
      */
-    public static function notFoundById(string $id, ?string $reason = null): self
+    public static function notAvailable(?string $assignmentId = null): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.not_found_by_id_with_reason'
-            : 'exceptions_repositories_assignmentrepository.not_found_by_id';
+        $key = $assignmentId
+            ? 'exceptions.repositories.assignment.assignment_not_available_with_id'
+            : 'exceptions.repositories.assignment.assignment_not_available';
 
-        return new static($key, ['id' => $id, 'reason' => $reason], 404);
+        return new static($key, ['id' => $assignmentId], HttpStatusCode::FORBIDDEN);
     }
 
     /**
-     * No assignments found for course exception.
+     * Create exception for assignment not started.
      *
-     * @param  string  $course  The course identifier
-     * @param  string|null  $reason  The failure reason
+     * @param  string|null  $assignmentId  The assignment ID
+     * @return static
      */
-    public static function notFoundByCourse(string $course, ?string $reason = null): self
+    public static function notStarted(?string $assignmentId = null): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.not_found_by_course_with_reason'
-            : 'exceptions_repositories_assignmentrepository.not_found_by_course';
+        $key = $assignmentId
+            ? 'exceptions.repositories.assignment.assignment_not_started_with_id'
+            : 'exceptions.repositories.assignment.assignment_not_started';
 
-        return new static($key, ['course' => $course, 'reason' => $reason], 404);
+        return new static($key, ['id' => $assignmentId], HttpStatusCode::FORBIDDEN);
     }
 
     /**
-     * Invalid course ID exception.
+     * Create exception for assignment ended.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string|null  $assignmentId  The assignment ID
+     * @return static
      */
-    public static function invalidCourse(?string $reason = null): self
+    public static function ended(?string $assignmentId = null): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.invalid_course_with_reason'
-            : 'exceptions_repositories_assignmentrepository.invalid_course';
+        $key = $assignmentId
+            ? 'exceptions.repositories.assignment.assignment_ended_with_id'
+            : 'exceptions.repositories.assignment.assignment_ended';
 
-        return new static($key, ['reason' => $reason], 400);
+        return new static($key, ['id' => $assignmentId], HttpStatusCode::FORBIDDEN);
     }
 
     /**
-     * Invalid student ID exception.
+     * Create exception for submission not found.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string|null  $submissionId  The submission ID
+     * @return static
      */
-    public static function invalidStudent(?string $reason = null): self
+    public static function submissionNotFound(?string $submissionId = null): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.invalid_student_with_reason'
-            : 'exceptions_repositories_assignmentrepository.invalid_student';
+        $key = $submissionId
+            ? 'exceptions.repositories.assignment.submission_not_found_with_id'
+            : 'exceptions.repositories.assignment.submission_not_found';
 
-        return new static($key, ['reason' => $reason], 400);
+        return new static($key, ['id' => $submissionId], HttpStatusCode::NOT_FOUND);
     }
 
     /**
-     * Invalid assignment data exception.
+     * Create exception for submission already exists.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string  $assignmentId  The assignment ID
+     * @param  string  $studentId  The student ID
+     * @return static
      */
-    public static function invalidAssignmentData(?string $reason = null): self
+    public static function submissionAlreadyExists(string $assignmentId, string $studentId): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.invalid_assignment_data_with_reason'
-            : 'exceptions_repositories_assignmentrepository.invalid_assignment_data';
-
-        return new static($key, ['reason' => $reason], 400);
+        return new static(
+            'exceptions.repositories.assignment.submission_already_exists',
+            ['assignment_id' => $assignmentId, 'student_id' => $studentId],
+            HttpStatusCode::CONFLICT
+        );
     }
 
     /**
-     * Assignment title required exception.
+     * Create exception for submission already graded.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string  $submissionId  The submission ID
+     * @return static
      */
-    public static function titleRequired(?string $reason = null): self
+    public static function submissionAlreadyGraded(string $submissionId): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.title_required_with_reason'
-            : 'exceptions_repositories_assignmentrepository.title_required';
-
-        return new static($key, ['reason' => $reason], 400);
+        return new static(
+            'exceptions.repositories.assignment.submission_already_graded',
+            ['submission_id' => $submissionId],
+            HttpStatusCode::CONFLICT
+        );
     }
 
     /**
-     * Assignment title too long exception.
+     * Create exception for submission not graded.
      *
-     * @param  int  $max  The maximum length
-     * @param  string|null  $reason  The failure reason
+     * @param  string  $submissionId  The submission ID
+     * @return static
      */
-    public static function titleTooLong(int $max, ?string $reason = null): self
+    public static function submissionNotGraded(string $submissionId): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.title_too_long_with_reason'
-            : 'exceptions_repositories_assignmentrepository.title_too_long';
-
-        return new static($key, ['max' => $max, 'reason' => $reason], 400);
+        return new static(
+            'exceptions.repositories.assignment.submission_not_graded',
+            ['submission_id' => $submissionId],
+            HttpStatusCode::BAD_REQUEST
+        );
     }
 
     /**
-     * Assignment description required exception.
+     * Create exception for late submission.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string  $assignmentId  The assignment ID
+     * @return static
      */
-    public static function descriptionRequired(?string $reason = null): self
+    public static function lateSubmission(string $assignmentId): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.description_required_with_reason'
-            : 'exceptions_repositories_assignmentrepository.description_required';
-
-        return new static($key, ['reason' => $reason], 400);
+        return new static(
+            'exceptions.repositories.assignment.late_submission',
+            ['assignment_id' => $assignmentId],
+            HttpStatusCode::FORBIDDEN
+        );
     }
 
     /**
-     * Invalid due date exception.
+     * Create exception for file upload failure.
      *
      * @param  string|null  $reason  The failure reason
+     * @return static
      */
-    public static function invalidDueDate(?string $reason = null): self
+    public static function fileUploadFailed(?string $reason = null): static
     {
         $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.invalid_due_date_with_reason'
-            : 'exceptions_repositories_assignmentrepository.invalid_due_date';
+            ? 'exceptions.repositories.assignment.file_upload_failed_with_reason'
+            : 'exceptions.repositories.assignment.file_upload_failed';
 
-        return new static($key, ['reason' => $reason], 400);
+        return new static($key, ['reason' => $reason], HttpStatusCode::BAD_REQUEST);
     }
 
     /**
-     * Invalid end date exception.
+     * Create exception for grading failure.
      *
      * @param  string|null  $reason  The failure reason
+     * @return static
      */
-    public static function invalidEndDate(?string $reason = null): self
+    public static function gradingFailed(?string $reason = null): static
     {
         $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.invalid_end_date_with_reason'
-            : 'exceptions_repositories_assignmentrepository.invalid_end_date';
+            ? 'exceptions.repositories.assignment.grading_failed_with_reason'
+            : 'exceptions.repositories.assignment.grading_failed';
 
-        return new static($key, ['reason' => $reason], 400);
+        return new static($key, ['reason' => $reason], HttpStatusCode::BAD_REQUEST);
     }
 
     /**
-     * Due date in past exception.
+     * Create exception for statistics calculation failure.
      *
      * @param  string|null  $reason  The failure reason
+     * @return static
      */
-    public static function dueDatePast(?string $reason = null): self
+    public static function statisticsCalculationFailed(?string $reason = null): static
     {
         $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.due_date_past_with_reason'
-            : 'exceptions_repositories_assignmentrepository.due_date_past';
+            ? 'exceptions.repositories.assignment.statistics_calculation_failed_with_reason'
+            : 'exceptions.repositories.assignment.statistics_calculation_failed';
 
-        return new static($key, ['reason' => $reason], 400);
+        return new static($key, ['reason' => $reason], HttpStatusCode::INTERNAL_SERVER_ERROR);
     }
 
     /**
-     * End date before due date exception.
+     * Create exception for insufficient permissions.
      *
-     * @param  string|null  $reason  The failure reason
+     * @param  string|null  $action  The action being attempted
+     * @return static
      */
-    public static function endDateBeforeDue(?string $reason = null): self
+    public static function insufficientPermissions(?string $action = null): static
     {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.end_date_before_due_with_reason'
-            : 'exceptions_repositories_assignmentrepository.end_date_before_due';
+        $key = $action
+            ? 'exceptions.repositories.assignment.insufficient_permissions_with_action'
+            : 'exceptions.repositories.assignment.insufficient_permissions';
 
-        return new static($key, ['reason' => $reason], 400);
-    }
-
-    /**
-     * Invalid maximum score exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function invalidMaxScore(?string $reason = null): self
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.invalid_max_score_with_reason'
-            : 'exceptions_repositories_assignmentrepository.invalid_max_score';
-
-        return new static($key, ['reason' => $reason], 400);
-    }
-
-    /**
-     * Negative maximum score exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function maxScoreNegative(?string $reason = null): self
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.max_score_negative_with_reason'
-            : 'exceptions_repositories_assignmentrepository.max_score_negative';
-
-        return new static($key, ['reason' => $reason], 400);
-    }
-
-    /**
-     * Assignment already published exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function assignmentPublished(?string $reason = null): self
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.assignment_published_with_reason'
-            : 'exceptions_repositories_assignmentrepository.assignment_published';
-
-        return new static($key, ['reason' => $reason], 409);
-    }
-
-    /**
-     * Assignment not published exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function assignmentNotPublished(?string $reason = null): self
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.assignment_not_published_with_reason'
-            : 'exceptions_repositories_assignmentrepository.assignment_not_published';
-
-        return new static($key, ['reason' => $reason], 409);
-    }
-
-    /**
-     * Assignment has submissions exception.
-     */
-    public static function assignmentHasSubmissions(?string $reason = null): self
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.assignment_has_submissions_with_reason'
-            : 'exceptions_repositories_assignmentrepository.assignment_has_submissions';
-
-        return new static($key, ['reason' => $reason], 409);
-    }
-
-    /**
-     * Assignment overdue exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function assignmentOverdue(?string $reason = null): self
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.assignment_overdue_with_reason'
-            : 'exceptions_repositories_assignmentrepository.assignment_overdue';
-
-        return new static($key, ['reason' => $reason], 409);
-    }
-
-    /**
-     * Assignment not available exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function assignmentNotAvailable(?string $reason = null): self
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.assignment_not_available_with_reason'
-            : 'exceptions_repositories_assignmentrepository.assignment_not_available';
-
-        return new static($key, ['reason' => $reason], 409);
-    }
-
-    /**
-     * Submission period ended exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function submissionPeriodEnded(?string $reason = null): self
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.submission_period_ended_with_reason'
-            : 'exceptions_repositories_assignmentrepository.submission_period_ended';
-
-        return new static($key, ['reason' => $reason], 409);
-    }
-
-    /**
-     * Invalid assignment status exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function invalidStatus(?string $reason = null): self
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.invalid_status_with_reason'
-            : 'exceptions_repositories_assignmentrepository.invalid_status';
-
-        return new static($key, ['reason' => $reason], 400);
-    }
-
-    /**
-     * Duplicate assignment title exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function duplicateTitle(?string $reason = null): self
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.duplicate_title_with_reason'
-            : 'exceptions_repositories_assignmentrepository.duplicate_title';
-
-        return new static($key, ['reason' => $reason], 409);
-    }
-
-    /**
-     * Course not found for assignment exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function courseNotFound(?string $reason = null): self
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.course_not_found_with_reason'
-            : 'exceptions_repositories_assignmentrepository.course_not_found';
-
-        return new static($key, ['reason' => $reason], 404);
-    }
-
-    /**
-     * Instructor mismatch exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function instructorMismatch(?string $reason = null): self
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.instructor_mismatch_with_reason'
-            : 'exceptions_repositories_assignmentrepository.instructor_mismatch';
-
-        return new static($key, ['reason' => $reason], 409);
-    }
-
-    /**
-     * Student not enrolled exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function studentNotEnrolled(?string $reason = null): self
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.student_not_enrolled_with_reason'
-            : 'exceptions_repositories_assignmentrepository.student_not_enrolled';
-
-        return new static($key, ['reason' => $reason], 403);
-    }
-
-    /**
-     * Grading error exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function gradingError(?string $reason = null): self
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.grading_error_with_reason'
-            : 'exceptions_repositories_assignmentrepository.grading_error';
-
-        return new static($key, ['reason' => $reason], 500);
-    }
-
-    /**
-     * Submission not found exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function submissionNotFound(?string $reason = null): self
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.submission_not_found_with_reason'
-            : 'exceptions_repositories_assignmentrepository.submission_not_found';
-
-        return new static($key, ['reason' => $reason], 404);
-    }
-
-    /**
-     * Create assignment failed exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function createFailed(?string $reason = null): self
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.create_failed_with_reason'
-            : 'exceptions_repositories_assignmentrepository.create_failed';
-
-        return new static($key, ['reason' => $reason], 500);
-    }
-
-    /**
-     * Update assignment failed exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function updateFailed(?string $id = null, ?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.update_failed_with_reason'
-            : 'exceptions_repositories_assignmentrepository.update_failed';
-
-        if ($reason) {
-            $replace['reason'] = $reason;
-        }
-
-        if ($id) {
-            $replace['id'] = $id;
-        }
-
-        return new static($key, $replace, 500);
-    }
-
-    /**
-     * Delete assignment failed exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function deleteFailed(?string $id = null, ?string $reason = null): static
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.delete_failed_with_reason'
-            : 'exceptions_repositories_assignmentrepository.delete_failed';
-
-        if ($reason) {
-            $replace['reason'] = $reason;
-        }
-
-        if ($id) {
-            $replace['id'] = $id;
-        }
-
-        return new static($key, $replace, 500);
-    }
-
-    /**
-     * Publish assignment failed exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function publishFailed(?string $reason = null): self
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.publish_failed_with_reason'
-            : 'exceptions_repositories_assignmentrepository.publish_failed';
-
-        return new static($key, ['reason' => $reason], 500);
-    }
-
-    /**
-     * Unpublish assignment failed exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function unpublishFailed(?string $reason = null): self
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.unpublish_failed_with_reason'
-            : 'exceptions_repositories_assignmentrepository.unpublish_failed';
-
-        return new static($key, ['reason' => $reason], 500);
-    }
-
-    /**
-     * Database error exception.
-     *
-     * @param  string|null  $reason  The failure reason
-     */
-    public static function databaseError(?string $reason = null): self
-    {
-        $key = $reason
-            ? 'exceptions_repositories_assignmentrepository.database_error_with_reason'
-            : 'exceptions_repositories_assignmentrepository.database_error';
-
-        return new static($key, ['reason' => $reason], 500);
+        return new static($key, ['action' => $action], HttpStatusCode::FORBIDDEN);
     }
 }

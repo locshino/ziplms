@@ -2,17 +2,67 @@
 
 namespace App\Models;
 
+use App\Enums\Status\QuizStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use OwenIt\Auditing\Auditable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Promethys\Revive\Concerns\Recyclable;
+use Spatie\Tags\HasTags;
 
-class Quiz extends Model
+/**
+ * @property string $id
+ * @property string $title
+ * @property string|null $description
+ * @property int|null $max_attempts
+ * @property bool $is_single_session
+ * @property int|null $time_limit_minutes
+ * @property QuizStatus $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\QuizAttempt> $attempts
+ * @property-read int|null $attempts_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Audit> $audits
+ * @property-read int|null $audits_count
+ * @property-read \App\Models\QuizQuestion|\App\Models\CourseQuiz|null $pivot
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Course> $courses
+ * @property-read int|null $courses_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Question> $questions
+ * @property-read int|null $questions_count
+ * @property \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tag> $tags
+ * @property-read int|null $tags_count
+ * @method static \Database\Factories\QuizFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz whereIsSingleSession($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz whereMaxAttempts($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz whereTimeLimitMinutes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz withAllTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz withAllTagsOfAnyType($tags)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz withAnyTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz withAnyTagsOfAnyType($tags)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz withAnyTagsOfType(array|string $type)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz withoutTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz withoutTrashed()
+ * @mixin \Eloquent
+ */
+class Quiz extends Model implements AuditableContract
 {
-    use HasFactory, HasUuids, Recyclable, SoftDeletes;
+    use HasFactory, HasTags, HasUuids, SoftDeletes, Auditable;
 
     /**
      * The attributes that are mass assignable.
@@ -20,15 +70,12 @@ class Quiz extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'course_id',
         'title',
         'description',
-        'max_points',
         'max_attempts',
         'is_single_session',
         'time_limit_minutes',
-        'start_at',
-        'end_at',
+        'status',
     ];
 
     /**
@@ -39,66 +86,34 @@ class Quiz extends Model
     protected function casts(): array
     {
         return [
-            'max_points' => 'decimal:2',
             'max_attempts' => 'integer',
             'is_single_session' => 'boolean',
             'time_limit_minutes' => 'integer',
-            'start_at' => 'datetime',
-            'end_at' => 'datetime',
+            'status' => QuizStatus::class,
         ];
     }
 
-    /**
-     * Get the course that owns the quiz.
-     */
-    public function course(): BelongsTo
+    // Course relationships
+    public function courses(): BelongsToMany
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsToMany(Course::class, 'course_quizzes')
+            ->using(CourseQuiz::class)
+            ->withPivot('id', 'start_at', 'end_at')
+            ->withTimestamps();
     }
 
-    /**
-     * Get the questions for the quiz.
-     */
-    public function questions(): HasMany
+    // Question relationships
+    public function questions(): BelongsToMany
     {
-        return $this->hasMany(Question::class);
+        return $this->belongsToMany(Question::class, 'quiz_questions')
+            ->using(QuizQuestion::class)
+            ->withPivot('id', 'points')
+            ->withTimestamps();
     }
 
-    /**
-     * Get the quiz attempts for the quiz.
-     */
+    // Quiz attempt relationships
     public function attempts(): HasMany
     {
         return $this->hasMany(QuizAttempt::class);
-    }
-
-    /**
-     * Determine if the quiz is currently active.
-     */
-    public function getIsActiveAttribute(): bool
-    {
-        $now = now();
-
-        // If no start time is set, consider it active
-        if (! $this->start_at) {
-            return ! $this->end_at || $now->lte($this->end_at);
-        }
-
-        // If no end time is set, check if it has started
-        if (! $this->end_at) {
-            return $now->gte($this->start_at);
-        }
-
-        // Check if current time is between start and end
-        return $now->gte($this->start_at) && $now->lte($this->end_at);
-    }
-
-    /**
-     * Determine if the quiz is published and available.
-     */
-    public function getIsPublishedAttribute(): bool
-    {
-        // A quiz is published if it's active (within time bounds)
-        return $this->is_active;
     }
 }
