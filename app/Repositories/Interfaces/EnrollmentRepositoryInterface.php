@@ -46,4 +46,19 @@ interface EnrollmentRepositoryInterface extends EloquentRepositoryInterface
      * Lấy đăng ký với thông tin chi tiết
      */
     public function getEnrollmentWithDetails(int $enrollmentId): ?Enrollment;
+
+    /**
+     * Delete enrollment by student and course
+     */
+    public function deleteEnrollment(int $studentId, int $courseId): bool;
+
+    /**
+     * Get enrolled user IDs for a course
+     */
+    public function getEnrolledUserIds(string $courseId): Collection;
+
+    /**
+     * Get user enrollments excluding a specific course
+     */
+    public function getUserEnrollmentsExcludingCourse(int $userId, int $excludeCourseId): Collection;
 }

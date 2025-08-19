@@ -2,9 +2,8 @@
 
 namespace App\Policies;
 
-use App\Libs\Roles\RoleHelper;
-use App\Models\Quiz;
 use App\Models\User;
+use App\Models\Quiz;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class QuizPolicy
@@ -16,7 +15,7 @@ class QuizPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_quiz');
+        return $user->can('view_any_quizzes::quiz');
     }
 
     /**
@@ -24,22 +23,7 @@ class QuizPolicy
      */
     public function view(User $user, Quiz $quiz): bool
     {
-        // Super admin and admin can view all quizzes
-        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
-            return true;
-        }
-
-        // Teachers can view quizzes in courses they teach
-        if (RoleHelper::isTeacher($user) && $quiz->course && $quiz->course->teachers()->where('user_id', $user->id)->exists()) {
-            return true;
-        }
-
-        // Students can view quizzes in courses they are enrolled in
-        if (RoleHelper::isStudent($user) && $quiz->course && $quiz->course->enrollments()->where('user_id', $user->id)->exists()) {
-            return true;
-        }
-
-        return $user->can('view_quiz');
+        return $user->can('view_quizzes::quiz');
     }
 
     /**
@@ -47,7 +31,7 @@ class QuizPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_quiz');
+        return $user->can('create_quizzes::quiz');
     }
 
     /**
@@ -55,17 +39,7 @@ class QuizPolicy
      */
     public function update(User $user, Quiz $quiz): bool
     {
-        // Super admin and admin can update all quizzes
-        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
-            return $user->can('update_quiz');
-        }
-
-        // Teachers can update quizzes in courses they teach
-        if (RoleHelper::isTeacher($user) && $quiz->course && $quiz->course->teachers()->where('user_id', $user->id)->exists()) {
-            return $user->can('update_quiz');
-        }
-
-        return $user->can('update_quiz');
+        return $user->can('update_quizzes::quiz');
     }
 
     /**
@@ -73,17 +47,7 @@ class QuizPolicy
      */
     public function delete(User $user, Quiz $quiz): bool
     {
-        // Super admin and admin can delete all quizzes
-        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
-            return $user->can('delete_quiz');
-        }
-
-        // Teachers can delete quizzes in courses they teach
-        if (RoleHelper::isTeacher($user) && $quiz->course && $quiz->course->teachers()->where('user_id', $user->id)->exists()) {
-            return $user->can('delete_quiz');
-        }
-
-        return false;
+        return $user->can('delete_quizzes::quiz');
     }
 
     /**
@@ -91,7 +55,7 @@ class QuizPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_quiz');
+        return $user->can('delete_any_quizzes::quiz');
     }
 
     /**
@@ -99,7 +63,7 @@ class QuizPolicy
      */
     public function forceDelete(User $user, Quiz $quiz): bool
     {
-        return $user->can('force_delete_quiz');
+        return $user->can('force_delete_quizzes::quiz');
     }
 
     /**
@@ -107,7 +71,7 @@ class QuizPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_quiz');
+        return $user->can('force_delete_any_quizzes::quiz');
     }
 
     /**
@@ -115,7 +79,7 @@ class QuizPolicy
      */
     public function restore(User $user, Quiz $quiz): bool
     {
-        return $user->can('restore_quiz');
+        return $user->can('restore_quizzes::quiz');
     }
 
     /**
@@ -123,7 +87,7 @@ class QuizPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_quiz');
+        return $user->can('restore_any_quizzes::quiz');
     }
 
     /**
@@ -131,7 +95,7 @@ class QuizPolicy
      */
     public function replicate(User $user, Quiz $quiz): bool
     {
-        return $user->can('replicate_quiz');
+        return $user->can('replicate_quizzes::quiz');
     }
 
     /**
@@ -139,20 +103,6 @@ class QuizPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_quiz');
-    }
-
-    /**
-     * Determine whether the user can take the quiz.
-     */
-    public function take(User $user, Quiz $quiz): bool
-    {
-        // Check if user is a student
-        if (! $user->hasRole('student')) {
-            return false;
-        }
-
-        // Check if user is enrolled in the course
-        return $user->enrollments()->where('course_id', $quiz->course_id)->exists();
+        return $user->can('reorder_quizzes::quiz');
     }
 }

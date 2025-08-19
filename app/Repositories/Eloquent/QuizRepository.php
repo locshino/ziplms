@@ -24,7 +24,7 @@ class QuizRepository extends EloquentRepository implements QuizRepositoryInterfa
     public function getByCourseId(string $courseId): Collection
     {
         return $this->model->where('course_id', $courseId)
-            ->with(['course', 'questions'])
+            ->with(['courses', 'questions'])
             ->get();
     }
 
@@ -33,7 +33,7 @@ class QuizRepository extends EloquentRepository implements QuizRepositoryInterfa
      */
     public function getPaginatedWithCourse(int $perPage = 15): LengthAwarePaginator
     {
-        return $this->model->with(['course'])
+        return $this->model->with(['courses'])
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
     }
@@ -50,7 +50,7 @@ class QuizRepository extends EloquentRepository implements QuizRepositoryInterfa
             'questions.answerChoices' => function ($query) {
                 $query->orderBy('created_at');
             },
-            'course',
+            'courses',
         ])->find($id);
     }
 
@@ -61,10 +61,12 @@ class QuizRepository extends EloquentRepository implements QuizRepositoryInterfa
     {
         // Get all quizzes for enrolled courses and filter by is_active in PHP
         // since is_active is a computed attribute
-        $quizzes = $this->model->whereHas('course.enrollments', function ($query) use ($studentId) {
-            $query->where('student_id', $studentId);
+        $quizzes = $this->model->whereHas('courses', function ($query) use ($studentId) {
+            $query->whereHas('users', function ($q) use ($studentId) {
+                $q->where('users.id', $studentId)->whereNull('users.deleted_at');
+            })->whereNull('courses.deleted_at');
         })
-            ->with(['course'])
+            ->with(['courses'])
             ->get();
 
         // Filter by is_active attribute (computed)
@@ -80,7 +82,7 @@ class QuizRepository extends EloquentRepository implements QuizRepositoryInterfa
     {
         return $this->model
             ->whereIn('course_id', $courseIds)
-            ->with(['course'])
+            ->with(['courses'])
             ->orderBy('created_at', 'desc')
             ->get();
     }
@@ -92,7 +94,7 @@ class QuizRepository extends EloquentRepository implements QuizRepositoryInterfa
     {
         return $this->model
             ->where('course_id', $courseId)
-            ->with(['course'])
+            ->with(['courses'])
             ->orderBy('created_at', 'desc')
             ->get();
     }
@@ -128,7 +130,7 @@ class QuizRepository extends EloquentRepository implements QuizRepositoryInterfa
      */
     public function getQuizWithQuestions(string $quizId): ?Quiz
     {
-        return $this->model->with(['questions', 'course'])->find($quizId);
+        return $this->model->with(['questions', 'courses'])->find($quizId);
     }
 
     /**
@@ -136,7 +138,7 @@ class QuizRepository extends EloquentRepository implements QuizRepositoryInterfa
      */
     public function getQuizWithAttempts(string $quizId): ?Quiz
     {
-        return $this->model->with(['attempts', 'course'])->find($quizId);
+        return $this->model->with(['attempts', 'courses'])->find($quizId);
     }
 
     /**
@@ -145,7 +147,7 @@ class QuizRepository extends EloquentRepository implements QuizRepositoryInterfa
     public function getUpcomingQuizzes(): Collection
     {
         return $this->model->where('start_at', '>', Carbon::now())
-            ->with(['course'])
+            ->with(['courses'])
             ->orderBy('start_at')
             ->get();
     }

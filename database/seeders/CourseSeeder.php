@@ -2,55 +2,61 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Status\CourseStatus;
+use App\Enums\System\RoleSystem;
 use App\Models\Course;
+use App\Models\Tag;
 use App\Models\User;
+use Database\Seeders\Contracts\HasCacheSeeder;
 use Illuminate\Database\Seeder;
 
 class CourseSeeder extends Seeder
 {
+    use HasCacheSeeder;
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        $teachers = User::role('teacher')->get();
-
-        if ($teachers->isEmpty()) {
-            $this->command->warn('No teachers found. Please run UserSeeder first.');
-
+        // Skip if courses already exist and cache is valid
+        if ($this->shouldSkipSeeding('courses', 'courses')) {
             return;
         }
 
-        $courses = [
-            [
-                'title' => 'Introduction to Programming',
-                'description' => 'Learn the fundamentals of programming using modern languages and best practices.',
-            ],
-            [
-                'title' => 'Web Development Basics',
-                'description' => 'Master HTML, CSS, and JavaScript to build modern web applications.',
-            ],
-            [
-                'title' => 'Database Design and Management',
-                'description' => 'Understand relational databases, SQL, and database optimization techniques.',
-            ],
-            [
-                'title' => 'Mobile App Development',
-                'description' => 'Create mobile applications for iOS and Android platforms.',
-            ],
-            [
-                'title' => 'Data Science Fundamentals',
-                'description' => 'Introduction to data analysis, statistics, and machine learning concepts.',
-            ],
-        ];
+        // Get or create courses with caching
+        $this->getCachedData('courses', function () {
+            // Get teachers, managers, students
+            $teachers = User::role(RoleSystem::TEACHER->value)->get();
+            $managers = User::role(RoleSystem::MANAGER->value)->get();
+            $students = User::role(RoleSystem::STUDENT->value)->get();
 
-        foreach ($courses as $courseData) {
-            Course::create(array_merge($courseData, [
-                'teacher_id' => $teachers->random()->id,
-            ]));
-        }
+            $tagNames = [
+                'Programming', 'Web Development', 'Mobile Development', 'Data Science', 'Machine Learning',
+                'Artificial Intelligence', 'Database', 'DevOps', 'Cloud Computing', 'Cybersecurity',
+                'UI/UX Design', 'Project Management', 'Business Analysis', 'Digital Marketing', 'E-commerce',
+                'Blockchain', 'IoT', 'Software Testing', 'System Administration',
+            ];
 
-        // Create additional random courses
-        Course::factory(10)->create();
+            for ($i = 1; $i <= 10; $i++) {
+                $parentCourse = Course::factory()->create([
+                    'teacher_id' => $teachers->random()->id,
+                    'status' => CourseStatus::PUBLISHED->value,
+                    'tags' => collect($tagNames)->random(rand(3, 5))->values()->all(),
+                ]);
+
+                // Assign 2 managers to each parent course
+                $courseManagers = $managers->random(2);
+                foreach ($courseManagers as $manager) {
+                    $parentCourse->users()->attach($manager->id);
+                }
+
+                // Gán học sinh vào khóa học
+                $courseStudents = $students->random(30);
+                foreach ($courseStudents as $student) {
+                    $parentCourse->users()->attach($student->id);
+                }
+            }
+            return true;
+        });
     }
 }

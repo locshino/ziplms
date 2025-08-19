@@ -155,8 +155,8 @@ class QuizService extends BaseService implements QuizServiceInterface
         try {
             $now = Carbon::now();
 
-            // Check if quiz is published
-            if (! $quiz->is_published) {
+            // Check if quiz is active
+            if (! $quiz->is_active) {
                 throw QuizServiceException::quizNotPublished();
             }
 
@@ -186,13 +186,24 @@ class QuizService extends BaseService implements QuizServiceInterface
     private function validateStudentCanTakeQuiz(Quiz $quiz, string $studentId): void
     {
         try {
-            // Check if student is enrolled in the course
-            $isEnrolled = DB::table('enrollments')
-                ->where('course_id', $quiz->course_id)
-                ->where('student_id', $studentId)
-                ->exists();
+            // Check if user is super admin or admin - they can take any quiz
+            $user = \App\Models\User::find($studentId);
+            if ($user && ($user->hasRole(['super_admin', 'admin']))) {
+                return; // Super admin and admin can take any quiz
+            }
 
-            if (! $isEnrolled) {
+            // Check if student is enrolled in the course with active status
+            $enrollment = \App\Models\Enrollment::where('course_id', $quiz->course_id)
+                ->where('student_id', $studentId)
+                ->first();
+
+            if (! $enrollment) {
+                throw QuizServiceException::quizNotActive();
+            }
+
+            // Check if enrollment has active status (using Spatie Model Status)
+            $enrollmentStatus = $enrollment->getStatusAttribute();
+            if ($enrollmentStatus !== 'active') {
                 throw QuizServiceException::quizNotActive();
             }
 
@@ -203,6 +214,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                 'quiz_id' => $quiz->id,
                 'student_id' => $studentId,
                 'error' => $e->getMessage(),
+                'enrollment_status' => isset($enrollment) ? $enrollment->getStatusAttribute() : 'not_found',
             ]);
             throw $e;
         }

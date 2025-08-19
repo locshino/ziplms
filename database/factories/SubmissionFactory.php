@@ -13,45 +13,22 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class SubmissionFactory extends Factory
 {
     /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $model = Submission::class;
-
-    /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
-        $submittedAt = $this->faker->dateTimeBetween('-1 month', 'now');
-        $isGraded = $this->faker->boolean(70);
-
         return [
             'assignment_id' => Assignment::factory(),
             'student_id' => User::factory(),
-            'grade' => $isGraded ? $this->faker->randomFloat(2, 0, 100) : null,
-            'feedback' => $isGraded ? $this->faker->optional(0.8)->paragraph() : null,
-            'submitted_at' => $submittedAt,
-            'graded_by' => $isGraded ? User::factory() : null,
-            'graded_at' => $isGraded ? $this->faker->dateTimeBetween($submittedAt, 'now') : null,
-            'version' => $this->faker->numberBetween(1, 3),
-        ];
-    }
-
-    /**
-     * Indicate that the submission is ungraded.
-     */
-    public function ungraded(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'grade' => null,
-            'feedback' => null,
+            'content' => $this->faker->paragraph(3),
+            'submitted_at' => $this->faker->dateTimeBetween('-1 month', 'now'),
+            'points' => null,
             'graded_by' => null,
             'graded_at' => null,
-        ]);
+            'feedback' => null,
+        ];
     }
 
     /**
@@ -59,11 +36,35 @@ class SubmissionFactory extends Factory
      */
     public function graded(): static
     {
+        return $this->state(function (array $attributes) {
+            $gradedAt = $this->faker->dateTimeBetween($attributes['submitted_at'], 'now');
+            
+            return [
+                'points' => $this->faker->randomFloat(2, 0, 100),
+                'graded_by' => User::factory(),
+                'graded_at' => $gradedAt,
+                'feedback' => $this->faker->paragraph(2),
+            ];
+        });
+    }
+
+    /**
+     * Indicate that the submission was submitted late.
+     */
+    public function late(): static
+    {
         return $this->state(fn (array $attributes) => [
-            'grade' => $this->faker->randomFloat(2, 0, 100),
-            'feedback' => $this->faker->paragraph(),
-            'graded_by' => User::factory(),
-            'graded_at' => $this->faker->dateTimeBetween($attributes['submitted_at'], 'now'),
+            'submitted_at' => $this->faker->dateTimeBetween('now', '+1 week'),
+        ]);
+    }
+
+    /**
+     * Indicate that the submission was submitted on time.
+     */
+    public function onTime(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'submitted_at' => $this->faker->dateTimeBetween('-1 week', 'now'),
         ]);
     }
 }
