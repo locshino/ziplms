@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enums;
+namespace App\Enums\Roles;
 
 enum RoleSystemEnum: string
 {
@@ -9,9 +9,4 @@ enum RoleSystemEnum: string
     case MANAGER = 'manager';
     case TEACHER = 'teacher';
     case STUDENT = 'student';
-
-    public function label(): string
-    {
-        return __('role_system.'.$this->value.'.label');
-    }
 }

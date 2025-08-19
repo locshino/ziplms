@@ -2,8 +2,9 @@
 
 namespace App\Policies;
 
-use App\Models\User;
+use App\Libs\Roles\RoleHelper;
 use App\Models\BadgeCondition;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class BadgeConditionPolicy
@@ -31,7 +32,12 @@ class BadgeConditionPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_badge::condition');
+        // Only super admin, admin, and manager can create badge conditions
+        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user) || RoleHelper::isManager($user)) {
+            return $user->can('create_badge::condition');
+        }
+
+        return false;
     }
 
     /**
@@ -39,7 +45,12 @@ class BadgeConditionPolicy
      */
     public function update(User $user, BadgeCondition $badgeCondition): bool
     {
-        return $user->can('update_badge::condition');
+        // Only super admin, admin, and manager can update badge conditions
+        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user) || RoleHelper::isManager($user)) {
+            return $user->can('update_badge::condition');
+        }
+
+        return false;
     }
 
     /**
@@ -47,7 +58,12 @@ class BadgeConditionPolicy
      */
     public function delete(User $user, BadgeCondition $badgeCondition): bool
     {
-        return $user->can('delete_badge::condition');
+        // Only super admin and admin can delete badge conditions
+        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
+            return $user->can('delete_badge::condition');
+        }
+
+        return false;
     }
 
     /**

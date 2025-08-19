@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Libs\Roles\RoleHelper;
 use App\Models\User;
 use App\Models\UserBadge;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -23,6 +24,16 @@ class UserBadgePolicy
      */
     public function view(User $user, UserBadge $userBadge): bool
     {
+        // Super admin and admin can view all user badges
+        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
+            return true;
+        }
+
+        // Users can view their own badges
+        if ($userBadge->user_id === $user->id) {
+            return true;
+        }
+
         return $user->can('view_user::badge');
     }
 
@@ -31,7 +42,12 @@ class UserBadgePolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_user::badge');
+        // Only super admin, admin, and manager can create user badges
+        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user) || RoleHelper::isManager($user)) {
+            return $user->can('create_user::badge');
+        }
+
+        return false;
     }
 
     /**
@@ -39,7 +55,12 @@ class UserBadgePolicy
      */
     public function update(User $user, UserBadge $userBadge): bool
     {
-        return $user->can('update_user::badge');
+        // Only super admin, admin, and manager can update user badges
+        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user) || RoleHelper::isManager($user)) {
+            return $user->can('update_user::badge');
+        }
+
+        return false;
     }
 
     /**
@@ -47,7 +68,12 @@ class UserBadgePolicy
      */
     public function delete(User $user, UserBadge $userBadge): bool
     {
-        return $user->can('delete_user::badge');
+        // Only super admin and admin can delete user badges
+        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
+            return $user->can('delete_user::badge');
+        }
+
+        return false;
     }
 
     /**

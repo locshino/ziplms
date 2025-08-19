@@ -8,7 +8,7 @@ return [
         'answer_choice_title' => 'Answer Choice',
         'created_at' => 'Created At',
         'updated_at' => 'Updated At',
-],
+    ],
     'fields' => [
         'quiz_attempt_id' => 'Quiz Attempt',
         'question_id' => 'Question',

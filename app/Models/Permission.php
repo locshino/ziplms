@@ -10,7 +10,7 @@ use Spatie\Permission\Models\Permission as SpatiePermission;
 
 class Permission extends SpatiePermission
 {
-    use HasFactory, HasUuids, SoftDeletes, Recyclable;
+    use HasFactory, HasUuids, Recyclable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -21,5 +21,14 @@ class Permission extends SpatiePermission
         'name',
         'guard_name',
         'is_system', // Add our custom column here
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'is_system' => 'boolean',
     ];
 }

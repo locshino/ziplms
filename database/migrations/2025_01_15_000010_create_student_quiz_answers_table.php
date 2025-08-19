@@ -16,6 +16,7 @@ return new class extends Migration
             $table->uuid('quiz_attempt_id');
             $table->uuid('question_id');
             $table->uuid('answer_choice_id');
+            $table->timestamps();
         });
     }
 

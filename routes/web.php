@@ -29,7 +29,34 @@ Route::prefix('app')->group(function () {
         return response()
             ->download($absolutePath, $filename)
             ->deleteFileAfterSend();
-
     })->name('filament-excel.exports.download')->middleware('signed');
 
+    // Media download route
+    Route::get('media/{media}/download', function (\App\Models\Media $media) {
+        // Check if user has permission to download this media
+        if (! auth()->check()) {
+            abort(401, 'Unauthorized');
+        }
+
+        // Get the model that owns this media
+        $model = $media->model;
+
+        // If it's an Assignment, check if user is enrolled in the course
+        if ($model instanceof \App\Models\Assignment) {
+            $user = auth()->user();
+            $enrolledCourseIds = $user->enrollments()->pluck('course_id');
+
+            if (! $enrolledCourseIds->contains($model->course_id)) {
+                abort(403, 'Access denied');
+            }
+        }
+
+        // Check if file exists
+        $filePath = $media->getPath();
+        if (! file_exists($filePath)) {
+            abort(404, 'File not found: '.$media->file_name);
+        }
+
+        return response()->download($filePath, $media->file_name);
+    })->name('media.download')->middleware('auth');
 });

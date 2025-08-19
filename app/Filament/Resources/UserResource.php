@@ -79,7 +79,7 @@ class UserResource extends Resource
                                             ->label(__('user_resource.fields.password'))
                                             ->password()
                                             ->required()
-                                            ->visible(fn(string $context) => $context === 'create')
+                                            ->visible(fn (string $context) => $context === 'create')
                                             ->maxLength(255),
                                     ])
                                     ->columns(1),
@@ -117,7 +117,7 @@ class UserResource extends Resource
             ->columns([
                 ImageColumn::make('avatar')
                     ->label(__('user_resource.columns.avatar'))
-                    ->getStateUsing(fn($record) => $record->getFirstMediaUrl('avatars') ?: 'https://jbagy.me/wp-content/uploads/2025/03/hinh-anh-cute-avatar-vo-tri-2.jpg')
+                    ->getStateUsing(fn ($record) => $record->getFirstMediaUrl('avatars') ?: 'https://jbagy.me/wp-content/uploads/2025/03/hinh-anh-cute-avatar-vo-tri-2.jpg')
                     ->circular()
                     ->size(60),
 
@@ -174,7 +174,7 @@ class UserResource extends Resource
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
-                    ->visible(fn($record) => $record->id !== Auth::id()),
+                    ->visible(fn ($record) => $record->id !== Auth::id()),
                 Tables\Actions\ForceDeleteAction::make(),
                 Tables\Actions\RestoreAction::make(),
             ])

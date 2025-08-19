@@ -13,7 +13,6 @@ return [
     'fields' => [
         'name' => 'Tên',
         'guard_name' => 'Tên Guard',
-        'is_system' => 'Quyền hệ thống',
     ],
     'model' => [
         'singular' => 'Quyền',

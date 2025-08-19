@@ -2,8 +2,9 @@
 
 namespace App\Policies;
 
-use App\Models\User;
+use App\Libs\Roles\RoleHelper;
 use App\Models\AnswerChoice;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class AnswerChoicePolicy
@@ -23,6 +24,16 @@ class AnswerChoicePolicy
      */
     public function view(User $user, AnswerChoice $answerChoice): bool
     {
+        // Super admin and admin can view all answer choices
+        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
+            return true;
+        }
+
+        // Teachers can view answer choices in questions they manage
+        if (RoleHelper::isTeacher($user) && $answerChoice->question && $answerChoice->question->quiz && $answerChoice->question->quiz->course && $answerChoice->question->quiz->course->teachers()->where('user_id', $user->id)->exists()) {
+            return true;
+        }
+
         return $user->can('view_answer::choice');
     }
 
@@ -31,7 +42,12 @@ class AnswerChoicePolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_answer::choice');
+        // Only super admin, admin, and teachers can create answer choices
+        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user) || RoleHelper::isTeacher($user)) {
+            return $user->can('create_answer::choice');
+        }
+
+        return false;
     }
 
     /**
@@ -39,7 +55,17 @@ class AnswerChoicePolicy
      */
     public function update(User $user, AnswerChoice $answerChoice): bool
     {
-        return $user->can('update_answer::choice');
+        // Super admin and admin can update all answer choices
+        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
+            return $user->can('update_answer::choice');
+        }
+
+        // Teachers can update answer choices in questions they manage
+        if (RoleHelper::isTeacher($user) && $answerChoice->question && $answerChoice->question->quiz && $answerChoice->question->quiz->course && $answerChoice->question->quiz->course->teachers()->where('user_id', $user->id)->exists()) {
+            return $user->can('update_answer::choice');
+        }
+
+        return false;
     }
 
     /**
@@ -47,7 +73,17 @@ class AnswerChoicePolicy
      */
     public function delete(User $user, AnswerChoice $answerChoice): bool
     {
-        return $user->can('delete_answer::choice');
+        // Super admin and admin can delete all answer choices
+        if (RoleHelper::isSuperAdmin($user) || RoleHelper::isAdmin($user)) {
+            return $user->can('delete_answer::choice');
+        }
+
+        // Teachers can delete answer choices in questions they manage
+        if (RoleHelper::isTeacher($user) && $answerChoice->question && $answerChoice->question->quiz && $answerChoice->question->quiz->course && $answerChoice->question->quiz->course->teachers()->where('user_id', $user->id)->exists()) {
+            return $user->can('delete_answer::choice');
+        }
+
+        return false;
     }
 
     /**

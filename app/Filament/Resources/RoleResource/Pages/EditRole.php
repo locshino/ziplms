@@ -3,52 +3,74 @@
 namespace App\Filament\Resources\RoleResource\Pages;
 
 use App\Filament\Resources\RoleResource;
-use BezhanSalleh\FilamentShield\Support\Utils;
+use App\Services\Interfaces\RoleServiceInterface;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 
 class EditRole extends EditRecord
 {
     protected static string $resource = RoleResource::class;
 
-    public Collection $permissions;
+    /**
+     * Role service instance.
+     */
+    protected RoleServiceInterface $roleService;
+
+    /**
+     * Processed form data.
+     */
+    protected array $processedData = [];
+
+    /**
+     * Boot method to inject dependencies.
+     */
+    public function boot(): void
+    {
+        $this->roleService = app(RoleServiceInterface::class);
+    }
 
     protected function getActions(): array
     {
-        return [
-            Actions\DeleteAction::make(),
-        ];
+        $actions = [];
+
+        // Only show delete action for non-system roles
+        if (! $this->record->is_system) {
+            $actions[] = Actions\DeleteAction::make()
+                ->requiresConfirmation()
+                ->modalHeading('Delete Role')
+                ->modalDescription('Are you sure you want to delete this role? This action cannot be undone.')
+                ->modalSubmitActionLabel('Yes, delete it');
+        }
+
+        return $actions;
     }
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $this->permissions = collect($data)
-            ->filter(function ($permission, $key) {
-                return ! in_array($key, ['name', 'guard_name', 'select_all', Utils::getTenantModelForeignKey()]);
-            })
-            ->values()
-            ->flatten()
-            ->unique();
+        try {
+            /** @var \App\Models\Role $role */
+            $role = $this->record;
+            $this->processedData = $this->roleService->processFormDataBeforeSave($role, $data);
 
-        if (Arr::has($data, Utils::getTenantModelForeignKey())) {
-            return Arr::only($data, ['name', 'guard_name', Utils::getTenantModelForeignKey()]);
+            return $this->processedData;
+        } catch (\App\Exceptions\Services\RoleServiceException $e) {
+            Notification::make()
+                ->title('Cannot edit system role')
+                ->body('System roles cannot be modified.')
+                ->danger()
+                ->send();
+
+            $this->halt();
+
+            return $data; // Return original data if exception occurs
         }
-
-        return Arr::only($data, ['name', 'guard_name']);
     }
 
     protected function afterSave(): void
     {
-        $permissionModels = collect();
-        $this->permissions->each(function ($permission) use ($permissionModels) {
-            $permissionModels->push(Utils::getPermissionModel()::firstOrCreate([
-                'name' => $permission,
-                'guard_name' => $this->data['guard_name'],
-            ]));
-        });
-
-        $this->record->syncPermissions($permissionModels);
+        /** @var \App\Models\Role $role */
+        $role = $this->record;
+        $this->roleService->syncPermissionsAfterSave($role, $this->processedData);
     }
 }

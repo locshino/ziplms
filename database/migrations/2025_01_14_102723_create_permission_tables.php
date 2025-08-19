@@ -24,7 +24,7 @@ return new class extends Migration
             $table->uuid('id')->primary(); // Changed to UUID
             $table->string('name');
             $table->string('guard_name');
-            $table->boolean('is_system')->default(false); // Added is_system column
+            $table->boolean('is_system')->default(true); // Added is_system column
             $table->timestamps();
             $table->softDeletes(); // Added soft deletes
 
@@ -39,7 +39,7 @@ return new class extends Migration
             }
             $table->string('name');
             $table->string('guard_name');
-            $table->boolean('is_system')->default(false); // Added is_system column
+            $table->boolean('is_system')->default(true); // Added is_system column
             $table->timestamps();
             $table->softDeletes(); // Added soft deletes
 
