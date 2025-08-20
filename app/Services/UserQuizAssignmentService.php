@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Libs\Roles\RoleHelper;
 use App\Models\Quiz;
 use App\Models\User;
-use App\Repositories\Interfaces\EnrollmentRepositoryInterface;
 use App\Repositories\Interfaces\QuizRepositoryInterface;
 use App\Services\Interfaces\UserQuizAssignmentServiceInterface;
 use Carbon\Carbon;
@@ -15,14 +15,10 @@ class UserQuizAssignmentService implements UserQuizAssignmentServiceInterface
 {
     protected QuizRepositoryInterface $quizRepository;
 
-    protected EnrollmentRepositoryInterface $enrollmentRepository;
-
     public function __construct(
-        QuizRepositoryInterface $quizRepository,
-        EnrollmentRepositoryInterface $enrollmentRepository
+        QuizRepositoryInterface $quizRepository
     ) {
         $this->quizRepository = $quizRepository;
-        $this->enrollmentRepository = $enrollmentRepository;
     }
 
     /**
@@ -58,7 +54,7 @@ class UserQuizAssignmentService implements UserQuizAssignmentServiceInterface
     public function getAssignedQuizzesByCourse(User $user, int $courseId): Collection
     {
         // Kiểm tra user có đăng ký khóa học không
-        if (! $this->isUserEnrolledInCourse($user, $courseId)) {
+        if (!$this->isUserEnrolledInCourse($user, $courseId)) {
             return collect();
         }
 
@@ -74,13 +70,24 @@ class UserQuizAssignmentService implements UserQuizAssignmentServiceInterface
      */
     public function canUserAccessQuiz(User $user, Quiz $quiz): bool
     {
+        // Kiểm tra user có phải student không
+        if (!RoleHelper::isStudent($user)) {
+            return false;
+        }
+
         // Kiểm tra user có đăng ký khóa học chứa quiz không
-        if (! $this->isUserEnrolledInCourse($user, $quiz->course_id)) {
+        $isEnrolledInQuizCourse = $quiz->courses()
+            ->whereHas('users', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->exists();
+
+        if (!$isEnrolledInQuizCourse) {
             return false;
         }
 
         // Kiểm tra trạng thái quiz
-        if (! $quiz->is_active) {
+        if (!$quiz->is_active) {
             return false;
         }
 
@@ -97,7 +104,7 @@ class UserQuizAssignmentService implements UserQuizAssignmentServiceInterface
 
         // Kiểm tra điều kiện tiên quyết (nếu có)
         if ($quiz->prerequisite_quiz_id) {
-            if (! $this->hasCompletedPrerequisite($user, $quiz->prerequisite_quiz_id)) {
+            if (!$this->hasCompletedPrerequisite($user, $quiz->prerequisite_quiz_id)) {
                 return false;
             }
         }
@@ -186,15 +193,15 @@ class UserQuizAssignmentService implements UserQuizAssignmentServiceInterface
      */
     protected function getEnrolledCourses(User $user): Collection
     {
-        return $this->enrollmentRepository->getEnrolledCoursesByUser($user->id);
+        return $user->courses;
     }
 
     /**
      * Kiểm tra user có đăng ký khóa học không
      */
-    protected function isUserEnrolledInCourse(User $user, int $courseId): bool
+    protected function isUserEnrolledInCourse(User $user, string $courseId): bool
     {
-        return $this->enrollmentRepository->isUserEnrolledInCourse($user->id, $courseId);
+        return $user->courses()->where('course_id', $courseId)->exists();
     }
 
     /**

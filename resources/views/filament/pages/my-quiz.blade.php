@@ -9,19 +9,41 @@
                     class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
                     <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Tổng số Quiz</p>
                     <p class="mt-1 text-3xl font-bold tracking-tight text-blue-500 dark:text-blue-400">
-                        {{ $this->getQuizzes()->count() }}</p>
+                        {{ $this->getQuizzes()->count() }}
+                    </p>
                 </div>
                 <div
                     class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
                     <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Quiz đã hoàn thành</p>
                     <p class="mt-1 text-3xl font-bold tracking-tight text-green-600 dark:text-green-400">
-                        {{ $this->getCompletedQuizzesCount() }}</p>
+                        {{ $this->getCompletedQuizzesCount() }}
+                    </p>
                 </div>
                 <div
                     class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
-                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Điểm cao nhất</p>
-                    <p class="mt-1 text-3xl font-bold tracking-tight text-amber-500 dark:text-amber-400">
-                        {{ $this->getHighestScore() }}%</p>
+                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Kết quả học tập</p>
+                    <p class="mt-1 text-3xl font-bold tracking-tight 
+                        @if($this->getAveragePercentage() >= 90) text-green-500 dark:text-green-400
+                        @elseif($this->getAveragePercentage() >= 80) text-blue-500 dark:text-blue-400
+                        @elseif($this->getAveragePercentage() >= 70) text-amber-500 dark:text-amber-400
+                        @elseif($this->getAveragePercentage() >= 60) text-orange-500 dark:text-orange-400
+                        @else text-red-500 dark:text-red-400
+                        @endif">
+                        @if($this->getAveragePercentage() >= 90)
+                            Xuất sắc
+                        @elseif($this->getAveragePercentage() >= 80)
+                            Giỏi
+                        @elseif($this->getAveragePercentage() >= 70)
+                            Khá
+                        @elseif($this->getAveragePercentage() >= 60)
+                            Trung bình
+                        @else
+                            Cần cải thiện
+                        @endif
+                    </p>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                        Điểm cao nhất: {{ $this->getHighestScore() }}%
+                    </p>
                 </div>
             </div>
 
@@ -50,9 +72,9 @@
                                 class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 px-3 py-2">
                                 <option value="">Tất cả trạng thái</option>
                                 @if ($this->listQuizStatus)
-                                @foreach ($this->listQuizStatus as $status)
-                                    <option value="{{ $status['value'] }}">{{ $status['label'] }}</option>
-                                @endforeach
+                                    @foreach ($this->listQuizStatus as $status)
+                                        <option value="{{ $status['value'] }}">{{ $status['label'] }}</option>
+                                    @endforeach
                                 @endif
                             </select>
                         </div>
@@ -77,7 +99,7 @@
                             <p
                                 class="inline-block bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-semibold px-3 py-1 rounded-full mb-3">
                                 @php
-                                    $course = $quiz->course ?? ($quiz->courses->count() ? $quiz->courses->first() : null);
+                                    $course = $quiz->courses->count() ? $quiz->courses->first() : null;
                                 @endphp
                                 Khóa học:
                                 @if($course)
@@ -85,13 +107,13 @@
                                 @else
                                     <span class="text-red-500">Không xác định</span>
                                 @endif
-                                </p>
+                            </p>
                             <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4 leading-tight">
-                                {{ $quiz->title }}</h3>
+                                {{ $quiz->title }}
+                            </h3>
                             <div class="flex flex-wrap gap-4">
                                 <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                                    <x-heroicon-o-question-mark-circle
-                                        class="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                                    <x-heroicon-o-question-mark-circle class="w-5 h-5 text-blue-500 dark:text-blue-400" />
                                     <span class="font-medium">{{ $quiz->questions->count() }} câu hỏi</span>
                                 </div>
                                 <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
@@ -99,10 +121,27 @@
                                     <span class="font-medium">{{ $quiz->time_limit_minutes ?? 'Không giới hạn' }}
                                         phút</span>
                                 </div>
-                                <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                                    <x-heroicon-o-star class="w-5 h-5 text-amber-500 dark:text-amber-400" />
-                                    <span class="font-medium">{{ $quiz->max_points ?? 'N/A' }} điểm tối đa</span>
-                                </div>
+                                
+                                @php
+                                    $userCourse = $quiz->courses->first(); // Get first course user is enrolled in
+                                    $courseQuiz = $userCourse ? $userCourse->pivot : null;
+                                @endphp
+                                
+                                @if($courseQuiz && ($courseQuiz->start_at || $courseQuiz->end_at))
+                                    <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                                        <x-heroicon-o-calendar class="w-5 h-5 text-purple-500 dark:text-purple-400" />
+                                        <span class="font-medium">
+                                            @if($courseQuiz->start_at && $courseQuiz->end_at)
+                                                {{ $courseQuiz->start_at->format('d/m/Y H:i') }} - {{ $courseQuiz->end_at->format('d/m/Y H:i') }}
+                                            @elseif($courseQuiz->start_at)
+                                                Từ {{ $courseQuiz->start_at->format('d/m/Y H:i') }}
+                                            @elseif($courseQuiz->end_at)
+                                                Đến {{ $courseQuiz->end_at->format('d/m/Y H:i') }}
+                                            @endif
+                                        </span>
+                                    </div>
+                                @endif
+
                             </div>
                         </div>
 
@@ -146,9 +185,10 @@
                                     {{ ($this->takeQuizAction)(['quiz' => $quiz->id])->extraAttributes(['class' => 'w-full lg:w-auto font-semibold px-4 py-3 rounded-lg transition-all duration-200 ease-in-out flex items-center justify-center gap-2 border border-transparent cursor-pointer no-underline hover:-translate-y-0.5 hover:shadow-lg bg-green-600 text-white hover:bg-green-700']) }}
                                 @endif
 
-                                @if ($quizStatus['canViewResults'])
+                                {{-- Ẩn nút "Xem đáp án" vì đã có chức năng xem lịch sử làm bài --}}
+                                {{-- @if ($quizStatus['canViewResults'])
                                     {{ ($this->viewResultsAction)(['quiz' => $quiz->id])->extraAttributes(['class' => 'w-full lg:w-auto font-semibold px-4 py-3 rounded-lg transition-all duration-200 ease-in-out flex items-center justify-center gap-2 border border-transparent cursor-pointer no-underline hover:-translate-y-0.5 hover:shadow-lg bg-green-600 text-white hover:bg-green-700']) }}
-                                @endif
+                                @endif --}}
 
                                 @if ($completedAttempts->count() > 1)
                                     {{ ($this->viewHistoryAction)(['quiz' => $quiz->id])->extraAttributes(['class' => 'w-full lg:w-auto font-semibold px-4 py-3 rounded-lg transition-all duration-200 ease-in-out flex items-center justify-center gap-2 border cursor-pointer no-underline hover:-translate-y-0.5 hover:shadow-lg bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-500 dark:hover:border-slate-400 hover:text-slate-800 dark:hover:text-slate-100']) }}
@@ -168,8 +208,8 @@
                     <div class="text-center py-16">
                         <div
                             class="mx-auto mb-6 w-24 h-24 bg-slate-200 dark:bg-slate-800 rounded-full flex items-center justify-center">
-                            <svg class="w-12 h-12 text-slate-400 dark:text-slate-600" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-12 h-12 text-slate-400 dark:text-slate-600" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z">
                                 </path>

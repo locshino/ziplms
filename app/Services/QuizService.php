@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\Services\QuizServiceException;
+use App\Libs\Roles\RoleHelper;
 use App\Models\Question;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
@@ -111,7 +112,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                         'student_id' => $studentId,
                         'attempt_number' => $nextAttemptNumber,
                         'status' => 'in_progress',
-                        'started_at' => Carbon::now(),
+                        'start_at' => Carbon::now(),
                     ]);
 
                     // Cache the attempt
@@ -186,24 +187,30 @@ class QuizService extends BaseService implements QuizServiceInterface
     private function validateStudentCanTakeQuiz(Quiz $quiz, string $studentId): void
     {
         try {
-            // Check if user is super admin or admin - they can take any quiz
+            // Check if user exists and get user instance
             $user = \App\Models\User::find($studentId);
-            if ($user && ($user->hasRole(['super_admin', 'admin']))) {
-                return; // Super admin and admin can take any quiz
-            }
-
-            // Check if student is enrolled in the course with active status
-            $enrollment = \App\Models\Enrollment::where('course_id', $quiz->course_id)
-                ->where('student_id', $studentId)
-                ->first();
-
-            if (! $enrollment) {
+            if (!$user) {
                 throw QuizServiceException::quizNotActive();
             }
 
-            // Check if enrollment has active status (using Spatie Model Status)
-            $enrollmentStatus = $enrollment->getStatusAttribute();
-            if ($enrollmentStatus !== 'active') {
+            // Check if user is super admin or admin - they can take any quiz
+            if ($user->hasRole(['super_admin', 'admin'])) {
+                return; // Super admin and admin can take any quiz
+            }
+
+            // Check if user is a student
+            if (!\App\Libs\Roles\RoleHelper::isStudent($user)) {
+                throw QuizServiceException::quizNotActive();
+            }
+
+            // Check if student is enrolled in any course that contains this quiz
+            $isEnrolledInQuizCourse = $quiz->courses()
+                ->whereHas('users', function ($query) use ($studentId) {
+                    $query->where('user_id', $studentId);
+                })
+                ->exists();
+
+            if (!$isEnrolledInQuizCourse) {
                 throw QuizServiceException::quizNotActive();
             }
 
@@ -214,7 +221,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                 'quiz_id' => $quiz->id,
                 'student_id' => $studentId,
                 'error' => $e->getMessage(),
-                'enrollment_status' => isset($enrollment) ? $enrollment->getStatusAttribute() : 'not_found',
+                'is_enrolled' => isset($isEnrolledInQuizCourse) ? $isEnrolledInQuizCourse : false,
             ]);
             throw $e;
         }
@@ -237,7 +244,7 @@ class QuizService extends BaseService implements QuizServiceInterface
 
             // Check if attempt is still valid (not expired)
             if ($attempt->quiz->time_limit) {
-                $timeElapsed = Carbon::now()->diffInMinutes($attempt->started_at);
+                $timeElapsed = Carbon::now()->diffInMinutes($attempt->start_at);
                 if ($timeElapsed >= $attempt->quiz->time_limit) {
                     // Auto-submit if time limit exceeded
                     try {
@@ -260,7 +267,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                         // Update attempt status to expired
                         $this->quizAttemptRepository->updateById($attempt->id, [
                             'status' => 'expired',
-                            'completed_at' => Carbon::now(),
+                            'end_at' => Carbon::now(),
                         ]);
 
                         // Clear cache
@@ -307,7 +314,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                 }
 
                 // Validate attempt status
-                if ($attempt->status !== 'in_progress') {
+                if ($attempt->status->value !== 'in_progress') {
                     throw QuizServiceException::quizAttemptAlreadyCompleted();
                 }
 
@@ -317,6 +324,13 @@ class QuizService extends BaseService implements QuizServiceInterface
                 try {
                     // Get quiz questions for validation
                     $quizQuestions = $this->cacheService->getQuizQuestions($attempt->quiz_id);
+                    
+                    // Fallback to database if cache is empty
+                    if (empty($quizQuestions) || $quizQuestions->isEmpty()) {
+                        $quiz = Quiz::find($attempt->quiz_id);
+                        $quizQuestions = $quiz ? $quiz->questions()->get() : collect();
+                    }
+                    
                     $questionIds = collect($quizQuestions)->pluck('id')->toArray();
 
                     // Validate that all answers are for valid questions
@@ -371,9 +385,9 @@ class QuizService extends BaseService implements QuizServiceInterface
 
                     // Update attempt
                     $this->quizAttemptRepository->updateById($attemptId, [
-                        'score' => $score,
+                        'points' => $score,
                         'status' => 'completed',
-                        'completed_at' => Carbon::now(),
+                        'end_at' => Carbon::now(),
                     ]);
 
                     // Get updated attempt
@@ -554,7 +568,11 @@ class QuizService extends BaseService implements QuizServiceInterface
     private function calculateScoreOptimized(QuizAttempt $attempt, Collection $questions, array $submittedAnswers): float
     {
         try {
-            $totalPoints = $questions->sum('points');
+            // Get quiz questions with pivot data to access points from quiz_questions table
+            $quiz = Quiz::with('questions')->find($attempt->quiz_id);
+            $quizQuestions = $quiz->questions;
+            
+            $totalPoints = $quizQuestions->sum('pivot.points');
             $earnedPoints = 0;
 
             // Group submitted answers by question
@@ -567,7 +585,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                 $answersByQuestion[$questionId][] = $answer['answer_choice_id'];
             }
 
-            foreach ($questions as $question) {
+            foreach ($quizQuestions as $question) {
                 $correctChoiceIds = $question->answerChoices
                     ->where('is_correct', true)
                     ->pluck('id')
@@ -580,7 +598,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                     count($correctChoiceIds) === count($studentChoiceIds) &&
                     empty(array_diff($correctChoiceIds, $studentChoiceIds))
                 ) {
-                    $earnedPoints += $question->points;
+                    $earnedPoints += $question->pivot->points;
                 }
             }
 
@@ -879,7 +897,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                 ];
             }
 
-            $scores = $attempts->pluck('score')->filter();
+            $scores = $attempts->pluck('points')->filter();
 
             return [
                 'total_attempts' => $attempts->count(),
@@ -910,7 +928,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                 return null;
             }
 
-            return $completedAttempts->max('score');
+            return $completedAttempts->max('points');
         } catch (Exception $e) {
             Log::error('Failed to get student best score', [
                 'quiz_id' => $quizId,

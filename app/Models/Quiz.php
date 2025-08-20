@@ -102,6 +102,19 @@ class Quiz extends Model implements AuditableContract
             ->withTimestamps();
     }
 
+    // Single course relationship (for backward compatibility)
+    public function course()
+    {
+        return $this->courses()->limit(1);
+    }
+
+    // Get the first course ID (for backward compatibility)
+    public function getCourseIdAttribute()
+    {
+        $firstCourse = $this->courses()->first();
+        return $firstCourse ? $firstCourse->id : null;
+    }
+
     // Question relationships
     public function questions(): BelongsToMany
     {
@@ -115,5 +128,86 @@ class Quiz extends Model implements AuditableContract
     public function attempts(): HasMany
     {
         return $this->hasMany(QuizAttempt::class);
+    }
+
+    /**
+     * Get max points calculated from quiz questions
+     */
+    public function getMaxPointsAttribute()
+    {
+        return $this->questions()->sum('quiz_questions.points') ?: 10.00;
+    }
+
+    /**
+     * Distribute points evenly among questions (default 10 total)
+     */
+    public function distributePointsEvenly($totalPoints = 10.00)
+    {
+        $questionCount = $this->questions()->count();
+        if ($questionCount > 0) {
+            $pointsPerQuestion = round($totalPoints / $questionCount, 2);
+            
+            // Update all quiz questions with distributed points
+            foreach ($this->questions as $question) {
+                $this->questions()->updateExistingPivot($question->id, ['points' => $pointsPerQuestion]);
+            }
+        }
+    }
+
+    /**
+     * Initialize quiz questions with default points distribution
+     */
+    public function initializeQuestionPoints()
+    {
+        $questionCount = $this->questions()->count();
+        if ($questionCount > 0) {
+            $pointsPerQuestion = round(10.00 / $questionCount, 2);
+            
+            // Set default points for questions that don't have points set
+            foreach ($this->questions as $question) {
+                if ($question->pivot->points == 1.00) { // Default value from migration
+                    $this->questions()->updateExistingPivot($question->id, ['points' => $pointsPerQuestion]);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if quiz is currently active
+     */
+    public function getIsActiveAttribute(): bool
+    {
+        // Quiz must be published to be active
+        if ($this->status !== QuizStatus::PUBLISHED) {
+            return false;
+        }
+
+        // If quiz has no course associations, it's not active
+        if ($this->courses()->count() === 0) {
+            return false;
+        }
+
+        // Check if any course has valid timing for this quiz
+        $now = now();
+        foreach ($this->courses as $course) {
+            $courseQuiz = $course->pivot;
+            $startAt = $courseQuiz->start_at;
+            $endAt = $courseQuiz->end_at;
+
+            // If no timing restrictions, quiz is active
+            if (!$startAt && !$endAt) {
+                return true;
+            }
+
+            // Check if current time is within the allowed period
+            $isAfterStart = !$startAt || $now->gte($startAt);
+            $isBeforeEnd = !$endAt || $now->lte($endAt);
+
+            if ($isAfterStart && $isBeforeEnd) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

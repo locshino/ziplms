@@ -16,7 +16,7 @@
                                  @foreach($allAttempts as $index => $attemptItem)
                                      <option value="{{ $attemptItem->id }}" {{ $attemptItem->id == $selectedAttemptId ? 'selected' : '' }}>
                                          Lần {{ $index + 1 }} - {{ $attemptItem->created_at ? $attemptItem->created_at->format('d/m/Y H:i') : 'N/A' }}
-                                         ({{ $attemptItem->score ?? 0 }}/{{ $quiz->max_points ?? 0 }} điểm)
+                                         ({{ $attemptItem->points ?? 0 }}/{{ $quiz->questions->sum('pivot.points') ?? 0 }} điểm)
                                      </option>
                                  @endforeach
                              </select>
@@ -127,7 +127,7 @@
                                     <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full font-bold">
                                         {{ $index + 1 }}
                                     </div>
-                                    <p class="flex-1 text-lg font-semibold text-gray-900 dark:text-white leading-relaxed">{{ $result['question']->question_text }}</p>
+                                    <p class="flex-1 text-lg font-semibold text-gray-900 dark:text-white leading-relaxed">{!! $result['question']->question_text !!}</p>
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium
                                         @if($result['status'] === 'correct') bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400
                                         @elseif($result['status'] === 'wrong') bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400
@@ -160,7 +160,7 @@
                                                 @else bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 @endif">
                                                 {{ $choiceLabel }}
                                             </div>
-                                            <p class="flex-1 font-medium text-gray-800 dark:text-gray-200">{{ $choice->title }}</p>
+                                            <p class="flex-1 font-medium text-gray-800 dark:text-gray-200">{!! $choice->title !!}</p>
                                             <div class="flex items-center gap-2 ml-auto">
                                                 @if($isCorrectChoice)
                                                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-green-100 dark:bg-green-600 text-green-800 dark:text-white">

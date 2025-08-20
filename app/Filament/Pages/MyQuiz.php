@@ -12,6 +12,8 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Enums\Status\QuizAttemptStatus;
+use Livewire\Attributes\Computed;
 
 class MyQuiz extends Page
 {
@@ -29,10 +31,12 @@ class MyQuiz extends Page
 
     public ?QuizAttempt $currentAttempt = null;
 
+    public bool $submitting = false;
+
     public ?string $selectedCourseId = null;
 
     public ?string $selectedStatus = null;
-    
+
     public ?array $listQuizStatus = null;
 
     public function mount(): void
@@ -42,17 +46,52 @@ class MyQuiz extends Page
 
     protected function canTakeQuiz(Quiz $quiz): bool
     {
-        // Check if quiz is active
-        $isQuizActive = $quiz->status == QuizStatus::PUBLISHED;
-        if (! $isQuizActive) return false;
+        $userId = Auth::id();
+        $now = now();
+
+        // Check if quiz is published
+        if ($quiz->status !== QuizStatus::PUBLISHED) {
+            return false;
+        }
+
+        // Check course_quizzes timing for each course the user is enrolled in
+        $canTakeInAnyCourse = false;
+
+        // Get courses where user is enrolled and quiz is assigned
+        $userCourses = $quiz->courses()->whereHas('users', function ($q) use ($userId) {
+            $q->where('users.id', $userId);
+        })->get();
+
+        foreach ($userCourses as $course) {
+            $courseQuiz = $course->pivot; // This is the CourseQuiz model
+
+            // Check if quiz timing is valid for this course
+            $startAt = $courseQuiz->start_at;
+            $endAt = $courseQuiz->end_at;
+
+            // If no timing restrictions, or within valid time range
+            if ((!$startAt || $now->gte($startAt)) && (!$endAt || $now->lte($endAt))) {
+                $canTakeInAnyCourse = true;
+                break;
+            }
+        }
+
+        if (!$canTakeInAnyCourse) {
+            return false;
+        }
 
         // Check if quiz has attempts left
-        $userId = Auth::id();
-        $maxAttempts = $quiz->max_attempts ?? 1;
+        $maxAttempts = $quiz->max_attempts;
         $attempts = QuizAttempt::where('quiz_id', $quiz->id)
             ->where('student_id', $userId)
             ->count();
 
+        // If max_attempts is 0 or null, unlimited attempts allowed
+        if ($maxAttempts === 0 || $maxAttempts === null) {
+            return true;
+        }
+        
+        // Check if user has remaining attempts
         return $attempts < $maxAttempts;
     }
 
@@ -62,10 +101,18 @@ class MyQuiz extends Page
         $userId = $user->id;
 
         // Get quizzes linked to courses where the user is enrolled (users relation)
-        $quizzesQuery = Quiz::with(['courses', 'questions', 'attempts' => function ($query) use ($userId) {
-            $query->where('student_id', $userId)
-                ->orderBy('created_at', 'desc');
-        }])
+        $quizzesQuery = Quiz::with([
+            'courses' => function ($query) use ($userId) {
+                $query->whereHas('users', function ($q) use ($userId) {
+                    $q->where('users.id', $userId);
+                })->withPivot('start_at', 'end_at');
+            },
+            'questions',
+            'attempts' => function ($query) use ($userId) {
+                $query->where('student_id', $userId)
+                    ->orderBy('created_at', 'desc');
+            }
+        ])
             ->whereHas('courses.users', function ($q) use ($userId) {
                 $q->where('users.id', $userId);
             });
@@ -156,8 +203,8 @@ class MyQuiz extends Page
     {
         // Example: count attempts, average score
         $attempts = QuizAttempt::where('quiz_id', $quiz->id)->get();
-        $avgScore = $attempts->avg('score');
-        $maxScore = $attempts->max('score');
+        $avgScore = $attempts->avg('points');
+        $maxScore = $attempts->max('points');
         $count = $attempts->count();
         return [
             'attempts_count' => $count,
@@ -172,9 +219,14 @@ class MyQuiz extends Page
     public function getStudentQuizBestScore(Quiz $quiz): ?float
     {
         $userId = Auth::id();
-        return QuizAttempt::where('quiz_id', $quiz->id)
-            ->where('student_id', $userId)
-            ->max('score');
+
+        // Get the max score from the database (could be a string or null)
+        $maxScore = QuizAttempt::where('quiz_id', $quiz->id)
+            ->where('student_id', Auth::id())
+            ->max('points');
+
+        // If a score was found, cast it to a float. Otherwise, return null.
+        return $maxScore === null ? null : (float) $maxScore;
     }
 
     /**
@@ -183,7 +235,13 @@ class MyQuiz extends Page
     public function getQuizRemainingAttempts(Quiz $quiz): ?int
     {
         $userId = Auth::id();
-        $maxAttempts = $quiz->max_attempts ?? 1;
+        $maxAttempts = $quiz->max_attempts;
+        
+        // If max_attempts is 0 or null, allow unlimited attempts
+        if ($maxAttempts === 0 || $maxAttempts === null) {
+            return null; // null indicates unlimited attempts
+        }
+        
         $usedAttempts = QuizAttempt::where('quiz_id', $quiz->id)
             ->where('student_id', $userId)
             ->count();
@@ -230,7 +288,7 @@ class MyQuiz extends Page
         foreach ($this->getQuizzes() as $quiz) {
             $attempts = QuizAttempt::where('quiz_id', $quiz->id)
                 ->where('student_id', $userId)
-                ->where('status', 'completed')
+                ->where('status', QuizAttemptStatus::COMPLETED->value)
                 ->count();
             if ($attempts > 0) {
                 $completedQuizzes->push($quiz->id);
@@ -242,28 +300,72 @@ class MyQuiz extends Page
     public function getHighestScore(): float
     {
         $userId = Auth::id();
-        $highestScore = 0;
+        $highestPercentage = 0;
+        foreach ($this->getQuizzes() as $quiz) {
+            $bestScore = QuizAttempt::where('quiz_id', $quiz->id)
+            ->where('student_id', Auth::id())
+            ->max('points');
+            if ($bestScore) {
+                $maxPoints = $quiz->questions->sum('pivot.points');
+                if ($maxPoints > 0) {
+                    $percentage = ((float)$bestScore / $maxPoints) * 100;
+                    // Ensure percentage doesn't exceed 100%
+                    $percentage = min($percentage, 100);
+                    if ($percentage > $highestPercentage) {
+                        $highestPercentage = $percentage;
+                    }
+                }
+            }
+        }
+        return round($highestPercentage, 1);
+    }
+
+    /**
+     * Get average percentage score from all completed quizzes
+     */
+    public function getAveragePercentage(): float
+    {
+        $userId = Auth::id();
+        $totalPercentage = 0;
+        $completedQuizzes = 0;
+        
         foreach ($this->getQuizzes() as $quiz) {
             $bestScore = QuizAttempt::where('quiz_id', $quiz->id)
                 ->where('student_id', $userId)
-                ->max('score');
-            if ($bestScore && $bestScore > $highestScore) {
-                $highestScore = $bestScore;
+                ->max('points');
+            
+            if ($bestScore !== null) {
+                $maxPoints = $quiz->questions->sum('pivot.points');
+                if ($maxPoints > 0) {
+                    $percentage = ((float)$bestScore / $maxPoints) * 100;
+                    // Ensure percentage doesn't exceed 100%
+                    $percentage = min($percentage, 100);
+                    $totalPercentage += $percentage;
+                    $completedQuizzes++;
+                }
             }
         }
-        return round($highestScore, 1);
+        
+        return $completedQuizzes > 0 ? round($totalPercentage / $completedQuizzes, 1) : 0;
     }
+
+
 
     public function getQuizStatus(Quiz $quiz): array
     {
         $userId = Auth::id();
         $canTake = $this->canTakeQuiz($quiz);
+
         $allAttempts = QuizAttempt::where('quiz_id', $quiz->id)
             ->where('student_id', $userId)
             ->get();
         $remainingAttempts = $this->getQuizRemainingAttempts($quiz);
-        $inProgressAttempt = $allAttempts->where('status', 'in_progress')->first();
-        $completedAttempts = $allAttempts->whereIn('status', ['completed', 'submitted']);
+        $inProgressAttempt = $allAttempts->filter(function ($attempt) {
+            return $attempt->status->value === QuizAttemptStatus::IN_PROGRESS->value;
+        })->first();
+        $completedAttempts = $allAttempts->filter(function ($attempt) {
+            return in_array($attempt->status->value, [QuizAttemptStatus::COMPLETED->value, QuizAttemptStatus::GRADED->value]);
+        });
         $latestCompletedAttempt = $completedAttempts->sortByDesc('created_at')->first();
 
         if (! $quiz->isActive) {
@@ -286,30 +388,84 @@ class MyQuiz extends Page
             ];
         }
         if ($remainingAttempts !== null && $remainingAttempts <= 0) {
+            $label = $latestCompletedAttempt ? 'Xem đáp án' : 'Hết lượt làm bài';
             return [
                 'status' => 'max_attempts_reached',
-                'label' => 'Hết lượt làm bài',
-                'color' => 'warning',
+                'label' => $label,
+                'color' => $latestCompletedAttempt ? 'success' : 'danger',
                 'canTake' => false,
                 'canViewResults' => $latestCompletedAttempt !== null,
                 'attempt' => $latestCompletedAttempt,
             ];
         }
         if (! $canTake && $allAttempts->isEmpty()) {
-            return [
-                'status' => 'no_access',
-                'label' => 'Không có quyền',
-                'color' => 'danger',
-                'canTake' => false,
-                'canViewResults' => false,
-            ];
+            // Check specific reason for no access
+            $now = now();
+            $hasValidTiming = false;
+            $isPublished = $quiz->status === QuizStatus::PUBLISHED->value;
+
+            if ($isPublished) {
+                // Check if any course has valid timing
+                $userCourses = $quiz->courses()->whereHas('users', function ($q) use ($userId) {
+                    $q->where('users.id', $userId);
+                })->get();
+
+                foreach ($userCourses as $course) {
+                    $courseQuiz = $course->pivot;
+                    $startAt = $courseQuiz->start_at;
+                    $endAt = $courseQuiz->end_at;
+
+                    if ((!$startAt || $now->gte($startAt)) && (!$endAt || $now->lte($endAt))) {
+                        $hasValidTiming = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!$isPublished) {
+                return [
+                    'status' => 'not_published',
+                    'label' => 'Chưa được xuất bản',
+                    'color' => 'gray',
+                    'canTake' => false,
+                    'canViewResults' => false,
+                ];
+            } elseif (!$hasValidTiming) {
+                return [
+                    'status' => 'time_restricted',
+                    'label' => 'Chưa đến thời gian làm bài',
+                    'color' => 'warning',
+                    'canTake' => false,
+                    'canViewResults' => false,
+                ];
+            } else {
+                return [
+                    'status' => 'no_access',
+                    'label' => 'Không có quyền',
+                    'color' => 'danger',
+                    'canTake' => false,
+                    'canViewResults' => false,
+                ];
+            }
         }
         if ($latestCompletedAttempt && $canTake) {
+            // If user has completed but still has attempts (or unlimited), show "Làm bài" instead of "Làm lại"
+            $label = ($remainingAttempts === null || $remainingAttempts > 0) ? 'Làm bài' : 'Làm lại';
             return [
                 'status' => 'completed',
-                'label' => 'Làm lại',
+                'label' => $label,
                 'color' => 'success',
                 'canTake' => true,
+                'canViewResults' => true,
+                'attempt' => $latestCompletedAttempt,
+            ];
+        }
+        if ($latestCompletedAttempt && !$canTake) {
+            return [
+                'status' => 'completed_no_retake',
+                'label' => 'Xem đáp án',
+                'color' => 'success',
+                'canTake' => false,
                 'canViewResults' => true,
                 'attempt' => $latestCompletedAttempt,
             ];
@@ -335,40 +491,32 @@ class MyQuiz extends Page
             ->label('Làm bài')
             ->icon('heroicon-o-play')
             ->color('primary')
-            ->action(function (array $arguments) {
-                return $this->handleQuizAction(
-                    function () use ($arguments) {
-                        $quiz = Quiz::find($arguments['quiz']);
-                        if (! $this->canTakeQuiz($quiz)) {
-                            Notification::make()
-                                ->title('Không thể làm bài')
-                                ->body('Bạn không có quyền làm bài quiz này hoặc quiz đã hết hạn.')
-                                ->danger()
-                                ->send();
-                            return null;
-                        }
-                        return redirect()->route('filament.app.pages.quiz-taking', ['quiz' => $quiz->id]);
-                    },
-                    'take_quiz',
-                    ['quiz_id' => $arguments['quiz']]
-                );
-            })
-            ->before(function (array $arguments) {
-                $this->selectedQuiz = Quiz::with(['questions.answerChoices'])
-                    ->find($arguments['quiz']);
-                $this->currentAttempt = QuizAttempt::where('quiz_id', $this->selectedQuiz->id)
-                    ->where('student_id', Auth::id())
-                    ->where('status', 'in_progress')
-                    ->first();
-                if ($this->currentAttempt) {
-                    $existingAnswers = $this->currentAttempt->answers()
-                        ->pluck('answer_choice_id', 'question_id')
-                        ->toArray();
-                    $this->currentAnswers = $existingAnswers;
-                } else {
-                    $this->currentAnswers = [];
+            ->url(function (array $arguments) {
+                $quiz = Quiz::find($arguments['quiz']);
+
+                // Check if user can take the quiz before redirecting
+                if (! $this->canTakeQuiz($quiz)) {
+                    $quizStatus = $this->getQuizStatus($quiz);
+                    $message = match ($quizStatus['status']) {
+                        'not_published' => 'Quiz chưa được xuất bản.',
+                        'time_restricted' => 'Chưa đến thời gian làm bài hoặc đã hết hạn.',
+                        'max_attempts_reached' => 'Bạn đã hết lượt làm bài.',
+                        default => 'Bạn không có quyền làm bài quiz này.'
+                    };
+
+                    // Show notification and return current page
+                    Notification::make()
+                        ->title('Không thể làm bài')
+                        ->body($message)
+                        ->danger()
+                        ->send();
+
+                    return null; // Stay on current page
                 }
-            });
+
+                return route('filament.app.pages.quiz-taking', ['quiz' => $arguments['quiz']]);
+            })
+            ->openUrlInNewTab(false);
     }
 
     public function viewResultsAction(): Action
@@ -382,7 +530,7 @@ class MyQuiz extends Page
                 $latestAttempt = QuizAttempt::where('quiz_id', $quiz->id)
                     ->where('student_id', Auth::id())
                     ->whereIn('status', ['completed', 'submitted'])
-                    ->orderByDesc('completed_at')
+                    ->orderByDesc('end_at')
                     ->first();
                 $params = ['quiz' => $arguments['quiz']];
                 if ($latestAttempt) {
@@ -399,13 +547,13 @@ class MyQuiz extends Page
             ->label('Lịch sử làm bài')
             ->icon('heroicon-o-clock')
             ->color('gray')
-            ->modalHeading(fn (array $arguments) => 'Lịch sử làm bài - '.Quiz::find($arguments['quiz'])->title)
+            ->modalHeading(fn(array $arguments) => 'Lịch sử làm bài - ' . Quiz::find($arguments['quiz'])->title)
             ->modalContent(function (array $arguments) {
                 $quiz = Quiz::find($arguments['quiz']);
                 $attempts = QuizAttempt::where('quiz_id', $quiz->id)
                     ->where('student_id', Auth::id())
-                    ->whereIn('status', ['completed', 'submitted'])
-                    ->orderByDesc('completed_at')
+                    ->whereIn('status', [QuizAttemptStatus::COMPLETED->value, QuizAttemptStatus::GRADED->value])
+                    ->orderByDesc('end_at')
                     ->get();
                 return view('filament.components.quiz-history-modal', [
                     'quiz' => $quiz,
@@ -415,5 +563,183 @@ class MyQuiz extends Page
             ->modalWidth('4xl')
             ->modalSubmitAction(false)
             ->modalCancelActionLabel('Đóng');
+    }
+
+    // Quiz taking methods
+    public function initializeQuizAttempt()
+    {
+        if (!$this->selectedQuiz) {
+            return;
+        }
+
+        $this->currentAttempt = QuizAttempt::where('quiz_id', $this->selectedQuiz->id)
+            ->where('student_id', Auth::id())
+            ->where('status', QuizAttemptStatus::IN_PROGRESS->value)
+            ->first();
+
+        if (!$this->currentAttempt) {
+            $this->currentAttempt = QuizAttempt::create([
+                'quiz_id' => $this->selectedQuiz->id,
+                'student_id' => Auth::id(),
+                'status' => QuizAttemptStatus::IN_PROGRESS->value,
+                'start_at' => now(),
+            ]);
+            $this->currentAnswers = [];
+        } else {
+            $existingAnswers = $this->currentAttempt->quizAnswers()
+                ->pluck('answer_choice_id', 'question_id')
+                ->toArray();
+            $this->currentAnswers = $existingAnswers;
+        }
+    }
+
+    public function updateAnswer($questionId, $choiceId)
+    {
+        if (!$this->currentAttempt) {
+            return;
+        }
+
+        $question = $this->selectedQuiz->questions()->find($questionId);
+        if (!$question) {
+            return;
+        }
+
+        if ($question->is_multiple_response) {
+            if (!isset($this->currentAnswers[$questionId])) {
+                $this->currentAnswers[$questionId] = [];
+            }
+
+            if (in_array($choiceId, $this->currentAnswers[$questionId])) {
+                $this->currentAnswers[$questionId] = array_diff($this->currentAnswers[$questionId], [$choiceId]);
+            } else {
+                $this->currentAnswers[$questionId][] = $choiceId;
+            }
+        } else {
+            $this->currentAnswers[$questionId] = $choiceId;
+        }
+
+        $this->saveAnswer($questionId, $choiceId, $question->is_multiple_response);
+    }
+
+    public function saveAnswer($questionId, $choiceId, $isMultiple = false)
+    {
+        if (!$this->currentAttempt) {
+            return;
+        }
+
+        if ($isMultiple) {
+            // For multiple choice, delete existing answers and save new ones
+            $this->currentAttempt->quizAnswers()->where('question_id', $questionId)->delete();
+
+            if (isset($this->currentAnswers[$questionId]) && !empty($this->currentAnswers[$questionId])) {
+                foreach ($this->currentAnswers[$questionId] as $choice) {
+                    $this->currentAttempt->quizAnswers()->create([
+                        'question_id' => $questionId,
+                        'answer_choice_id' => $choice,
+                    ]);
+                }
+            }
+        } else {
+            // For single choice, update or create
+            $this->currentAttempt->quizAnswers()->updateOrCreate(
+                ['question_id' => $questionId],
+                ['answer_choice_id' => $choiceId]
+            );
+        }
+    }
+
+    public function submitQuiz()
+    {
+        if (!$this->currentAttempt || $this->submitting) {
+            return;
+        }
+
+        $this->submitting = true;
+
+        try {
+            // Calculate score
+            $totalScore = 0;
+            $maxScore = 0;
+
+            foreach ($this->selectedQuiz->questions as $question) {
+                $questionPoints = $question->pivot->points ?? 1;
+                $maxScore += $questionPoints;
+
+                $userAnswers = $this->currentAttempt->quizAnswers()
+                    ->where('question_id', $question->id)
+                    ->pluck('answer_choice_id')
+                    ->toArray();
+
+                $correctAnswers = $question->answerChoices()
+                    ->where('is_correct', true)
+                    ->pluck('id')
+                    ->toArray();
+
+                if (empty(array_diff($correctAnswers, $userAnswers)) && empty(array_diff($userAnswers, $correctAnswers))) {
+                    $totalScore += $questionPoints;
+                }
+            }
+
+            // Update attempt
+            $this->currentAttempt->update([
+                'status' => QuizAttemptStatus::COMPLETED->value,
+                'end_at' => now(),
+                'points' => $totalScore,
+                'max_points' => $maxScore,
+            ]);
+
+            Notification::make()
+                ->title('Nộp bài thành công!')
+                ->body("Điểm của bạn: {$totalScore}/{$maxScore}")
+                ->success()
+                ->send();
+
+            $this->selectedQuiz = null;
+            $this->currentAttempt = null;
+            $this->currentAnswers = [];
+            $this->submitting = false;
+
+            $this->dispatch('close-modal', id: 'takeQuiz');
+        } catch (\Exception $e) {
+            $this->submitting = false;
+            Notification::make()
+                ->title('Lỗi!')
+                ->body('Có lỗi xảy ra khi nộp bài: ' . $e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+
+    public function backToQuizList()
+    {
+        $this->selectedQuiz = null;
+        $this->currentAttempt = null;
+        $this->currentAnswers = [];
+        $this->dispatch('close-modal', id: 'takeQuiz');
+    }
+
+    public function getAnsweredCount()
+    {
+        if (!$this->currentAnswers) {
+            return 0;
+        }
+
+        return count(array_filter($this->currentAnswers, function ($answer) {
+            return is_array($answer) ? !empty($answer) : $answer !== null;
+        }));
+    }
+
+    public function getProgressPercentage()
+    {
+        if (!$this->selectedQuiz) {
+            return 0;
+        }
+
+        $totalQuestions = $this->selectedQuiz->questions->count();
+        if ($totalQuestions === 0) {
+            return 0;
+        }
+
+        return round(($this->getAnsweredCount() / $totalQuestions) * 100);
     }
 }

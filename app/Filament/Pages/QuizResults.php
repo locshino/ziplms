@@ -24,11 +24,19 @@ class QuizResults extends Page
     protected static bool $shouldRegisterNavigation = false;
 
     #[Url]
-    public ?int $attempt = null;
+    public ?string $attempt = null;
 
     public ?QuizAttempt $attemptModel = null;
 
     public ?Quiz $quiz = null;
+    
+    public float $percentage = 0;
+    
+    public int $correctAnswers = 0;
+    
+    public int $incorrectAnswers = 0;
+    
+    public int $unansweredQuestions = 0;
 
     public array $attemptHistory = [];
 
@@ -50,24 +58,57 @@ class QuizResults extends Page
         $this->attemptModel = QuizAttempt::with([
             'quiz.course',
             'quiz.questions.answerChoices',
-            'answers.answerChoice',
-            'answers.question',
+            'studentAnswers.answerChoice',
+            'studentAnswers.question',
         ])->findOrFail($this->attempt);
 
         // Check if this attempt belongs to the current user
-        if ($this->attemptModel->user_id !== Auth::id()) {
+        if ($this->attemptModel->student_id !== Auth::id()) {
             abort(403, 'Unauthorized access to quiz results.');
         }
 
         $this->quiz = $this->attemptModel->quiz;
+        
+        // Calculate percentage and correct answers
+        // Get max score from pivot table (quiz_questions.points)
+        $maxScore = $this->quiz->questions->sum('pivot.points');
+        $this->percentage = $maxScore > 0 ? ($this->attemptModel->points / $maxScore) * 100 : 0;
+        // Ensure percentage doesn't exceed 100%
+        $this->percentage = min($this->percentage, 100);
+        
+        // Count correct, incorrect and unanswered questions
+        $this->correctAnswers = 0;
+        $this->incorrectAnswers = 0;
+        $this->unansweredQuestions = 0;
+        foreach ($this->quiz->questions as $question) {
+            if ($this->isAnswered($question->id)) {
+                if ($this->isCorrectAnswer($question->id)) {
+                    $this->correctAnswers++;
+                } else {
+                    $this->incorrectAnswers++;
+                }
+            } else {
+                $this->unansweredQuestions++;
+            }
+        }
 
         // Load attempt history for this quiz
-        $this->attemptHistory = QuizAttempt::where('quiz_id', $this->quiz->id)
-            ->where('user_id', Auth::id())
+        $attempts = QuizAttempt::where('quiz_id', $this->quiz->id)
+            ->where('student_id', Auth::id())
             ->where('status', 'completed')
-            ->orderBy('completed_at', 'desc')
-            ->get()
-            ->toArray();
+            ->orderBy('end_at', 'desc')
+            ->get();
+        
+        // Calculate percentage for each attempt
+        $maxScore = $this->quiz->questions->sum('pivot.points');
+        $this->attemptHistory = $attempts->map(function ($attempt) use ($maxScore) {
+            $attemptArray = $attempt->toArray();
+            $percentage = $maxScore > 0 ? ($attempt->points / $maxScore) * 100 : 0;
+            // Ensure percentage doesn't exceed 100%
+            $attemptArray['percentage'] = round(min($percentage, 100), 2);
+            $attemptArray['completed_at'] = $attempt->end_at; // Add completed_at field
+            return $attemptArray;
+        })->toArray();
     }
 
     #[Computed]
@@ -76,7 +117,7 @@ class QuizResults extends Page
         $correct = 0;
 
         foreach ($this->quiz->questions as $question) {
-            $userAnswer = $this->attemptModel->answers
+            $userAnswer = $this->attemptModel->studentAnswers
                 ->where('question_id', $question->id)
                 ->first();
 
@@ -98,7 +139,7 @@ class QuizResults extends Page
         $incorrect = 0;
 
         foreach ($this->quiz->questions as $question) {
-            $userAnswer = $this->attemptModel->answers
+            $userAnswer = $this->attemptModel->studentAnswers
                 ->where('question_id', $question->id)
                 ->first();
 
@@ -117,7 +158,7 @@ class QuizResults extends Page
     #[Computed]
     public function unansweredQuestions(): int
     {
-        $answered = $this->attemptModel->answers->pluck('question_id')->toArray();
+        $answered = $this->attemptModel->studentAnswers->pluck('question_id')->toArray();
         $totalQuestions = $this->quiz->questions->count();
 
         return $totalQuestions - count($answered);
@@ -126,11 +167,11 @@ class QuizResults extends Page
     #[Computed]
     public function timeSpent(): string
     {
-        if (! $this->attemptModel->started_at || ! $this->attemptModel->completed_at) {
+        if (! $this->attemptModel->start_at || ! $this->attemptModel->completed_at) {
             return 'N/A';
         }
 
-        $start = Carbon::parse($this->attemptModel->started_at);
+        $start = Carbon::parse($this->attemptModel->start_at);
         $end = Carbon::parse($this->attemptModel->completed_at);
 
         $diff = $start->diff($end);
@@ -147,8 +188,8 @@ class QuizResults extends Page
     #[Computed]
     public function percentage(): float
     {
-        $maxPoints = $this->quiz->max_points ?? 100;
-        $score = $this->attemptModel->score ?? 0;
+        $maxPoints = $this->quiz->questions->sum('pivot.points') ?? 100;
+        $score = $this->attemptModel->points ?? 0;
 
         return $maxPoints > 0 ? round(($score / $maxPoints) * 100, 2) : 0;
     }
@@ -163,14 +204,14 @@ class QuizResults extends Page
         ];
     }
 
-    public function isCorrectAnswer(int $questionId): bool
+    public function isCorrectAnswer(string $questionId): bool
     {
         $question = $this->quiz->questions->where('id', $questionId)->first();
         if (! $question) {
             return false;
         }
 
-        $userAnswer = $this->attemptModel->answers
+        $userAnswer = $this->attemptModel->studentAnswers
             ->where('question_id', $questionId)
             ->first();
 
@@ -181,16 +222,16 @@ class QuizResults extends Page
         return $userAnswer && $correctChoice && $userAnswer->answer_choice_id == $correctChoice->id;
     }
 
-    public function isAnswered(int $questionId): bool
+    public function isAnswered(string $questionId): bool
     {
-        return $this->attemptModel->answers
+        return $this->attemptModel->studentAnswers
             ->where('question_id', $questionId)
             ->isNotEmpty();
     }
 
-    public function getUserAnswer(int $questionId): ?int
+    public function getUserAnswer(string $questionId): ?string
     {
-        $answer = $this->attemptModel->answers
+        $answer = $this->attemptModel->studentAnswers
             ->where('question_id', $questionId)
             ->first();
 

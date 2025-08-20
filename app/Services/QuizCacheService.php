@@ -34,7 +34,7 @@ class QuizCacheService
             return Cache::remember(
                 self::QUIZ_PREFIX.$quizId,
                 self::CACHE_TTL,
-                fn () => Quiz::with(['course'])->find($quizId)
+                fn () => Quiz::with(['courses'])->find($quizId)
             );
         } catch (\Exception $e) {
             Log::error('Quiz cache error', ['quiz_id' => $quizId, 'error' => $e->getMessage()]);
@@ -143,11 +143,11 @@ class QuizCacheService
                         ->get();
 
                     $totalAttempts = $attempts->count();
-                    $averageScore = $totalAttempts > 0 ? $attempts->avg('score') : 0;
-                    $maxScore = $totalAttempts > 0 ? $attempts->max('score') : 0;
-                    $minScore = $totalAttempts > 0 ? $attempts->min('score') : 0;
-                    $passRate = $totalAttempts > 0 ?
-                        $attempts->where('score', '>=', 70)->count() / $totalAttempts * 100 : 0;
+                    $averageScore = $totalAttempts > 0 ? $attempts->avg('points') : 0;
+        $maxScore = $totalAttempts > 0 ? $attempts->max('points') : 0;
+        $minScore = $totalAttempts > 0 ? $attempts->min('points') : 0;
+        $passRate = $totalAttempts > 0 ?
+            $attempts->where('points', '>=', 70)->count() / $totalAttempts * 100 : 0;
 
                     return [
                         'total_attempts' => $totalAttempts,

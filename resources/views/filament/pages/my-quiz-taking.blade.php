@@ -1,33 +1,13 @@
 <x-filament-panels::page>
-    <div x-data="quizTakingApp()" x-init="init()" class="min-h-screen bg-gray-100 dark:bg-gray-900">
-        <!-- Quiz Header -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ $this->quizModel->title }}</h1>
-                <p class="text-gray-600 dark:text-gray-400 mb-4">{{ $this->quizModel->description }}</p>
-            <div class="flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
-                <span>Tổng số câu: {{ $this->quizModel->questions->count() }}</span>
-                @if($this->quizModel->time_limit_minutes)
-                    <span>Thời gian: {{ $this->quizModel->time_limit_minutes }} phút</span>
-                @endif
-                <span>Điểm tối đa: {{ $this->quizModel->max_points ?? $this->quizModel->questions->sum('points') }}</span>
-            </div>
-        </div>
-
-        <!-- Timer -->
-        @if($this->quizModel->time_limit_minutes && !$this->isUnlimited)
-            <div id="timer" class="fixed top-20 right-20 bg-red-500 text-white px-4 py-2 rounded-lg font-bold z-50 shadow-lg">
-                <span x-text="formatTime(remainingSeconds)">{{ $this->quizModel->time_limit_minutes }}:00</span>
-            </div>
-        @endif
-
+    <div x-data="myQuizTakingApp()" x-init="init()" class="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
             <!-- Main Content: Questions -->
             <div class="lg:col-span-2 space-y-6">
-                @foreach($this->quizModel->questions as $index => $question)
+                @foreach($this->selectedQuiz->questions as $index => $question)
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                         <div class="flex justify-between items-start gap-4 mb-4">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white leading-relaxed">Câu {{ $index + 1 }}: {!! $question->title !!}</h3>
-                            <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap">{{ $question->pivot->points ?? $question->points }} điểm</span>
+                            <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap">{{ $question->pivot->points ?? 1 }} điểm</span>
                         </div>
 
                         @if($question->question_image)
@@ -47,7 +27,7 @@
                                         <input type="checkbox" name="answers_{{ $question->id }}[]" value="{{ $choice->id }}"
                                             wire:key="checkbox-{{ $question->id }}-{{ $choice->id }}"
                                             wire:click="updateAnswer('{{ $question->id }}', '{{ $choice->id }}')"
-                                            @if(isset($this->answers[$question->id]) && is_array($this->answers[$question->id]) && in_array($choice->id, $this->answers[$question->id])) checked @endif
+                                            @if(isset($this->currentAnswers[$question->id]) && is_array($this->currentAnswers[$question->id]) && in_array($choice->id, $this->currentAnswers[$question->id])) checked @endif
                                             class="peer sr-only">
                                         <div class="w-5 h-5 border-2 border-gray-400 rounded flex items-center justify-center flex-shrink-0 transition-all duration-200 peer-checked:bg-blue-500 peer-checked:border-blue-500">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 text-white opacity-0 scale-50 transition-all duration-200 peer-checked:opacity-100 peer-checked:scale-100">
@@ -59,9 +39,9 @@
                                     @else
                                         <input type="radio" name="answers_{{ $question->id }}" value="{{ $choice->id }}"
                                             wire:key="radio-{{ $question->id }}-{{ $choice->id }}"
-                                            wire:model.live="answers.{{ $question->id }}"
+                                            wire:model.live="currentAnswers.{{ $question->id }}"
                                             wire:click="updateAnswer('{{ $question->id }}', '{{ $choice->id }}')"
-                                            @if(isset($this->answers[$question->id]) && $this->answers[$question->id] == $choice->id)
+                                            @if(isset($this->currentAnswers[$question->id]) && $this->currentAnswers[$question->id] == $choice->id)
                                             checked @endif
                                             class="peer sr-only">
                                         <div class="w-5 h-5 border-2 border-gray-400 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200 peer-checked:bg-blue-500 peer-checked:border-blue-500">
@@ -86,14 +66,13 @@
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                     <div class="space-y-4">
                         <div class="space-y-2">
-                            <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ $this->quizModel->title }}</h1>
-                            <p class="text-sm text-blue-600 dark:text-blue-400 font-medium">{{ $this->quizModel->courses->first()?->title ?? 'Khóa học không xác định' }}</p>
-                            @if($this->quizModel->description)
-                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ $this->quizModel->description }}</p>
+                            <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ $this->selectedQuiz->title }}</h1>
+                            @if($this->selectedQuiz->description)
+                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ $this->selectedQuiz->description }}</p>
                             @endif
                         </div>
                         <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                            @if(!$this->isUnlimited)
+                            @if($this->selectedQuiz->time_limit_minutes)
                                 <div class="text-center p-3 rounded-lg" :class="{ 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300': timeWarning, 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300': !timeWarning }">
                                     <div class="text-xs font-medium mb-1">Thời gian còn lại</div>
                                     <div class="text-lg font-mono font-bold" x-text="formatTime(remainingSeconds)"></div>
@@ -109,129 +88,67 @@
                     <div class="mt-6 space-y-3">
                         <div class="flex justify-between items-center text-sm">
                             <span class="text-gray-600 dark:text-gray-400">Tiến độ:
-                                {{ $this->answeredCount }}/{{ $this->quizModel->questions->count() }} câu</span>
-                            <span class="font-semibold text-blue-600 dark:text-blue-400">{{ $this->progressPercentage }}%</span>
+                                {{ $this->getAnsweredCount() }}/{{ $this->selectedQuiz->questions->count() }} câu</span>
+                            <span class="font-semibold text-blue-600 dark:text-blue-400">{{ $this->getProgressPercentage() }}%</span>
                         </div>
                         <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                            <div class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: {{ $this->progressPercentage }}%"></div>
+                            <div class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: {{ $this->getProgressPercentage() }}%"></div>
                         </div>
                     </div>
                 </div>
 
-
+                <!-- Submit Card -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <div class="space-y-4">
+                        <x-filament::button color="success" icon="heroicon-o-check"
+                             wire:click="submitQuiz"
+                             x-on:click="confirmSubmit()"
+                             x-bind:disabled="$wire.submitting"
+                             class="w-full">
+                             <span wire:loading.remove wire:target="submitQuiz">Nộp bài</span>
+                             <span wire:loading wire:target="submitQuiz">Đang nộp...</span>
+                         </x-filament::button>
+                         
+                         <x-filament::button color="gray" icon="heroicon-o-arrow-left"
+                             wire:click="backToQuizList"
+                             class="w-full">
+                             Quay lại
+                         </x-filament::button>
+                     </div>
+                 </div>
              </div>
          </div>
 
          <script>
-             function quizTakingApp() {
+             function myQuizTakingApp() {
                  return {
-                     remainingSeconds: @js($this->remainingSeconds),
-                     isUnlimited: @js($this->isUnlimited),
+                     remainingSeconds: @js($this->selectedQuiz->time_limit_minutes ? $this->selectedQuiz->time_limit_minutes * 60 : null),
+                     isUnlimited: @js(!$this->selectedQuiz->time_limit_minutes),
                      timeWarning: false,
                      submitting: false,
-                     quizId: @js($this->quizModel->id),
-                     attemptId: @js($this->attemptModel->id ?? null),
+                     quizId: @js($this->selectedQuiz->id),
+                     attemptId: @js($this->currentAttempt->id ?? null),
 
                      init() {
-                         this.timeWarning = this.remainingSeconds <= 300;
-                         this.loadFromStorage();
-                         this.startTimer();
+                         if (!this.isUnlimited) {
+                             this.timeWarning = this.remainingSeconds <= 300;
+                             this.startTimer();
+                         }
                          this.bindAnswerEvents();
                          this.$watch('$wire.submitting', (value) => {
                              this.submitting = value;
                          });
-
-                         // Listen for answers loaded event
-                         this.$wire.on('answers-loaded', () => {
-                             this.updateCheckboxStates();
-                         });
-
-                         // Listen for clear storage event
-                         this.$wire.on('clear-quiz-storage', () => {
-                             this.clearStorage();
-                         });
-
-                         // Listen for clear previous quiz storage event
-                         this.$wire.on('clear-previous-quiz-storage', (data) => {
-                             this.clearPreviousQuizStorage(data.quizId);
-                         });
-                     },
-
-                     loadFromStorage() {
-                         const storageKey = `quiz_${this.quizId}_attempt_${this.attemptId}`;
-                         const savedAnswers = localStorage.getItem(storageKey);
-                         if (savedAnswers) {
-                             try {
-                                 const answers = JSON.parse(savedAnswers);
-                                 this.$wire.set('answers', answers, false);
-                                 this.updateProgressFromStorage(answers);
-                             } catch (e) {
-                                 console.error('Error loading saved answers:', e);
-                             }
-                         }
-                     },
-
-                     updateProgressFromStorage(answers) {
-                         const totalQuestions = {{ $this->quizModel->questions->count() }};
-                         const answeredCount = Object.values(answers).filter(a => Array.isArray(a) ? a.length > 0 : a !== null).length;
-                         const percentage = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
-
-                         const progressBar = document.querySelector('.bg-blue-500');
-                         const progressText = document.querySelector('.text-gray-600');
-                         const progressPercentage = document.querySelector('.font-semibold');
-
-                         if (progressBar) progressBar.style.width = percentage + '%';
-                         if (progressText) progressText.textContent = `Tiến độ: ${answeredCount}/${totalQuestions} câu`;
-                         if (progressPercentage) progressPercentage.textContent = percentage + '%';
                      },
 
                      bindAnswerEvents() {
-                         this.$watch('$wire.answers', (newAnswers) => {
+                         this.$watch('$wire.currentAnswers', (newAnswers) => {
                              this.saveToStorage(newAnswers);
-                             this.$wire.call('autoSave');
                          });
                      },
 
                      saveToStorage(answers) {
-                         const storageKey = `quiz_${this.quizId}_attempt_${this.attemptId}`;
+                         const storageKey = `myquiz_${this.quizId}_attempt_${this.attemptId}`;
                          localStorage.setItem(storageKey, JSON.stringify(answers));
-                         this.updateProgressFromStorage(answers);
-                     },
-
-                     updateCheckboxStates() {
-                         const answers = this.$wire.answers;
-
-                         // Update all checkboxes based on current answers
-                         document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                             const questionId = checkbox.name.match(/answers_(\d+)/)?.[1];
-                             const choiceId = parseInt(checkbox.value);
-
-                             if (questionId && answers[questionId] && Array.isArray(answers[questionId])) {
-                                 checkbox.checked = answers[questionId].includes(choiceId);
-                             } else {
-                                 checkbox.checked = false;
-                             }
-                         });
-
-                         // Update progress after state update
-                         this.updateProgressFromStorage(answers);
-                     },
-
-                     clearStorage() {
-                         const storageKey = `quiz_${this.quizId}_attempt_${this.attemptId}`;
-                         localStorage.removeItem(storageKey);
-                     },
-
-                     clearPreviousQuizStorage(quizId) {
-                         // Clear all localStorage entries for this quiz (all attempts)
-                         const keysToRemove = [];
-                         for (let i = 0; i < localStorage.length; i++) {
-                             const key = localStorage.key(i);
-                             if (key && key.startsWith(`quiz_${quizId}_attempt_`)) {
-                                 keysToRemove.push(key);
-                             }
-                         }
-                         keysToRemove.forEach(key => localStorage.removeItem(key));
                      },
 
                      startTimer() {
@@ -260,7 +177,6 @@
                      confirmSubmit() {
                          if (this.submitting) return;
                          if (confirm('Bạn có chắc chắn muốn nộp bài? Bạn không thể thay đổi sau khi nộp.')) {
-                             this.clearStorage();
                              // wire:click handles the rest
                          } else {
                              event.preventDefault();
@@ -269,7 +185,6 @@
 
                      autoSubmit() {
                          alert('Hết thời gian! Bài quiz sẽ được nộp tự động.');
-                         this.clearStorage();
                          this.$wire.call('submitQuiz');
                      }
                  }

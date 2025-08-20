@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Status\QuizAttemptStatus;
+use App\Models\StudentQuizAnswer;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -97,5 +98,29 @@ class QuizAttempt extends Model
     public function studentAnswers(): HasMany
     {
         return $this->hasMany(StudentQuizAnswer::class);
+    }
+
+    // Accessor for score (alias for points)
+    public function getScoreAttribute()
+    {
+        return $this->points;
+    }
+
+    // Accessor for completed_at (alias for end_at)
+    public function getCompletedAtAttribute()
+    {
+        return $this->end_at;
+    }
+
+    // Alias relationship for answers
+    public function answers(): HasMany
+    {
+        return $this->hasMany(StudentQuizAnswer::class, 'quiz_attempt_id');
+    }
+    
+    // Alternative relationship name to avoid conflicts
+    public function quizAnswers(): HasMany
+    {
+        return $this->hasMany(StudentQuizAnswer::class, 'quiz_attempt_id');
     }
 }
