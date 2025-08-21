@@ -20,29 +20,42 @@ use UnitEnum;
 
 class MyAssignmentsPage extends Page
 {
-    use WithPagination, WithFileUploads, HasPageShield;
+    use HasPageShield, WithFileUploads, WithPagination;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-academic-cap';
+
     protected static UnitEnum|string|null $navigationGroup = 'Student Section';
+
     protected static ?string $navigationLabel = 'My Assignments';
+
     protected static ?string $title = 'My Assignments';
+
     protected static ?string $slug = 'my-assignments';
+
     protected string $view = 'filament.pages.my-assignments';
+
     public string $search = '';
+
     public string $filter = 'all';
+
     public string $courseId = '';
+
     public bool $showSubmissionModal = false;
+
     public bool $showInstructionsModal = false;
+
     public ?CourseAssignment $selectedCourseAssignment = null;
+
     public string $submissionType = 'file';
+
     public $file;
+
     public string $link_url = '';
+
     public string $notes = '';
 
-    // Thêm thuộc tính này để lưu trữ màu sắc của khóa học
     public array $courseColors = [];
 
-    // Định nghĩa một bảng màu
     public array $colorPalette = [
         'blue' => ['bg' => 'bg-blue-100 dark:bg-blue-900', 'text' => 'text-blue-800 dark:text-blue-200'],
         'green' => ['bg' => 'bg-green-100 dark:bg-green-900', 'text' => 'text-green-800 dark:text-green-200'],
@@ -90,13 +103,13 @@ class MyAssignmentsPage extends Page
                 'nullable',
                 'file',
                 'max:25600',
-                'mimes:pdf,doc,docx,zip,rar,png,jpg,jpeg,txt,ppt,pptx,xls,xlsx'
+                'mimes:pdf,doc,docx,zip,rar,png,jpg,jpeg,txt,ppt,pptx,xls,xlsx',
             ],
             'link_url' => [
                 Rule::requiredIf($this->submissionType === 'link'),
                 'nullable',
                 'url',
-                'max:2048'
+                'max:2048',
             ],
             'notes' => 'nullable|string|max:5000',
         ];
@@ -104,7 +117,7 @@ class MyAssignmentsPage extends Page
 
     public function getCoursesProperty()
     {
-        return Auth::user()->courses()->whereHas('courseAssignments')->orderBy('title')->get();
+        return Auth::user()->courses()->whereHas('assignments')->orderBy('title')->get();
     }
 
     public function getCourseAssignmentsProperty(): LengthAwarePaginator
@@ -122,7 +135,7 @@ class MyAssignmentsPage extends Page
 
         if ($this->search) {
             $query->whereHas('assignment', function (Builder $q) {
-                $q->where('title', 'like', '%' . $this->search . '%');
+                $q->where('title', 'like', '%'.$this->search.'%');
             });
         }
 
@@ -133,17 +146,17 @@ class MyAssignmentsPage extends Page
             'submitted' => $query->whereHas(
                 'assignment.submissions',
                 fn (Builder $q) => $q->where('student_id', $studentId)
-                                     ->whereIn('status', [SubmissionStatus::SUBMITTED, SubmissionStatus::LATE])
+                    ->whereIn('status', [SubmissionStatus::SUBMITTED, SubmissionStatus::LATE])
             ),
             'graded' => $query->whereHas(
                 'assignment.submissions',
                 fn (Builder $q) => $q->where('student_id', $studentId)
-                                     ->whereIn('status', [SubmissionStatus::GRADED, SubmissionStatus::RETURNED])
+                    ->whereIn('status', [SubmissionStatus::GRADED, SubmissionStatus::RETURNED])
             ),
             'not_submitted' => $query->whereDoesntHave('assignment.submissions', fn (Builder $q) => $q->where('student_id', $studentId))
-                                     ->where(fn($q) => $q->where('end_submission_at', '>', now())->orWhereNull('end_submission_at')),
+                ->where(fn ($q) => $q->where('end_submission_at', '>', now())->orWhereNull('end_submission_at')),
             'overdue' => $query->whereDoesntHave('assignment.submissions', fn (Builder $q) => $q->where('student_id', $studentId))
-                               ->where('end_submission_at', '<=', now()),
+                ->where('end_submission_at', '<=', now()),
             default => null,
         };
 
@@ -190,20 +203,23 @@ class MyAssignmentsPage extends Page
     public function openSubmissionModal(string $courseAssignmentId): void
     {
         $this->selectedCourseAssignment = CourseAssignment::with([
-            'assignment.submissions' => fn($q) => $q->where('student_id', Auth::id()),
-            'course'
+            'assignment.submissions' => fn ($q) => $q->where('student_id', Auth::id()),
+            'course',
         ])->find($courseAssignmentId);
 
-        if (!$this->selectedCourseAssignment) return;
+        if (! $this->selectedCourseAssignment) {
+            return;
+        }
 
         // Điều kiện: Người dùng phải được ghi danh vào khóa học
         $isEnrolled = Auth::user()->courses()->where('course_id', $this->selectedCourseAssignment->course_id)->exists();
-        if (!$isEnrolled) {
+        if (! $isEnrolled) {
             Notification::make()
                 ->title('Không thể thực hiện')
                 ->body('Bạn không có trong danh sách sinh viên của khóa học này.')
                 ->warning()
                 ->send();
+
             return;
         }
 
@@ -218,6 +234,7 @@ class MyAssignmentsPage extends Page
                 ->body("Bài tập này sẽ bắt đầu vào lúc: {$startAt->format('d/m/Y H:i')}.")
                 ->info()
                 ->send();
+
             return;
         }
 
@@ -228,6 +245,7 @@ class MyAssignmentsPage extends Page
                 ->body('Bạn đã nộp bài cho bài tập này rồi.')
                 ->info()
                 ->send();
+
             return;
         }
 
@@ -245,19 +263,22 @@ class MyAssignmentsPage extends Page
 
     public function submitAssignment(): void
     {
-        if (!$this->selectedCourseAssignment) return;
+        if (! $this->selectedCourseAssignment) {
+            return;
+        }
 
         $user = Auth::user();
 
         // 1. Điều kiện: Người dùng phải ở trong khóa học
         $isEnrolled = $user->courses()->where('course_id', $this->selectedCourseAssignment->course_id)->exists();
-        if (!$isEnrolled) {
+        if (! $isEnrolled) {
             Notification::make()
                 ->title('Nộp bài thất bại!')
                 ->body('Bạn không có trong danh sách sinh viên của khóa học này.')
                 ->danger()
                 ->send();
             $this->closeSubmissionModal();
+
             return;
         }
 
@@ -270,16 +291,18 @@ class MyAssignmentsPage extends Page
                 ->warning()
                 ->send();
             $this->closeSubmissionModal();
+
             return;
         }
 
         if ($this->selectedCourseAssignment->assignment->submissions()->where('student_id', $user->id)->exists()) {
-             Notification::make()
+            Notification::make()
                 ->title('Nộp bài thất bại!')
                 ->body('Bạn đã nộp bài cho bài tập này rồi.')
                 ->warning()
                 ->send();
             $this->closeSubmissionModal();
+
             return;
         }
 
@@ -302,7 +325,7 @@ class MyAssignmentsPage extends Page
                 ->usingName($this->file->getClientOriginalName())
                 ->toMediaCollection('submission_documents');
         } elseif ($this->submissionType === 'link') {
-            $submission->content = "Submitted via link: {$this->link_url}\n\nNotes:\n" . $this->notes;
+            $submission->content = "Submitted via link: {$this->link_url}\n\nNotes:\n".$this->notes;
             $submission->save();
         }
 

@@ -9,21 +9,78 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Tags\HasTags;
 
-class Course extends Model implements HasMedia, Auditable
+/**
+ * @property string $id
+ * @property string $title
+ * @property string $slug
+ * @property string|null $description
+ * @property numeric|null $price
+ * @property bool $is_featured
+ * @property string $teacher_id
+ * @property \Illuminate\Support\Carbon|null $start_at
+ * @property \Illuminate\Support\Carbon|null $end_at
+ * @property CourseStatus $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\CourseUser|\App\Models\CourseQuiz|\App\Models\CourseAssignment|null $pivot
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Assignment> $assignments
+ * @property-read int|null $assignments_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Audit> $audits
+ * @property-read int|null $audits_count
+ * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \App\Models\Media> $media
+ * @property-read int|null $media_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Quiz> $quizzes
+ * @property-read int|null $quizzes_count
+ * @property \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tag> $tags
+ * @property-read int|null $tags_count
+ * @property-read \App\Models\User $teacher
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
+ * @property-read int|null $users_count
+ *
+ * @method static \Database\Factories\CourseFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course whereEndAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course whereIsFeatured($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course wherePrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course whereSlug($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course whereStartAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course whereTeacherId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course withAllTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course withAllTagsOfAnyType($tags)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course withAnyTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course withAnyTagsOfAnyType($tags)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course withAnyTagsOfType(array|string $type)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course withoutTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Course withoutTrashed()
+ *
+ * @mixin \Eloquent
+ */
+class Course extends Model implements Auditable, HasMedia
 {
     use HasFactory,
         HasTags,
         HasUuids,
         InteractsWithMedia,
-        SoftDeletes,
-        \OwenIt\Auditing\Auditable;
+        \OwenIt\Auditing\Auditable,
+        SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -82,16 +139,6 @@ class Course extends Model implements HasMedia, Auditable
             ->withTimestamps();
     }
 
-    /**
-     * FIX: Thêm mối quan hệ này để sửa lỗi BadMethodCallException.
-     * Mối quan hệ này cho phép truy vấn các bản ghi pivot 'course_assignments'
-     * trực tiếp từ một đối tượng Course.
-     */
-    public function courseAssignments(): HasMany
-    {
-        return $this->hasMany(CourseAssignment::class);
-    }
-
     // Quiz relationships
     public function quizzes(): BelongsToMany
     {
@@ -115,5 +162,4 @@ class Course extends Model implements HasMedia, Auditable
                 ...MimeType::archives(),
             ]);
     }
-    
 }

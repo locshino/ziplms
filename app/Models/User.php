@@ -48,6 +48,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property-read int|null $submissions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Course> $teachingCourses
  * @property-read int|null $teaching_courses_count
+ *
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
@@ -71,6 +72,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutPermission($permissions)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutRole($roles, $guard = null)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class User extends Authenticatable implements HasMedia
@@ -100,19 +102,13 @@ class User extends Authenticatable implements HasMedia
         'password' => 'hashed',
     ];
 
-    /**
-     * FIX: Renamed from teachingCourses to taughtCourses to match the call in GradingPage.
-     * This relationship defines the courses taught by this user.
-     */
-    public function taughtCourses(): HasMany
+    // Relationships as Teacher
+    public function teachingCourses(): HasMany
     {
         return $this->hasMany(Course::class, 'teacher_id');
     }
 
-    /**
-     * Relationships as Student
-     * This relationship defines the courses this user is enrolled in.
-     */
+    // Relationships as Student
     public function courses(): BelongsToMany
     {
         return $this->belongsToMany(Course::class, 'course_user', 'user_id', 'course_id')

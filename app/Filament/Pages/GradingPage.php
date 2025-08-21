@@ -13,29 +13,40 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Livewire\WithPagination;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use UnitEnum;
 
 class GradingPage extends Page
 {
-    use WithPagination, HasPageShield;
+    use HasPageShield, WithPagination;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-pencil-square';
+
     protected static ?string $navigationLabel = 'Chấm điểm';
+
     protected static UnitEnum|string|null $navigationGroup = 'Teacher Section';
+
     protected string $view = 'filament.pages.grading-page';
+
     protected static ?string $slug = 'grading';
+
     protected static ?string $title = 'Chấm điểm bài tập';
 
     public string $search = '';
+
     public string $filter = 'all';
+
     public string $courseId = '';
+
     public bool $showSubmissionsModal = false;
+
     public bool $showInstructionsModal = false;
+
     public ?CourseAssignment $selectedCourseAssignment = null;
+
     public $submissions = [];
 
     public array $points = [];
+
     public array $feedback = [];
 
     // Thêm thuộc tính này để lưu trữ màu sắc của khóa học
@@ -80,10 +91,14 @@ class GradingPage extends Page
             'courseId' => ['except' => ''],
         ];
     }
+
     public function getCoursesProperty()
     {
-        return Auth::user()->taughtCourses()->whereHas('courseAssignments')->orderBy('title')->get();
+        // === CHANGED HERE ===
+        // Updated from 'courseAssignments' to 'assignments' to match the relationship in the Course model.
+        return Auth::user()->teachingCourses()->whereHas('assignments')->orderBy('title')->get();
     }
+
     public function getCourseAssignmentsProperty(): LengthAwarePaginator
     {
         $teacherCourseIds = $this->getCoursesProperty()->pluck('id');
@@ -95,13 +110,13 @@ class GradingPage extends Page
                     'submissions',
                     'submissions as graded_submissions_count' => function (Builder $query) {
                         $query->whereNotNull('points');
-                    }
+                    },
                 ]);
             }]);
 
         if ($this->search) {
             $query->whereHas('assignment', function (Builder $q) {
-                $q->where('title', 'like', '%' . $this->search . '%');
+                $q->where('title', 'like', '%'.$this->search.'%');
             });
         }
         if ($this->courseId) {
@@ -110,11 +125,11 @@ class GradingPage extends Page
 
         match ($this->filter) {
             'graded' => $query->whereHas('assignment', function (Builder $assignmentQuery) {
-                $assignmentQuery->whereHas('submissions', fn($q) => $q->whereNotNull('points'));
+                $assignmentQuery->whereHas('submissions', fn ($q) => $q->whereNotNull('points'));
             }),
             'ungraded' => $query->where(function (Builder $mainQuery) {
                 $mainQuery->whereHas('assignment', function (Builder $assignmentQuery) {
-                    $assignmentQuery->whereDoesntHave('submissions', fn($q) => $q->whereNotNull('points'));
+                    $assignmentQuery->whereDoesntHave('submissions', fn ($q) => $q->whereNotNull('points'));
                 });
             }),
             default => null,
@@ -155,8 +170,9 @@ class GradingPage extends Page
     public function openSubmissionsModal(string $courseAssignmentId): void
     {
         $this->selectedCourseAssignment = CourseAssignment::with(['assignment', 'course'])->find($courseAssignmentId);
-        if (!$this->selectedCourseAssignment) {
+        if (! $this->selectedCourseAssignment) {
             Notification::make()->title('Không tìm thấy bài tập!')->warning()->send();
+
             return;
         }
         $this->submissions = Submission::where('assignment_id', $this->selectedCourseAssignment->assignment_id)
@@ -179,13 +195,15 @@ class GradingPage extends Page
     public function saveGrade(string $submissionId): void
     {
         $submission = Submission::find($submissionId);
-        if (!$submission) {
+        if (! $submission) {
             Notification::make()->title('Lỗi')->body('Không tìm thấy bài nộp.')->danger()->send();
+
             return;
         }
 
-        if (!$this->selectedCourseAssignment) {
+        if (! $this->selectedCourseAssignment) {
             Notification::make()->title('Lỗi')->body('Không tìm thấy thông tin bài tập của khóa học.')->danger()->send();
+
             return;
         }
 
@@ -196,12 +214,13 @@ class GradingPage extends Page
         $isCourseTeacher = $user->id === $course->teacher_id;
         $isPrivilegedUser = RoleHelper::isAdministrative($user);
 
-        if (!$isCourseTeacher && !$isPrivilegedUser) {
+        if (! $isCourseTeacher && ! $isPrivilegedUser) {
             Notification::make()
                 ->title('Không được phép')
                 ->body('Bạn không có quyền chấm bài cho khóa học này.')
                 ->danger()
                 ->send();
+
             return;
         }
 
@@ -215,6 +234,7 @@ class GradingPage extends Page
                 ->body("Thời gian chấm bài bắt đầu từ: {$startGrading->format('d/m/Y H:i')}.")
                 ->warning()
                 ->send();
+
             return;
         }
 
@@ -224,6 +244,7 @@ class GradingPage extends Page
                 ->body("Thời gian chấm bài đã kết thúc vào: {$endGrading->format('d/m/Y H:i')}.")
                 ->danger()
                 ->send();
+
             return;
         }
 
@@ -233,10 +254,11 @@ class GradingPage extends Page
         $feedback = $this->feedback[$submissionId] ?? '';
         $maxPoints = $this->selectedCourseAssignment->assignment->max_points;
 
-        if ($points !== null && (!is_numeric($points) || $points < 0 || $points > $maxPoints)) {
+        if ($points !== null && (! is_numeric($points) || $points < 0 || $points > $maxPoints)) {
             Notification::make()->title('Dữ liệu không hợp lệ')
-                        ->body("Điểm phải là một số từ 0 đến {$maxPoints}.")
-                        ->danger()->send();
+                ->body("Điểm phải là một số từ 0 đến {$maxPoints}.")
+                ->danger()->send();
+
             return;
         }
 
@@ -255,8 +277,9 @@ class GradingPage extends Page
         $submission = Submission::with('media')->find($submissionId);
         $mediaItem = $submission?->getFirstMedia('submission_documents');
 
-        if (!$mediaItem) {
+        if (! $mediaItem) {
             Notification::make()->title('Lỗi')->body('Không tìm thấy tệp đính kèm.')->danger()->send();
+
             return null;
         }
 

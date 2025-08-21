@@ -9,12 +9,47 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
+/**
+ * @property string $id
+ * @property string $course_id
+ * @property string $assignment_id
+ * @property \Illuminate\Support\Carbon|null $start_at
+ * @property \Illuminate\Support\Carbon|null $end_submission_at
+ * @property \Illuminate\Support\Carbon|null $start_grading_at
+ * @property \Illuminate\Support\Carbon|null $end_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\Assignment $assignment
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Audit> $audits
+ * @property-read int|null $audits_count
+ * @property-read \App\Models\Course $course
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment whereAssignmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment whereCourseId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment whereEndAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment whereEndSubmissionAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment whereStartAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment whereStartGradingAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment withoutTrashed()
+ *
+ * @mixin \Eloquent
+ */
 class CourseAssignment extends Pivot implements Auditable
 {
     use HasFactory,
         HasUuids,
-        SoftDeletes,
-        \OwenIt\Auditing\Auditable;
+        \OwenIt\Auditing\Auditable,
+        SoftDeletes;
 
     /**
      * The table associated with the model.
