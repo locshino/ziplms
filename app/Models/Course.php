@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\MimeType;
 use App\Enums\Status\CourseStatus;
+use App\Enums\System\RoleSystem;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -120,9 +121,7 @@ class Course extends Model implements HasMedia, Auditable
         return $this->belongsTo(User::class, 'teacher_id');
     }
 
-    // Parent course relationship
-
-
+    // Enrolled users relationship
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'course_user', 'course_id', 'user_id')
@@ -130,6 +129,26 @@ class Course extends Model implements HasMedia, Auditable
             ->withPivot('id', 'start_at', 'end_at')
             ->withTimestamps()
             ->wherePivotNull('deleted_at');
+    }
+
+    /**
+     * Get only the students associated with the course.
+     * This reuses the main users() relationship and filters by role.
+     */
+    public function students(): BelongsToMany
+    {
+        // Assumes the role name is 'student'
+        return $this->users()->role(RoleSystem::STUDENT);
+    }
+
+    /**
+     * Get only the managers associated with the course.
+     * This reuses the main users() relationship and filters by role.
+     */
+    public function managers(): BelongsToMany
+    {
+        // Assumes the role name is 'manager'
+        return $this->users()->role(RoleSystem::MANAGER);
     }
 
     // Assignment relationships

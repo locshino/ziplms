@@ -22,7 +22,8 @@ class QuizAttemptsTable
                     ->label('ID')
                     ->searchable(),
                 TextColumn::make('quiz.title')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('student.name')
                     ->searchable(),
                 TextColumn::make('points')
@@ -49,6 +50,7 @@ class QuizAttemptsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultGroup('quiz.title')
             ->filters([
                 TrashedFilter::make(),
             ])

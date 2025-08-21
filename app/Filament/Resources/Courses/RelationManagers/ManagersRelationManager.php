@@ -2,76 +2,97 @@
 
 namespace App\Filament\Resources\Courses\RelationManagers;
 
-use App\Enums\Status\AssignmentStatus;
-use App\Filament\Resources\Assignments\AssignmentResource;
-use Filament\Actions\CreateAction;
+use App\Enums\Status\UserStatus;
+use App\Libs\Roles\RoleHelper;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Malzariey\FilamentDaterangepickerFilter\Filters\DateRangeFilter;
 
-class AssignmentsRelationManager extends RelationManager
+class ManagersRelationManager extends RelationManager
 {
-    protected static string $relationship = 'assignments';
+    protected static string $relationship = 'managers';
 
-    protected static ?string $recordTitleAttribute = 'title';
+    protected static ?string $recordTitleAttribute = 'name';
 
-    // protected static ?string $relatedResource = AssignmentResource::class;
+    public static function canViewForRecord($ownerRecord, $pageClass): bool
+    {
+        return RoleHelper::isAdministrative();
+    }
 
     public function form(Schema $form): Schema
     {
         return $form
             ->schema([
-                TextInput::make('title')
-                    ->columnSpanFull()
-                    ->label('Title')
+                TextInput::make('name')
+                    ->label('Name')
+                    ->disabled()
+                    ->required(),
+                TextInput::make('email')
+                    ->label('Email')
                     ->disabled()
                     ->required(),
                 ...$this->getTimeCoursePicker(),
             ]);
     }
 
-
     public function table(Table $table): Table
     {
         return $table
             ->columns([
+                SpatieMediaLibraryImageColumn::make('avatar')
+                    ->collection('avatar')
+                    ->label(__('resource_user.table.columns.avatar'))
+                    ->circular()
+                    ->defaultImageUrl(url('/images/avatar/default.png'))
+                    ->toggleable(),
                 TextColumn::make('id')
-                    ->label('ID')
+                    ->label(__('resource_user.table.columns.id'))
+                    ->searchable()
                     ->copyable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('title')
+                TextColumn::make('name')
+                    ->label(__('resource_user.table.columns.name'))
                     ->searchable(),
-                TextColumn::make('max_points')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('max_attempts')
-                    ->numeric()
-                    ->sortable(),
+                TextColumn::make('email')
+                    ->label(__('resource_user.table.columns.email'))
+                    ->searchable(),
+                TextColumn::make('email_verified_at')
+                    ->label(__('resource_user.table.columns.email_verified_at'))
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('status')
+                    ->label(__('resource_user.table.columns.status'))
+                    ->badge()
+                    ->searchable(),
+                TextColumn::make('roles.name')
+                    ->label(__('resource_user.table.columns.roles'))
+                    ->badge()
+                    ->separator(', ')
                     ->searchable(),
                 TextColumn::make('pivot.start_at')
                     ->label('Start At')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('pivot.end_submission_at')
-                    ->label('End Submission At')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('pivot.start_grading_at')
-                    ->label('Start Grading At')
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('pivot.end_at')
@@ -79,14 +100,17 @@ class AssignmentsRelationManager extends RelationManager
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(__('resource_user.table.columns.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(__('resource_user.table.columns.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('deleted_at')
+                    ->label(__('resource_user.table.columns.deleted_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -94,18 +118,12 @@ class AssignmentsRelationManager extends RelationManager
             ->filters([
                 TrashedFilter::make(),
                 SelectFilter::make('status')
-                    ->options(AssignmentStatus::class),
+                    ->options(UserStatus::class)
+                    ->label(__('resource_user.table.filters.status')),
                 DateRangeFilter::make('pivot.start_at')
                     ->label('Start At'),
-                DateRangeFilter::make('pivot.end_submission_at')
-                    ->label('End Submission At'),
-                DateRangeFilter::make('pivot.start_grading_at')
-                    ->label('Start Grading At'),
                 DateRangeFilter::make('pivot.end_at')
                     ->label('End At'),
-            ])
-            ->recordActions([
-                EditAction::make(),
             ])
             ->headerActions([
                 AttachAction::make()
@@ -113,9 +131,12 @@ class AssignmentsRelationManager extends RelationManager
                         $action->getRecordSelect(),
                         ...$this->getTimeCoursePicker(),
                     ])
+                    ->recordSelectSearchColumns(['name', 'email'])
                     ->multiple(),
-            ])
-            ->toolbarActions([
+            ])->recordActions([
+                EditAction::make(),
+                DetachAction::make(),
+            ])->toolbarActions([
                 BulkActionGroup::make([
                     // ...
                     DetachBulkAction::make(),
@@ -139,20 +160,8 @@ class AssignmentsRelationManager extends RelationManager
                 ->minDate($this->getOwnerRecord()->start_at)
                 ->maxDate($this->getOwnerRecord()->end_at)
                 ->required(),
-            DateTimePicker::make('end_submission_at')
-                ->after('start_at')
-                ->before('start_grading_at')
-                ->minDate($this->getOwnerRecord()->start_at)
-                ->maxDate($this->getOwnerRecord()->end_at)
-                ->required(),
-            DateTimePicker::make('start_grading_at')
-                ->after('end_submission_at')
-                ->before('end_at')
-                ->minDate($this->getOwnerRecord()->start_at)
-                ->maxDate($this->getOwnerRecord()->end_at)
-                ->required(),
             DateTimePicker::make('end_at')
-                ->after('start_grading_at')
+                ->after('start_at')
                 ->default($this->getOwnerRecord()->end_at)
                 ->minDate($this->getOwnerRecord()->start_at)
                 ->maxDate($this->getOwnerRecord()->end_at)

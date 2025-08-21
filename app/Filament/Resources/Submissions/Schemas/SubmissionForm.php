@@ -27,7 +27,9 @@ class SubmissionForm
                     ->options(SubmissionStatus::class)
                     ->required(),
                 DateTimePicker::make('submitted_at'),
-                TextInput::make('graded_by'),
+                Select::make('graded_by')
+                    ->relationship('grader', 'name')
+                    ->required(),
                 TextInput::make('points')
                     ->numeric(),
                 Textarea::make('feedback')

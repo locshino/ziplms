@@ -56,7 +56,7 @@ class SubmissionResource extends Resource
         return [
             'index' => ListSubmissions::route('/'),
             'create' => CreateSubmission::route('/create'),
-            'view' => ViewSubmission::route('/{record}'),
+            // 'view' => ViewSubmission::route('/{record}'),
             'edit' => EditSubmission::route('/{record}/edit'),
         ];
     }
