@@ -2,13 +2,16 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\Assignment;
-use App\Models\Course;
+use App\Enums\Status\AssignmentStatus;
+use App\Enums\Status\SubmissionStatus;
+use App\Models\CourseAssignment;
 use App\Models\Submission;
 use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Livewire\WithFileUploads;
@@ -25,57 +28,60 @@ class MyAssignmentsPage extends Page
     protected static ?string $title = 'My Assignments';
     protected static ?string $slug = 'my-assignments';
     protected string $view = 'filament.pages.my-assignments';
-
-    /*
-    |                                   --------------------------------------------------------------------------
-    | Thuộc tính Trạng thái của Component (Component State Properties)
-    |--------------------------------------------------------------------------
-    |
-    | Đây là các thuộc tính công khai (public) của Livewire component.
-    | Chúng lưu trữ trạng thái của trang, ví dụ như từ khóa tìm kiếm,
-    | bộ lọc đang được áp dụng, ID khóa học, và trạng thái hiển thị
-    | của các modal (cửa sổ pop-up).
-    |
-    */
     public string $search = '';
     public string $filter = 'all';
     public string $courseId = '';
     public bool $showSubmissionModal = false;
     public bool $showInstructionsModal = false;
-    public ?Assignment $selectedAssignment = null;
-
+    public ?CourseAssignment $selectedCourseAssignment = null;
     public string $submissionType = 'file';
     public $file;
     public string $link_url = '';
     public string $notes = '';
 
-    /*
-    |--------------------------------------------------------------------------
-    | Đồng bộ hóa với Query String (Query String Synchronization)
-    |--------------------------------------------------------------------------
-    |
-    | Mảng này cho phép đồng bộ hóa các thuộc tính của component với
-    | query string trên URL. Điều này giúp người dùng có thể đánh dấu
-    | trang (bookmark) hoặc chia sẻ link với trạng thái tìm kiếm,
-    | bộ lọc đã được áp dụng.
-    |
-    */
-    protected $queryString = [
-        'search' => ['except' => ''],
-        'filter' => ['except' => 'all'],
-        'courseId' => ['except' => ''],
+    // Thêm thuộc tính này để lưu trữ màu sắc của khóa học
+    public array $courseColors = [];
+
+    // Định nghĩa một bảng màu
+    public array $colorPalette = [
+        'blue' => ['bg' => 'bg-blue-100 dark:bg-blue-900', 'text' => 'text-blue-800 dark:text-blue-200'],
+        'green' => ['bg' => 'bg-green-100 dark:bg-green-900', 'text' => 'text-green-800 dark:text-green-200'],
+        'red' => ['bg' => 'bg-red-100 dark:bg-red-900', 'text' => 'text-red-800 dark:text-red-200'],
+        'yellow' => ['bg' => 'bg-yellow-100 dark:bg-yellow-900', 'text' => 'text-yellow-800 dark:text-yellow-200'],
+        'purple' => ['bg' => 'bg-purple-100 dark:bg-purple-900', 'text' => 'text-purple-800 dark:text-purple-200'],
+        'indigo' => ['bg' => 'bg-indigo-100 dark:bg-indigo-900', 'text' => 'text-indigo-800 dark:text-indigo-200'],
+        'pink' => ['bg' => 'bg-pink-100 dark:bg-pink-900', 'text' => 'text-pink-800 dark:text-pink-200'],
+        'orange' => ['bg' => 'bg-orange-100 dark:bg-orange-900', 'text' => 'text-orange-800 dark:text-orange-200'],
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | Quy tắc Xác thực (Validation Rules)
-    |--------------------------------------------------------------------------
-    |
-    | Phương thức này định nghĩa các quy tắc xác thực (validation rules)
-    | cho form nộp bài. Nó đảm bảo dữ liệu người dùng nhập vào là hợp lệ
-    | trước khi xử lý.
-    |
-    */
+    public function mount(): void
+    {
+        $this->assignCourseColors();
+    }
+
+    public function assignCourseColors(): void
+    {
+        $courses = $this->getCoursesProperty();
+        $colorKeys = array_keys($this->colorPalette);
+        $colorCount = count($colorKeys);
+        $i = 0;
+
+        foreach ($courses as $course) {
+            $colorKey = $colorKeys[$i % $colorCount];
+            $this->courseColors[$course->id] = $this->colorPalette[$colorKey];
+            $i++;
+        }
+    }
+
+    protected function queryString(): array
+    {
+        return [
+            'search' => ['except' => ''],
+            'filter' => ['except' => 'all'],
+            'courseId' => ['except' => ''],
+        ];
+    }
+
     protected function rules(): array
     {
         return [
@@ -84,7 +90,7 @@ class MyAssignmentsPage extends Page
                 'nullable',
                 'file',
                 'max:25600',
-                'mimes:pdf,doc,docx,zip,rar,png,jpg'
+                'mimes:pdf,doc,docx,zip,rar,png,jpg,jpeg,txt,ppt,pptx,xls,xlsx'
             ],
             'link_url' => [
                 Rule::requiredIf($this->submissionType === 'link'),
@@ -98,55 +104,79 @@ class MyAssignmentsPage extends Page
 
     public function getCoursesProperty()
     {
-        return Course::whereHas('assignments')->orderBy('title')->get();
+        return Auth::user()->courses()->whereHas('courseAssignments')->orderBy('title')->get();
     }
 
-    public function getAssignmentsProperty()
+    public function getCourseAssignmentsProperty(): LengthAwarePaginator
     {
-        $assignmentsQuery = Assignment::query()
-            ->with(['submissions', 'course'])
-            ->where('title', 'like', '%' . $this->search . '%')
-            ->orderByRaw(
-                'CASE WHEN due_at >= ? THEN 0 ELSE 1 END,
-                 CASE WHEN due_at >= ? THEN due_at END ASC,
-                 CASE WHEN due_at < ? THEN due_at END DESC',
-                [now(), now(), now()]
-            );
+        $studentId = Auth::id();
+
+        $query = CourseAssignment::query()
+            ->whereIn('course_id', $this->getCoursesProperty()->pluck('id'))
+            ->whereHas('assignment', function (Builder $q) {
+                $q->where('status', AssignmentStatus::PUBLISHED);
+            })
+            ->with(['assignment', 'course', 'assignment.submissions' => function ($query) use ($studentId) {
+                $query->where('student_id', $studentId);
+            }]);
+
+        if ($this->search) {
+            $query->whereHas('assignment', function (Builder $q) {
+                $q->where('title', 'like', '%' . $this->search . '%');
+            });
+        }
+
         if ($this->courseId) {
-            $assignmentsQuery->where('course_id', $this->courseId);
+            $query->where('course_id', $this->courseId);
         }
         match ($this->filter) {
-            'submitted' => $assignmentsQuery->whereHas('submissions', fn ($q) => $q->where('student_id', Auth::id())),
-            'not_submitted' => $assignmentsQuery->whereDoesntHave('submissions', fn ($q) => $q->where('student_id', Auth::id()))->where('due_at', '>', now()),
-            'overdue' => $assignmentsQuery->whereDoesntHave('submissions', fn ($q) => $q->where('student_id', Auth::id()))->where('due_at', '<=', now()),
+            'submitted' => $query->whereHas(
+                'assignment.submissions',
+                fn (Builder $q) => $q->where('student_id', $studentId)
+                                     ->whereIn('status', [SubmissionStatus::SUBMITTED, SubmissionStatus::LATE])
+            ),
+            'graded' => $query->whereHas(
+                'assignment.submissions',
+                fn (Builder $q) => $q->where('student_id', $studentId)
+                                     ->whereIn('status', [SubmissionStatus::GRADED, SubmissionStatus::RETURNED])
+            ),
+            'not_submitted' => $query->whereDoesntHave('assignment.submissions', fn (Builder $q) => $q->where('student_id', $studentId))
+                                     ->where(fn($q) => $q->where('end_submission_at', '>', now())->orWhereNull('end_submission_at')),
+            'overdue' => $query->whereDoesntHave('assignment.submissions', fn (Builder $q) => $q->where('student_id', $studentId))
+                               ->where('end_submission_at', '<=', now()),
             default => null,
         };
 
-        // Phân trang kết quả
-        return $assignmentsQuery->paginate(10);
+        $query->orderByRaw(
+            'CASE WHEN end_submission_at >= ? OR end_submission_at IS NULL THEN 0 ELSE 1 END,
+             CASE WHEN end_submission_at >= ? OR end_submission_at IS NULL THEN end_submission_at END ASC,
+             CASE WHEN end_submission_at < ? THEN end_submission_at END DESC',
+            [now(), now(), now()]
+        );
+
+        return $query->paginate(10);
     }
 
-    public function updatedCourseId(): void
+    public function updated($property): void
     {
-        $this->resetPage();
-    }
-
-    public function updatedSubmissionType(): void
-    {
-        $this->reset('file', 'link_url');
-        $this->resetErrorBag();
+        if (in_array($property, ['courseId', 'search', 'filter'])) {
+            $this->resetPage();
+        }
+        if ($property === 'submissionType') {
+            $this->reset('file', 'link_url');
+            $this->resetErrorBag();
+        }
     }
 
     public function setFilter(string $filter): void
     {
         $this->filter = $filter;
-        $this->resetPage();
     }
 
-    public function openInstructionsModal(string $assignmentId): void
+    public function openInstructionsModal(string $courseAssignmentId): void
     {
-        $this->selectedAssignment = Assignment::with('course')->find($assignmentId);
-        if ($this->selectedAssignment) {
+        $this->selectedCourseAssignment = CourseAssignment::with(['assignment', 'course'])->find($courseAssignmentId);
+        if ($this->selectedCourseAssignment) {
             $this->showInstructionsModal = true;
         }
     }
@@ -154,21 +184,54 @@ class MyAssignmentsPage extends Page
     public function closeInstructionsModal(): void
     {
         $this->showInstructionsModal = false;
-        $this->selectedAssignment = null;
+        $this->selectedCourseAssignment = null;
     }
 
-    public function openSubmissionModal(string $assignmentId): void
+    public function openSubmissionModal(string $courseAssignmentId): void
     {
-        $this->selectedAssignment = Assignment::with('course')->find($assignmentId);
-        if (!$this->selectedAssignment) return;
+        $this->selectedCourseAssignment = CourseAssignment::with([
+            'assignment.submissions' => fn($q) => $q->where('student_id', Auth::id()),
+            'course'
+        ])->find($courseAssignmentId);
 
-        $isSubmitted = $this->selectedAssignment->submissions()->where('student_id', Auth::id())->exists();
-        $isOverdue = $this->selectedAssignment->due_at->isPast();
+        if (!$this->selectedCourseAssignment) return;
 
-        if ($isSubmitted || $isOverdue) {
+        // Điều kiện: Người dùng phải được ghi danh vào khóa học
+        $isEnrolled = Auth::user()->courses()->where('course_id', $this->selectedCourseAssignment->course_id)->exists();
+        if (!$isEnrolled) {
+            Notification::make()
+                ->title('Không thể thực hiện')
+                ->body('Bạn không có trong danh sách sinh viên của khóa học này.')
+                ->warning()
+                ->send();
             return;
         }
 
+        // Điều kiện: Kiểm tra thời gian bắt đầu nộp bài
+        $now = now();
+        $startAt = $this->selectedCourseAssignment->start_at;
+
+        // Chỉ kiểm tra thời gian bắt đầu nếu nó được thiết lập
+        if ($startAt && $now->isBefore($startAt)) {
+            Notification::make()
+                ->title('Chưa đến thời gian làm bài')
+                ->body("Bài tập này sẽ bắt đầu vào lúc: {$startAt->format('d/m/Y H:i')}.")
+                ->info()
+                ->send();
+            return;
+        }
+
+        // Điều kiện: Đã nộp bài rồi
+        if ($this->selectedCourseAssignment->assignment->submissions->isNotEmpty()) {
+            Notification::make()
+                ->title('Thông báo')
+                ->body('Bạn đã nộp bài cho bài tập này rồi.')
+                ->info()
+                ->send();
+            return;
+        }
+
+        // Xóa bỏ việc chặn mở modal khi hết hạn, cho phép nộp muộn
         $this->reset('file', 'link_url', 'notes', 'submissionType');
         $this->resetErrorBag();
         $this->showSubmissionModal = true;
@@ -177,29 +240,44 @@ class MyAssignmentsPage extends Page
     public function closeSubmissionModal(): void
     {
         $this->showSubmissionModal = false;
-        $this->selectedAssignment = null;
+        $this->selectedCourseAssignment = null;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Xử lý Nộp bài (Submit Assignment)
-    |--------------------------------------------------------------------------
-    |
-    | Phương thức này chứa logic để xử lý việc nộp bài của sinh viên.
-    | Nó kiểm tra hạn nộp, xác thực dữ liệu, lưu file/link,
-    | và tạo một bản ghi `Submission` mới trong cơ sở dữ liệu.
-    |
-    */
     public function submitAssignment(): void
     {
-        if (!$this->selectedAssignment) return;
+        if (!$this->selectedCourseAssignment) return;
 
-        // Kiểm tra lần cuối trước khi nộp
-        if ($this->selectedAssignment->due_at->isPast()) {
+        $user = Auth::user();
+
+        // 1. Điều kiện: Người dùng phải ở trong khóa học
+        $isEnrolled = $user->courses()->where('course_id', $this->selectedCourseAssignment->course_id)->exists();
+        if (!$isEnrolled) {
             Notification::make()
                 ->title('Nộp bài thất bại!')
-                ->body('Hạn nộp cho bài tập này đã qua.')
+                ->body('Bạn không có trong danh sách sinh viên của khóa học này.')
                 ->danger()
+                ->send();
+            $this->closeSubmissionModal();
+            return;
+        }
+
+        $now = now();
+        $startAt = $this->selectedCourseAssignment->start_at;
+        if ($startAt && $now->isBefore($startAt)) {
+            Notification::make()
+                ->title('Nộp bài thất bại!')
+                ->body('Chưa đến thời gian làm bài.')
+                ->warning()
+                ->send();
+            $this->closeSubmissionModal();
+            return;
+        }
+
+        if ($this->selectedCourseAssignment->assignment->submissions()->where('student_id', $user->id)->exists()) {
+             Notification::make()
+                ->title('Nộp bài thất bại!')
+                ->body('Bạn đã nộp bài cho bài tập này rồi.')
+                ->warning()
                 ->send();
             $this->closeSubmissionModal();
             return;
@@ -207,24 +285,26 @@ class MyAssignmentsPage extends Page
 
         $this->validate();
 
-        $submissionContent = '';
-        $filePath = null;
+        $endAt = $this->selectedCourseAssignment->end_submission_at;
+        $isLate = $endAt ? $now->isAfter($endAt) : false;
+        $status = $isLate ? SubmissionStatus::LATE : SubmissionStatus::SUBMITTED;
 
-        if ($this->submissionType === 'file' && $this->file) {
-            $filePath = $this->file->store('submissions/' . Auth::id(), 'public');
-            $fileName = $this->file->getClientOriginalName();
-            $submissionContent = "File submitted: '{$fileName}'.\n\nNotes:\n" . $this->notes;
-        } elseif ($this->submissionType === 'link') {
-            $submissionContent = "Submitted via link: {$this->link_url}\n\nNotes:\n" . $this->notes;
-        }
-
-        Submission::create([
-            'assignment_id' => $this->selectedAssignment->id,
-            'student_id' => Auth::id(),
-            'feedback' => $submissionContent,
-            'file_path' => $filePath,
+        $submission = Submission::create([
+            'assignment_id' => $this->selectedCourseAssignment->assignment_id,
+            'student_id' => $user->id,
+            'content' => $this->notes,
+            'status' => $status,
             'submitted_at' => now(),
         ]);
+
+        if ($this->submissionType === 'file' && $this->file) {
+            $submission->addMedia($this->file->getRealPath())
+                ->usingName($this->file->getClientOriginalName())
+                ->toMediaCollection('submission_documents');
+        } elseif ($this->submissionType === 'link') {
+            $submission->content = "Submitted via link: {$this->link_url}\n\nNotes:\n" . $this->notes;
+            $submission->save();
+        }
 
         $this->closeSubmissionModal();
 

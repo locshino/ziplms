@@ -15,51 +15,6 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Tags\HasTags;
 
-/**
- * @property string $id
- * @property string $title
- * @property string|null $description
- * @property numeric $max_points
- * @property int|null $max_attempts
- * @property AssignmentStatus $status
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Audit> $audits
- * @property-read int|null $audits_count
- * @property-read \App\Models\CourseAssignment|null $pivot
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Course> $courses
- * @property-read int|null $courses_count
- * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \App\Models\Media> $media
- * @property-read int|null $media_count
- * @property \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tag> $tags
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Submission> $submissions
- * @property-read int|null $submissions_count
- * @property-read int|null $tags_count
- * @method static \Database\Factories\AssignmentFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereMaxAttempts($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereMaxPoints($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereTitle($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment withAllTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment withAllTagsOfAnyType($tags)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment withAnyTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment withAnyTagsOfAnyType($tags)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment withAnyTagsOfType(array|string $type)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment withTrashed(bool $withTrashed = true)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment withoutTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment withoutTrashed()
- * @mixin \Eloquent
- */
 class Assignment extends Model implements HasMedia, Auditable
 {
     use HasFactory,
@@ -96,22 +51,30 @@ class Assignment extends Model implements HasMedia, Auditable
         ];
     }
 
-    // Course relationships
+    /**
+     * Mối quan hệ nhiều-nhiều với Course.
+     * Một bài tập có thể được sử dụng trong nhiều khóa học.
+     */
     public function courses(): BelongsToMany
     {
         return $this->belongsToMany(Course::class, 'course_assignments')
-            ->using(CourseAssignment::class)
+            ->using(CourseAssignment::class) // Sử dụng Pivot Model tùy chỉnh
             ->withPivot('id', 'start_at', 'end_submission_at', 'start_grading_at', 'end_at')
             ->withTimestamps();
     }
+    
 
-    // Submission relationships
+    /**
+     * Một bài tập có nhiều bài nộp.
+     */
     public function submissions(): HasMany
     {
         return $this->hasMany(Submission::class);
     }
 
-    // Media collections
+    /**
+     * Đăng ký media collection cho các tài liệu đính kèm của bài tập.
+     */
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('assignment_documents')->acceptsMimeTypes([

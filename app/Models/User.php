@@ -96,15 +96,23 @@ class User extends Authenticatable implements HasMedia
      */
     protected $casts = [
         'status' => UserStatus::class,
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
     ];
 
-    // Relationships as Teacher
-    public function teachingCourses(): HasMany
+    /**
+     * FIX: Renamed from teachingCourses to taughtCourses to match the call in GradingPage.
+     * This relationship defines the courses taught by this user.
+     */
+    public function taughtCourses(): HasMany
     {
         return $this->hasMany(Course::class, 'teacher_id');
     }
 
-    // Relationships as Student
+    /**
+     * Relationships as Student
+     * This relationship defines the courses this user is enrolled in.
+     */
     public function courses(): BelongsToMany
     {
         return $this->belongsToMany(Course::class, 'course_user', 'user_id', 'course_id')
