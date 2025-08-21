@@ -58,7 +58,7 @@ class AssignmentResource extends Resource
         return [
             'index' => ListAssignments::route('/'),
             'create' => CreateAssignment::route('/create'),
-            'view' => ViewAssignment::route('/{record}'),
+            // 'view' => ViewAssignment::route('/{record}'),
             'edit' => EditAssignment::route('/{record}/edit'),
         ];
     }

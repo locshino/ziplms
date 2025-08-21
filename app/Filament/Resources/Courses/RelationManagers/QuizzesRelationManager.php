@@ -5,8 +5,14 @@ namespace App\Filament\Resources\Courses\RelationManagers;
 use App\Filament\Resources\Quizzes\QuizResource;
 use Filament\Actions\CreateAction;
 use Filament\Actions\AttachAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -15,7 +21,25 @@ class QuizzesRelationManager extends RelationManager
 {
     protected static string $relationship = 'quizzes';
 
-    protected static ?string $relatedResource = QuizResource::class;
+    // protected static ?string $relatedResource = QuizResource::class;
+
+    public function form(Schema $form): Schema
+    {
+        return $form
+            ->schema([
+                TextInput::make('title')
+                    ->label('Title')
+                    ->columnSpanFull()
+                    ->disabled()
+                    ->required(),
+                DateTimePicker::make('start_at')
+                    ->label('Start At')
+                    ->required(),
+                DateTimePicker::make('end_at')
+                    ->label('End At')
+                    ->required(),
+            ]);
+    }
 
     public function table(Table $table): Table
     {
@@ -60,9 +84,8 @@ class QuizzesRelationManager extends RelationManager
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->headerActions([
-                CreateAction::make(),
                 AttachAction::make()
-                    ->schema(fn (AttachAction $action): array => [
+                    ->schema(fn(AttachAction $action): array => [
                         $action->getRecordSelect(),
                         DateTimePicker::make('start_at')
                             ->before('end_at')
@@ -72,6 +95,15 @@ class QuizzesRelationManager extends RelationManager
                             ->required(),
                     ])
                     ->multiple()
+            ])
+            ->recordActions([
+                EditAction::make(),
+                DetachAction::make(),
+            ])->toolbarActions([
+                BulkActionGroup::make([
+                    // ...
+                    DetachBulkAction::make(),
+                ]),
             ]);
     }
 }

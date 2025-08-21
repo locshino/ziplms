@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Libs\Roles\RoleHelper;
 use App\Models\User;
 use App\Models\Role;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -31,7 +32,8 @@ class RolePolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_role');
+        // return $user->can('create_role');
+        return false; // Prevent creation of roles through the UI
     }
 
     /**
@@ -47,6 +49,7 @@ class RolePolicy
      */
     public function delete(User $user, Role $role): bool
     {
+        if (RoleHelper::isSystemRole($role->name)) return false;
         return $user->can('delete_role');
     }
 
@@ -63,6 +66,7 @@ class RolePolicy
      */
     public function forceDelete(User $user, Role $role): bool
     {
+        if (RoleHelper::isSystemRole($role->name)) return false;
         return $user->can('{{ ForceDelete }}');
     }
 

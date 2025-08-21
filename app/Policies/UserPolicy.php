@@ -2,6 +2,8 @@
 
 namespace App\Policies;
 
+use App\Libs\Roles\RoleHelper;
+use App\Models\Role;
 use App\Models\User;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -27,7 +29,7 @@ class UserPolicy
      * @param  \App\Models\User  $user
      * @return bool
      */
-    public function view(User $user): bool
+    public function view(User $user, User $userRecord): bool
     {
         return $user->can('view_users::user');
     }
@@ -49,8 +51,12 @@ class UserPolicy
      * @param  \App\Models\User  $user
      * @return bool
      */
-    public function update(User $user): bool
+    public function update(User $user, User $userRecord): bool
     {
+        // Prevent lower role from updating higher role
+        $compare = RoleHelper::compareUserRoles($user, $userRecord);
+        if ($compare === -1) return false;
+
         return $user->can('update_users::user');
     }
 
@@ -60,8 +66,11 @@ class UserPolicy
      * @param  \App\Models\User  $user
      * @return bool
      */
-    public function delete(User $user): bool
+    public function delete(User $user, User $userRecord): bool
     {
+        if ($user->id === $userRecord->id) return false;
+        if (RoleHelper::isSuperAdmin($userRecord)) return false;
+
         return $user->can('delete_users::user');
     }
 
@@ -82,8 +91,15 @@ class UserPolicy
      * @param  \App\Models\User  $user
      * @return bool
      */
-    public function forceDelete(User $user): bool
+    public function forceDelete(User $user, User $userRecord): bool
     {
+        if ($user->id === $userRecord->id) return false;
+        if (RoleHelper::isSuperAdmin($userRecord)) return false;
+
+        // Prevent lower role from force deleting higher role
+        $compare = RoleHelper::compareUserRoles($user, $userRecord);
+        if ($compare === -1) return false;
+
         return $user->can('force_delete_users::user');
     }
 
@@ -104,7 +120,7 @@ class UserPolicy
      * @param  \App\Models\User  $user
      * @return bool
      */
-    public function restore(User $user): bool
+    public function restore(User $user, User $userRecord): bool
     {
         return $user->can('restore_users::user');
     }
@@ -126,7 +142,7 @@ class UserPolicy
      * @param  \App\Models\User  $user
      * @return bool
      */
-    public function replicate(User $user): bool
+    public function replicate(User $user, User $userRecord): bool
     {
         return $user->can('replicate_users::user');
     }

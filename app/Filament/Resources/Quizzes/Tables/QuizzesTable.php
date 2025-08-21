@@ -40,7 +40,8 @@ class QuizzesTable
                     ->searchable(),
                 SpatieTagsColumn::make('tags')
                     ->label('Phân loại')
-                    ->type(Quiz::class),
+                    ->type(Quiz::class)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
