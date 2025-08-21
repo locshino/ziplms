@@ -24,7 +24,6 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \App\Models\Course $course
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment onlyTrashed()
@@ -41,15 +40,14 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseAssignment withoutTrashed()
- *
  * @mixin \Eloquent
  */
 class CourseAssignment extends Pivot implements Auditable
 {
     use HasFactory,
         HasUuids,
-        \OwenIt\Auditing\Auditable,
-        SoftDeletes;
+        SoftDeletes,
+        \OwenIt\Auditing\Auditable;
 
     /**
      * The table associated with the model.
@@ -94,17 +92,13 @@ class CourseAssignment extends Pivot implements Auditable
         ];
     }
 
-    /**
-     * Lấy thông tin khóa học mà bản ghi này thuộc về.
-     */
+    // Course relationship
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
     }
 
-    /**
-     * Lấy thông tin bài tập mà bản ghi này thuộc về.
-     */
+    // Assignment relationship
     public function assignment(): BelongsTo
     {
         return $this->belongsTo(Assignment::class);

@@ -48,7 +48,6 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property-read int|null $submissions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Course> $teachingCourses
  * @property-read int|null $teaching_courses_count
- *
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
@@ -72,7 +71,6 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutPermission($permissions)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutRole($roles, $guard = null)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
- *
  * @mixin \Eloquent
  */
 class User extends Authenticatable implements HasMedia
@@ -98,8 +96,6 @@ class User extends Authenticatable implements HasMedia
      */
     protected $casts = [
         'status' => UserStatus::class,
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
     ];
 
     // Relationships as Teacher
