@@ -1,9 +1,16 @@
 <x-filament-panels::page :fullHeight="true">
     <div class="space-y-6">
+        <div class="flex justify-end">
+            <button type="button" onclick="window.location.reload()"
+                class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg shadow hover:bg-indigo-700 transition">
+                <x-heroicon-o-cube class="w-5 h-5 mr-2" />
+                Load lại
+            </button>
+        </div>
         <x-tabs-nav :navs="[
-            ['key' => 'ongoing', 'label' => 'Đang diễn ra', 'count' => count($ongoingCourses)],
-            ['key' => 'completed', 'label' => 'Đã kết thúc', 'count' => count($completedCourses)],
-        ]">
+        ['key' => 'ongoing', 'label' => 'Đang diễn ra', 'count' => count($ongoingCourses)],
+        ['key' => 'completed', 'label' => 'Đã kết thúc', 'count' => count($completedCourses)],
+    ]">
             <!-- Tab Content -->
             <div>
                 <!-- Ongoing Courses Tab -->
