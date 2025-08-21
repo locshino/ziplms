@@ -6,6 +6,7 @@ use App\Enums\MimeType;
 use App\Enums\Status\CourseStatus;
 use App\Filament\Resources\Users\Tables\UsersTable;
 use App\Models\Course;
+use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\ModalTableSelect;
 use Filament\Schemas\Components\Section;
@@ -16,6 +17,8 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\SpatieTagsInput;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Schemas\Components\Utilities\Set;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Malzariey\FilamentLexicalEditor\LexicalEditor;
@@ -56,8 +59,56 @@ class CourseForm
                             ->relationship('teacher', 'name')
                             ->tableConfiguration(UsersTable::class)
                             ->required(),
-                        DateTimePicker::make('start_at'),
-                        DateTimePicker::make('end_at'),
+                        Action::make('setEvergreen')
+                            ->label('Chuyển sang Vô thời hạn')
+                            ->color('info')
+                            ->icon('heroicon-o-calendar-days')
+                            ->requiresConfirmation()
+                            ->modalHeading('Xác nhận chuyển đổi sang Vô thời hạn')
+                            ->modalDescription(new HtmlString(
+                                'Hành động này sẽ xóa lịch trình của khóa học. <br/><br/>' .
+                                    '<strong class="text-danger">Cảnh báo: Nếu khóa học đã có học viên, bạn sẽ không thể thiết lập lại lịch cho khóa học này nữa.</strong>'
+                            ))
+                            ->modalSubmitActionLabel('Có, tôi hiểu và xác nhận')
+                            ->action(function (Set $set) {
+                                $set('start_at', null);
+                                $set('end_at', null);
+                            }),
+                        DateTimePicker::make('start_at')
+                            ->label('Thời gian bắt đầu')
+                            ->disabled(function (?Course $record) {
+                                if (!$record) {
+                                    return false; // Always enabled on create
+                                }
+                                // Rule 1: Disable if it's an evergreen course with students
+                                if ($record->start_at === null && $record->students()->exists()) {
+                                    return true;
+                                }
+                                // Rule 2: Disable if the timed course is currently running
+                                if ($record->start_at && now()->between($record->start_at, $record->end_at)) {
+                                    return true;
+                                }
+                                return false;
+                            })
+                            ->helperText(function (?Course $record) {
+                                if ($record && $record->start_at === null && $record->students()->exists()) {
+                                    return 'Không thể đặt lại lịch vì khóa học đã có học viên.';
+                                }
+                                return null;
+                            }),
+
+                        DateTimePicker::make('end_at')
+                            ->label('Thời gian kết thúc')
+                            ->disabled(function (?Course $record) {
+                                if (!$record) {
+                                    return false;
+                                }
+                                // Rule 1: Disable if it's an evergreen course with students
+                                if ($record->start_at === null && $record->students()->exists()) {
+                                    return true;
+                                }
+                                return false;
+                            }),
                         Select::make('status')
                             ->options(CourseStatus::class)
                             ->required(),
@@ -83,8 +134,8 @@ class CourseForm
                             ->reorderable()
                             ->downloadable()
                             ->openable()
-                            ->mediaName(fn ($file) => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document')
-                            ->customProperties(fn ($file) => ['title' => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document']),
+                            ->mediaName(fn($file) => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document')
+                            ->customProperties(fn($file) => ['title' => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document']),
                     ]),
                 Section::make('Mở rộng')
                     ->columnSpanFull()

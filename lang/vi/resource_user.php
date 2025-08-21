@@ -63,6 +63,7 @@ return [
             'roles' => 'Vai trò',
             'created_at' => 'Ngày tạo',
             'updated_at' => 'Ngày cập nhật',
+            'deleted_at' => 'Ngày xóa',
         ],
         'filters' => [
             'status' => 'Lọc theo trạng thái',

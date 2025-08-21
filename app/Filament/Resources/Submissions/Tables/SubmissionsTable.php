@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Submissions\Tables;
 
+use App\Enums\Status\SubmissionStatus;
+use App\Models\Submission;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -9,8 +11,11 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Malzariey\FilamentDaterangepickerFilter\Filters\DateRangeFilter;
 
 class SubmissionsTable
 {
@@ -20,9 +25,12 @@ class SubmissionsTable
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
-                    ->searchable(),
+                    ->searchable()
+                    ->copyable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('assignment.title')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('student.name')
                     ->searchable(),
                 TextColumn::make('status')
@@ -30,7 +38,7 @@ class SubmissionsTable
                 TextColumn::make('submitted_at')
                     ->dateTime()
                     ->sortable(),
-                TextColumn::make('graded_by')
+                TextColumn::make('grader.name')
                     ->searchable(),
                 TextColumn::make('points')
                     ->numeric()
@@ -51,8 +59,25 @@ class SubmissionsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultGroup('assignment.title')
             ->filters([
                 TrashedFilter::make(),
+                SelectFilter::make('assignment')
+                    ->relationship('assignment', 'title')
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('student')
+                    ->relationship('student', 'name')
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('grader')
+                    ->relationship('grader', 'name')
+                    ->searchable()
+                    ->preload(),
+                DateRangeFilter::make('submitted_at'),
+                DateRangeFilter::make('graded_at'),
+                SelectFilter::make('status')
+                    ->options(SubmissionStatus::class),
             ])
             ->recordActions([
                 ViewAction::make(),

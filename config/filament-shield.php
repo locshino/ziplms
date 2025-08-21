@@ -62,7 +62,7 @@ return [
     ],
 
     'generator' => [
-        'option' => 'policies_and_permissions',
+        'option' => 'permissions',
         'policy_directory' => 'Policies',
         'policy_namespace' => 'Policies',
     ],

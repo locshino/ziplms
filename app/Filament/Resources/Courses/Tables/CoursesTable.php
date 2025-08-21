@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Courses\Tables;
 
+use App\Enums\Status\CourseStatus;
 use App\Models\Course;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -12,8 +13,11 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\SpatieTagsColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Malzariey\FilamentDaterangepickerFilter\Filters\DateRangeFilter;
 
 class CoursesTable
 {
@@ -23,18 +27,13 @@ class CoursesTable
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
-                    ->searchable()
+                    ->copyable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('title')
                     ->searchable(),
                 TextColumn::make('slug')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('price')
-                    ->money()
-                    ->sortable(),
-                IconColumn::make('is_featured')
-                    ->boolean(),
                 TextColumn::make('teacher.name')
                     ->searchable(),
                 TextColumn::make('start_at')
@@ -45,9 +44,15 @@ class CoursesTable
                     ->sortable(),
                 TextColumn::make('status')
                     ->searchable(),
+                TextColumn::make('price')
+                    ->money()
+                    ->sortable(),
+                IconColumn::make('is_featured')
+                    ->boolean(),
                 SpatieTagsColumn::make('tags')
                     ->label('Phân loại')
-                    ->type(Course::class),
+                    ->type(Course::class)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -63,6 +68,15 @@ class CoursesTable
             ])
             ->filters([
                 TrashedFilter::make(),
+                SelectFilter::make('teacher')
+                    ->relationship('teacher', 'name')
+                    ->searchable()
+                    ->preload(),
+                DateRangeFilter::make('start_at'),
+                DateRangeFilter::make('end_at'),
+                SelectFilter::make('status')
+                    ->options(CourseStatus::class),
+                TernaryFilter::make('is_featured'),
             ])
             ->recordActions([
                 EditAction::make(),

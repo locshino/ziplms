@@ -42,11 +42,6 @@ class CoursesRelationManager extends RelationManager
                 TextColumn::make('slug')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('price')
-                    ->money()
-                    ->sortable(),
-                IconColumn::make('is_featured')
-                    ->boolean(),
                 TextColumn::make('teacher.name')
                     ->searchable(),
                 TextColumn::make('start_at')
@@ -78,8 +73,6 @@ class CoursesRelationManager extends RelationManager
             ])
             ->recordActions([
                 ViewAction::make(),
-                AttachAction::make()
-                    ->multiple(),
             ])
             ->toolbarActions([]);
     }
