@@ -18,6 +18,11 @@ class MyCourse extends Page
 
     public Collection|EloquentCollection $ongoingCourses;
     public Collection|EloquentCollection $completedCourses;
+    public string $searchCourse;
+    public array $tags = [];
+    public $teachers = [];
+    public $selectedTeacher;
+
 
     public function mount(): void
     {
@@ -31,13 +36,18 @@ class MyCourse extends Page
 
         foreach ($enrolledCourses as $course) {
             $pivot = $course->pivot;
-            if (! $pivot->end_at || $pivot->end_at->isAfter($now)) {
+            if (!$pivot->end_at || $pivot->end_at->isAfter($now)) {
                 $ongoingCourses->push($course);
             } elseif ($pivot->end_at && $pivot->end_at->isBefore($now)) {
                 $completedCourses->push($course);
             }
         }
-
+        foreach ($enrolledCourses as $course) {
+            $this->tags = $course->tags()->pluck('name')->unique()->toArray();
+        }
+        foreach ($enrolledCourses as $course) {
+            $this->teachers = User::where('id', $course->teacher_id)->get();
+        }
         $this->ongoingCourses = $ongoingCourses;
         $this->completedCourses = $completedCourses;
     }
@@ -67,4 +77,125 @@ class MyCourse extends Page
             ->orderBy('courses.created_at', 'asc')
             ->paginate(10);
     }
+    public function searchCourses()
+    {
+        $ongoingCourses = collect();
+        $closedCourses = collect();
+
+        $enrolledCourses = $this->getEnrolledCourses();
+
+        foreach ($enrolledCourses as $course) {
+
+            if ($this->searchCourse !== '' && !str_contains(strtolower($course->title), strtolower($this->searchCourse))) {
+                continue;
+            }
+
+
+            if ($course->status !== CourseStatus::PUBLISHED) {
+                $closedCourses->push($course);
+                continue;
+            }
+            $ongoingCourses->push($course);
+        }
+
+        $this->ongoingCourses = $ongoingCourses;
+        $this->closedCourses = $closedCourses;
+    }
+    public function sortCourses(string $sort)
+    {
+        $this->sortBy = $sort;
+        $this->filterCourses();
+    }
+    protected function filterCourses()
+    {
+        $ongoingCourses = collect();
+        $closedCourses = collect();
+
+        $enrolledCourses = $this->getEnrolledCourses(); // Lấy danh sách các course mà user đã tham gia
+
+        foreach ($enrolledCourses as $course) {
+            if ($course->status !== CourseStatus::PUBLISHED) {
+                $closedCourses->push($course);
+                continue;
+            }
+
+            // Course ongoing
+            $ongoingCourses->push($course);
+        }
+
+        // Áp dụng sắp xếp
+        $this->ongoingCourses = $this->sortCollection($ongoingCourses);
+        $this->closedCourses = $this->sortCollection($closedCourses);
+    }
+    protected function sortCollection($collection)
+    {
+        return match ($this->sortBy) {
+            'newest' => $collection->sortByDesc('created_at')->values(),
+            'oldest' => $collection->sortBy('created_at')->values(),
+            'end_at' => $collection->sortBy(fn($q) => $q->pivot?->end_at ?? now())->values(),
+            default => $collection,
+        };
+    }
+    public function filterCoursesByTag($tag = null)
+    {
+        $ongoingCourses = collect();
+        $closedCourses = collect();
+        $this->selectedTag = $tag; // lưu tag đã chọn
+
+        $enrolledCourses = $this->getEnrolledCourses(); // tất cả course người dùng đăng ký
+
+        foreach ($enrolledCourses as $course) {
+
+            // Kiểm tra tag
+            $hasSelectedTag = $this->selectedTag
+                ? $course->tags->contains('name', $this->selectedTag)
+                : true; 
+            if (!$hasSelectedTag) {
+                continue; 
+            }
+            if ($course->status !== CourseStatus::PUBLISHED) {
+                $closedCourses->push($course);
+                continue;
+            }
+
+
+            // Course ongoing
+            $ongoingCourses->push($course);
+        }
+
+        $this->ongoingCourses = $ongoingCourses;
+        $this->closedCourses = $closedCourses;
+    }
+    public function filterCoursesByTeacher($teacherId)
+    {
+        $ongoingCourses = collect();
+        $closedCourses = collect();
+        $this->selectedTeacher = $teacherId;
+
+        $enrolledCourses = $this->getEnrolledCourses();
+
+        foreach ($enrolledCourses as $course) {
+
+
+            $hasSelectedTeacher = $this->selectedTeacher
+                ? $course->teacher_id == $this->selectedTeacher
+                : true;
+
+            if (!$hasSelectedTeacher) {
+                continue;
+            }
+
+            if ($course->status !== CourseStatus::PUBLISHED) {
+                $closedCourses->push($course);
+                continue;
+            }
+
+            $ongoingCourses->push($course);
+        }
+
+        $this->ongoingCourses = $ongoingCourses;
+        $this->closedCourses = $closedCourses;
+    }
+
+
 }
