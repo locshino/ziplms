@@ -142,16 +142,21 @@
                                 <div class="pl-14 flex flex-col gap-3">
                                     @foreach($result['question']->answerChoices as $choiceIndex => $choice)
                                         @php
-                                            $isUserChoice = $result['user_answer'] && $result['user_answer']->answer_choice_id == $choice->id;
+                                            $userChoiceIds = $result['user_answers']->pluck('answer_choice_id')->toArray();
+                                            // Debug: uncomment to see user choices
+                                            // dd('Question ID: ' . $result['question']->id, 'User Choice IDs: ', $userChoiceIds, 'Current Choice ID: ' . $choice->id);
+                                            $isUserChoice = in_array($choice->id, $userChoiceIds);
                                             $isCorrectChoice = $choice->is_correct;
                                             $choiceLabel = chr(65 + $choiceIndex);
                                             $choiceClass = '';
-                                            if ($isCorrectChoice)
-                                                $choiceClass = 'border-green-600 bg-green-50 dark:bg-green-900/15';
-                                            elseif ($isUserChoice)
-                                                $choiceClass = 'border-red-600 bg-red-50 dark:bg-red-900/15';
+                                            if ($isCorrectChoice && $isUserChoice)
+                                                $choiceClass = 'border-green-600 bg-green-50 dark:bg-green-900/15'; // Correct and selected
+                                            elseif ($isCorrectChoice && !$isUserChoice)
+                                                $choiceClass = 'border-green-400 bg-green-25 dark:bg-green-900/10'; // Correct but not selected
+                                            elseif (!$isCorrectChoice && $isUserChoice)
+                                                $choiceClass = 'border-red-600 bg-red-50 dark:bg-red-900/15'; // Incorrect but selected
                                             else
-                                                $choiceClass = 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700/50';
+                                                $choiceClass = 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700/50'; // Not selected
                                         @endphp
                                         <div class="flex items-start gap-3 p-3 rounded-lg border-2 {{ $choiceClass }}">
                                             <div class="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold
@@ -162,14 +167,14 @@
                                             </div>
                                             <p class="flex-1 font-medium text-gray-800 dark:text-gray-200">{!! $choice->title !!}</p>
                                             <div class="flex items-center gap-2 ml-auto">
+                                                @if($isUserChoice)
+                                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-blue-100 dark:bg-blue-600 text-blue-800 dark:text-white">
+                                                        <x-heroicon-s-hand-raised class="w-4 h-4"/> Bạn đã chọn
+                                                    </span>
+                                                @endif
                                                 @if($isCorrectChoice)
                                                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-green-100 dark:bg-green-600 text-green-800 dark:text-white">
                                                         <x-heroicon-s-check class="w-4 h-4"/> Đáp án đúng
-                                                    </span>
-                                                @endif
-                                                @if($isUserChoice && !$isCorrectChoice)
-                                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-blue-100 dark:bg-indigo-800 text-indigo-800 dark:text-indigo-200">
-                                                        <x-heroicon-s-user class="w-4 h-4"/> Lựa chọn của bạn
                                                     </span>
                                                 @endif
                                             </div>

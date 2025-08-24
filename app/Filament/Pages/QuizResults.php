@@ -29,13 +29,13 @@ class QuizResults extends Page
     public ?QuizAttempt $attemptModel = null;
 
     public ?Quiz $quiz = null;
-    
+
     public float $percentage = 0;
-    
+
     public int $correctAnswers = 0;
-    
+
     public int $incorrectAnswers = 0;
-    
+
     public int $unansweredQuestions = 0;
 
     public array $attemptHistory = [];
@@ -68,14 +68,14 @@ class QuizResults extends Page
         }
 
         $this->quiz = $this->attemptModel->quiz;
-        
+
         // Calculate percentage and correct answers
         // Get max score from pivot table (quiz_questions.points)
         $maxScore = $this->quiz->questions->sum('pivot.points');
         $this->percentage = $maxScore > 0 ? ($this->attemptModel->points / $maxScore) * 100 : 0;
         // Ensure percentage doesn't exceed 100%
         $this->percentage = min($this->percentage, 100);
-        
+
         // Count correct, incorrect and unanswered questions
         $this->correctAnswers = 0;
         $this->incorrectAnswers = 0;
@@ -98,7 +98,7 @@ class QuizResults extends Page
             ->where('status', 'completed')
             ->orderBy('end_at', 'desc')
             ->get();
-        
+
         // Calculate percentage for each attempt
         $maxScore = $this->quiz->questions->sum('pivot.points');
         $this->attemptHistory = $attempts->map(function ($attempt) use ($maxScore) {
@@ -117,15 +117,21 @@ class QuizResults extends Page
         $correct = 0;
 
         foreach ($this->quiz->questions as $question) {
-            $userAnswer = $this->attemptModel->studentAnswers
-                ->where('question_id', $question->id)
-                ->first();
+            $userAnswers = $this->attemptModel->studentAnswers
+                ->where('question_id', $question->id);
 
-            $correctChoice = $question->answerChoices
+            $correctChoiceIds = $question->answerChoices
                 ->where('is_correct', true)
-                ->first();
+                ->pluck('id')
+                ->toArray();
 
-            if ($userAnswer && $correctChoice && $userAnswer->answer_choice_id == $correctChoice->id) {
+            $userChoiceIds = $userAnswers->pluck('answer_choice_id')->toArray();
+
+            // Check if user answered correctly (all correct choices selected, no incorrect ones)
+            if (
+                count($correctChoiceIds) === count($userChoiceIds) &&
+                empty(array_diff($correctChoiceIds, $userChoiceIds))
+            ) {
                 $correct++;
             }
         }
@@ -139,15 +145,23 @@ class QuizResults extends Page
         $incorrect = 0;
 
         foreach ($this->quiz->questions as $question) {
-            $userAnswer = $this->attemptModel->studentAnswers
-                ->where('question_id', $question->id)
-                ->first();
+            $userAnswers = $this->attemptModel->studentAnswers
+                ->where('question_id', $question->id);
 
-            $correctChoice = $question->answerChoices
+            $correctChoiceIds = $question->answerChoices
                 ->where('is_correct', true)
-                ->first();
+                ->pluck('id')
+                ->toArray();
 
-            if ($userAnswer && $correctChoice && $userAnswer->answer_choice_id != $correctChoice->id) {
+            $userChoiceIds = $userAnswers->pluck('answer_choice_id')->toArray();
+
+            // Check if user answered incorrectly (not all correct choices or has incorrect ones)
+            if (
+                $userAnswers->isNotEmpty() && (
+                    count($correctChoiceIds) !== count($userChoiceIds) ||
+                    !empty(array_diff($correctChoiceIds, $userChoiceIds))
+                )
+            ) {
                 $incorrect++;
             }
         }
@@ -211,15 +225,20 @@ class QuizResults extends Page
             return false;
         }
 
-        $userAnswer = $this->attemptModel->studentAnswers
-            ->where('question_id', $questionId)
-            ->first();
+        $userAnswers = $this->attemptModel->studentAnswers
+            ->where('question_id', $questionId);
 
-        $correctChoice = $question->answerChoices
+        $correctChoiceIds = $question->answerChoices
             ->where('is_correct', true)
-            ->first();
+            ->pluck('id')
+            ->toArray();
 
-        return $userAnswer && $correctChoice && $userAnswer->answer_choice_id == $correctChoice->id;
+        $userChoiceIds = $userAnswers->pluck('answer_choice_id')->toArray();
+
+        // Check if user answered correctly (all correct choices selected, no incorrect ones)
+        return $userAnswers->isNotEmpty() &&
+            count($correctChoiceIds) === count($userChoiceIds) &&
+            empty(array_diff($correctChoiceIds, $userChoiceIds));
     }
 
     public function isAnswered(string $questionId): bool
@@ -238,6 +257,14 @@ class QuizResults extends Page
         return $answer ? $answer->answer_choice_id : null;
     }
 
+    public function getUserAnswers(string $questionId): array
+    {
+        return $this->attemptModel->studentAnswers
+            ->where('question_id', $questionId)
+            ->pluck('answer_choice_id')
+            ->toArray();
+    }
+
     public function getActions(): array
     {
         return [
@@ -247,12 +274,7 @@ class QuizResults extends Page
                 ->color('gray')
                 ->url(route('filament.app.pages.my-quiz')),
 
-            Action::make('retake')
-                ->label('Làm lại')
-                ->icon('heroicon-o-arrow-path')
-                ->color('primary')
-                ->visible(fn () => $this->canRetakeQuiz())
-                ->url(fn () => route('filament.app.pages.quiz-taking', ['quiz' => $this->quiz->id])),
+
         ];
     }
 

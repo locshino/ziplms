@@ -84,6 +84,15 @@ class Question extends Model implements Auditable
         ];
     }
 
+    /**
+     * Check if this question allows multiple responses
+     * Based on the number of correct answers
+     */
+    public function getIsMultipleResponseAttribute(): bool
+    {
+        return $this->answerChoices()->where('is_correct', true)->count() > 1;
+    }
+
     // Quiz relationships
     public function quizzes(): BelongsToMany
     {

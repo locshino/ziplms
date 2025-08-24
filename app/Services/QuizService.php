@@ -101,8 +101,8 @@ class QuizService extends BaseService implements QuizServiceInterface
                     // Calculate next attempt number
                     $nextAttemptNumber = count($existingAttempts) + 1;
 
-                    // Check attempt limit
-                    if ($quiz->max_attempts && $nextAttemptNumber > $quiz->max_attempts) {
+                    // Check attempt limit (0 or null means unlimited)
+                    if ($quiz->max_attempts !== null && $quiz->max_attempts > 0 && $nextAttemptNumber > $quiz->max_attempts) {
                         throw QuizServiceException::maxAttemptsExceeded();
                     }
 
@@ -243,9 +243,13 @@ class QuizService extends BaseService implements QuizServiceInterface
             }
 
             // Check if attempt is still valid (not expired)
-            if ($attempt->quiz->time_limit) {
-                $timeElapsed = Carbon::now()->diffInMinutes($attempt->start_at);
-                if ($timeElapsed >= $attempt->quiz->time_limit) {
+            if ($attempt->quiz->time_limit_minutes) {
+                $startTime = Carbon::parse($attempt->start_at);
+                $timeLimit = $attempt->quiz->time_limit_minutes;
+                $endTime = $startTime->copy()->addMinutes($timeLimit);
+                $now = Carbon::now();
+                
+                if ($now->gte($endTime)) {
                     // Auto-submit if time limit exceeded
                     try {
                         // Get existing answers before auto-submit
@@ -325,10 +329,15 @@ class QuizService extends BaseService implements QuizServiceInterface
                     // Get quiz questions for validation
                     $quizQuestions = $this->cacheService->getQuizQuestions($attempt->quiz_id);
                     
-                    // Fallback to database if cache is empty
+                    // Fallback to database if cache is empty, load with answerChoices for JSON preparation
                     if (empty($quizQuestions) || $quizQuestions->isEmpty()) {
                         $quiz = Quiz::find($attempt->quiz_id);
-                        $quizQuestions = $quiz ? $quiz->questions()->get() : collect();
+                        $quizQuestions = $quiz ? $quiz->questions()->with('answerChoices')->get() : collect();
+                    } else {
+                        // If using cached questions, ensure answerChoices are loaded
+                        $quizQuestions = Question::with('answerChoices')
+                            ->whereIn('id', $quizQuestions->pluck('id'))
+                            ->get();
                     }
                     
                     $questionIds = collect($quizQuestions)->pluck('id')->toArray();
@@ -352,8 +361,21 @@ class QuizService extends BaseService implements QuizServiceInterface
                     // Prepare answers for bulk insert
                     $answersToInsert = [];
                     foreach ($answers as $questionId => $answerChoiceIds) {
+                        // Skip null or empty answers
+                        if ($answerChoiceIds === null || $answerChoiceIds === '') {
+                            continue;
+                        }
+
                         if (is_array($answerChoiceIds)) {
+                            // Skip empty arrays
+                            if (empty($answerChoiceIds)) {
+                                continue;
+                            }
                             foreach ($answerChoiceIds as $answerChoiceId) {
+                                // Skip empty choice IDs
+                                if (empty($answerChoiceId)) {
+                                    continue;
+                                }
                                 $answersToInsert[] = [
                                     'id' => (string) \Illuminate\Support\Str::uuid(),
                                     'quiz_attempt_id' => $attemptId,
@@ -364,6 +386,10 @@ class QuizService extends BaseService implements QuizServiceInterface
                                 ];
                             }
                         } else {
+                            // Skip empty single choice answers
+                            if (empty($answerChoiceIds)) {
+                                continue;
+                            }
                             $answersToInsert[] = [
                                 'id' => (string) \Illuminate\Support\Str::uuid(),
                                 'quiz_attempt_id' => $attemptId,
@@ -383,11 +409,15 @@ class QuizService extends BaseService implements QuizServiceInterface
                     // Calculate score with optimized method
                     $score = $this->calculateScoreOptimized($attempt, $quizQuestions, $answersToInsert);
 
+                    // Prepare answers JSON for storage
+                    $answersJson = $this->prepareAnswersJson($answers, $quizQuestions);
+
                     // Update attempt
                     $this->quizAttemptRepository->updateById($attemptId, [
                         'points' => $score,
                         'status' => 'completed',
                         'end_at' => Carbon::now(),
+                        'answers' => $answersJson,
                     ]);
 
                     // Get updated attempt
@@ -432,18 +462,26 @@ class QuizService extends BaseService implements QuizServiceInterface
     private function validateAnswersFormat(array $answers): void
     {
         try {
+            // Allow empty answers - student can submit without answering any questions
             if (empty($answers)) {
-                throw QuizServiceException::invalidAnswerSubmission();
+                return;
             }
 
             foreach ($answers as $questionId => $answerChoiceIds) {
+                // Validate question ID is not empty
                 if (empty($questionId)) {
                     throw QuizServiceException::invalidAnswerSubmission();
                 }
 
+                // Skip validation if answer is null or empty (unanswered question)
+                if ($answerChoiceIds === null || $answerChoiceIds === '') {
+                    continue;
+                }
+
                 if (is_array($answerChoiceIds)) {
+                    // For multiple choice, allow empty array (no selections)
                     if (empty($answerChoiceIds)) {
-                        throw QuizServiceException::invalidAnswerSubmission();
+                        continue;
                     }
                     foreach ($answerChoiceIds as $choiceId) {
                         if (empty($choiceId)) {
@@ -451,6 +489,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                         }
                     }
                 } else {
+                    // For single choice, validate choice ID is not empty
                     if (empty($answerChoiceIds)) {
                         throw QuizServiceException::invalidAnswerSubmission();
                     }
@@ -533,8 +572,8 @@ class QuizService extends BaseService implements QuizServiceInterface
                 return false;
             }
 
-            // Check attempt limits
-            if ($quiz->max_attempts) {
+            // Check attempt limits (0 or null means unlimited)
+            if ($quiz->max_attempts !== null && $quiz->max_attempts > 0) {
                 $attemptCount = $this->quizAttemptRepository->countStudentAttempts($quizId, $studentId);
                 if ($attemptCount >= $quiz->max_attempts) {
                     return false;
@@ -862,8 +901,8 @@ class QuizService extends BaseService implements QuizServiceInterface
     {
         try {
             $quiz = $this->repository->findById($quizId);
-            if (! $quiz || ! $quiz->max_attempts) {
-                return null;
+            if (! $quiz || $quiz->max_attempts === null || $quiz->max_attempts === 0) {
+                return null; // null means unlimited attempts
             }
 
             $attemptCount = $this->quizAttemptRepository->countStudentAttempts($quizId, $studentId);
@@ -1051,5 +1090,62 @@ class QuizService extends BaseService implements QuizServiceInterface
             ]);
             throw QuizServiceException::databaseError($e->getMessage());
         }
+    }
+
+    /**
+     * Prepare answers in JSON format for storage
+     * Format: {
+     *   "question_id": number,
+     *   "question_text": string,
+     *   "is_multiple_response": boolean,
+     *   "answer_choice_id": string|array (string for single choice, array for multiple choices)
+     * }
+     *
+     * @param array $answers Student answers in format [question_id => answer_choice_id(s)]
+     * @param Collection $quizQuestions Quiz questions collection
+     * @return array JSON formatted answers
+     */
+    private function prepareAnswersJson(array $answers, Collection $quizQuestions): array
+    {
+        $answersJson = [];
+
+        foreach ($answers as $questionId => $answerData) {
+            // Skip null or empty answers
+            if ($answerData === null || $answerData === '' || (is_array($answerData) && empty($answerData))) {
+                continue;
+            }
+
+            // Get question details
+            $question = $quizQuestions->where('id', $questionId)->first();
+            if (!$question) {
+                continue;
+            }
+
+            $questionAnswer = [
+                'question_id' => $questionId,
+                'question_text' => $question->question_text ?? '',
+                'is_multiple_response' => $question->is_multiple_response ?? false,
+            ];
+
+            if (is_array($answerData)) {
+                // Multiple choice answers - store as array
+                $selectedChoices = [];
+                foreach ($answerData as $choiceId) {
+                    if (!empty($choiceId)) {
+                        $selectedChoices[] = $choiceId;
+                    }
+                }
+                $questionAnswer['answer_choice_id'] = $selectedChoices;
+            } else {
+                // Single choice answer - store as string
+                if (!empty($answerData)) {
+                    $questionAnswer['answer_choice_id'] = $answerData;
+                }
+            }
+
+            $answersJson[] = $questionAnswer;
+        }
+
+        return $answersJson;
     }
 }

@@ -1,4 +1,27 @@
 <x-filament-panels::page>
+    <style>
+        /* Custom radio button styling */
+        input[type="radio"]:checked + .radio-indicator {
+            background: #3b82f6 !important;
+            border-color: #3b82f6 !important;
+        }
+        
+        input[type="radio"]:checked + .radio-indicator .radio-dot {
+            opacity: 1 !important;
+            transform: scale(1) !important;
+        }
+        
+        /* Custom checkbox styling */
+        input[type="checkbox"]:checked + .checkbox-indicator {
+            background: #3b82f6 !important;
+            border-color: #3b82f6 !important;
+        }
+        
+        input[type="checkbox"]:checked + .checkbox-indicator .checkbox-icon {
+            opacity: 1 !important;
+            transform: scale(1) !important;
+        }
+    </style>
     <div x-data="myQuizTakingApp()" x-init="init()" class="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
             <!-- Main Content: Questions -->
@@ -28,9 +51,10 @@
                                             wire:key="checkbox-{{ $question->id }}-{{ $choice->id }}"
                                             wire:click="updateAnswer('{{ $question->id }}', '{{ $choice->id }}')"
                                             @if(isset($this->currentAnswers[$question->id]) && is_array($this->currentAnswers[$question->id]) && in_array($choice->id, $this->currentAnswers[$question->id])) checked @endif
-                                            class="peer sr-only">
-                                        <div class="w-5 h-5 border-2 border-gray-400 rounded flex items-center justify-center flex-shrink-0 transition-all duration-200 peer-checked:bg-blue-500 peer-checked:border-blue-500">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 text-white opacity-0 scale-50 transition-all duration-200 peer-checked:opacity-100 peer-checked:scale-100">
+                                            class="peer sr-only"
+                                            onchange="this.closest('label').querySelector('.checkbox-indicator').style.backgroundColor = this.checked ? '#3b82f6' : 'transparent'; this.closest('label').querySelector('.checkbox-indicator').style.borderColor = this.checked ? '#3b82f6' : '#9ca3af'; this.closest('label').querySelector('.checkbox-icon').style.opacity = this.checked ? '1' : '0';">
+                                        <div class="checkbox-indicator w-5 h-5 border-2 border-gray-400 rounded flex items-center justify-center flex-shrink-0 transition-all duration-200 peer-checked:bg-blue-500 peer-checked:border-blue-500">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="checkbox-icon w-3.5 h-3.5 text-white opacity-0 scale-50 transition-all duration-200 peer-checked:opacity-100 peer-checked:scale-100">
                                                 <path fill-rule="evenodd"
                                                     d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
                                                     clip-rule="evenodd" />
@@ -43,13 +67,10 @@
                                             wire:click="updateAnswer('{{ $question->id }}', '{{ $choice->id }}')"
                                             @if(isset($this->currentAnswers[$question->id]) && $this->currentAnswers[$question->id] == $choice->id)
                                             checked @endif
-                                            class="peer sr-only">
-                                        <div class="w-5 h-5 border-2 border-gray-400 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200 peer-checked:bg-blue-500 peer-checked:border-blue-500">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 text-white opacity-0 scale-50 transition-all duration-200 peer-checked:opacity-100 peer-checked:scale-100">
-                                                <path fill-rule="evenodd"
-                                                    d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
+                                            class="peer sr-only"
+                                            onchange="this.closest('label').querySelector('.radio-indicator').style.backgroundColor = this.checked ? '#3b82f6' : 'transparent'; this.closest('label').querySelector('.radio-indicator').style.borderColor = this.checked ? '#3b82f6' : '#9ca3af'; this.closest('label').querySelector('.radio-dot').style.opacity = this.checked ? '1' : '0';">
+                                        <div class="radio-indicator w-5 h-5 border-2 border-gray-400 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200">
+                                            <div class="radio-dot w-2 h-2 bg-white rounded-full opacity-0 scale-50 transition-all duration-200"></div>
                                         </div>
                                     @endif
                                     <span class="ml-3 text-gray-600 dark:text-gray-400 peer-checked:text-blue-800 dark:peer-checked:text-white peer-checked:font-medium">{!! $choice->title !!}</span>
@@ -76,6 +97,7 @@
                                 <div class="text-center p-3 rounded-lg" :class="{ 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300': timeWarning, 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300': !timeWarning }">
                                     <div class="text-xs font-medium mb-1">Thời gian còn lại</div>
                                     <div class="text-lg font-mono font-bold" x-text="formatTime(remainingSeconds)"></div>
+                                    <div class="text-xs opacity-75 mt-1">Tổng thời gian: {{ $this->selectedQuiz->time_limit_minutes }} phút</div>
                                 </div>
                             @else
                                 <div class="text-center p-3 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg">
@@ -101,12 +123,11 @@
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                     <div class="space-y-4">
                         <x-filament::button color="success" icon="heroicon-o-check"
-                             wire:click="submitQuiz"
                              x-on:click="confirmSubmit()"
                              x-bind:disabled="$wire.submitting"
                              class="w-full">
-                             <span wire:loading.remove wire:target="submitQuiz">Nộp bài</span>
-                             <span wire:loading wire:target="submitQuiz">Đang nộp...</span>
+                             <span x-show="!$wire.submitting">Nộp bài</span>
+                             <span x-show="$wire.submitting">Đang nộp...</span>
                          </x-filament::button>
                          
                          <x-filament::button color="gray" icon="heroicon-o-arrow-left"
@@ -128,6 +149,7 @@
                      submitting: false,
                      quizId: @js($this->selectedQuiz->id),
                      attemptId: @js($this->currentAttempt->id ?? null),
+                     timer: null,
 
                      init() {
                          if (!this.isUnlimited) {
@@ -153,11 +175,24 @@
 
                      startTimer() {
                          if (this.isUnlimited) return;
-                         const timer = setInterval(() => {
+                         
+                         // Clear any existing timer to prevent multiple timers
+                         if (this.timer) {
+                             clearInterval(this.timer);
+                         }
+                         
+                         // Check if time is already up
+                         if (this.remainingSeconds <= 0) {
+                             this.autoSubmit();
+                             return;
+                         }
+                         
+                         this.timer = setInterval(() => {
                              this.remainingSeconds--;
                              this.timeWarning = this.remainingSeconds <= 300;
                              if (this.remainingSeconds <= 0) {
-                                 clearInterval(timer);
+                                 clearInterval(this.timer);
+                                 this.timer = null;
                                  this.autoSubmit();
                              }
                          }, 1000);
@@ -176,19 +211,38 @@
 
                      confirmSubmit() {
                          if (this.submitting) return;
-                         if (confirm('Bạn có chắc chắn muốn nộp bài? Bạn không thể thay đổi sau khi nộp.')) {
-                             // wire:click handles the rest
-                         } else {
-                             event.preventDefault();
-                         }
+                         
+                         // Call custom action instead of direct method
+                         this.$wire.mountAction('customSubmit');
+                         
+                         event.preventDefault();
                      },
 
                      autoSubmit() {
-                         alert('Hết thời gian! Bài quiz sẽ được nộp tự động.');
-                         this.$wire.call('submitQuiz');
+                         // Show Filament notification for auto-submit
+                         this.$wire.call('showAutoSubmitNotification');
+                         this.$wire.mountAction('customSubmit');
                      }
                  }
              }
+         </script>
+         
+         <script>
+             document.addEventListener('DOMContentLoaded', function() {
+                 // Đảm bảo hiển thị trạng thái đã chọn khi trang được tải
+                 document.querySelectorAll('input[type="radio"]:checked, input[type="checkbox"]:checked').forEach(function(input) {
+                     const event = new Event('change');
+                     input.dispatchEvent(event);
+                 });
+             });
+             
+             // Lắng nghe sự kiện Livewire để cập nhật hiển thị
+             document.addEventListener('livewire:updated', function() {
+                 document.querySelectorAll('input[type="radio"]:checked, input[type="checkbox"]:checked').forEach(function(input) {
+                     const event = new Event('change');
+                     input.dispatchEvent(event);
+                 });
+             });
          </script>
      </div>
 </x-filament-panels::page>

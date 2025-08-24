@@ -3,136 +3,95 @@
     <div class="min-h-screen bg-slate-100 dark:bg-slate-900">
         <div class="max-w-7xl mx-auto px-4 py-8">
 
-            <!-- Stats Section -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div
-                    class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
-                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Tổng số Quiz</p>
-                    <p class="mt-1 text-3xl font-bold tracking-tight text-blue-500 dark:text-blue-400">
-                        {{ $this->getQuizzes()->count() }}
-                    </p>
-                </div>
-                <div
-                    class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
-                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Quiz đã hoàn thành</p>
-                    <p class="mt-1 text-3xl font-bold tracking-tight text-green-600 dark:text-green-400">
-                        {{ $this->getCompletedQuizzesCount() }}
-                    </p>
-                </div>
-                <div
-                    class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
-                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Kết quả học tập</p>
-                    <p class="mt-1 text-3xl font-bold tracking-tight 
-                        @if($this->getAveragePercentage() >= 90) text-green-500 dark:text-green-400
-                        @elseif($this->getAveragePercentage() >= 80) text-blue-500 dark:text-blue-400
-                        @elseif($this->getAveragePercentage() >= 70) text-amber-500 dark:text-amber-400
-                        @elseif($this->getAveragePercentage() >= 60) text-orange-500 dark:text-orange-400
-                        @else text-red-500 dark:text-red-400
-                        @endif">
-                        @if($this->getAveragePercentage() >= 90)
-                            Xuất sắc
-                        @elseif($this->getAveragePercentage() >= 80)
-                            Giỏi
-                        @elseif($this->getAveragePercentage() >= 70)
-                            Khá
-                        @elseif($this->getAveragePercentage() >= 60)
-                            Trung bình
-                        @else
-                            Cần cải thiện
-                        @endif
-                    </p>
-                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                        Điểm cao nhất: {{ $this->getHighestScore() }}%
-                    </p>
-                </div>
-            </div>
-
-            <!-- Filter Bar -->
             <div
-                class="mb-8 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                class="mb-8 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 flex flex-col gap-6">
                 <div class="flex items-center gap-4 flex-wrap">
-                    <div class="flex items-center gap-3">
-                        <label class="text-sm font-medium text-slate-800 dark:text-slate-100">Lọc theo khóa học:</label>
+                    <div class="flex items-center gap-3 flex-grow">
+                        <label for="courseFilter" class="text-sm font-medium text-slate-800 dark:text-slate-100">Khóa
+                            học:</label>
                         <div class="flex-grow min-w-[200px]">
-                            <select wire:model.live="selectedCourseId"
+                            <select id="courseFilter" wire:model.live="selectedCourseId"
                                 class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 px-3 py-2">
-                                <option value="">Tất cả khóa học</option>
-                                @foreach ($this->getUserCourses() as $course)
-                                    <option value="{{ $course->id }}">{{ $course->title ?? $course->name }}</option>
+                                <option value="">Tất cả các khóa học</option>
+                                @foreach($this->getUserCourses() as $course)
+                                    <option value="{{ $course->id }}">{{ $course->title }}</option>
                                 @endforeach
                             </select>
                         </div>
                     </div>
-
-                    <div class="flex items-center gap-3">
-                        <label class="text-sm font-medium text-slate-800 dark:text-slate-100">Lọc theo trạng
-                            thái:</label>
+                    <div class="flex items-center gap-3 flex-grow">
+                        <label for="searchFilter" class="text-sm font-medium text-slate-800 dark:text-slate-100">Tìm
+                            kiếm:</label>
                         <div class="flex-grow min-w-[200px]">
-                            <select wire:model.live="selectedStatus"
+                            <input id="searchFilter" wire:model.live.debounce.300ms="searchTerm" type="search"
+                                placeholder="Tìm tiêu đề quiz..."
                                 class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 px-3 py-2">
-                                <option value="">Tất cả trạng thái</option>
-                                @if ($this->listQuizStatus)
-                                    @foreach ($this->listQuizStatus as $status)
-                                        <option value="{{ $status['value'] }}">{{ $status['label'] }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
                         </div>
                     </div>
-
-                    @if ($selectedCourseId || $selectedStatus)
-                        <button wire:click="$set('selectedCourseId', null); $set('selectedStatus', null)"
-                            class="px-3 py-2 text-sm bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg border-none cursor-pointer transition-colors hover:bg-slate-200 dark:hover:bg-slate-600">
-                            Xóa tất cả bộ lọc
-                        </button>
-                    @endif
                 </div>
+
+                {{-- Filter Buttons --}}
+                <div class="pt-4 border-t border-slate-200 dark:border-slate-700">
+                    <div
+                        class="p-1.5 flex items-center bg-slate-100 dark:bg-slate-900/50 rounded-full border border-slate-200 dark:border-slate-700">
+                        @php
+                            $filterNavs = [
+                                ['key' => 'all', 'label' => 'Tất cả'],
+                                ['key' => 'unsubmitted', 'label' => 'Chưa nộp'],
+                                ['key' => 'overdue', 'label' => 'Quá hạn'],
+                                ['key' => 'submitted', 'label' => 'Đã nộp'],
+                            ];
+                        @endphp
+
+                        @foreach ($filterNavs as $nav)
+                                            <button type="button" wire:click="updateFilter('{{ $nav['key'] }}')" class="flex-1 text-center py-2 text-sm font-semibold rounded-full transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-100 dark:focus:ring-offset-slate-900 focus:ring-blue-500
+                                                    {{ $selectedFilter === $nav['key']
+                            ? 'bg-white dark:bg-slate-700 text-blue-500 shadow-sm'
+                            : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+                                                    }}">
+                                                {{ $nav['label'] }}
+                                            </button>
+                        @endforeach
+                    </div>
+                </div>
+
             </div>
 
-            <!-- Quiz List -->
             <div class="grid grid-cols-1 gap-6">
-                @forelse($this->getQuizzes() as $quiz)
-                    <div
-                        class="flex flex-col lg:flex-row lg:items-stretch bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg overflow-hidden transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1">
-                        <!-- Main Info Section -->
-                        <div class="p-6 flex-grow lg:border-r lg:border-slate-200 lg:dark:border-slate-700">
-                            <p
-                                class="inline-block bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-semibold px-3 py-1 rounded-full mb-3">
-                                @php
-                                    $course = $quiz->courses->count() ? $quiz->courses->first() : null;
-                                @endphp
-                                Khóa học:
-                                @if($course)
-                                    {{ $course->title ?? $course->name }}
-                                @else
-                                    <span class="text-red-500">Không xác định</span>
-                                @endif
-                            </p>
+                @forelse($this->getFilteredQuizzes() as $quiz)
+                    @php
+                        $quizStatus = $this->getQuizStatus($quiz);
+                        $bestScore = $this->getStudentQuizBestScore($quiz);
+                        $completedAttempts = \App\Models\QuizAttempt::where('quiz_id', $quiz->id)->where('student_id', Auth::id())->whereIn('status', ['completed', 'submitted'])->get();
+                        $isCompleted = $completedAttempts->count() > 0;
+                        $courseQuiz = $quiz->courses->first() ? $quiz->courses->first()->pivot : null;
+                        $isOverdue = $courseQuiz && $courseQuiz->end_at && $courseQuiz->end_at->isPast() && !$isCompleted;
+                    @endphp
+                    <div wire:key="{{ $quiz->id }}" class="flex flex-col lg:flex-row lg:items-stretch bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                        <div class="flex-grow p-6 lg:border-r lg:border-slate-200 lg:dark:border-slate-700">
+                            <div
+                                class="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                                {{ $quiz->courses->first()->title ?? 'Khóa học không xác định' }}
+                            </div>
+
                             <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4 leading-tight">
-                                {{ $quiz->title }}
-                            </h3>
+                                {{ $quiz->title }}</h3>
                             <div class="flex flex-wrap gap-4">
-                                <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                                    <x-heroicon-o-question-mark-circle class="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                                <div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                                    <x-heroicon-o-question-mark-circle class="w-5 h-5 text-blue-500" />
                                     <span class="font-medium">{{ $quiz->questions->count() }} câu hỏi</span>
                                 </div>
-                                <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                                    <x-heroicon-o-clock class="w-5 h-5 text-green-600 dark:text-green-400" />
+                                <div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                                    <x-heroicon-o-clock class="w-5 h-5 text-green-500" />
                                     <span class="font-medium">{{ $quiz->time_limit_minutes ?? 'Không giới hạn' }}
                                         phút</span>
                                 </div>
-                                
-                                @php
-                                    $userCourse = $quiz->courses->first(); // Get first course user is enrolled in
-                                    $courseQuiz = $userCourse ? $userCourse->pivot : null;
-                                @endphp
-                                
                                 @if($courseQuiz && ($courseQuiz->start_at || $courseQuiz->end_at))
-                                    <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                                        <x-heroicon-o-calendar class="w-5 h-5 text-purple-500 dark:text-purple-400" />
+                                    <div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                                        <x-heroicon-o-calendar-days class="w-5 h-5 text-red-500" />
                                         <span class="font-medium">
                                             @if($courseQuiz->start_at && $courseQuiz->end_at)
-                                                {{ $courseQuiz->start_at->format('d/m/Y H:i') }} - {{ $courseQuiz->end_at->format('d/m/Y H:i') }}
+                                                Hạn: {{ $courseQuiz->end_at->format('d/m/Y H:i') }}
                                             @elseif($courseQuiz->start_at)
                                                 Từ {{ $courseQuiz->start_at->format('d/m/Y H:i') }}
                                             @elseif($courseQuiz->end_at)
@@ -141,86 +100,86 @@
                                         </span>
                                     </div>
                                 @endif
-
                             </div>
                         </div>
 
-                        <!-- Meta & Actions Section -->
-                        <div
-                            class="p-6 bg-slate-50 dark:bg-slate-900 border-t lg:border-t-0 border-slate-200 dark:border-slate-700 flex-shrink-0 lg:w-80">
-                            @php
-                                $quizStatus = $this->getQuizStatus($quiz);
-                                $bestScore = $this->getStudentQuizBestScore($quiz);
-                                $completedAttempts = \App\Models\QuizAttempt::where('quiz_id', $quiz->id)
-                                    ->where('student_id', Auth::id())
-                                    ->whereIn('status', ['completed', 'submitted'])
-                                    ->get();
-                            @endphp
-
-                            @if ($completedAttempts->count() > 0)
-                                <div class="mb-4">
-                                    <div class="flex items-center gap-2 mb-2">
-                                        <x-heroicon-o-check-circle class="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                                        <span class="text-sm font-medium text-slate-800 dark:text-slate-100">Đã hoàn
-                                            thành {{ $completedAttempts->count() }} lần</span>
+                        {{-- Right Side: Status & Actions --}}
+                        <div class="p-6 lg:w-80 bg-slate-100 dark:bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-700 flex flex-col justify-between">
+                            <div class="space-y-4">
+                                @if($isCompleted)
+                                    <div
+                                        class="inline-flex items-center gap-2 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded-full text-sm font-semibold">
+                                        <x-heroicon-o-check-circle class="w-4 h-4" />
+                                        Đã nộp
                                     </div>
-                                    @if (!is_null($bestScore))
-                                        <div class="flex items-center gap-2">
-                                            <x-heroicon-o-star class="w-4 h-4 text-amber-500 flex-shrink-0" />
-                                            <span class="text-sm font-medium text-slate-800 dark:text-slate-100">Điểm
-                                                cao nhất: {{ number_format($bestScore, 1) }}%</span>
-                                        </div>
-                                    @endif
-                                </div>
-                            @endif
-
-                            <div class="flex flex-col lg:flex-row lg:justify-end gap-2">
-                                @if ($quizStatus['status'] === 'in_progress')
-                                    <a href="{{ route('filament.app.pages.quiz-taking', ['quiz' => $quiz->id]) }}"
-                                        class="w-full lg:w-auto font-semibold px-4 py-3 rounded-lg transition-all duration-200 ease-in-out flex items-center justify-center gap-2 border border-transparent cursor-pointer no-underline hover:-translate-y-0.5 hover:shadow-lg bg-amber-500 text-white hover:bg-amber-600">
-                                        <x-heroicon-o-play class="w-5 h-5" />
-                                        <span>{{ $quizStatus['label'] }}</span>
-                                    </a>
-                                @elseif($quizStatus['canTake'])
-                                    {{ ($this->takeQuizAction)(['quiz' => $quiz->id])->extraAttributes(['class' => 'w-full lg:w-auto font-semibold px-4 py-3 rounded-lg transition-all duration-200 ease-in-out flex items-center justify-center gap-2 border border-transparent cursor-pointer no-underline hover:-translate-y-0.5 hover:shadow-lg bg-green-600 text-white hover:bg-green-700']) }}
+                                @elseif($isOverdue)
+                                    <div
+                                        class="inline-flex items-center gap-2 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-3 py-1 rounded-full text-sm font-semibold">
+                                        <x-heroicon-o-exclamation-triangle class="w-4 h-4" />
+                                        Quá hạn
+                                    </div>
+                                @else
+                                    <div
+                                        class="inline-flex items-center gap-2 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-3 py-1 rounded-full text-sm font-semibold">
+                                        <x-heroicon-o-clock class="w-4 h-4" />
+                                        Chưa nộp
+                                    </div>
                                 @endif
 
-                                {{-- Ẩn nút "Xem đáp án" vì đã có chức năng xem lịch sử làm bài --}}
-                                {{-- @if ($quizStatus['canViewResults'])
-                                    {{ ($this->viewResultsAction)(['quiz' => $quiz->id])->extraAttributes(['class' => 'w-full lg:w-auto font-semibold px-4 py-3 rounded-lg transition-all duration-200 ease-in-out flex items-center justify-center gap-2 border border-transparent cursor-pointer no-underline hover:-translate-y-0.5 hover:shadow-lg bg-green-600 text-white hover:bg-green-700']) }}
-                                @endif --}}
+                                @if($isCompleted && $bestScore !== null)
+                                    <div class="text-center">
+                                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-1">Điểm cao nhất</p>
+                                        <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                                            {{ number_format($bestScore, 1) }}%
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
 
-                                @if ($completedAttempts->count() > 1)
-                                    {{ ($this->viewHistoryAction)(['quiz' => $quiz->id])->extraAttributes(['class' => 'w-full lg:w-auto font-semibold px-4 py-3 rounded-lg transition-all duration-200 ease-in-out flex items-center justify-center gap-2 border cursor-pointer no-underline hover:-translate-y-0.5 hover:shadow-lg bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-500 dark:hover:border-slate-400 hover:text-slate-800 dark:hover:text-slate-100']) }}
+                            <div class="mt-4 space-y-2">
+                                @if ($quizStatus['status'] === 'in_progress')
+                                    <a href="{{ route('filament.app.pages.quiz-taking', ['quiz' => $quiz->id]) }}"
+                                        class="w-full text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2"
+                                        style="background-color: #f97316 !important; border-color: #f97316 !important;"
+                                        onmouseover="this.style.backgroundColor='#ea580c'" 
+                                        onmouseout="this.style.backgroundColor='#f97316'">
+                                        <x-heroicon-o-play class="w-4 h-4" />
+                                        Tiếp tục
+                                    </a>
+                                @elseif($quizStatus['canTake'])
+                                    {{ ($this->takeQuizAction)(['quiz' => $quiz->id])->extraAttributes(['class' => 'w-full text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2', 'style' => 'background-color: #f97316 !important; border-color: #f97316 !important;', 'onmouseover' => 'this.style.backgroundColor="#ea580c"', 'onmouseout' => 'this.style.backgroundColor="#f97316"']) }}
+                                @endif
+
+                                @if ($completedAttempts->count() > 0)
+                                    {{ ($this->viewHistoryAction)(['quiz' => $quiz->id])->extraAttributes(['class' => 'w-full text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2', 'style' => 'background-color: #4f46e5 !important; border-color: #4f46e5 !important;', 'onmouseover' => 'this.style.backgroundColor="#4338ca"', 'onmouseout' => 'this.style.backgroundColor="#4f46e5"']) }}
                                 @endif
 
                                 @if (!$quizStatus['canTake'] && !$quizStatus['canViewResults'] && $quizStatus['status'] !== 'in_progress')
-                                    <button disabled
-                                        class="w-full lg:w-auto font-semibold px-4 py-3 rounded-lg transition-all duration-200 ease-in-out flex items-center justify-center gap-2 border border-transparent cursor-not-allowed bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500">
-                                        <x-heroicon-o-lock-closed class="w-5 h-5" />
-                                        <span>{{ $quizStatus['label'] }}</span>
-                                    </button>
+                                    <div
+                                        class="w-full text-gray-600 dark:text-gray-300 px-4 py-2 rounded-lg text-center text-sm font-medium cursor-not-allowed"
+                                        style="background-color: #d1d5db !important;">
+                                        <x-heroicon-o-lock-closed class="w-4 h-4 inline mr-1" />
+                                        {{ $quizStatus['label'] }}
+                                    </div>
                                 @endif
                             </div>
                         </div>
                     </div>
                 @empty
-                    <div class="text-center py-16">
+                    <div class="flex flex-col items-center justify-center py-16 px-6 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg">
                         <div
-                            class="mx-auto mb-6 w-24 h-24 bg-slate-200 dark:bg-slate-800 rounded-full flex items-center justify-center">
-                            <svg class="w-12 h-12 text-slate-400 dark:text-slate-600" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z">
-                                </path>
-                            </svg>
+                            class="w-20 h-20 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-6">
+                            <x-heroicon-o-document-text class="w-10 h-10 text-slate-400" />
                         </div>
-                        <h3 class="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-2">Chưa có quiz nào</h3>
-                        <p class="text-slate-500 dark:text-slate-400">Bạn chưa được gán vào khóa học nào có quiz hoặc
-                            không có quiz nào khớp với bộ lọc.</p>
+                        <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-200 mb-2">Không có quiz nào</h3>
+                        <p class="text-slate-500 dark:text-slate-400 text-center max-w-md text-sm">
+                            Hiện tại không có quiz nào phù hợp với bộ lọc của bạn. Hãy thử điều chỉnh bộ lọc hoặc quay lại
+                            sau.
+                        </p>
                     </div>
                 @endforelse
             </div>
+
         </div>
     </div>
 </x-filament-panels::page>

@@ -67,7 +67,7 @@
                     @php
                         $isCorrect = $this->isCorrectAnswer($question->id);
                         $isAnswered = $this->isAnswered($question->id);
-                        $userAnswerId = $this->getUserAnswer($question->id);
+                        $userAnswerIds = $this->getUserAnswers($question->id);
                         $correctChoice = $question->answerChoices->where('is_correct', true)->first();
                     @endphp
 
@@ -113,7 +113,7 @@
                         <div class="space-y-2">
                             @foreach($question->answerChoices as $choice)
                                 @php
-                                    $isUserChoice = $userAnswerId == $choice->id;
+                                    $isUserChoice = in_array($choice->id, $userAnswerIds);
                                     $isCorrectChoice = $choice->is_correct;
                                 @endphp
 

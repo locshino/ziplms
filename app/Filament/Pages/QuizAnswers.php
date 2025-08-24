@@ -147,13 +147,18 @@ class QuizAnswers extends Page
 
         // Loop through all quiz questions to determine the status of each
         foreach ($this->quiz->questions as $question) {
-            $userAnswer = $userAnswers->get($question->id);
-            $correctChoice = $question->answerChoices->where('is_correct', true)->first();
+            $questionUserAnswers = $userAnswers->where('question_id', $question->id);
+            $correctChoiceIds = $question->answerChoices->where('is_correct', true)->pluck('id')->toArray();
+            $userChoiceIds = $questionUserAnswers->pluck('answer_choice_id')->toArray();
             $status = 'unanswered';
             $isCorrect = false;
 
-            if ($userAnswer) {
-                if ($correctChoice && $userAnswer->answer_choice_id === $correctChoice->id) {
+            if ($questionUserAnswers->isNotEmpty()) {
+                // Check if user answered correctly (all correct choices selected, no incorrect ones)
+                if (
+                    count($correctChoiceIds) === count($userChoiceIds) &&
+                    empty(array_diff($correctChoiceIds, $userChoiceIds))
+                ) {
                     $status = 'correct';
                     $isCorrect = true;
                     $this->correctCount++;
@@ -168,8 +173,8 @@ class QuizAnswers extends Page
             // Add all relevant info for this question to a structured collection
             $preparedResults->push([
                 'question' => $question,
-                'user_answer' => $userAnswer,
-                'correct_choice' => $correctChoice,
+                'user_answers' => $questionUserAnswers, // Changed to plural for multiple answers
+                'correct_choices' => $question->answerChoices->where('is_correct', true), // All correct choices
                 'status' => $status,
                 'is_correct' => $isCorrect,
             ]);

@@ -43,7 +43,11 @@
                                 </p>
                                 <span class="inline-flex items-center text-xs font-medium text-gray-500 dark:text-gray-400">
                                     <x-heroicon-s-clock class="w-4 h-4 mr-1 text-gray-400" />
-                                    {{ $quiz->time_limit_minutes }} phút
+                                    @if($quiz->time_limit_minutes)
+                                        {{ $quiz->time_limit_minutes }} phút
+                                    @else
+                                        <span class="text-blue-600 dark:text-blue-400 font-bold">∞</span> Không giới hạn
+                                    @endif
                                 </span>
 
                             </div>

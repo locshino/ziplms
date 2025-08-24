@@ -147,7 +147,7 @@ class QuizTaking extends Page
 
     protected function calculateRemainingTime(): void
     {
-        if (! $this->quizModel->time_limit || ! $this->attempt) {
+        if (! $this->quizModel->time_limit_minutes || ! $this->attempt) {
             $this->isUnlimited = true;
 
             return;
@@ -155,17 +155,18 @@ class QuizTaking extends Page
 
         $this->isUnlimited = false;
         $startTime = Carbon::parse($this->attempt->start_at);
-        $timeLimit = $this->quizModel->time_limit; // in minutes
-        $endTime = $startTime->addMinutes($timeLimit);
+        $timeLimit = $this->quizModel->time_limit_minutes; // in minutes
+        $endTime = $startTime->copy()->addMinutes($timeLimit); // Fix: use copy() to avoid mutating $startTime
         $now = Carbon::now();
 
-        $this->remainingSeconds = max(0, $endTime->diffInSeconds($now, false));
-        $this->timeWarning = $this->remainingSeconds <= 300; // 5 minutes warning
-
-        // Auto-submit if time is up
-        if ($this->remainingSeconds <= 0) {
+        if ($now->gte($endTime)) {
+            $this->remainingSeconds = 0;
             $this->autoSubmit();
+            return;
         }
+
+        $this->remainingSeconds = $now->diffInSeconds($endTime);
+        $this->timeWarning = $this->remainingSeconds <= 300; // 5 minutes warning
     }
 
     public function updateAnswer(string $questionId, string $choiceId): void
@@ -316,14 +317,19 @@ class QuizTaking extends Page
         }
     }
 
-    public function autoSubmit(): void
+
+
+    public function showAutoSubmitNotification(): void
     {
         Notification::make()
             ->title('Hết thời gian!')
             ->body('Bài quiz sẽ được nộp tự động.')
             ->warning()
             ->send();
+    }
 
+    public function autoSubmit(): void
+    {
         $this->submitQuiz();
     }
 
@@ -491,12 +497,12 @@ class QuizTaking extends Page
     {
         $userId = Auth::id();
         $maxAttempts = $quiz->max_attempts;
-        
+
         // If max_attempts is 0 or null, allow unlimited attempts
         if ($maxAttempts === 0 || $maxAttempts === null) {
             return null; // null indicates unlimited attempts
         }
-        
+
         $completedAttempts = QuizAttempt::where('quiz_id', $quiz->id)
             ->where('student_id', $userId)
             ->whereIn('status', [QuizAttemptStatus::COMPLETED->value, QuizAttemptStatus::GRADED->value])
@@ -514,15 +520,31 @@ class QuizTaking extends Page
                 ->color('gray')
                 ->url(route('filament.app.pages.my-quiz')),
 
-            Action::make('submit')
-                ->label('Nộp bài')
-                ->icon('heroicon-o-paper-airplane')
-                ->color('success')
-                ->requiresConfirmation()
-                ->modalHeading('Xác nhận nộp bài')
-                ->modalDescription('Bạn có chắc chắn muốn nộp bài? Bạn không thể thay đổi sau khi nộp.')
-                ->action(fn() => $this->submitQuiz())
-                ->disabled(fn() => $this->submitting),
         ];
+    }
+
+    // Custom action để gọi trong blade template
+    public function customSubmitAction(): Action
+    {
+        return Action::make('customSubmit')
+            ->label('Nộp bài')
+            ->icon('heroicon-o-paper-airplane')
+            ->color('success')
+            ->requiresConfirmation()
+            ->modalHeading('Xác nhận nộp bài')
+            ->modalDescription('Bạn có chắc chắn muốn nộp bài? Bạn không thể thay đổi sau khi nộp.')
+            ->action(function () {
+                $this->submitQuiz();
+            })
+            ->disabled(fn() => $this->submitting);
+    }
+
+    public function customBackAction(): Action
+    {
+        return Action::make('customBack')
+            ->label('Quay lại')
+            ->icon('heroicon-o-arrow-left')
+            ->color('gray')
+            ->url(route('filament.app.pages.my-quiz'));
     }
 }

@@ -6,6 +6,7 @@ use App\Enums\Status\QuizStatus;
 use App\Models\Course;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
+use App\Services\QuizFilterService;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -39,8 +40,18 @@ class MyQuiz extends Page
 
     public ?array $listQuizStatus = null;
 
+    public string $selectedFilter = 'all';
+
+    public string $searchTerm = '';
+
+    protected ?QuizFilterService $quizFilterService = null;
+
     public function mount(): void
     {
+        $this->quizFilterService = new QuizFilterService();
+        $this->selectedFilter = request('filter', 'all');
+        $this->selectedCourseId = request('course_id', null);
+        $this->searchTerm = request('search', '');
         $this->setListQuizStatus();
     }
 
@@ -90,7 +101,7 @@ class MyQuiz extends Page
         if ($maxAttempts === 0 || $maxAttempts === null) {
             return true;
         }
-        
+
         // Check if user has remaining attempts
         return $attempts < $maxAttempts;
     }
@@ -168,21 +179,6 @@ class MyQuiz extends Page
         return;
     }
 
-    public function getUserCourses()
-    {
-        $user = Auth::user();
-        $userId = $user->id;
-        // Return courses where the user is teacher OR enrolled as student
-        return Course::where(function ($query) use ($userId) {
-            $query->where('teacher_id', $userId)
-                ->orWhereHas('users', function ($q) use ($userId) {
-                    $q->where('users.id', $userId)->whereNull('users.deleted_at');
-                });
-        })
-            ->orderBy('title')
-            ->get();
-    }
-
     public function updatedSelectedCourseId()
     {
         // Tự động cập nhật danh sách quiz khi thay đổi khóa học
@@ -236,16 +232,17 @@ class MyQuiz extends Page
     {
         $userId = Auth::id();
         $maxAttempts = $quiz->max_attempts;
-        
+
         // If max_attempts is 0 or null, allow unlimited attempts
         if ($maxAttempts === 0 || $maxAttempts === null) {
             return null; // null indicates unlimited attempts
         }
-        
-        $usedAttempts = QuizAttempt::where('quiz_id', $quiz->id)
+
+        $completedAttempts = QuizAttempt::where('quiz_id', $quiz->id)
             ->where('student_id', $userId)
+            ->whereIn('status', [QuizAttemptStatus::COMPLETED->value, QuizAttemptStatus::GRADED->value])
             ->count();
-        return max(0, $maxAttempts - $usedAttempts);
+        return max(0, $maxAttempts - $completedAttempts);
     }
 
     /**
@@ -303,8 +300,8 @@ class MyQuiz extends Page
         $highestPercentage = 0;
         foreach ($this->getQuizzes() as $quiz) {
             $bestScore = QuizAttempt::where('quiz_id', $quiz->id)
-            ->where('student_id', Auth::id())
-            ->max('points');
+                ->where('student_id', Auth::id())
+                ->max('points');
             if ($bestScore) {
                 $maxPoints = $quiz->questions->sum('pivot.points');
                 if ($maxPoints > 0) {
@@ -328,12 +325,12 @@ class MyQuiz extends Page
         $userId = Auth::id();
         $totalPercentage = 0;
         $completedQuizzes = 0;
-        
+
         foreach ($this->getQuizzes() as $quiz) {
             $bestScore = QuizAttempt::where('quiz_id', $quiz->id)
                 ->where('student_id', $userId)
                 ->max('points');
-            
+
             if ($bestScore !== null) {
                 $maxPoints = $quiz->questions->sum('pivot.points');
                 if ($maxPoints > 0) {
@@ -345,7 +342,7 @@ class MyQuiz extends Page
                 }
             }
         }
-        
+
         return $completedQuizzes > 0 ? round($totalPercentage / $completedQuizzes, 1) : 0;
     }
 
@@ -547,7 +544,7 @@ class MyQuiz extends Page
             ->label('Lịch sử làm bài')
             ->icon('heroicon-o-clock')
             ->color('gray')
-            ->modalHeading(fn(array $arguments) => 'Lịch sử làm bài - ' . Quiz::find($arguments['quiz'])->title)
+            ->modalHeading(fn(array $arguments) => 'Lịch sử làm bài ')
             ->modalContent(function (array $arguments) {
                 $quiz = Quiz::find($arguments['quiz']);
                 $attempts = QuizAttempt::where('quiz_id', $quiz->id)
@@ -561,8 +558,7 @@ class MyQuiz extends Page
                 ]);
             })
             ->modalWidth('4xl')
-            ->modalSubmitAction(false)
-            ->modalCancelActionLabel('Đóng');
+            ->modalSubmitAction(false);
     }
 
     // Quiz taking methods
@@ -572,24 +568,31 @@ class MyQuiz extends Page
             return;
         }
 
-        $this->currentAttempt = QuizAttempt::where('quiz_id', $this->selectedQuiz->id)
-            ->where('student_id', Auth::id())
-            ->where('status', QuizAttemptStatus::IN_PROGRESS->value)
-            ->first();
+        try {
+            // First check for existing in-progress attempt
+            $this->currentAttempt = QuizAttempt::where('quiz_id', $this->selectedQuiz->id)
+                ->where('student_id', Auth::id())
+                ->where('status', QuizAttemptStatus::IN_PROGRESS->value)
+                ->first();
 
-        if (!$this->currentAttempt) {
-            $this->currentAttempt = QuizAttempt::create([
-                'quiz_id' => $this->selectedQuiz->id,
-                'student_id' => Auth::id(),
-                'status' => QuizAttemptStatus::IN_PROGRESS->value,
-                'start_at' => now(),
-            ]);
-            $this->currentAnswers = [];
-        } else {
-            $existingAnswers = $this->currentAttempt->quizAnswers()
-                ->pluck('answer_choice_id', 'question_id')
-                ->toArray();
-            $this->currentAnswers = $existingAnswers;
+            if (!$this->currentAttempt) {
+                // Use QuizService to properly create attempt with all validations
+                $quizService = app(\App\Services\Interfaces\QuizServiceInterface::class);
+                $this->currentAttempt = $quizService->startQuizAttempt($this->selectedQuiz->id, Auth::id());
+                $this->currentAnswers = [];
+            } else {
+                $existingAnswers = $this->currentAttempt->quizAnswers()
+                    ->pluck('answer_choice_id', 'question_id')
+                    ->toArray();
+                $this->currentAnswers = $existingAnswers;
+            }
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Lỗi!')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+            return;
         }
     }
 
@@ -646,6 +649,25 @@ class MyQuiz extends Page
                 ['answer_choice_id' => $choiceId]
             );
         }
+    }
+
+    public function confirmSubmission(): bool
+    {
+        // Use Filament's built-in confirmation dialog
+        return $this->confirm(
+            title: 'Xác nhận nộp bài',
+            message: 'Bạn có chắc chắn muốn nộp bài? Bạn không thể thay đổi sau khi nộp.',
+            icon: 'heroicon-o-question-mark-circle'
+        );
+    }
+
+    public function showAutoSubmitNotification(): void
+    {
+        Notification::make()
+            ->title('Hết thời gian!')
+            ->body('Bài quiz sẽ được nộp tự động.')
+            ->warning()
+            ->send();
     }
 
     public function submitQuiz()
@@ -741,5 +763,134 @@ class MyQuiz extends Page
         }
 
         return round(($this->getAnsweredCount() / $totalQuestions) * 100);
+    }
+
+    /**
+     * Lấy thống kê quiz đã lọc từ QuizFilterService
+     */
+    public function getFilteredQuizStatistics(): array
+    {
+        // Kiểm tra nếu quizFilterService chưa được khởi tạo
+        if (!$this->quizFilterService) {
+            $this->quizFilterService = new QuizFilterService();
+        }
+
+        // Nếu có bộ lọc khóa học hoặc tìm kiếm, tính toán thống kê dựa trên kết quả lọc
+        if ($this->selectedCourseId || !empty($this->searchTerm)) {
+            $allQuizzes = $this->quizFilterService->getAllQuizzes();
+            $filteredQuizzes = $this->quizFilterService->applyAllFilters(
+                $allQuizzes,
+                $this->selectedCourseId,
+                $this->searchTerm
+            );
+
+            $unsubmittedQuizzes = $this->quizFilterService->applyAllFilters(
+                $this->quizFilterService->getUnsubmittedQuizzes(),
+                $this->selectedCourseId,
+                $this->searchTerm
+            );
+
+            $overdueQuizzes = $this->quizFilterService->applyAllFilters(
+                $this->quizFilterService->getOverdueQuizzes(),
+                $this->selectedCourseId,
+                $this->searchTerm
+            );
+
+            $submittedQuizzes = $this->quizFilterService->applyAllFilters(
+                $this->quizFilterService->getSubmittedQuizzes(),
+                $this->selectedCourseId,
+                $this->searchTerm
+            );
+
+            return [
+                'total' => $filteredQuizzes->count(),
+                'unsubmitted' => $unsubmittedQuizzes->count(),
+                'overdue' => $overdueQuizzes->count(),
+                'submitted' => $submittedQuizzes->count(),
+            ];
+        }
+
+        // Nếu không có bộ lọc, trả về thống kê tổng
+        return $this->quizFilterService->getQuizStatistics();
+    }
+
+    /**
+     * Lấy danh sách quiz đã lọc từ QuizFilterService
+     */
+    public function getFilteredQuizzes()
+    {
+        // Kiểm tra nếu quizFilterService chưa được khởi tạo
+        if (!$this->quizFilterService) {
+            $this->quizFilterService = new QuizFilterService();
+        }
+
+        // Lấy quiz theo trạng thái
+        $quizzes = match ($this->selectedFilter) {
+            'unsubmitted' => $this->quizFilterService->getUnsubmittedQuizzes(),
+            'overdue' => $this->quizFilterService->getOverdueQuizzes(),
+            'submitted' => $this->quizFilterService->getSubmittedQuizzes(),
+            default => $this->quizFilterService->getAllQuizzes(),
+        };
+
+        // Áp dụng các bộ lọc khác (khóa học và tìm kiếm)
+        $quizzes = $this->quizFilterService->applyAllFilters(
+            $quizzes,
+            $this->selectedCourseId,
+            $this->searchTerm
+        );
+
+        return $quizzes;
+    }
+
+    /**
+     * Cập nhật bộ lọc
+     */
+    public function updateFilter(string $filter): void
+    {
+        $this->selectedFilter = $filter;
+    }
+
+    /**
+     * Cập nhật bộ lọc khóa học
+     */
+    public function updateCourseFilter(?string $courseId): void
+    {
+        $this->selectedCourseId = $courseId;
+    }
+
+    /**
+     * Cập nhật từ khóa tìm kiếm
+     */
+    public function updateSearchTerm(string $searchTerm): void
+    {
+        $this->searchTerm = $searchTerm;
+    }
+
+    /**
+     * Xóa tất cả bộ lọc
+     */
+    public function clearAllFilters(): void
+    {
+        $this->selectedFilter = 'all';
+        $this->selectedCourseId = null;
+        $this->searchTerm = '';
+    }
+
+    /**
+     * Lấy danh sách khóa học của user
+     */
+    public function getUserCourses()
+    {
+        return Course::whereHas('users', function ($query) {
+            $query->where('users.id', Auth::id());
+        })->orderBy('title')->get();
+    }
+
+    /**
+     * Lấy trạng thái chi tiết của quiz từ service
+     */
+    public function getQuizDetailedStatusFromService(Quiz $quiz): array
+    {
+        return $this->quizFilterService->getQuizDetailedStatus($quiz);
     }
 }
