@@ -36,6 +36,8 @@ class QuizResults extends Page
 
     public int $incorrectAnswers = 0;
 
+    public int $partiallyCorrectAnswers = 0;
+
     public int $unansweredQuestions = 0;
 
     public array $attemptHistory = [];
@@ -76,14 +78,18 @@ class QuizResults extends Page
         // Ensure percentage doesn't exceed 100%
         $this->percentage = min($this->percentage, 100);
 
-        // Count correct, incorrect and unanswered questions
+        // Count correct, incorrect, partially correct and unanswered questions
         $this->correctAnswers = 0;
         $this->incorrectAnswers = 0;
+        $this->partiallyCorrectAnswers = 0;
         $this->unansweredQuestions = 0;
         foreach ($this->quiz->questions as $question) {
             if ($this->isAnswered($question->id)) {
-                if ($this->isCorrectAnswer($question->id)) {
+                $answerStatus = $this->getAnswerStatus($question->id);
+                if ($answerStatus === 'correct') {
                     $this->correctAnswers++;
+                } elseif ($answerStatus === 'partially_correct') {
+                    $this->partiallyCorrectAnswers++;
                 } else {
                     $this->incorrectAnswers++;
                 }
@@ -218,15 +224,19 @@ class QuizResults extends Page
         ];
     }
 
-    public function isCorrectAnswer(string $questionId): bool
+    public function getAnswerStatus(string $questionId): string
     {
         $question = $this->quiz->questions->where('id', $questionId)->first();
         if (! $question) {
-            return false;
+            return 'unanswered';
         }
 
         $userAnswers = $this->attemptModel->studentAnswers
             ->where('question_id', $questionId);
+
+        if ($userAnswers->isEmpty()) {
+            return 'unanswered';
+        }
 
         $correctChoiceIds = $question->answerChoices
             ->where('is_correct', true)
@@ -234,11 +244,59 @@ class QuizResults extends Page
             ->toArray();
 
         $userChoiceIds = $userAnswers->pluck('answer_choice_id')->toArray();
+        $userCorrectChoices = array_intersect($userChoiceIds, $correctChoiceIds);
+        $userIncorrectChoices = array_diff($userChoiceIds, $correctChoiceIds);
 
-        // Check if user answered correctly (all correct choices selected, no incorrect ones)
-        return $userAnswers->isNotEmpty() &&
-            count($correctChoiceIds) === count($userChoiceIds) &&
-            empty(array_diff($correctChoiceIds, $userChoiceIds));
+        // If user selected incorrect choices, it's incorrect
+        if (!empty($userIncorrectChoices)) {
+            return 'incorrect';
+        }
+
+        // If user selected all correct choices, it's correct
+        if (count($userCorrectChoices) === count($correctChoiceIds)) {
+            return 'correct';
+        }
+
+        // If user selected some correct choices but not all, it's partially correct
+        if (!empty($userCorrectChoices)) {
+            return 'partially_correct';
+        }
+
+        return 'incorrect';
+    }
+
+    public function isCorrectAnswer(string $questionId): bool
+    {
+        return $this->getAnswerStatus($questionId) === 'correct';
+    }
+
+    public function isPartiallyCorrectAnswer(string $questionId): bool
+    {
+        return $this->getAnswerStatus($questionId) === 'partially_correct';
+    }
+
+    public function getCorrectAnswersCount(string $questionId): array
+    {
+        $question = $this->quiz->questions->where('id', $questionId)->first();
+        if (! $question) {
+            return ['selected' => 0, 'total' => 0];
+        }
+
+        $correctChoiceIds = $question->answerChoices
+            ->where('is_correct', true)
+            ->pluck('id')
+            ->toArray();
+
+        $userAnswers = $this->attemptModel->studentAnswers
+            ->where('question_id', $questionId);
+
+        $userChoiceIds = $userAnswers->pluck('answer_choice_id')->toArray();
+        $userCorrectChoices = array_intersect($userChoiceIds, $correctChoiceIds);
+
+        return [
+            'selected' => count($userCorrectChoices),
+            'total' => count($correctChoiceIds)
+        ];
     }
 
     public function isAnswered(string $questionId): bool

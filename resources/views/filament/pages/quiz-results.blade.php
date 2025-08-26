@@ -1,204 +1,859 @@
+{{-- Toàn bộ CSS thuần để tạo kiểu cho trang --}}
+<style>
+    /* ----- Biến và Thiết lập chung ----- */
+    :root {
+        --color-blue-600: #2563eb;
+        --color-indigo-700: #4338ca;
+        --color-white: #ffffff;
+        --color-black: #000000;
+        --color-text-primary-light: #1f2937;
+        --color-text-secondary-light: #6b7280;
+        --color-bg-light: #ffffff;
+        --color-bg-secondary-light: #f9fafb;
+        --color-border-light: #e5e7eb;
+
+        --color-success: #10B981;
+        --color-success-hover: #059669;
+        --color-success-bg: #f0fdf4;
+        --color-success-border: #a7f3d0;
+        --color-success-text: #065f46;
+
+        --color-warning: #F59E0B;
+        --color-warning-hover: #D97706;
+        --color-warning-bg: #fffbeb;
+        --color-warning-border: #fde68a;
+        --color-warning-text: #b45309;
+
+        --color-danger: #EF4444;
+        --color-danger-hover: #DC2626;
+        --color-danger-bg: #fef2f2;
+        --color-danger-border: #fecaca;
+        --color-danger-text: #991b1b;
+
+        --color-neutral: #6B7280;
+        --color-neutral-hover: #4B5563;
+        --color-neutral-bg: #f8fafc;
+        --color-neutral-border: #e2e8f0;
+        --color-neutral-text: #334155;
+    }
+
+    .dark {
+        --color-text-primary-light: #f9fafb;
+        --color-text-secondary-light: #9ca3af;
+        --color-bg-light: #1f2937;
+        --color-bg-secondary-light: #374151;
+        --color-border-light: #4b5563;
+
+        --color-success-bg: #064e3b;
+        --color-success-border: #047857;
+        --color-success-text: #a7f3d0;
+
+        --color-warning-bg: #78350f;
+        --color-warning-border: #92400e;
+        --color-warning-text: #fde68a;
+
+        --color-danger-bg: #7f1d1d;
+        --color-danger-border: #991b1b;
+        --color-danger-text: #fecaca;
+
+        --color-neutral-bg: #374151;
+        --color-neutral-border: #4b5563;
+        --color-neutral-text: #d1d5db;
+    }
+
+    .page-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    /* ----- Header Banner ----- */
+    .header-banner {
+        position: relative;
+        overflow: hidden;
+        background-image: linear-gradient(to bottom right, var(--color-blue-600), var(--color-indigo-700));
+        border-radius: 1rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(37, 99, 235, 0.5);
+        color: var(--color-white);
+        padding: 1.5rem;
+    }
+
+    .header-banner-overlay {
+        position: absolute;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .header-banner-content {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 1.5rem;
+    }
+
+    .header-info {
+        display: flex;
+        align-items: center;
+    }
+
+    .header-info-icon {
+        background-color: rgba(255, 255, 255, 0.2);
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    .header-info-icon svg {
+        width: 2.25rem;
+        height: 2.25rem;
+    }
+
+    .header-info-course {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .header-info-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .header-status {
+        background-color: rgba(0, 0, 0, 0.2);
+        padding: 0.75rem 1.25rem;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        flex-shrink: 0;
+    }
+
+    .header-status-label {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .header-status-value {
+        font-size: 1.125rem;
+        font-weight: 600;
+    }
+
+    /* ----- Card ----- */
+    .card {
+        background-color: var(--color-bg-light);
+        border-radius: 1rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        border: 1px solid var(--color-border-light);
+        padding: 1.5rem;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        color: var(--color-text-primary-light);
+    }
+
+    .card-title svg {
+        width: 1.75rem;
+        height: 1.75rem;
+        margin-right: 0.75rem;
+        color: var(--color-blue-600);
+    }
+
+    /* ----- Overview Section ----- */
+    .overview-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .overview-stats-column {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .percentage-card {
+        background-image: linear-gradient(to bottom right, var(--color-blue-600), var(--color-indigo-700));
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        color: var(--color-white);
+        text-align: center;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .percentage-card-label {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .percentage-card-value {
+        font-size: 3rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+    }
+
+    .percentage-card-points {
+        font-size: 1.125rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .time-spent-card {
+        background-color: var(--color-bg-secondary-light);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        color: var(--color-text-secondary-light);
+    }
+
+    .time-spent-card svg {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .time-spent-card span {
+        font-size: 1.125rem;
+        font-weight: 600;
+    }
+
+    .overview-chart-column {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        align-items: center;
+    }
+
+    .chart-container {
+        position: relative;
+        width: 16rem;
+        height: 16rem;
+        margin: 0 auto;
+    }
+
+    .legend-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem;
+        background-color: var(--color-bg-secondary-light);
+        border-radius: 0.5rem;
+        border: 1px solid var(--color-border-light);
+    }
+
+    .legend-dot {
+        width: 1rem;
+        height: 1rem;
+        border-radius: 9999px;
+        margin-right: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    .legend-label {
+        flex-grow: 1;
+        font-weight: 600;
+        color: var(--color-text-secondary-light);
+    }
+
+    .legend-value {
+        font-weight: 700;
+        color: var(--color-text-primary-light);
+    }
+
+    /* ----- Quick Navigation ----- */
+    .question-nav-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 8px 0;
+    }
+
+    .question-nav-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        font-weight: bold;
+        color: white;
+        text-decoration: none;
+        transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    .question-nav-link:hover {
+        transform: scale(1.1);
+    }
+
+    .status-correct {
+        background-color: var(--color-success);
+    }
+
+    .status-correct:hover {
+        background-color: var(--color-success-hover);
+    }
+
+    .status-partially-correct {
+        background-color: var(--color-warning);
+    }
+
+    .status-partially-correct:hover {
+        background-color: var(--color-warning-hover);
+    }
+
+    .status-incorrect {
+        background-color: var(--color-danger);
+    }
+
+    .status-incorrect:hover {
+        background-color: var(--color-danger-hover);
+    }
+
+    .status-unanswered {
+        background-color: var(--color-neutral);
+    }
+
+    .status-unanswered:hover {
+        background-color: var(--color-neutral-hover);
+    }
+
+    /* ----- Question Card ----- */
+    .question-card-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .question-card {
+        border-radius: 1rem;
+        padding: 1.25rem;
+        border: 1px solid;
+        scroll-margin-top: 1.5rem;
+    }
+
+    .question-card.is-correct {
+        background-color: var(--color-success-bg);
+        border-color: var(--color-success-border);
+    }
+
+    .question-card.is-partially-correct {
+        background-color: var(--color-warning-bg);
+        border-color: var(--color-warning-border);
+    }
+
+    .question-card.is-incorrect {
+        background-color: var(--color-danger-bg);
+        border-color: var(--color-danger-border);
+    }
+
+    .question-card.is-unanswered {
+        background-color: var(--color-neutral-bg);
+        border-color: var(--color-neutral-border);
+    }
+
+    .question-header {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .question-title-section {
+        flex-grow: 1;
+    }
+
+    .question-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .question-number {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--color-text-primary-light);
+    }
+
+    .question-status-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.25rem 0.625rem;
+        border-radius: 9999px;
+        border: 1px solid;
+    }
+
+    .question-card.is-correct .question-status-badge {
+        background-color: #dcfce7;
+        color: var(--color-success-text);
+        border-color: #bbf7d0;
+    }
+
+    .question-card.is-partially-correct .question-status-badge {
+        background-color: #fef3c7;
+        color: var(--color-warning-text);
+        border-color: #fde68a;
+    }
+
+    .question-card.is-incorrect .question-status-badge {
+        background-color: #fee2e2;
+        color: var(--color-danger-text);
+        border-color: #fecaca;
+    }
+
+    .question-card.is-unanswered .question-status-badge {
+        background-color: #e2e8f0;
+        color: var(--color-neutral-text);
+        border-color: #cbd5e1;
+    }
+
+    .dark .question-card.is-correct .question-status-badge {
+        background-color: #166534;
+        border-color: #22c55e;
+        color: #dcfce7;
+    }
+
+    .dark .question-card.is-partially-correct .question-status-badge {
+        background-color: #92400e;
+        border-color: #f59e0b;
+        color: #fef3c7;
+    }
+
+    .dark .question-card.is-incorrect .question-status-badge {
+        background-color: #991b1b;
+        border-color: #ef4444;
+        color: #fee2e2;
+    }
+
+    .dark .question-card.is-unanswered .question-status-badge {
+        background-color: #475569;
+        border-color: #64748b;
+        color: #e2e8f0;
+    }
+
+    .question-content {
+        line-height: 1.6;
+        color: var(--color-text-primary-light);
+    }
+
+    .question-points {
+        background-color: #dbeafe;
+        color: #1e40af;
+        font-weight: 700;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        text-align: center;
+    }
+
+    .dark .question-points {
+        background-color: #1e3a8a;
+        color: #bfdbfe;
+    }
+
+    .question-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+        border: 1px solid var(--color-border-light);
+        margin-bottom: 1.25rem;
+    }
+
+    /* ----- Answer Choices ----- */
+    .answer-choices-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .answer-choice {
+        border-radius: 0.5rem;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        border: 1px solid;
+    }
+
+    .answer-choice-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    .answer-choice-text {
+        flex-grow: 1;
+        font-weight: 500;
+    }
+
+    .answer-choice.is-correct {
+        background-color: #dcfce7;
+        border-color: #4ade80;
+        color: #15803d;
+    }
+
+    .dark .answer-choice.is-correct {
+        background-color: #14532d;
+        border-color: #22c55e;
+        color: #dcfce7;
+    }
+
+    .answer-choice.is-incorrect-selected {
+        background-color: #fee2e2;
+        border-color: #f87171;
+        color: #b91c1c;
+    }
+
+    .dark .answer-choice.is-incorrect-selected {
+        background-color: #7f1d1d;
+        border-color: #ef4444;
+        color: #fee2e2;
+    }
+
+    .answer-choice.is-neutral {
+        background-color: #f1f5f9;
+        border-color: #cbd5e1;
+        color: #475569;
+        opacity: 0.8;
+    }
+
+    .dark .answer-choice.is-neutral {
+        background-color: #334155;
+        border-color: #475569;
+        color: #94a3b8;
+    }
+
+    /* ----- Explanation Box ----- */
+    .explanation-box {
+        margin-top: 1.25rem;
+        padding: 1rem;
+        background-color: #eff6ff;
+        border-left: 4px solid #60a5fa;
+        border-radius: 0 0.5rem 0.5rem 0;
+    }
+
+    .dark .explanation-box {
+        background-color: #1e293b;
+        border-left-color: #3b82f6;
+    }
+
+    .explanation-title {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        color: #1d4ed8;
+        margin-bottom: 0.5rem;
+    }
+
+    .dark .explanation-title {
+        color: #93c5fd;
+    }
+
+    .explanation-title svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        margin-right: 0.5rem;
+    }
+
+    .explanation-content {
+        line-height: 1.6;
+        color: #1e3a8a;
+    }
+
+    .dark .explanation-content {
+        color: #bfdbfe;
+    }
+
+    /* ----- Media Queries for Layout ----- */
+    @media (min-width: 640px) {
+        .header-banner {
+            padding: 2rem;
+        }
+
+        .header-banner-content {
+            flex-direction: row;
+            align-items: flex-start;
+        }
+
+        .card {
+            padding: 2rem;
+        }
+
+        .question-header {
+            flex-direction: row;
+            align-items: flex-start;
+        }
+
+        .question-card {
+            padding: 1.5rem;
+        }
+
+        .overview-chart-column {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .overview-grid {
+            grid-template-columns: 1fr 2fr;
+        }
+    }
+</style>
+
 <x-filament-panels::page>
-    <div class="space-y-6">
-        <!-- Header -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        Kết quả Quiz
-                    </h1>
-                    <h2 class="text-xl text-gray-600 dark:text-gray-400 mt-1">
-                        {{ $this->quiz->title }}
-                    </h2>
-                    <p class="text-gray-500 dark:text-gray-500">
-                        {{ $this->quiz->courses->first()?->title ?? 'Khóa học không xác định' }}
-                    </p>
+    <div class="page-container">
+        <div class="header-banner">
+            <div class="header-banner-overlay"></div>
+            <div class="header-banner-content">
+                <div class="header-info">
+                    <div class="header-info-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="header-info-course">
+                            {{ $this->quiz->courses->first()?->title ?? 'Khóa học không xác định' }}
+                        </p>
+                        <h1 class="header-info-title">{{ $this->quiz->title }}</h1>
+                    </div>
+                </div>
+                <div class="header-status">
+                    <div class="header-status-label">Trạng thái</div>
+                    <div class="header-status-value">Đã hoàn thành</div>
                 </div>
             </div>
         </div>
 
-        <!-- Score Overview -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Score Card -->
-            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white text-center">
-                <div class="text-4xl font-bold mb-2">
-                    {{ $this->attemptModel->points }}/{{ $this->quiz->questions->sum('pivot.points') }}
+        <div class="card">
+            <h2 class="card-title">
+                <x-heroicon-o-chart-pie />
+                Tổng quan kết quả
+            </h2>
+            <div class="overview-grid">
+                <div class="overview-stats-column">
+                    <div class="percentage-card">
+                        <div class="percentage-card-label">Tỷ lệ đúng</div>
+                        <div class="percentage-card-value">{{ number_format($this->percentage, 1) }}%</div>
+                        <div class="percentage-card-points">
+                            {{ $this->attemptModel->points }}/{{ $this->quiz->questions->sum('pivot.points') }} điểm
+                        </div>
+                    </div>
+                    <div class="time-spent-card">
+                        <x-heroicon-o-clock />
+                        <span>Thời gian: {{ $this->timeSpent }}</span>
+                    </div>
                 </div>
-                <div class="text-lg">{{ number_format($this->percentage, 1) }}%</div>
-                <div class="text-sm opacity-90 mt-1">Điểm số</div>
-            </div>
-
-            <!-- Correct Answers -->
-            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-6 text-white text-center">
-                <div class="text-4xl font-bold mb-2">{{ $this->correctAnswers }}</div>
-                <div class="text-lg">Đúng</div>
-                <div class="text-sm opacity-90 mt-1">Câu trả lời</div>
-            </div>
-
-            <!-- Incorrect Answers -->
-            <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-lg p-6 text-white text-center">
-                <div class="text-4xl font-bold mb-2">{{ $this->incorrectAnswers }}</div>
-                <div class="text-lg">Sai</div>
-                <div class="text-sm opacity-90 mt-1">Câu trả lời</div>
-            </div>
-
-            <!-- Time Spent -->
-            <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-6 text-white text-center">
-                <div class="text-4xl font-bold mb-2">{{ $this->timeSpent }}</div>
-                <div class="text-lg">Thời gian</div>
-                <div class="text-sm opacity-90 mt-1">Đã sử dụng</div>
-            </div>
-        </div>
-
-        <!-- Performance Chart -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Biểu đồ kết quả</h3>
-            <div class="w-full h-64">
-                <canvas id="performanceChart"></canvas>
+                <div class="overview-chart-column">
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                    <div class="legend-list">
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: var(--color-success);"></div>
+                            <div class="legend-label">Đúng hoàn toàn</div>
+                            <div class="legend-value">{{ $this->correctAnswers }}</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: var(--color-warning);"></div>
+                            <div class="legend-label">Đúng một phần</div>
+                            <div class="legend-value">{{ $this->partiallyCorrectAnswers }}</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: var(--color-danger);"></div>
+                            <div class="legend-label">Sai</div>
+                            <div class="legend-value">{{ $this->incorrectAnswers }}</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: var(--color-neutral);"></div>
+                            <div class="legend-label">Chưa trả lời</div>
+                            <div class="legend-value">{{ $this->unansweredQuestions ?? 0 }}</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Detailed Results -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Chi tiết câu trả lời</h3>
+        <div class="card">
+            <h2 class="card-title">
+                <x-heroicon-o-document-text />
+                Xem lại chi tiết
+            </h2>
+            <div
+                style="border-top: 1px solid var(--color-border-light); border-bottom: 1px solid var(--color-border-light); margin-bottom: 2rem;">
+                <h3
+                    style="font-size: 0.875rem; font-weight: 600; color: var(--color-text-secondary-light); margin-top: 1rem; margin-bottom: 0.75rem;">
+                    Chuyển đến câu hỏi</h3>
+                <div class="question-nav-container">
+                    @foreach($this->quiz->questions as $index => $question)
+                        @php
+                            $status = $this->getAnswerStatus($question->id);
+                            $statusClass = [
+                                'correct' => 'status-correct',
+                                'partially_correct' => 'status-partially-correct',
+                                'incorrect' => 'status-incorrect',
+                                'unanswered' => 'status-unanswered',
+                            ][$status] ?? 'status-unanswered';
+                        @endphp
+                        <a href="#question-{{ $index + 1 }}" class="question-nav-link {{ $statusClass }}">
+                            {{ $index + 1 }}
+                        </a>
+                    @endforeach
+                </div>
+            </div>
 
-            <div class="space-y-6">
+            <div class="question-card-list">
                 @foreach($this->quiz->questions as $index => $question)
                     @php
-                        $isCorrect = $this->isCorrectAnswer($question->id);
-                        $isAnswered = $this->isAnswered($question->id);
+                        $answerStatus = $this->getAnswerStatus($question->id);
                         $userAnswerIds = $this->getUserAnswers($question->id);
-                        $correctChoice = $question->answerChoices->where('is_correct', true)->first();
+                        $statusClass = [
+                            'correct' => 'is-correct',
+                            'partially_correct' => 'is-partially-correct',
+                            'incorrect' => 'is-incorrect',
+                            'unanswered' => 'is-unanswered'
+                        ][$answerStatus] ?? 'is-unanswered';
+                        $badgeLabel = [
+                            'correct' => 'Đúng hoàn toàn',
+                            'partially_correct' => 'Đúng một phần',
+                            'incorrect' => 'Sai',
+                            'unanswered' => 'Chưa trả lời'
+                        ][$answerStatus] ?? '';
                     @endphp
 
-                    <div
-                        class="border-l-4 rounded-lg p-6 transition-all duration-200
-                        {{ $isCorrect ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ($isAnswered ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20') }}">
-
-                        <div class="flex justify-between items-start mb-4">
-                            <h4 class="text-lg font-semibold text-gray-900 dark:text-white">
-                                Câu {{ $index + 1 }}: {!! $question->title !!}
-                            </h4>
-                            <div class="flex items-center space-x-2">
-                                @if($isCorrect)
-                                    <span
-                                        class="bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200 text-xs font-medium px-2.5 py-0.5 rounded">
-                                        Đúng
-                                    </span>
-                                @elseif($isAnswered)
-                                    <span
-                                        class="bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-200 text-xs font-medium px-2.5 py-0.5 rounded">
-                                        Sai
-                                    </span>
-                                @else
-                                    <span
-                                        class="bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200 text-xs font-medium px-2.5 py-0.5 rounded">
-                                        Chưa trả lời
-                                    </span>
-                                @endif
-                                <span
-                                    class="bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 text-xs font-medium px-2.5 py-0.5 rounded">
-                                    {{ $question->pivot->points ?? $question->points }} điểm
-                                </span>
+                    <div id="question-{{ $index + 1 }}" class="question-card {{ $statusClass }}">
+                        <div class="question-header">
+                            <div class="question-title-section">
+                                <div class="question-meta">
+                                    <h3 class="question-number">Câu {{ $index + 1 }}</h3>
+                                    <span class="question-status-badge">{{ $badgeLabel }}</span>
+                                </div>
+                                <div class="question-content">{!! $question->title !!}</div>
                             </div>
+                            <div class="question-points">{{ $question->pivot->points ?? $question->points }} điểm</div>
                         </div>
 
                         @if($question->question_image)
-                            <div class="mb-4">
-                                <img src="{{ $question->question_image }}" alt="Question Image"
-                                    class="max-w-full h-auto rounded border">
-                            </div>
+                            <img src="{{ $question->question_image }}" alt="Question Image" class="question-image">
                         @endif
 
-                        <div class="space-y-2">
+                        <div class="answer-choices-list">
                             @foreach($question->answerChoices as $choice)
                                 @php
                                     $isUserChoice = in_array($choice->id, $userAnswerIds);
                                     $isCorrectChoice = $choice->is_correct;
+                                    $choiceStatusClass = '';
+                                    $icon = null;
+
+                                    if ($isCorrectChoice) {
+                                        $choiceStatusClass = 'is-correct';
+                                        $icon = $isUserChoice ? 'heroicon-s-check-circle' : 'heroicon-o-check-circle';
+                                    } elseif ($isUserChoice && !$isCorrectChoice) {
+                                        $choiceStatusClass = 'is-incorrect-selected';
+                                        $icon = 'heroicon-s-x-circle';
+                                    } else {
+                                        $choiceStatusClass = 'is-neutral';
+                                        $icon = 'heroicon-o-chevron-right';
+                                    }
                                 @endphp
-
-                                <div
-                                    class="p-3 rounded border transition-colors
-                                    {{ $isCorrectChoice ? 'bg-green-100 dark:bg-green-800/30 border-green-200 dark:border-green-700' : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600' }}
-                                    {{ $isUserChoice && !$isCorrectChoice ? 'bg-red-100 dark:bg-red-800/30 border-red-200 dark:border-red-700' : '' }}">
-
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-gray-700 dark:text-gray-300">{!! $choice->title !!}</span>
-                                        <div class="flex items-center space-x-2">
-                                            @if($isCorrectChoice)
-                                                <span class="text-green-600 dark:text-green-400 font-medium flex items-center">
-                                                    <x-heroicon-o-check-circle class="w-4 h-4 mr-1" />
-                                                    Đáp án đúng
-                                                </span>
-                                            @endif
-                                            @if($isUserChoice)
-                                                <span class="text-blue-600 dark:text-blue-400 font-medium flex items-center">
-                                                    <x-heroicon-o-arrow-left class="w-4 h-4 mr-1" />
-                                                    Bạn đã chọn
-                                                </span>
-                                            @endif
-                                        </div>
-                                    </div>
+                                <div class="answer-choice {{ $choiceStatusClass }}">
+                                    @if($icon)
+                                        <x-dynamic-component :component="$icon" class="answer-choice-icon" />
+                                    @endif
+                                    <span class="answer-choice-text">{!! $choice->title !!}</span>
                                 </div>
                             @endforeach
                         </div>
 
                         @if($question->explanation)
-                            <div
-                                class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded">
-                                <h5 class="font-medium text-blue-800 dark:text-blue-200 mb-1 flex items-center">
-                                    <x-heroicon-o-light-bulb class="w-4 h-4 mr-1" />
-                                    Giải thích:
+                            <div class="explanation-box">
+                                <h5 class="explanation-title">
+                                    <x-heroicon-o-light-bulb />
+                                    Giải thích
                                 </h5>
-                                <p class="text-blue-700 dark:text-blue-300">{!! $question->explanation !!}</p>
+                                <div class="explanation-content">{!! $question->explanation !!}</div>
                             </div>
                         @endif
                     </div>
                 @endforeach
             </div>
         </div>
-
-
+    </div>
 
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                // Performance Chart
                 const ctx = document.getElementById('performanceChart').getContext('2d');
+                const isDarkMode = document.documentElement.classList.contains('dark');
+
                 new Chart(ctx, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Đúng', 'Sai', 'Chưa trả lời'],
+                        labels: ['Đúng hoàn toàn', 'Đúng một phần', 'Sai', 'Chưa trả lời'],
                         datasets: [{
                             data: [
-                                {{ $this->correctAnswers }},
-                                {{ $this->incorrectAnswers }},
-                                {{ $this->unansweredQuestions }}
+                                    {{ $this->correctAnswers }},
+                                    {{ $this->partiallyCorrectAnswers }},
+                                    {{ $this->incorrectAnswers }},
+                                {{ $this->unansweredQuestions ?? 0 }}
                             ],
-                            backgroundColor: [
-                                '#10b981',
-                                '#ef4444',
-                                '#f59e0b'
-                            ],
-                            borderWidth: 2,
-                            borderColor: '#ffffff'
+                            backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#6B7280'],
+                            borderWidth: 4,
+                            borderColor: isDarkMode ? '#1f2937' : '#ffffff',
+                            hoverBorderWidth: 6,
+                            borderRadius: 8,
+                            spacing: 4
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        cutout: '70%',
                         plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    padding: 20,
-                                    font: {
-                                        size: 14
-                                    },
-                                    color: document.documentElement.classList.contains('dark') ? '#ffffff' : '#374151'
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+                                titleColor: isDarkMode ? '#F9FAFB' : '#111827',
+                                bodyColor: isDarkMode ? '#D1D5DB' : '#374151',
+                                borderColor: isDarkMode ? '#374151' : '#E5E7EB',
+                                borderWidth: 1,
+                                cornerRadius: 8,
+                                displayColors: true,
+                                callbacks: {
+                                    label: function (context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `${label}: ${value} câu (${percentage}%)`;
+                                    }
                                 }
                             }
+                        },
+                        animation: {
+                            duration: 1000,
+                            easing: 'easeOutQuart'
                         }
                     }
                 });

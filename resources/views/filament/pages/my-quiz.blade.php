@@ -147,7 +147,7 @@
                                         Tiếp tục
                                     </a>
                                 @elseif($quizStatus['canTake'])
-                                    {{ ($this->takeQuizAction)(['quiz' => $quiz->id])->extraAttributes(['class' => 'w-full text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2', 'style' => 'background-color: #f97316 !important; border-color: #f97316 !important;', 'onmouseover' => 'this.style.backgroundColor="#ea580c"', 'onmouseout' => 'this.style.backgroundColor="#f97316"']) }}
+                                    {{ ($this->takeQuizAction)(['quiz' => $quiz->id])->extraAttributes(['class' => 'w-full text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2', 'style' => 'background-color: #16a34a !important; border-color: #16a34a !important;', 'onmouseover' => 'this.style.backgroundColor="#15803d"', 'onmouseout' => 'this.style.backgroundColor="#16a34a"']) }}
                                 @endif
 
                                 @if ($completedAttempts->count() > 0)

@@ -631,13 +631,25 @@ class QuizService extends BaseService implements QuizServiceInterface
                     ->toArray();
 
                 $studentChoiceIds = $answersByQuestion[$question->id] ?? [];
+                $studentCorrectChoices = array_intersect($studentChoiceIds, $correctChoiceIds);
+                $studentIncorrectChoices = array_diff($studentChoiceIds, $correctChoiceIds);
 
-                // Check if student answered correctly
+                // If student selected incorrect choices, no points
+                if (!empty($studentIncorrectChoices)) {
+                    continue;
+                }
+
+                // If student answered completely correctly
                 if (
                     count($correctChoiceIds) === count($studentChoiceIds) &&
                     empty(array_diff($correctChoiceIds, $studentChoiceIds))
                 ) {
                     $earnedPoints += $question->pivot->points;
+                }
+                // If student answered partially correctly (some correct choices but not all)
+                elseif (!empty($studentCorrectChoices) && count($studentCorrectChoices) < count($correctChoiceIds)) {
+                    $partialPoints = ($question->pivot->points * count($studentCorrectChoices)) / count($correctChoiceIds);
+                    $earnedPoints += $partialPoints;
                 }
             }
 
@@ -671,13 +683,25 @@ class QuizService extends BaseService implements QuizServiceInterface
                 $correctChoices = $question->answerChoices->where('is_correct', true);
                 $studentChoiceIds = $studentAnswers->pluck('answer_choice_id')->toArray();
                 $correctChoiceIds = $correctChoices->pluck('id')->toArray();
+                $studentCorrectChoices = array_intersect($studentChoiceIds, $correctChoiceIds);
+                $studentIncorrectChoices = array_diff($studentChoiceIds, $correctChoiceIds);
 
-                // Check if student answered correctly
+                // If student selected incorrect choices, no points
+                if (!empty($studentIncorrectChoices)) {
+                    continue;
+                }
+
+                // If student answered completely correctly
                 if (
                     count($correctChoiceIds) === count($studentChoiceIds) &&
                     empty(array_diff($correctChoiceIds, $studentChoiceIds))
                 ) {
                     $earnedPoints += $question->points;
+                }
+                // If student answered partially correctly (some correct choices but not all)
+                elseif (!empty($studentCorrectChoices) && count($studentCorrectChoices) < count($correctChoiceIds)) {
+                    $partialPoints = ($question->points * count($studentCorrectChoices)) / count($correctChoiceIds);
+                    $earnedPoints += $partialPoints;
                 }
             }
 

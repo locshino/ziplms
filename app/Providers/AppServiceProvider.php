@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\QuizAttempt;
+use App\Observers\QuizAttemptObserver;
 use App\Providers\Concerns\HasRegisterClass;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -22,7 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Register observers
+        QuizAttempt::observe(QuizAttemptObserver::class);
     }
 
     /**

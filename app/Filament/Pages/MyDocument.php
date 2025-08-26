@@ -56,6 +56,32 @@ class MyDocument extends Page
     }
 
     /**
+     * Lấy tài liệu được nhóm theo khóa học.
+     */
+    public function getDocumentsByCourse(): Collection
+    {
+        $enrolledCourses = $this->getEnrolledCourses();
+        $courseDocuments = new Collection();
+
+        foreach ($enrolledCourses as $course) {
+            // Áp dụng bộ lọc nếu người dùng chọn một khóa học cụ thể
+            if ($this->selectedCourseId && $course->id !== $this->selectedCourseId) {
+                continue;
+            }
+            
+            $courseMedia = $course->getMedia('course_documents');
+            if ($courseMedia->isNotEmpty()) {
+                $courseDocuments->push([
+                    'course' => $course,
+                    'documents' => $courseMedia->sortByDesc('created_at')
+                ]);
+            }
+        }
+
+        return $courseDocuments;
+    }
+
+    /**
      * Lấy các khóa học mà người dùng đang tham gia và còn trong thời gian hợp lệ.
      * Đây là nơi duy nhất chứa logic truy vấn, đảm bảo tính nhất quán.
      */
