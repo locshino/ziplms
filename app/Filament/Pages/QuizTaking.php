@@ -2,6 +2,9 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\Status\QuizStatus;
+use App\Enums\Status\QuizAttemptStatus;
+use App\Libs\Roles\RoleHelper;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Services\Interfaces\QuizServiceInterface;
@@ -61,13 +64,16 @@ class QuizTaking extends Page
         }
 
         // Sử dụng findOrFail để tìm bằng ID (có thể là int hoặc UUID string)
-        $this->quizModel = Quiz::with(['course', 'questions.answerChoices'])
+        $this->quizModel = Quiz::with(['courses', 'questions.answerChoices'])
             ->findOrFail($this->quiz);
-        // Check if user can take this quiz
-        if (! $this->quizService->canTakeQuiz($this->quizModel->id, Auth::id())) {
+        // Check if user can take this quiz with simplified logic
+        $canTake = $this->canTakeQuiz($this->quizModel);
+        if (!$canTake) {
+            $errorMessage = 'Quiz này chưa đến thời gian làm bài, đã hết hạn hoặc bạn đã hết lượt làm bài.';
+
             Notification::make()
                 ->title('Không thể làm bài!')
-                ->body('Bạn không có quyền làm bài quiz này hoặc đã hết lượt làm bài.')
+                ->body($errorMessage)
                 ->danger()
                 ->send();
             $this->redirect(route('filament.app.pages.my-quiz'));
@@ -88,7 +94,7 @@ class QuizTaking extends Page
         // Check for existing in-progress attempt
         $this->attempt = QuizAttempt::where('quiz_id', $this->quizModel->id)
             ->where('student_id', Auth::id())
-            ->where('status', 'in_progress')
+            ->where('status', QuizAttemptStatus::IN_PROGRESS->value)
             ->first();
 
         // If no existing attempt, create new one
@@ -117,7 +123,7 @@ class QuizTaking extends Page
             $existingAnswers = [];
 
             // Group answers by question_id to handle multiple choice
-            $answersByQuestion = $this->attempt->answers()
+            $answersByQuestion = $this->attempt->studentAnswers()
                 ->get()
                 ->groupBy('question_id');
 
@@ -141,25 +147,26 @@ class QuizTaking extends Page
 
     protected function calculateRemainingTime(): void
     {
-        if (! $this->quizModel->time_limit || ! $this->attempt) {
+        if (! $this->quizModel->time_limit_minutes || ! $this->attempt) {
             $this->isUnlimited = true;
 
             return;
         }
 
         $this->isUnlimited = false;
-        $startTime = Carbon::parse($this->attempt->started_at);
-        $timeLimit = $this->quizModel->time_limit; // in minutes
-        $endTime = $startTime->addMinutes($timeLimit);
+        $startTime = Carbon::parse($this->attempt->start_at);
+        $timeLimit = $this->quizModel->time_limit_minutes; // in minutes
+        $endTime = $startTime->copy()->addMinutes($timeLimit); // Fix: use copy() to avoid mutating $startTime
         $now = Carbon::now();
 
-        $this->remainingSeconds = max(0, $endTime->diffInSeconds($now, false));
-        $this->timeWarning = $this->remainingSeconds <= 300; // 5 minutes warning
-
-        // Auto-submit if time is up
-        if ($this->remainingSeconds <= 0) {
+        if ($now->gte($endTime)) {
+            $this->remainingSeconds = 0;
             $this->autoSubmit();
+            return;
         }
+
+        $this->remainingSeconds = $now->diffInSeconds($endTime);
+        $this->timeWarning = $this->remainingSeconds <= 300; // 5 minutes warning
     }
 
     public function updateAnswer(string $questionId, string $choiceId): void
@@ -310,14 +317,19 @@ class QuizTaking extends Page
         }
     }
 
-    public function autoSubmit(): void
+
+
+    public function showAutoSubmitNotification(): void
     {
         Notification::make()
             ->title('Hết thời gian!')
             ->body('Bài quiz sẽ được nộp tự động.')
             ->warning()
             ->send();
+    }
 
+    public function autoSubmit(): void
+    {
         $this->submitQuiz();
     }
 
@@ -349,6 +361,156 @@ class QuizTaking extends Page
         return round(($this->answeredCount / $this->quizModel->questions->count()) * 100);
     }
 
+    /**
+     * Check if user can take the quiz
+     * Simplified logic: check student role, quiz exists in course_quizzes with valid time
+     */
+    public function canTakeQuiz(Quiz $quiz): bool
+    {
+        $user = Auth::user();
+        $userId = $user->id;
+
+        // Check if user is a student
+        if (!RoleHelper::isStudent($user)) {
+            return false;
+        }
+
+        // Check if quiz exists in course_quizzes table with valid time restrictions
+        $courseQuiz = $quiz->courses()
+            ->withPivot(['start_at', 'end_at'])
+            ->first();
+
+        if (!$courseQuiz) {
+            return false;
+        }
+
+        // Check time restrictions
+        $now = now();
+        $startAt = $courseQuiz->pivot->start_at;
+        $endAt = $courseQuiz->pivot->end_at;
+
+        // If start_at is set and current time is before start time
+        if ($startAt && $now->lt($startAt)) {
+            return false;
+        }
+
+        // If end_at is set and current time is after end time
+        if ($endAt && $now->gt($endAt)) {
+            return false;
+        }
+
+        // Check remaining attempts
+        $remainingAttempts = $this->getQuizRemainingAttempts($quiz);
+        // If remainingAttempts is null, it means unlimited attempts
+        return $remainingAttempts === null || $remainingAttempts > 0;
+    }
+
+    /**
+     * Get quiz status for display
+     */
+    public function getQuizStatus(Quiz $quiz): array
+    {
+        $userId = Auth::id();
+
+        // Check if quiz is published
+        if ($quiz->status !== QuizStatus::PUBLISHED->value) {
+            return [
+                'status' => 'not_published',
+                'canTake' => false,
+                'canViewResults' => false,
+                'message' => 'Quiz chưa được xuất bản'
+            ];
+        }
+
+        // Get user's enrolled courses with quiz time restrictions
+        $userCourses = $quiz->courses()
+            ->whereHas('users', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
+            ->withPivot(['start_at', 'end_at'])
+            ->get();
+
+        if ($userCourses->isEmpty()) {
+            return [
+                'status' => 'no_access',
+                'canTake' => false,
+                'canViewResults' => false,
+                'message' => 'Bạn chưa đăng ký khóa học này'
+            ];
+        }
+
+        // Check time restrictions
+        $now = now();
+        $canTakeInAnyCourse = false;
+
+        foreach ($userCourses as $course) {
+            $startAt = $course->pivot->start_at;
+            $endAt = $course->pivot->end_at;
+
+            // If no time restrictions, allow access
+            if (!$startAt && !$endAt) {
+                $canTakeInAnyCourse = true;
+                break;
+            }
+
+            // Check if current time is within allowed range
+            if ((!$startAt || $now->gte($startAt)) && (!$endAt || $now->lte($endAt))) {
+                $canTakeInAnyCourse = true;
+                break;
+            }
+        }
+
+        if (!$canTakeInAnyCourse) {
+            return [
+                'status' => 'time_restricted',
+                'canTake' => false,
+                'canViewResults' => false,
+                'message' => 'Chưa đến thời gian làm bài hoặc đã hết hạn'
+            ];
+        }
+
+        // Check remaining attempts
+        $remainingAttempts = $this->getQuizRemainingAttempts($quiz);
+
+        // If remainingAttempts is not null and <= 0, user has reached max attempts
+        if ($remainingAttempts !== null && $remainingAttempts <= 0) {
+            return [
+                'status' => 'max_attempts_reached',
+                'canTake' => false,
+                'canViewResults' => true,
+                'message' => 'Đã hết lượt làm bài'
+            ];
+        }
+
+        return [
+            'status' => 'available',
+            'canTake' => true,
+            'canViewResults' => false,
+            'message' => 'Có thể làm bài'
+        ];
+    }
+
+    /**
+     * Get remaining attempts for quiz
+     */
+    public function getQuizRemainingAttempts(Quiz $quiz): ?int
+    {
+        $userId = Auth::id();
+        $maxAttempts = $quiz->max_attempts;
+
+        // If max_attempts is 0 or null, allow unlimited attempts
+        if ($maxAttempts === 0 || $maxAttempts === null) {
+            return null; // null indicates unlimited attempts
+        }
+
+        $completedAttempts = QuizAttempt::where('quiz_id', $quiz->id)
+            ->where('student_id', $userId)
+            ->whereIn('status', [QuizAttemptStatus::COMPLETED->value, QuizAttemptStatus::GRADED->value])
+            ->count();
+
+        return max(0, $maxAttempts - $completedAttempts);
+    }
+
     public function getActions(): array
     {
         return [
@@ -358,15 +520,31 @@ class QuizTaking extends Page
                 ->color('gray')
                 ->url(route('filament.app.pages.my-quiz')),
 
-            Action::make('submit')
-                ->label('Nộp bài')
-                ->icon('heroicon-o-paper-airplane')
-                ->color('success')
-                ->requiresConfirmation()
-                ->modalHeading('Xác nhận nộp bài')
-                ->modalDescription('Bạn có chắc chắn muốn nộp bài? Bạn không thể thay đổi sau khi nộp.')
-                ->action(fn () => $this->submitQuiz())
-                ->disabled(fn () => $this->submitting),
         ];
+    }
+
+    // Custom action để gọi trong blade template
+    public function customSubmitAction(): Action
+    {
+        return Action::make('customSubmit')
+            ->label('Nộp bài')
+            ->icon('heroicon-o-paper-airplane')
+            ->color('success')
+            ->requiresConfirmation()
+            ->modalHeading('Xác nhận nộp bài')
+            ->modalDescription('Bạn có chắc chắn muốn nộp bài? Bạn không thể thay đổi sau khi nộp.')
+            ->action(function () {
+                $this->submitQuiz();
+            })
+            ->disabled(fn() => $this->submitting);
+    }
+
+    public function customBackAction(): Action
+    {
+        return Action::make('customBack')
+            ->label('Quay lại')
+            ->icon('heroicon-o-arrow-left')
+            ->color('gray')
+            ->url(route('filament.app.pages.my-quiz'));
     }
 }

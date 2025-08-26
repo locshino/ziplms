@@ -24,6 +24,8 @@ class QuizAnswers extends Page
     public ?Quiz $quiz = null;
 
     public ?QuizAttempt $attempt = null;
+    
+    public ?QuizAttempt $attemptModel = null;
 
     public Collection $allAttempts;
 
@@ -72,7 +74,7 @@ class QuizAnswers extends Page
         $this->quiz = Quiz::with('questions.answerChoices')->find($quizId);
 
         // Get all completed attempts for this quiz
-        $this->allAttempts = QuizAttempt::with('answers.answerChoice')
+        $this->allAttempts = QuizAttempt::with('quizAnswers.answerChoice')
             ->where('quiz_id', $quizId)
             ->where('student_id', Auth::id())
             ->whereIn('status', ['completed', 'submitted'])
@@ -94,6 +96,9 @@ class QuizAnswers extends Page
             $this->attempt = $this->allAttempts->first();
             $this->selectedAttemptId = $this->attempt->id;
         }
+        
+        // Sync attemptModel with attempt for compatibility
+        $this->attemptModel = $this->attempt;
 
         $this->calculateAndPrepareResults();
     }
@@ -118,15 +123,15 @@ class QuizAnswers extends Page
     protected function calculateAndPrepareResults(): void
     {
         // Basic stats from the attempt
-        $this->score = $this->attempt->score ?? 0;
-        $this->maxScore = $this->quiz->max_points ?? 0;
+        $this->score = $this->attempt->points ?? 0; // Use points instead of score
+        $this->maxScore = $this->quiz->questions->sum('pivot.points') ?? 0; // Get max points from pivot table
         $this->percentage = $this->maxScore > 0 ? round(($this->score / $this->maxScore) * 100, 2) : 0;
         $this->completedAt = $this->attempt->completed_at?->format('d/m/Y H:i');
         $this->timeSpent = $this->attempt->time_spent ? gmdate('H:i:s', $this->attempt->time_spent) : null;
 
         // Calculate quiz completion duration
-        if ($this->attempt->started_at && $this->attempt->completed_at) {
-            $startTime = $this->attempt->started_at;
+        if ($this->attempt->start_at && $this->attempt->completed_at) {
+            $startTime = $this->attempt->start_at;
             $endTime = $this->attempt->completed_at;
             $durationInSeconds = $startTime->diffInSeconds($endTime);
 
@@ -137,18 +142,23 @@ class QuizAnswers extends Page
             $this->duration = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
         }
 
-        $userAnswers = $this->attempt->answers->keyBy('question_id');
+        $userAnswers = $this->attempt->quizAnswers->keyBy('question_id');
         $preparedResults = new Collection;
 
         // Loop through all quiz questions to determine the status of each
         foreach ($this->quiz->questions as $question) {
-            $userAnswer = $userAnswers->get($question->id);
-            $correctChoice = $question->answerChoices->where('is_correct', true)->first();
+            $questionUserAnswers = $userAnswers->where('question_id', $question->id);
+            $correctChoiceIds = $question->answerChoices->where('is_correct', true)->pluck('id')->toArray();
+            $userChoiceIds = $questionUserAnswers->pluck('answer_choice_id')->toArray();
             $status = 'unanswered';
             $isCorrect = false;
 
-            if ($userAnswer) {
-                if ($correctChoice && $userAnswer->answer_choice_id === $correctChoice->id) {
+            if ($questionUserAnswers->isNotEmpty()) {
+                // Check if user answered correctly (all correct choices selected, no incorrect ones)
+                if (
+                    count($correctChoiceIds) === count($userChoiceIds) &&
+                    empty(array_diff($correctChoiceIds, $userChoiceIds))
+                ) {
                     $status = 'correct';
                     $isCorrect = true;
                     $this->correctCount++;
@@ -163,8 +173,8 @@ class QuizAnswers extends Page
             // Add all relevant info for this question to a structured collection
             $preparedResults->push([
                 'question' => $question,
-                'user_answer' => $userAnswer,
-                'correct_choice' => $correctChoice,
+                'user_answers' => $questionUserAnswers, // Changed to plural for multiple answers
+                'correct_choices' => $question->answerChoices->where('is_correct', true), // All correct choices
                 'status' => $status,
                 'is_correct' => $isCorrect,
             ]);
@@ -202,6 +212,31 @@ class QuizAnswers extends Page
     public function getTitle(): string
     {
         return 'Đáp án: '.($this->quiz?->title ?? 'Quiz');
+    }
+
+    public function isCorrectAnswer(string $questionId): bool
+    {
+        $question = $this->quiz->questions->where('id', $questionId)->first();
+        if (! $question) {
+            return false;
+        }
+
+        $userAnswer = $this->attemptModel->studentAnswers
+            ->where('question_id', $questionId)
+            ->first();
+
+        $correctChoice = $question->answerChoices
+            ->where('is_correct', true)
+            ->first();
+
+        return $userAnswer && $correctChoice && $userAnswer->answer_choice_id == $correctChoice->id;
+    }
+    
+    public function isAnswered(string $questionId): bool
+    {
+        return $this->attemptModel->studentAnswers
+            ->where('question_id', $questionId)
+            ->isNotEmpty();
     }
 
     public function getHeading(): string
