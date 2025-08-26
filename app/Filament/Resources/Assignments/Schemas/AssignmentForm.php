@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\Assignments\Schemas;
 
+use App\Enums\MimeType;
 use App\Enums\Status\AssignmentStatus;
 use App\Models\Assignment;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\SpatieTagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -23,6 +25,8 @@ class AssignmentForm
                     ->components([
                         TextInput::make('title')
                             ->required(),
+                        LexicalEditor::make('description')
+                            ->columnSpanFull(),
                         Section::make('Thiết lập')
                             ->columns(4)
                             ->components([
@@ -43,12 +47,26 @@ class AssignmentForm
                             ->type(Assignment::class),
                     ]),
 
-                Section::make('Mở rộng')
+                Section::make('Tài liệu')
                     ->columnSpanFull()
                     ->collapsible()
-                    ->components([
-                        LexicalEditor::make('description')
-                            ->columnSpanFull(),
+                    ->schema([
+                        SpatieMediaLibraryFileUpload::make('course_documents')
+                            ->label('Tài liệu bài tập')
+                            ->collection('assignment_documents')
+                            ->multiple()
+                            ->acceptedFileTypes([
+                                ...MimeType::documents(),
+                                ...MimeType::images(),
+                                ...MimeType::archives(),
+                            ])
+                            ->maxSize(10240) // 10MB
+                            ->helperText('Tải lên các tài liệu liên quan đến bài tập (PDF, Word, Excel, hình ảnh, v.v.)')
+                            ->reorderable()
+                            ->downloadable()
+                            ->openable()
+                            ->mediaName(fn($file) => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document')
+                            ->customProperties(fn($file) => ['title' => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document']),
                     ]),
             ]);
     }

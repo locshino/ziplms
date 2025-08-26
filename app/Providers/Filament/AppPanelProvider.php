@@ -2,12 +2,16 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\EditProfile;
+use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\RenewPassword;
+use App\Http\Middleware\CheckUserActive;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Cmsmaxinc\FilamentErrorPages\FilamentErrorPagesPlugin;
 use Devonab\FilamentEasyFooter\EasyFooterPlugin;
 use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
 use DutchCodingCompany\FilamentSocialite\Provider;
+use Filafly\Themes\Brisk\BriskTheme;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -29,6 +33,7 @@ use pxlrbt\FilamentEnvironmentIndicator\EnvironmentIndicatorPlugin;
 use pxlrbt\FilamentSpotlight\SpotlightPlugin;
 use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
 use Swis\Filament\Backgrounds\ImageProviders\CuratedBySwis;
+use Swis\Filament\Backgrounds\ImageProviders\MyImages;
 use Tapp\FilamentAuthenticationLog\FilamentAuthenticationLogPlugin;
 use Tapp\FilamentMailLog\FilamentMailLogPlugin;
 use Yebor974\Filament\RenewPassword\RenewPasswordPlugin;
@@ -42,8 +47,11 @@ class AppPanelProvider extends PanelProvider
             ->default()
             ->id('app')
             ->path('app')
-            ->login()
+
+            ->login(Login::class)
             ->passwordReset()
+            ->profile(page: EditProfile::class, isSimple: false)
+
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -60,13 +68,17 @@ class AppPanelProvider extends PanelProvider
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
+
                 StartSession::class,
+                CheckUserActive::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
+
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+
             ])
             ->authMiddleware([
                 Authenticate::class,
@@ -99,6 +111,7 @@ class AppPanelProvider extends PanelProvider
             FilamentApexChartsPlugin::make(),
             FilamentErrorPagesPlugin::make(),
             SpotlightPlugin::make(),
+            BriskTheme::make()->withoutSuggestedFont(),
 
             // Pages
             FilamentApiDocsBuilderPlugin::make(),
@@ -116,7 +129,10 @@ class AppPanelProvider extends PanelProvider
         if ($config['backgrounds']['enabled']) {
             $plugins[] = FilamentBackgroundsPlugin::make()
                 ->remember($config['backgrounds']['remember_in_seconds'])
-                ->imageProvider(CuratedBySwis::make());
+                ->imageProvider(
+                    MyImages::make()
+                        ->directory('images/backgrounds')
+                );
         }
 
         // UI

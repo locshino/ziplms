@@ -45,7 +45,7 @@ class CoursesTable
                 TextColumn::make('status')
                     ->searchable(),
                 TextColumn::make('price')
-                    ->money()
+                    ->money(currency: config('ziplms.currency.default'))
                     ->sortable(),
                 IconColumn::make('is_featured')
                     ->boolean(),
@@ -76,6 +76,12 @@ class CoursesTable
                 DateRangeFilter::make('end_at'),
                 SelectFilter::make('status')
                     ->options(CourseStatus::class),
+                SelectFilter::make('tags')
+                    ->label('Phân loại')
+                    ->relationship('tags', 'name')
+                    ->searchable()
+                    ->multiple()
+                    ->preload(),
                 TernaryFilter::make('is_featured'),
             ])
             ->recordActions([

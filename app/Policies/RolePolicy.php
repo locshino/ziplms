@@ -16,7 +16,7 @@ class RolePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_role');
+        return $user->can('view_any_roles::role');
     }
 
     /**
@@ -24,7 +24,7 @@ class RolePolicy
      */
     public function view(User $user, Role $role): bool
     {
-        return $user->can('view_role');
+        return $user->can('view_roles::role');
     }
 
     /**
@@ -32,7 +32,7 @@ class RolePolicy
      */
     public function create(User $user): bool
     {
-        // return $user->can('create_role');
+        $isCanCreateRole = $user->can('create_roles::role');
         return false; // Prevent creation of roles through the UI
     }
 
@@ -49,8 +49,9 @@ class RolePolicy
      */
     public function delete(User $user, Role $role): bool
     {
+        $isCanDelete = $user->can('delete_roles::role');
         if (RoleHelper::isSystemRole($role->name)) return false;
-        return $user->can('delete_role');
+        return $isCanDelete;
     }
 
     /**
@@ -58,7 +59,7 @@ class RolePolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_role');
+        return $user->can('delete_any_roles::role');
     }
 
     /**
@@ -66,8 +67,9 @@ class RolePolicy
      */
     public function forceDelete(User $user, Role $role): bool
     {
+        $isCanForceDelete = $user->can('{{ ForceDelete }}');
         if (RoleHelper::isSystemRole($role->name)) return false;
-        return $user->can('{{ ForceDelete }}');
+        return $$isCanForceDelete;
     }
 
     /**
@@ -99,7 +101,9 @@ class RolePolicy
      */
     public function replicate(User $user, Role $role): bool
     {
-        return $user->can('{{ Replicate }}');
+        $isCanReplicate = $user->can('{{ Replicate }}');
+        if (RoleHelper::isSystemRole($role->name)) return false;
+        return $isCanReplicate;
     }
 
     /**

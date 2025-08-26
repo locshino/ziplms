@@ -53,7 +53,7 @@ class UserForm
                     ->required(),
                 Toggle::make('force_renew_password')
                     ->label(__('resource_user.form.fields.force_renew_password'))
-                    ->visible(fn () => config('ziplms.plugins.renew_password.enabled') && (config('ziplms.plugins.renew_password.force_renew_password') == false))
+                    ->visible(fn() => config('ziplms.plugins.renew_password.enabled') && (config('ziplms.plugins.renew_password.force_renew_password') == false))
                     ->required(),
             ]);
     }

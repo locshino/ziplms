@@ -31,7 +31,15 @@ class UserPolicy
      */
     public function view(User $user, User $userRecord): bool
     {
-        return $user->can('view_users::user');
+        $isCanView = $user->can('view_users::user');
+        if ($isCanView == false) {
+            return false;
+        }
+
+        $compare = RoleHelper::compareUserRoles($user, $userRecord);
+        if ($compare === -1) return false;
+
+        return $isCanView;
     }
 
     /**
@@ -53,11 +61,17 @@ class UserPolicy
      */
     public function update(User $user, User $userRecord): bool
     {
+        $isCanUpdate = $user->can('update_users::user');
+
+        if ($isCanUpdate == false) {
+            return false;
+        }
+
         // Prevent lower role from updating higher role
         $compare = RoleHelper::compareUserRoles($user, $userRecord);
-        if ($compare === -1) return false;
+        if ($compare !== 1) return false;
 
-        return $user->can('update_users::user');
+        return $isCanUpdate;
     }
 
     /**
@@ -68,10 +82,16 @@ class UserPolicy
      */
     public function delete(User $user, User $userRecord): bool
     {
+        $isCanDelete = $user->can('delete_users::user');
+
+        if ($isCanDelete == false) {
+            return false;
+        }
+
         if ($user->id === $userRecord->id) return false;
         if (RoleHelper::isSuperAdmin($userRecord)) return false;
 
-        return $user->can('delete_users::user');
+        return $isCanDelete;
     }
 
     /**
@@ -93,14 +113,20 @@ class UserPolicy
      */
     public function forceDelete(User $user, User $userRecord): bool
     {
+        $isCanForceDelete = $user->can('force_delete_users::user');
+
+        if ($isCanForceDelete == false) {
+            return false;
+        }
+
         if ($user->id === $userRecord->id) return false;
         if (RoleHelper::isSuperAdmin($userRecord)) return false;
 
         // Prevent lower role from force deleting higher role
         $compare = RoleHelper::compareUserRoles($user, $userRecord);
-        if ($compare === -1) return false;
+        if ($compare !== 1) return false;
 
-        return $user->can('force_delete_users::user');
+        return $isCanForceDelete;
     }
 
     /**

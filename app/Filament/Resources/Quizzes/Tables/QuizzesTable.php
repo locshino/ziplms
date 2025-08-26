@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Quizzes\Tables;
 
+use App\Filament\Tables\Filters\SelectTagsFilter;
 use App\Models\Quiz;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -12,6 +13,7 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\SpatieTagsColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
@@ -57,6 +59,8 @@ class QuizzesTable
             ])
             ->filters([
                 TrashedFilter::make(),
+                SelectTagsFilter::make('tags')
+                    ->type(Quiz::class),
             ])
             ->recordActions([
                 // ViewAction::make(),

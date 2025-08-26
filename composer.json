@@ -15,6 +15,7 @@
         "cmsmaxinc/filament-error-pages": "^2.0",
         "devonab/filament-easy-footer": "^2.1@beta",
         "dutchcodingcompany/filament-socialite": "^3.0",
+        "filafly/brisk": "^1.0",
         "filament/filament": "~4.0",
         "filament/spatie-laravel-media-library-plugin": "^4.0",
         "filament/spatie-laravel-tags-plugin": "^4.0",

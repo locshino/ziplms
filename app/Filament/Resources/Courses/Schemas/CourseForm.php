@@ -4,7 +4,7 @@ namespace App\Filament\Resources\Courses\Schemas;
 
 use App\Enums\MimeType;
 use App\Enums\Status\CourseStatus;
-use App\Filament\Resources\Users\Tables\UsersTable;
+use App\Filament\Resources\Users\Tables\TeachersTable;
 use App\Models\Course;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
@@ -55,67 +55,88 @@ class CourseForm
 
                                 $set('slug', $slug);
                             }),
-                        ModalTableSelect::make('teacher_id')
-                            ->relationship('teacher', 'name')
-                            ->tableConfiguration(UsersTable::class)
-                            ->required(),
+
+                        Section::make('Thiết lập')
+                            ->columnSpanFull()
+                            ->columns(3)
+                            ->schema([
+                                ModalTableSelect::make('teacher_id')
+                                    ->relationship('teacher', 'name')
+                                    ->tableConfiguration(TeachersTable::class)
+                                    ->required(),
+                                Select::make('status')
+                                    ->options(CourseStatus::class)
+                                    ->required(),
+                                SpatieTagsInput::make('tags')
+                                    ->label('Phân loại')
+                                    ->type(Course::class),
+                            ]),
+
+                        Section::make('Thời gian')
+                            ->columnSpanFull()
+                            ->columns(2)
+                            ->schema([
+                                DateTimePicker::make('start_at')
+                                    ->label('Thời gian bắt đầu')
+                                    ->disabled(function (?Course $record) {
+                                        if (!$record) {
+                                            return false; // Always enabled on create
+                                        }
+                                        // Rule 1: Disable if it's an evergreen course with students
+                                        if ($record->start_at === null && $record->students()->exists()) {
+                                            return true;
+                                        }
+                                        // Rule 2: Disable if the timed course is currently running
+                                        if ($record->start_at && now()->between($record->start_at, $record->end_at)) {
+                                            return true;
+                                        }
+                                        return false;
+                                    })
+                                    ->helperText(function (?Course $record) {
+                                        if ($record && $record->start_at === null && $record->students()->exists()) {
+                                            return 'Không thể đặt lại lịch vì khóa học đã có học viên.';
+                                        }
+                                        return null;
+                                    }),
+
+                                DateTimePicker::make('end_at')
+                                    ->label('Thời gian kết thúc')
+                                    ->disabled(function (?Course $record) {
+                                        if (!$record) {
+                                            return false;
+                                        }
+                                        // Rule 1: Disable if it's an evergreen course with students
+                                        if ($record->start_at === null && $record->students()->exists()) {
+                                            return true;
+                                        }
+                                        return false;
+                                    }),
+                            ]),
+
                         Action::make('setEvergreen')
                             ->label('Chuyển sang Vô thời hạn')
                             ->color('info')
                             ->icon('heroicon-o-calendar-days')
                             ->requiresConfirmation()
+                            ->visible(function (?Course $record) {
+                                if (!$record) {
+                                    return false;
+                                }
+                                // Only show if the course is currently timed
+                                return $record->start_at !== null;
+                            })
                             ->modalHeading('Xác nhận chuyển đổi sang Vô thời hạn')
                             ->modalDescription(new HtmlString(
                                 'Hành động này sẽ xóa lịch trình của khóa học. <br/><br/>' .
-                                    '<strong class="text-danger">Cảnh báo: Nếu khóa học đã có học viên, bạn sẽ không thể thiết lập lại lịch cho khóa học này nữa.</strong>'
+                                    '<strong class="text-danger">Cảnh báo: Nếu khóa học đã có học viên, bạn sẽ không thể thiết lập lại lịch cho khóa học này nữa. Thay đổi sẽ có hiệu lực khi bấm lưu thay đổi</strong>'
                             ))
                             ->modalSubmitActionLabel('Có, tôi hiểu và xác nhận')
                             ->action(function (Set $set) {
                                 $set('start_at', null);
                                 $set('end_at', null);
                             }),
-                        DateTimePicker::make('start_at')
-                            ->label('Thời gian bắt đầu')
-                            ->disabled(function (?Course $record) {
-                                if (!$record) {
-                                    return false; // Always enabled on create
-                                }
-                                // Rule 1: Disable if it's an evergreen course with students
-                                if ($record->start_at === null && $record->students()->exists()) {
-                                    return true;
-                                }
-                                // Rule 2: Disable if the timed course is currently running
-                                if ($record->start_at && now()->between($record->start_at, $record->end_at)) {
-                                    return true;
-                                }
-                                return false;
-                            })
-                            ->helperText(function (?Course $record) {
-                                if ($record && $record->start_at === null && $record->students()->exists()) {
-                                    return 'Không thể đặt lại lịch vì khóa học đã có học viên.';
-                                }
-                                return null;
-                            }),
-
-                        DateTimePicker::make('end_at')
-                            ->label('Thời gian kết thúc')
-                            ->disabled(function (?Course $record) {
-                                if (!$record) {
-                                    return false;
-                                }
-                                // Rule 1: Disable if it's an evergreen course with students
-                                if ($record->start_at === null && $record->students()->exists()) {
-                                    return true;
-                                }
-                                return false;
-                            }),
-                        Select::make('status')
-                            ->options(CourseStatus::class)
-                            ->required(),
-                        SpatieTagsInput::make('tags')
-                            ->label('Phân loại')
-                            ->type(Course::class),
                     ]),
+
                 Section::make('Tài liệu')
                     ->columnSpanFull()
                     ->collapsible()
@@ -150,7 +171,7 @@ class CourseForm
                             }),
                         TextInput::make('price')
                             ->numeric()
-                            ->prefix('VND'),
+                            ->prefix(config('ziplms.currency.default')),
                         Toggle::make('is_featured')
                             ->required(),
                         LexicalEditor::make('description')

@@ -41,10 +41,7 @@ class RoleResource extends Resource implements HasShieldPermissions
         return [
             'view',
             'view_any',
-            'create',
             'update',
-            'delete',
-            'delete_any',
         ];
     }
 

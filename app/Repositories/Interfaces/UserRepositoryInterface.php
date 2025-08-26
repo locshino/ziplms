@@ -43,4 +43,19 @@ interface UserRepositoryInterface extends EloquentRepositoryInterface
      * Get users not in the given IDs array.
      */
     public function getUsersNotInIds(array $excludedIds): Collection;
+
+    /**
+     * Check if user is active (not deleted and status is active).
+     */
+    public function isActive(string $userId): bool;
+
+    /**
+     * Check if user does not exist (deleted or status is inactive or pending).
+     */
+    public function isNotExist(string $userId): bool;
+
+    /**
+     * Check if user is suspended (status is suspended and not deleted).
+     */
+    public function isSuspended(string $userId): bool;
 }

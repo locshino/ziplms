@@ -3,13 +3,16 @@
 namespace App\Models;
 
 use App\Enums\Status\QuizAttemptStatus;
+use App\Enums\System\RoleSystem;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+
 /**
  * @property string $id
  * @property string $quiz_id
@@ -46,9 +49,9 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt withoutTrashed()
  * @mixin \Eloquent
  */
-class QuizAttempt extends Model
+class QuizAttempt extends Model implements AuditableContract
 {
-    use HasFactory, HasUuids, SoftDeletes;
+    use HasFactory, HasUuids, SoftDeletes, Auditable;
 
     /**
      * The attributes that are mass assignable.
@@ -90,7 +93,7 @@ class QuizAttempt extends Model
     // Student relationship
     public function student(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'student_id');
+        return $this->belongsTo(User::class, 'student_id')->role(RoleSystem::STUDENT);
     }
 
     // Student quiz answer relationships

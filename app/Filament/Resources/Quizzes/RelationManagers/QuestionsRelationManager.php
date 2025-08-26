@@ -5,10 +5,12 @@ namespace App\Filament\Resources\Quizzes\RelationManagers;
 use App\Enums\Status\QuestionStatus;
 use App\Filament\Resources\Questions\QuestionResource;
 use App\Filament\Resources\Questions\Tables\QuestionsTable;
+use App\Models\Question;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\DetachBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
@@ -35,6 +37,7 @@ class QuestionsRelationManager extends RelationManager
                 TextInput::make('title')
                     ->columnSpanFull()
                     ->label('Title')
+                    ->disabled()
                     ->required(),
                 TextInput::make('points')
                     ->label('Points')
@@ -43,6 +46,7 @@ class QuestionsRelationManager extends RelationManager
                     ->required(),
                 Select::make('status')
                     ->options(QuestionStatus::class)
+                    ->disabled()
                     ->required(),
             ]);
     }
@@ -58,7 +62,7 @@ class QuestionsRelationManager extends RelationManager
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('title')
                     ->searchable(),
-                TextColumn::make('pivot.points')
+                TextColumn::make('points')
                     ->label('Points')
                     ->sortable(),
                 TextColumn::make('status'),
@@ -78,7 +82,9 @@ class QuestionsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make(),
                 AttachAction::make()
-                    ->schema(fn (AttachAction $action): array => [
+                    // ->multiple()
+                    ->schema(fn(AttachAction $action) => [
+                        $action->getRecordSelect(),
                         ModalTableSelect::make('recordId')
                             ->label('Question')
                             ->relationship('quizzes', 'title')
@@ -101,9 +107,7 @@ class QuestionsRelationManager extends RelationManager
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
+                    DetachBulkAction::make(),
                 ]),
             ]);
     }

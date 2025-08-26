@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'currency' => [
+        'default' => env('CURRENCY_DEFAULT', 'USD'),
+        'supported' => explode(',', env('CURRENCY_SUPPORTED', 'USD,EUR,GBP')),
+    ],
+
     'plugins' => [
         'renew_password' => [
             'enabled' => env('RENEW_PASSWORD_ENABLED', true),

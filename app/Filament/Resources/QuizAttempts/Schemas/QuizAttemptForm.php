@@ -3,7 +3,11 @@
 namespace App\Filament\Resources\QuizAttempts\Schemas;
 
 use App\Enums\Status\QuizAttemptStatus;
+use App\Filament\Resources\Quizzes\Tables\QuizzesTable;
+use App\Filament\Resources\Users\Tables\UsersTable;
+use App\Models\Quiz;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\ModalTableSelect;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -15,11 +19,13 @@ class QuizAttemptForm
     {
         return $schema
             ->components([
-                Select::make('quiz_id')
+                ModalTableSelect::make('quiz_id')
                     ->relationship('quiz', 'title')
+                    ->tableConfiguration(QuizzesTable::class)
                     ->required(),
-                Select::make('student_id')
+                ModalTableSelect::make('student_id')
                     ->relationship('student', 'name')
+                    ->tableConfiguration(UsersTable::class)
                     ->required(),
                 TextInput::make('points')
                     ->numeric(),

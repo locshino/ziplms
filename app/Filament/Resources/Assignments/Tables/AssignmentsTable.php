@@ -2,13 +2,20 @@
 
 namespace App\Filament\Resources\Assignments\Tables;
 
+use App\Enums\Status\AssignmentStatus;
+use App\Filament\Tables\Filters\SelectTagsFilter;
+use App\Models\Assignment;
+use App\Models\Tag;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Builder;
+use Filament\Tables\Columns\SpatieTagsColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
@@ -32,6 +39,10 @@ class AssignmentsTable
                     ->sortable(),
                 TextColumn::make('status')
                     ->searchable(),
+                SpatieTagsColumn::make('tags')
+                    ->label('Phân loại')
+                    ->type(Assignment::class)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -47,6 +58,10 @@ class AssignmentsTable
             ])
             ->filters([
                 TrashedFilter::make(),
+                SelectFilter::make('status')
+                    ->options(AssignmentStatus::class),
+                SelectTagsFilter::make('tags')
+                    ->type(Assignment::class),
             ])
             ->recordActions([
                 EditAction::make(),
