@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Enrollment;
+use App\Libs\Roles\RoleHelper;
 use App\Models\Quiz;
 use App\Models\User;
 
@@ -34,7 +34,9 @@ class QuizAccessService
 
         // Manager can only view quizzes in courses they have permission for
         if ($user->hasRole('manager')) {
-            return $user->can('manage-course-'.$quiz->course_id);
+            return $quiz->courses()->get()->some(function ($course) use ($user) {
+                return $user->can('manage-course-'.$course->id);
+            });
         }
 
         // Teachers can view all quizzes for grading purposes
@@ -43,8 +45,8 @@ class QuizAccessService
         }
 
         // Students can only view quizzes in enrolled courses
-        if ($user->hasRole('student')) {
-            return $this->isEnrolledInCourse($user, $quiz->course_id);
+        if (RoleHelper::isStudent($user)) {
+            return $this->isEnrolledInQuizCourses($user, $quiz);
         }
 
         return false;
@@ -52,36 +54,40 @@ class QuizAccessService
 
     /**
      * Check if user can take quiz
+     * Simplified logic: check student role, quiz exists in course_quizzes with valid time
      */
     public function canTakeQuiz(User $user, Quiz $quiz): bool
     {
-        // Check take_quizzes permission first
-        if (! $user->can('take_quizzes')) {
+        // Check if user is a student
+        if (!RoleHelper::isStudent($user)) {
             return false;
         }
 
-        // Super admin can take any quiz
-        if ($user->hasRole('super_admin')) {
-            return true;
-        }
+        // Check if quiz exists in course_quizzes table with valid time restrictions
+        $courseQuiz = $quiz->courses()
+            ->withPivot(['start_at', 'end_at'])
+            ->first();
 
-        // Admin can take any quiz
-        if ($user->hasRole('admin')) {
-            return true;
-        }
-
-        // Only students can take quizzes (after admin checks)
-        if (! $user->hasRole('student')) {
+        if (!$courseQuiz) {
             return false;
         }
 
-        // Check enrollment for students
-        if (! $this->isStudentEnrolledInCourse($user->id, $quiz->course_id)) {
+        // Check time restrictions
+        $now = now();
+        $startAt = $courseQuiz->pivot->start_at;
+        $endAt = $courseQuiz->pivot->end_at;
+
+        // If start_at is set and current time is before start time
+        if ($startAt && $now->lt($startAt)) {
             return false;
         }
 
-        // Use existing quiz service logic
-        return $this->quizService->canTakeQuiz($quiz->id, $user->id);
+        // If end_at is set and current time is after end time
+        if ($endAt && $now->gt($endAt)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -149,7 +155,9 @@ class QuizAccessService
 
         // Manager can view results for courses they have permission for
         if ($user->hasRole('manager')) {
-            return $user->can('manage-course-'.$quiz->course_id);
+            return $quiz->courses()->get()->some(function ($course) use ($user) {
+                return $user->can('manage-course-'.$course->id);
+            });
         }
 
         // Teachers can view all quiz results for grading purposes
@@ -158,20 +166,30 @@ class QuizAccessService
         }
 
         // Students can only view their own results (but need view_reports permission)
-        if ($user->hasRole('student')) {
-            return $this->isEnrolledInCourse($user, $quiz->course_id);
+        if (RoleHelper::isStudent($user)) {
+            return $this->isEnrolledInQuizCourses($user, $quiz);
         }
 
         return false;
     }
 
     /**
-     * Check if student is enrolled in course
+     * Check if user is enrolled in course through course_user pivot table
      */
-    private function isStudentEnrolledInCourse(string $studentId, string $courseId): bool
+    private function isEnrolledInCourse(User $user, string $courseId): bool
     {
-        return Enrollment::where('student_id', $studentId)
-            ->where('course_id', $courseId)
+        return $user->courses()->where('course_id', $courseId)->exists();
+    }
+
+    /**
+     * Check if user is enrolled in any course that contains the quiz
+     */
+    private function isEnrolledInQuizCourses(User $user, Quiz $quiz): bool
+    {
+        return $quiz->courses()
+            ->whereHas('users', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
             ->exists();
     }
 
@@ -185,8 +203,8 @@ class QuizAccessService
             'can_take' => $this->canTakeQuiz($user, $quiz),
             'can_manage' => $this->canManageQuiz($user, $quiz),
             'can_view_results' => $this->canViewResults($user, $quiz),
-            'is_enrolled' => $user->hasRole('student') ?
-                $this->isStudentEnrolledInCourse($user->id, $quiz->course_id) : null,
+            'is_enrolled' => RoleHelper::isStudent($user) ?
+                $this->isEnrolledInQuizCourses($user, $quiz) : null,
         ];
     }
 }

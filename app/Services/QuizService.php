@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\Services\QuizServiceException;
+use App\Libs\Roles\RoleHelper;
 use App\Models\Question;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
@@ -100,8 +101,8 @@ class QuizService extends BaseService implements QuizServiceInterface
                     // Calculate next attempt number
                     $nextAttemptNumber = count($existingAttempts) + 1;
 
-                    // Check attempt limit
-                    if ($quiz->max_attempts && $nextAttemptNumber > $quiz->max_attempts) {
+                    // Check attempt limit (0 or null means unlimited)
+                    if ($quiz->max_attempts !== null && $quiz->max_attempts > 0 && $nextAttemptNumber > $quiz->max_attempts) {
                         throw QuizServiceException::maxAttemptsExceeded();
                     }
 
@@ -111,7 +112,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                         'student_id' => $studentId,
                         'attempt_number' => $nextAttemptNumber,
                         'status' => 'in_progress',
-                        'started_at' => Carbon::now(),
+                        'start_at' => Carbon::now(),
                     ]);
 
                     // Cache the attempt
@@ -186,24 +187,30 @@ class QuizService extends BaseService implements QuizServiceInterface
     private function validateStudentCanTakeQuiz(Quiz $quiz, string $studentId): void
     {
         try {
-            // Check if user is super admin or admin - they can take any quiz
+            // Check if user exists and get user instance
             $user = \App\Models\User::find($studentId);
-            if ($user && ($user->hasRole(['super_admin', 'admin']))) {
-                return; // Super admin and admin can take any quiz
-            }
-
-            // Check if student is enrolled in the course with active status
-            $enrollment = \App\Models\Enrollment::where('course_id', $quiz->course_id)
-                ->where('student_id', $studentId)
-                ->first();
-
-            if (! $enrollment) {
+            if (!$user) {
                 throw QuizServiceException::quizNotActive();
             }
 
-            // Check if enrollment has active status (using Spatie Model Status)
-            $enrollmentStatus = $enrollment->getStatusAttribute();
-            if ($enrollmentStatus !== 'active') {
+            // Check if user is super admin or admin - they can take any quiz
+            if ($user->hasRole(['super_admin', 'admin'])) {
+                return; // Super admin and admin can take any quiz
+            }
+
+            // Check if user is a student
+            if (!\App\Libs\Roles\RoleHelper::isStudent($user)) {
+                throw QuizServiceException::quizNotActive();
+            }
+
+            // Check if student is enrolled in any course that contains this quiz
+            $isEnrolledInQuizCourse = $quiz->courses()
+                ->whereHas('users', function ($query) use ($studentId) {
+                    $query->where('user_id', $studentId);
+                })
+                ->exists();
+
+            if (!$isEnrolledInQuizCourse) {
                 throw QuizServiceException::quizNotActive();
             }
 
@@ -214,7 +221,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                 'quiz_id' => $quiz->id,
                 'student_id' => $studentId,
                 'error' => $e->getMessage(),
-                'enrollment_status' => isset($enrollment) ? $enrollment->getStatusAttribute() : 'not_found',
+                'is_enrolled' => isset($isEnrolledInQuizCourse) ? $isEnrolledInQuizCourse : false,
             ]);
             throw $e;
         }
@@ -236,9 +243,13 @@ class QuizService extends BaseService implements QuizServiceInterface
             }
 
             // Check if attempt is still valid (not expired)
-            if ($attempt->quiz->time_limit) {
-                $timeElapsed = Carbon::now()->diffInMinutes($attempt->started_at);
-                if ($timeElapsed >= $attempt->quiz->time_limit) {
+            if ($attempt->quiz->time_limit_minutes) {
+                $startTime = Carbon::parse($attempt->start_at);
+                $timeLimit = $attempt->quiz->time_limit_minutes;
+                $endTime = $startTime->copy()->addMinutes($timeLimit);
+                $now = Carbon::now();
+                
+                if ($now->gte($endTime)) {
                     // Auto-submit if time limit exceeded
                     try {
                         // Get existing answers before auto-submit
@@ -260,7 +271,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                         // Update attempt status to expired
                         $this->quizAttemptRepository->updateById($attempt->id, [
                             'status' => 'expired',
-                            'completed_at' => Carbon::now(),
+                            'end_at' => Carbon::now(),
                         ]);
 
                         // Clear cache
@@ -307,7 +318,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                 }
 
                 // Validate attempt status
-                if ($attempt->status !== 'in_progress') {
+                if ($attempt->status->value !== 'in_progress') {
                     throw QuizServiceException::quizAttemptAlreadyCompleted();
                 }
 
@@ -317,6 +328,18 @@ class QuizService extends BaseService implements QuizServiceInterface
                 try {
                     // Get quiz questions for validation
                     $quizQuestions = $this->cacheService->getQuizQuestions($attempt->quiz_id);
+                    
+                    // Fallback to database if cache is empty, load with answerChoices for JSON preparation
+                    if (empty($quizQuestions) || $quizQuestions->isEmpty()) {
+                        $quiz = Quiz::find($attempt->quiz_id);
+                        $quizQuestions = $quiz ? $quiz->questions()->with('answerChoices')->get() : collect();
+                    } else {
+                        // If using cached questions, ensure answerChoices are loaded
+                        $quizQuestions = Question::with('answerChoices')
+                            ->whereIn('id', $quizQuestions->pluck('id'))
+                            ->get();
+                    }
+                    
                     $questionIds = collect($quizQuestions)->pluck('id')->toArray();
 
                     // Validate that all answers are for valid questions
@@ -338,8 +361,21 @@ class QuizService extends BaseService implements QuizServiceInterface
                     // Prepare answers for bulk insert
                     $answersToInsert = [];
                     foreach ($answers as $questionId => $answerChoiceIds) {
+                        // Skip null or empty answers
+                        if ($answerChoiceIds === null || $answerChoiceIds === '') {
+                            continue;
+                        }
+
                         if (is_array($answerChoiceIds)) {
+                            // Skip empty arrays
+                            if (empty($answerChoiceIds)) {
+                                continue;
+                            }
                             foreach ($answerChoiceIds as $answerChoiceId) {
+                                // Skip empty choice IDs
+                                if (empty($answerChoiceId)) {
+                                    continue;
+                                }
                                 $answersToInsert[] = [
                                     'id' => (string) \Illuminate\Support\Str::uuid(),
                                     'quiz_attempt_id' => $attemptId,
@@ -350,6 +386,10 @@ class QuizService extends BaseService implements QuizServiceInterface
                                 ];
                             }
                         } else {
+                            // Skip empty single choice answers
+                            if (empty($answerChoiceIds)) {
+                                continue;
+                            }
                             $answersToInsert[] = [
                                 'id' => (string) \Illuminate\Support\Str::uuid(),
                                 'quiz_attempt_id' => $attemptId,
@@ -369,11 +409,15 @@ class QuizService extends BaseService implements QuizServiceInterface
                     // Calculate score with optimized method
                     $score = $this->calculateScoreOptimized($attempt, $quizQuestions, $answersToInsert);
 
+                    // Prepare answers JSON for storage
+                    $answersJson = $this->prepareAnswersJson($answers, $quizQuestions);
+
                     // Update attempt
                     $this->quizAttemptRepository->updateById($attemptId, [
-                        'score' => $score,
+                        'points' => $score,
                         'status' => 'completed',
-                        'completed_at' => Carbon::now(),
+                        'end_at' => Carbon::now(),
+                        'answers' => $answersJson,
                     ]);
 
                     // Get updated attempt
@@ -418,18 +462,26 @@ class QuizService extends BaseService implements QuizServiceInterface
     private function validateAnswersFormat(array $answers): void
     {
         try {
+            // Allow empty answers - student can submit without answering any questions
             if (empty($answers)) {
-                throw QuizServiceException::invalidAnswerSubmission();
+                return;
             }
 
             foreach ($answers as $questionId => $answerChoiceIds) {
+                // Validate question ID is not empty
                 if (empty($questionId)) {
                     throw QuizServiceException::invalidAnswerSubmission();
                 }
 
+                // Skip validation if answer is null or empty (unanswered question)
+                if ($answerChoiceIds === null || $answerChoiceIds === '') {
+                    continue;
+                }
+
                 if (is_array($answerChoiceIds)) {
+                    // For multiple choice, allow empty array (no selections)
                     if (empty($answerChoiceIds)) {
-                        throw QuizServiceException::invalidAnswerSubmission();
+                        continue;
                     }
                     foreach ($answerChoiceIds as $choiceId) {
                         if (empty($choiceId)) {
@@ -437,6 +489,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                         }
                     }
                 } else {
+                    // For single choice, validate choice ID is not empty
                     if (empty($answerChoiceIds)) {
                         throw QuizServiceException::invalidAnswerSubmission();
                     }
@@ -519,8 +572,8 @@ class QuizService extends BaseService implements QuizServiceInterface
                 return false;
             }
 
-            // Check attempt limits
-            if ($quiz->max_attempts) {
+            // Check attempt limits (0 or null means unlimited)
+            if ($quiz->max_attempts !== null && $quiz->max_attempts > 0) {
                 $attemptCount = $this->quizAttemptRepository->countStudentAttempts($quizId, $studentId);
                 if ($attemptCount >= $quiz->max_attempts) {
                     return false;
@@ -554,7 +607,11 @@ class QuizService extends BaseService implements QuizServiceInterface
     private function calculateScoreOptimized(QuizAttempt $attempt, Collection $questions, array $submittedAnswers): float
     {
         try {
-            $totalPoints = $questions->sum('points');
+            // Get quiz questions with pivot data to access points from quiz_questions table
+            $quiz = Quiz::with('questions')->find($attempt->quiz_id);
+            $quizQuestions = $quiz->questions;
+            
+            $totalPoints = $quizQuestions->sum('pivot.points');
             $earnedPoints = 0;
 
             // Group submitted answers by question
@@ -567,20 +624,32 @@ class QuizService extends BaseService implements QuizServiceInterface
                 $answersByQuestion[$questionId][] = $answer['answer_choice_id'];
             }
 
-            foreach ($questions as $question) {
+            foreach ($quizQuestions as $question) {
                 $correctChoiceIds = $question->answerChoices
                     ->where('is_correct', true)
                     ->pluck('id')
                     ->toArray();
 
                 $studentChoiceIds = $answersByQuestion[$question->id] ?? [];
+                $studentCorrectChoices = array_intersect($studentChoiceIds, $correctChoiceIds);
+                $studentIncorrectChoices = array_diff($studentChoiceIds, $correctChoiceIds);
 
-                // Check if student answered correctly
+                // If student selected incorrect choices, no points
+                if (!empty($studentIncorrectChoices)) {
+                    continue;
+                }
+
+                // If student answered completely correctly
                 if (
                     count($correctChoiceIds) === count($studentChoiceIds) &&
                     empty(array_diff($correctChoiceIds, $studentChoiceIds))
                 ) {
-                    $earnedPoints += $question->points;
+                    $earnedPoints += $question->pivot->points;
+                }
+                // If student answered partially correctly (some correct choices but not all)
+                elseif (!empty($studentCorrectChoices) && count($studentCorrectChoices) < count($correctChoiceIds)) {
+                    $partialPoints = ($question->pivot->points * count($studentCorrectChoices)) / count($correctChoiceIds);
+                    $earnedPoints += $partialPoints;
                 }
             }
 
@@ -614,13 +683,25 @@ class QuizService extends BaseService implements QuizServiceInterface
                 $correctChoices = $question->answerChoices->where('is_correct', true);
                 $studentChoiceIds = $studentAnswers->pluck('answer_choice_id')->toArray();
                 $correctChoiceIds = $correctChoices->pluck('id')->toArray();
+                $studentCorrectChoices = array_intersect($studentChoiceIds, $correctChoiceIds);
+                $studentIncorrectChoices = array_diff($studentChoiceIds, $correctChoiceIds);
 
-                // Check if student answered correctly
+                // If student selected incorrect choices, no points
+                if (!empty($studentIncorrectChoices)) {
+                    continue;
+                }
+
+                // If student answered completely correctly
                 if (
                     count($correctChoiceIds) === count($studentChoiceIds) &&
                     empty(array_diff($correctChoiceIds, $studentChoiceIds))
                 ) {
                     $earnedPoints += $question->points;
+                }
+                // If student answered partially correctly (some correct choices but not all)
+                elseif (!empty($studentCorrectChoices) && count($studentCorrectChoices) < count($correctChoiceIds)) {
+                    $partialPoints = ($question->points * count($studentCorrectChoices)) / count($correctChoiceIds);
+                    $earnedPoints += $partialPoints;
                 }
             }
 
@@ -844,8 +925,8 @@ class QuizService extends BaseService implements QuizServiceInterface
     {
         try {
             $quiz = $this->repository->findById($quizId);
-            if (! $quiz || ! $quiz->max_attempts) {
-                return null;
+            if (! $quiz || $quiz->max_attempts === null || $quiz->max_attempts === 0) {
+                return null; // null means unlimited attempts
             }
 
             $attemptCount = $this->quizAttemptRepository->countStudentAttempts($quizId, $studentId);
@@ -879,7 +960,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                 ];
             }
 
-            $scores = $attempts->pluck('score')->filter();
+            $scores = $attempts->pluck('points')->filter();
 
             return [
                 'total_attempts' => $attempts->count(),
@@ -910,7 +991,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                 return null;
             }
 
-            return $completedAttempts->max('score');
+            return $completedAttempts->max('points');
         } catch (Exception $e) {
             Log::error('Failed to get student best score', [
                 'quiz_id' => $quizId,
@@ -1033,5 +1114,62 @@ class QuizService extends BaseService implements QuizServiceInterface
             ]);
             throw QuizServiceException::databaseError($e->getMessage());
         }
+    }
+
+    /**
+     * Prepare answers in JSON format for storage
+     * Format: {
+     *   "question_id": number,
+     *   "question_text": string,
+     *   "is_multiple_response": boolean,
+     *   "answer_choice_id": string|array (string for single choice, array for multiple choices)
+     * }
+     *
+     * @param array $answers Student answers in format [question_id => answer_choice_id(s)]
+     * @param Collection $quizQuestions Quiz questions collection
+     * @return array JSON formatted answers
+     */
+    private function prepareAnswersJson(array $answers, Collection $quizQuestions): array
+    {
+        $answersJson = [];
+
+        foreach ($answers as $questionId => $answerData) {
+            // Skip null or empty answers
+            if ($answerData === null || $answerData === '' || (is_array($answerData) && empty($answerData))) {
+                continue;
+            }
+
+            // Get question details
+            $question = $quizQuestions->where('id', $questionId)->first();
+            if (!$question) {
+                continue;
+            }
+
+            $questionAnswer = [
+                'question_id' => $questionId,
+                'question_text' => $question->question_text ?? '',
+                'is_multiple_response' => $question->is_multiple_response ?? false,
+            ];
+
+            if (is_array($answerData)) {
+                // Multiple choice answers - store as array
+                $selectedChoices = [];
+                foreach ($answerData as $choiceId) {
+                    if (!empty($choiceId)) {
+                        $selectedChoices[] = $choiceId;
+                    }
+                }
+                $questionAnswer['answer_choice_id'] = $selectedChoices;
+            } else {
+                // Single choice answer - store as string
+                if (!empty($answerData)) {
+                    $questionAnswer['answer_choice_id'] = $answerData;
+                }
+            }
+
+            $answersJson[] = $questionAnswer;
+        }
+
+        return $answersJson;
     }
 }

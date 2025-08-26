@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Enums\Status\CourseStatus;
+use App\Enums\Status\AssignmentStatus;
+use App\Enums\Status\QuizStatus;
 use App\Services\Interfaces\CourseManagementServiceInterface;
 use App\Repositories\Interfaces\CourseRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
@@ -247,7 +250,7 @@ class CourseManagementService implements CourseManagementServiceInterface
             return DB::transaction(function () use ($courseId, $adminId) {
                 // Update course status
                 $this->courseRepository->updateCourseById($courseId, [
-                    'status' => 'archived',
+                    'status' => CourseStatus::ARCHIVED->value,
                     'archived_at' => now(),
                     'archived_by' => $adminId
                 ]);
@@ -256,7 +259,7 @@ class CourseManagementService implements CourseManagementServiceInterface
                 $assignments = $this->assignmentRepository->getAssignmentsByCourse($courseId);
                 foreach ($assignments as $assignment) {
                     $this->assignmentRepository->updateAssignmentById($assignment->id, [
-                        'status' => 'archived'
+                        'status' => AssignmentStatus::ARCHIVED->value
                     ]);
                 }
                 
@@ -264,7 +267,7 @@ class CourseManagementService implements CourseManagementServiceInterface
                 $quizzes = $this->quizRepository->getQuizzesByCourse($courseId);
                 foreach ($quizzes as $quiz) {
                     $this->quizRepository->updateQuizById($quiz->id, [
-                        'status' => 'archived'
+                        'status' => QuizStatus::ARCHIVED->value
                     ]);
                 }
                 
