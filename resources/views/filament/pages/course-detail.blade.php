@@ -10,103 +10,146 @@
         <div class="grid md:grid-cols-3 sm:grid-cols-1 gap-4">
             <!-- Quiz Card -->
             <div
-                class="relative group overflow-hidden rounded-3xl shadow-2xl bg-gradient-to-tr from-pink-500 to-rose-600 transform transition-all duration-500 hover:-translate-y-2 hover:scale-105 p-4 h-48">
-                <div class="absolute -top-8 -left-8 w-28 h-28 bg-white/20 rounded-full blur-3xl animate-pulse-slow"></div>
-                <div class="absolute -bottom-8 -right-8 w-28 h-28 bg-white/20 rounded-full blur-3xl animate-pulse-slow">
+                class="relative bg-white rounded-2xl shadow-md p-5 h-52 flex flex-col justify-between
+                                                                                                                               transition-transform duration-300 hover:-translate-y-2 hover:shadow-lg">
+
+                <!-- Header: Title + Total -->
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-gray-800 font-semibold text-lg">Quiz</h3>
+                        <span class="text-gray-900 font-bold text-2xl">
+                            {{ $this->completedQuizzes->count() + $this->ongoingQuizzes->count() }}
+                        </span>
+                    </div>
+                    <!-- Icon trong vòng tròn màu nhẹ -->
+                    <div class="w-14 h-14 flex items-center justify-center bg-blue-100 rounded-full shadow-sm">
+                        <x-heroicon-o-academic-cap class="w-7 h-7 text-blue-600" />
+                    </div>
                 </div>
 
-                <!-- Tổng số góc trái trên -->
-                <div class="relative z-10">
-                    <h3 class="text-white font-bold text-base">Quiz</h3>
-                    <span
-                        class="text-white/80 font-semibold text-lg">{{$this->completedQuizzes->count() + $this->ongoingQuizzes->count()}}</span>
-                </div>
-
-                <!-- Doughnut SVG góc phải giữa -->
-                <div class="absolute top-1/2 right-4 w-20 h-20 -translate-y-1/2">
+                <!-- Doughnut chart mini -->
+                <div class="absolute top-4 right-4 w-16 h-16">
                     <svg viewBox="0 0 36 36" class="w-full h-full">
-                        <circle class="text-white/20" stroke-width="4" stroke="currentColor" fill="none" cx="18" cy="18"
+                        <circle class="text-gray-200" stroke-width="4" stroke="currentColor" fill="none" cx="18" cy="18"
                             r="16" />
-                        <circle class="text-green-400" stroke-width="4" stroke-dasharray="60 40" stroke-dashoffset="25"
+                        <circle class="text-green-400" stroke-width="4"
+                            stroke-dasharray="{{ $this->completedQuizzes->count() }} {{ $this->ongoingQuizzes->count() }}"
                             stroke-linecap="round" fill="none" cx="18" cy="18" r="16" />
                     </svg>
-                    <x-heroicon-o-academic-cap
-                        class="absolute top-1/2 left-1/2 w-6 h-6 -translate-x-1/2 -translate-y-1/2 text-white opacity-90" />
                 </div>
 
-                <!-- Đã làm / Chưa làm góc trái dưới -->
-                <div class="relative z-10 mt-8 flex flex-col gap-2 text-white font-semibold text-sm">
-                    <span>Đã hết hạn:
-                        {{ $this->course->quizzes->filter(fn($q) => $q->status === App\Enums\Status\QuizStatus::CLOSED)->count() }}
-                    </span>
-                    <span>Đã làm: <span
-                            class="font-bold">{{ $this->completedQuizzes->filter(fn($q) => $q->status === App\Enums\Status\QuizStatus::ARCHIVED)->count() }}
-                        </span></span>
-                    <span>Chưa làm: <span class="font-bold">{{$this->ongoingQuizzes->count()}}</span></span>
+                <!-- Stats với màu nhẹ -->
+                <div class="flex flex-col gap-2 mt-5 text-sm font-medium">
+                    <div class="flex justify-between text-orange-600">
+                        <span>Đã hết hạn:</span>
+                        <span>{{ $this->course->quizzes->filter(fn($q) => $q->status === App\Enums\Status\QuizStatus::CLOSED)->count() }}</span>
+                    </div>
+                    <div class="flex justify-between text-green-600">
+                        <span>Đã làm:</span>
+                        <span>{{ $this->completedQuizzes->filter(fn($q) => $q->status === App\Enums\Status\QuizStatus::ARCHIVED)->count() }}</span>
+                    </div>
+                    <div class="flex justify-between text-blue-600">
+                        <span>Chưa làm:</span>
+                        <span>{{ $this->ongoingQuizzes->count() }}</span>
+                    </div>
                 </div>
             </div>
+
+
 
             <!-- Assignment Card -->
             <div
-                class="relative group overflow-hidden rounded-3xl shadow-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 transform transition-all duration-500 hover:-translate-y-2 hover:scale-105 p-4 h-48">
-                <div class="absolute -top-8 -left-8 w-28 h-28 bg-white/20 rounded-full blur-3xl animate-pulse-slow"></div>
-                <div class="absolute -bottom-8 -right-8 w-28 h-28 bg-white/20 rounded-full blur-3xl animate-pulse-slow">
+                class="relative bg-white rounded-2xl shadow-md p-5 h-52 flex flex-col justify-between
+                                                                                            transition-transform duration-300 hover:-translate-y-2 hover:shadow-lg">
+
+                <!-- Header: Title + Total -->
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-gray-800 font-semibold text-lg">Assignment</h3>
+                        <span class="text-gray-900 font-bold text-2xl">
+                            {{ $this->ongoingAssignments->count() + $this->closedAssignments->count() }}
+                        </span>
+                    </div>
+                    <!-- Icon trong vòng tròn màu nhẹ -->
+                    <div class="w-14 h-14 flex items-center justify-center bg-purple-100 rounded-full shadow-sm">
+                        <x-heroicon-o-clipboard-document-check class="w-7 h-7 text-purple-600" />
+                    </div>
                 </div>
 
-                <div class="relative z-10">
-                    <h3 class="text-white font-bold text-base">Assignment</h3>
-                    <span
-                        class="text-white/80 font-semibold text-lg">{{$this->ongoingAssignments->count() + $this->closedAssignments->count()}}</span>
-                </div>
-
-                <div class="absolute top-1/2 right-4 w-20 h-20 -translate-y-1/2">
+                <!-- Doughnut chart mini -->
+                <div class="absolute top-4 right-4 w-16 h-16">
                     <svg viewBox="0 0 36 36" class="w-full h-full">
-                        <circle class="text-white/20" stroke-width="4" stroke="currentColor" fill="none" cx="18" cy="18"
+                        <circle class="text-gray-200" stroke-width="4" stroke="currentColor" fill="none" cx="18" cy="18"
                             r="16" />
-                        <circle class="text-yellow-400" stroke-width="4" stroke-dasharray="50 50" stroke-dashoffset="25"
+                        <circle class="text-purple-400" stroke-width="4"
+                            stroke-dasharray="{{ $this->course->assignments->where('status', 'completed')->count() }} {{ $this->course->assignments->where('status', '!=', 'completed')->count() }}"
                             stroke-linecap="round" fill="none" cx="18" cy="18" r="16" />
                     </svg>
-                    <x-heroicon-o-clipboard-document-list
-                        class="absolute top-1/2 left-1/2 w-6 h-6 -translate-x-1/2 -translate-y-1/2 text-white opacity-90" />
                 </div>
 
-                <div class="relative z-10 mt-8 flex flex-col gap-2 text-white font-semibold text-sm">
-                    <span>Đã hết hạn:
-                        {{ $this->course->assignments->filter(fn($a) => $a->status === App\Enums\Status\AssignmentStatus::CLOSED)->count() }}</span>
-                    <span>Đã làm: <span
-                            class="font-bold">{{ $this->course->assignments->filter(fn($a) => $a->status === App\Enums\Status\AssignmentStatus::ARCHIVED)->count() }}</span></span>
-                    <span>Chưa làm: <span class="font-bold">{{ $this->ongoingAssignments->count() }}</span></span>
+                <!-- Stats -->
+                <div class="flex flex-col gap-2 mt-5 text-sm font-medium">
+                    <div class="flex justify-between text-orange-600">
+                        <span>Đã hết hạn:</span>
+                        <span>
+                            {{ $this->course->assignments->filter(fn($a) => $a->status === App\Enums\Status\AssignmentStatus::CLOSED)->count() }}</span>
+                    </div>
+                    <div class="flex justify-between text-green-600">
+                        <span>Đã làm:</span>
+                        <span>
+                            {{ $this->course->assignments->filter(fn($a) => $a->status === App\Enums\Status\AssignmentStatus::ARCHIVED)->count() }}</span>
+                    </div>
+                    <div class="flex justify-between text-blue-600">
+                        <span>Chưa nộp:</span>
+                        <span>{{ $this->ongoingAssignments->count() }}</span>
+                    </div>
                 </div>
             </div>
+
+
 
             <!-- Document Card -->
-            <div
-                class="relative group overflow-hidden rounded-3xl shadow-2xl bg-gradient-to-tr from-green-500 to-emerald-600 transform transition-all duration-500 hover:-translate-y-2 hover:scale-105 p-4 h-48">
-                <div class="absolute -top-8 -left-8 w-28 h-28 bg-white/20 rounded-full blur-3xl animate-pulse-slow"></div>
-                <div class="absolute -bottom-8 -right-8 w-28 h-28 bg-white/20 rounded-full blur-3xl animate-pulse-slow">
+            <div class="relative bg-white rounded-2xl shadow-md p-5 h-52 flex flex-col justify-between
+                                    transition-transform duration-300 hover:-translate-y-2 hover:shadow-lg">
+
+                <!-- Header: Title + Total -->
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-gray-800 font-semibold text-lg">Documents</h3>
+                        <span class="text-gray-900 font-bold text-2xl">
+                            {{ $this->documents->count() }}
+                        </span>
+                    </div>
+                    <!-- Icon trong vòng tròn màu nhẹ -->
+                    <div class="w-14 h-14 flex items-center justify-center bg-yellow-100 rounded-full shadow-sm">
+                        <x-heroicon-o-document-text class="w-7 h-7 text-yellow-600" />
+                    </div>
                 </div>
 
-                <div class="relative z-10">
-                    <h3 class="text-white font-bold text-base">Document</h3>
-                    <span class="text-white/80 font-semibold text-lg">{{$this->documents->count()}}</span>
-                </div>
-
-                <div class="absolute top-1/2 right-4 w-20 h-20 -translate-y-1/2">
+                <!-- Doughnut chart mini -->
+                <div class="absolute top-4 right-4 w-16 h-16">
                     <svg viewBox="0 0 36 36" class="w-full h-full">
-                        <circle class="text-white/20" stroke-width="4" stroke="currentColor" fill="none" cx="18" cy="18"
+                        <circle class="text-gray-200" stroke-width="4" stroke="currentColor" fill="none" cx="18" cy="18"
                             r="16" />
-                        <circle class="text-blue-400" stroke-width="4" stroke-dasharray="75 25" stroke-dashoffset="25"
+                        <circle class="text-yellow-400" stroke-width="4" stroke-dasharray="75 25" stroke-dashoffset="25"
                             stroke-linecap="round" fill="none" cx="18" cy="18" r="16" />
                     </svg>
-                    <x-heroicon-o-document-text
-                        class="absolute top-1/2 left-1/2 w-6 h-6 -translate-x-1/2 -translate-y-1/2 text-white opacity-90" />
                 </div>
 
-                <div class="relative z-10 mt-16 flex flex-col space-y-1 text-white font-semibold text-sm">
-                    <span>Đã làm: <span class="font-bold">--</span></span>
-                    <span>Chưa làm: <span class="font-bold">--</span></span>
+                <!-- Stats -->
+                <div class="flex flex-col gap-2 mt-5 text-sm font-medium">
+                    <div class="flex justify-between text-green-600">
+                        <span>Đã làm:</span>
+                        <span>--</span>
+                    </div>
+                    <div class="flex justify-between text-blue-600">
+                        <span>Chưa làm:</span>
+                        <span>--</span>
+                    </div>
                 </div>
             </div>
+
+
         </div>
 
 
@@ -124,13 +167,12 @@
 
                             <!-- Nút Bộ Lọc Tag -->
                             <div x-data="{ open: false }" class="relative inline-block text-left">
-                                <button @click="open = !open"
-                                    class="inline-flex items-center rounded-full px-5 py-2 shadow-md text-white font-medium
-                                                                                                                                                                                                                                                                                                                                                                               bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600
-                                                                                                                                                                                                                                                                                                                                                                               border border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-400
-                                                                                                                                                                                                                                                                                                                                                                               transition-transform duration-200">
+                                <!-- Button -->
+                                <button @click="open = !open" class="inline-flex items-center rounded-full px-4 py-2 shadow-sm bg-gray-800 text-white font-medium
+                               hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500
+                               transition-transform duration-200">
                                     Bộ lọc Tag
-                                    <svg class="ml-2 h-5 w-5 transform transition-transform duration-200"
+                                    <svg class="ml-2 h-4 w-4 transform transition-transform duration-200"
                                         :class="{ 'rotate-180': open }" xmlns="http://www.w3.org/2000/svg" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -138,7 +180,7 @@
                                     </svg>
                                 </button>
 
-                                <!-- Dropdown Tag -->
+                                <!-- Dropdown -->
                                 <div x-show="open" @click.away="open = false"
                                     x-transition:enter="transition ease-out duration-200"
                                     x-transition:enter-start="opacity-0 translate-y-1"
@@ -146,7 +188,7 @@
                                     x-transition:leave="transition ease-in duration-150"
                                     x-transition:leave-start="opacity-100 translate-y-0"
                                     x-transition:leave-end="opacity-0 translate-y-1"
-                                    class="absolute left-0 mt-2 w-56 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-20">
+                                    class="absolute left-0 mt-2 w-56 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-10 z-20">
 
                                     <div class="py-1 max-h-60 overflow-y-auto">
                                         <!-- Tất cả tag -->
@@ -170,15 +212,15 @@
 
 
 
+
                             <!-- Nút Sắp Xếp -->
                             <div x-data="{ open: false }" class="relative inline-block text-left">
-                                <button @click="open = !open"
-                                    class="inline-flex items-center rounded-full px-5 py-2 shadow-md text-white font-medium
-                                                                                                                                                                                                                                                                                                                                                                                 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600
-                                                                                                                                                                                                                                                                                                                                                                                 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400
-                                                                                                                                                                                                                                                                                                                                                                                 transition-transform duration-200">
+                                <!-- Button -->
+                                <button @click="open = !open" class="inline-flex items-center rounded-full px-4 py-2 bg-gray-800 text-white font-medium
+                       shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500
+                       transition-transform duration-200">
                                     Sắp xếp
-                                    <svg class="ml-2 h-5 w-5 transform transition-transform duration-200"
+                                    <svg class="ml-2 h-4 w-4 transform transition-transform duration-200"
                                         :class="{ 'rotate-180': open }" xmlns="http://www.w3.org/2000/svg" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -194,20 +236,24 @@
                                     x-transition:leave="transition ease-in duration-150"
                                     x-transition:leave-start="opacity-100 translate-y-0"
                                     x-transition:leave-end="opacity-0 translate-y-1"
-                                    class="absolute left-0 mt-2 w-56 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-20">
+                                    class="absolute left-0 mt-2 w-56 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-10 z-20">
                                     <div class="py-1">
                                         <a href="#" wire:click.prevent="sortQuizzes('newest')"
-                                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Mới
-                                            nhất</a>
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            Mới nhất
+                                        </a>
                                         <a href="#" wire:click.prevent="sortQuizzes('oldest')"
-                                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Cũ
-                                            nhất</a>
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            Cũ nhất
+                                        </a>
                                         <a href="#" wire:click.prevent="sortQuizzes('end_at')"
-                                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Ngày
-                                            kết thúc gần nhất</a>
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            Ngày kết thúc gần nhất
+                                        </a>
                                     </div>
                                 </div>
                             </div>
+
 
                         </div>
 
@@ -217,9 +263,9 @@
                             <div class="relative flex-1">
                                 <input type="text" wire:model="search" placeholder="Tìm kiếm..."
                                     class="w-full pl-12 pr-4 py-2.5 rounded-3xl border border-gray-300 dark:border-gray-600
-                                                                                                                                                                                                                                                                                                                                                                               bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-md
-                                                                                                                                                                                                                                                                                                                                                                               focus:outline-none focus:ring-4 focus:ring-indigo-400 focus:border-indigo-500
-                                                                                                                                                                                                                                                                                                                                                                               transition-all duration-300" />
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-md
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       focus:outline-none focus:ring-4 focus:ring-indigo-400 focus:border-indigo-500
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       transition-all duration-300" />
                                 <div class="absolute inset-y-0 left-0 flex items-center pl-4 cursor-pointer"
                                     wire:click="searchQuizzes">
                                     <x-heroicon-s-magnifying-glass class="w-5 h-5 text-indigo-500" />
@@ -286,10 +332,10 @@
                                         @foreach($quiz->tags as $tag)
                                             <span
                                                 class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               text-white shadow-md hover:shadow-xl
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               transition-all duration-300 ease-in-out
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               hover:scale-105 animate-gradient-x cursor-default relative overflow-hidden">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       text-white shadow-md hover:shadow-xl
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       transition-all duration-300 ease-in-out
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       hover:scale-105 animate-gradient-x cursor-default relative overflow-hidden">
 
                                                 <!-- Hiệu ứng viền sáng -->
                                                 <span class="absolute inset-0 rounded-full bg-white/10 blur-sm opacity-40"></span>
@@ -332,8 +378,10 @@
                         </div>
 
 
-                        <div class="flex-1 h-1 ml-4 rounded-full 
-                                        bg-gradient-to-r from-green-400 via-gray-300 to-gray-400 opacity-80"></div>
+                        <div
+                            class="flex-1 h-1 ml-4 rounded-full 
+                                                                                                                                                                bg-gradient-to-r from-green-400 via-gray-300 to-gray-400 opacity-80">
+                        </div>
                     </div>
 
 
@@ -402,10 +450,10 @@
                                         @foreach($quiz->tags as $tag)
                                             <span
                                                 class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           text-white shadow-md hover:shadow-xl
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           transition-all duration-300 ease-in-out
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           hover:scale-105 animate-gradient-x cursor-default relative overflow-hidden">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   text-white shadow-md hover:shadow-xl
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   transition-all duration-300 ease-in-out
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   hover:scale-105 animate-gradient-x cursor-default relative overflow-hidden">
 
                                                 <!-- Hiệu ứng viền sáng -->
                                                 <span class="absolute inset-0 rounded-full bg-white/10 blur-sm opacity-40"></span>
@@ -446,9 +494,9 @@
                         <div x-data="{ open: false }" class="relative inline-block text-left">
                             <button @click="open = !open"
                                 class="inline-flex items-center rounded-full px-5 py-2 shadow-md text-white font-medium
-                                                                                                                                                                                                                                                                                                                                                                               bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600
-                                                                                                                                                                                                                                                                                                                                                                               border border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-400
-                                                                                                                                                                                                                                                                                                                                                                               transition-transform duration-200">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       border border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-400
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       transition-transform duration-200">
                                 Bộ lọc Tag
                                 <svg class="ml-2 h-5 w-5 transform transition-transform duration-200"
                                     :class="{ 'rotate-180': open }" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -494,9 +542,9 @@
                         <div x-data="{ open: false }" class="relative inline-block text-left">
                             <button @click="open = !open"
                                 class="inline-flex items-center rounded-full px-5 py-2 shadow-md text-white font-medium
-                                                                                                                                                                                                                                                                                                                                                                                 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600
-                                                                                                                                                                                                                                                                                                                                                                                 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400
-                                                                                                                                                                                                                                                                                                                                                                                 transition-transform duration-200">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         border border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         transition-transform duration-200">
                                 Sắp xếp
                                 <svg class="ml-2 h-5 w-5 transform transition-transform duration-200"
                                     :class="{ 'rotate-180': open }" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -537,9 +585,9 @@
                         <div class="relative flex-1">
                             <input type="text" wire:model="search" placeholder="Tìm kiếm..."
                                 class="w-full pl-12 pr-4 py-2.5 rounded-3xl border border-gray-300 dark:border-gray-600
-                                                                                                                                                                                                                                                                                                                                                                               bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-md
-                                                                                                                                                                                                                                                                                                                                                                               focus:outline-none focus:ring-4 focus:ring-indigo-400 focus:border-indigo-500
-                                                                                                                                                                                                                                                                                                                                                                               transition-all duration-300" />
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-md
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       focus:outline-none focus:ring-4 focus:ring-indigo-400 focus:border-indigo-500
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       transition-all duration-300" />
                             <div class="absolute inset-y-0 left-0 flex items-center pl-4 cursor-pointer"
                                 wire:click="searchAssignments">
                                 <x-heroicon-s-magnifying-glass class="w-5 h-5 text-indigo-500" />
@@ -577,20 +625,20 @@
                         @endphp
                         <div
                             class="group rounded-2xl shadow-xl overflow-hidden bg-white dark:bg-gray-800
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            transform transition duration-300 hover:-translate-y-2 hover:shadow-2xl">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            transform transition duration-300 hover:-translate-y-2 hover:shadow-2xl">
 
                             <!-- Nửa trên: gradient + icon -->
                             <div class="h-32 flex items-center justify-center bg-gradient-to-r {{ $bgx }} relative">
                                 <x-heroicon-o-pencil-square
                                     class="w-12 h-12 text-white opacity-90 transform transition duration-300
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   group-hover:scale-125 group-hover:rotate-12" />
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   group-hover:scale-125 group-hover:rotate-12" />
                             </div>
 
                             <!-- Nửa dưới: thông tin assignment -->
                             <div class="p-5">
                                 <h3
                                     class="text-xl font-bold text-gray-900 dark:text-white mb-1
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   group-hover:text-indigo-500 transition">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   group-hover:text-indigo-500 transition">
                                     {{ $assignment->title }}
                                 </h3>
                                 <p class="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
@@ -602,10 +650,10 @@
                                     @foreach($assignment->tags as $tag)
                                         <span
                                             class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 text-white shadow-md hover:shadow-xl
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 transition-all duration-300 ease-in-out
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 hover:scale-105 animate-gradient-x cursor-default relative overflow-hidden">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         text-white shadow-md hover:shadow-xl
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         transition-all duration-300 ease-in-out
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         hover:scale-105 animate-gradient-x cursor-default relative overflow-hidden">
                                             <span class="absolute inset-0 rounded-full bg-white/10 blur-sm opacity-40"></span>
                                             <x-heroicon-o-tag class="w-3 h-3 mr-1 relative z-10" />
                                             <span class="relative z-10">{{ $tag->name }}</span>
@@ -617,14 +665,14 @@
                                 <div class="flex flex-wrap gap-2 mt-3">
                                     <div
                                         class="flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-green-400 to-blue-500
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        text-white font-semibold shadow-md animate-pulse">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        text-white font-semibold shadow-md animate-pulse">
                                         <x-heroicon-o-calendar class="w-4 h-4 mr-1" />
                                         {{ $daysxLeft }} ngày
                                     </div>
 
                                     <div
                                         class="flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        text-white font-semibold shadow-md animate-pulse">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        text-white font-semibold shadow-md animate-pulse">
                                         <x-heroicon-o-clock class="w-4 h-4 mr-1" />
                                         {{ $hoursxLeft }} giờ
                                     </div>
@@ -643,8 +691,10 @@
                         </div>
 
 
-                        <div class="flex-1 h-1 ml-4 rounded-full 
-                                            bg-gradient-to-r from-green-400 via-gray-300 to-gray-400 opacity-80"></div>
+                        <div
+                            class="flex-1 h-1 ml-4 rounded-full 
+                                                                                                                                                                    bg-gradient-to-r from-green-400 via-gray-300 to-gray-400 opacity-80">
+                        </div>
                     </div>
 
 
@@ -666,7 +716,7 @@
 
                         <div
                             class="group rounded-2xl shadow-xl overflow-hidden bg-gray-100 dark:bg-gray-700
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                transform transition duration-300 cursor-not-allowed opacity-70">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                transform transition duration-300 cursor-not-allowed opacity-70">
                             <div class="h-32 flex items-center justify-center bg-gradient-to-r {{ $bgx }} relative">
                                 <x-heroicon-o-lock-closed
                                     class="w-12 h-12 text-white opacity-90 transform transition duration-300" />
@@ -684,7 +734,7 @@
                                     @foreach($closedassignment->tags as $tag)
                                         <span
                                             class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     bg-gray-400 text-white shadow-md cursor-not-allowed">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             bg-gray-400 text-white shadow-md cursor-not-allowed">
                                             <x-heroicon-o-tag class="w-3 h-3 mr-1" />
                                             {{ $tag->name }}
                                         </span>

@@ -28,20 +28,36 @@ class MyCourse extends Page
     {
         /** @var User $user */
         $now = now();
+        $user = Auth::user();
+        $enrolledCourses = collect();
 
-        $enrolledCourses = $this->getEnrolledCourses();
-
+        if ($user->hasRole('student')) {
+            $enrolledCourses = $this->getEnrolledCourses();
+        } elseif ($user->hasRole('teacher')) {
+            $enrolledCourses = $this->getTeachingCourses();
+        }
         $ongoingCourses = collect();
         $completedCourses = collect();
 
         foreach ($enrolledCourses as $course) {
             $pivot = $course->pivot;
-            if (!$pivot->end_at || $pivot->end_at->isAfter($now)) {
-                $ongoingCourses->push($course);
-            } elseif ($pivot->end_at && $pivot->end_at->isBefore($now)) {
-                $completedCourses->push($course);
+
+            if ($pivot) { // chỉ student mới có pivot
+                if (!$pivot->end_at || $pivot->end_at->isAfter($now)) {
+                    $ongoingCourses->push($course);
+                } elseif ($pivot->end_at && $pivot->end_at->isBefore($now)) {
+                    $completedCourses->push($course);
+                }
+            } else {
+                // teacher: dùng start/end của course trực tiếp
+                if (!$course->end_at || $course->end_at->isAfter($now)) {
+                    $ongoingCourses->push($course);
+                } elseif ($course->end_at && $course->end_at->isBefore($now)) {
+                    $completedCourses->push($course);
+                }
             }
         }
+
         foreach ($enrolledCourses as $course) {
             $this->tags = $course->tags()->pluck('name')->unique()->toArray();
         }
@@ -77,6 +93,29 @@ class MyCourse extends Page
             ->orderBy('courses.created_at', 'asc')
             ->paginate(10);
     }
+    public function getTeachingCourses()
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $now = now();
+
+        return Course::query()
+            ->where('teacher_id', $user->id)   // lọc theo giáo viên dạy
+            ->where('status', CourseStatus::PUBLISHED)
+            ->where(function ($query) use ($now) {
+                $query->whereNull('start_at')
+                    ->orWhere('start_at', '<=', $now);
+            })
+            ->where(function ($query) use ($now) {
+                $query->whereNull('end_at')
+                    ->orWhere('end_at', '>=', $now);
+            })
+            ->with(['users', 'media', 'tags'])
+            ->orderBy('created_at', 'asc')
+            ->paginate(10);
+    }
+
+
     public function searchCourses()
     {
         $ongoingCourses = collect();
@@ -149,9 +188,9 @@ class MyCourse extends Page
             // Kiểm tra tag
             $hasSelectedTag = $this->selectedTag
                 ? $course->tags->contains('name', $this->selectedTag)
-                : true; 
+                : true;
             if (!$hasSelectedTag) {
-                continue; 
+                continue;
             }
             if ($course->status !== CourseStatus::PUBLISHED) {
                 $closedCourses->push($course);

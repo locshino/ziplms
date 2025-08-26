@@ -63,58 +63,63 @@ class CourseDetail extends Page
         foreach ($this->course->quizzes as $quiz) {
             $start = $quiz->pivot->start_at;
             $end = $quiz->pivot->end_at;
+            $user = auth()->user();
+            if (!$user->hasRole('student')) {
+                if (in_array($quiz->status, [QuizStatus::DRAFT, QuizStatus::ARCHIVED, QuizStatus::CLOSED])) {
+                    $completedQuizzes->push($quiz);
+                }
+            } else {
+                if (in_array($quiz->status, [QuizStatus::ARCHIVED, QuizStatus::CLOSED])) {
+                    $hasAttempted = $quiz->attempts()
+                        ->where('student_id', $user->id)
+                        ->exists();
+                    if ($hasAttempted) {
+                        $completedQuizzes->push($quiz);
+                    } else {
+                        $completedQuizzes->push($quiz);
+                    }
+                }
+            }
 
-            if ($quiz->status === QuizStatus::ARCHIVED || $quiz->status === QuizStatus::CLOSED) {
-                // Đã làm
-                $completedQuizzes->push($quiz);
-            } elseif (
-                $start &&
-                $now->gte($start) &&   // đã bắt đầu (start nhỏ hơn now)
-                (!$end || $now->lte($end)) &&  // chưa kết thúc hoặc không có end
-                $quiz->status === QuizStatus::PUBLISHED
-            ) {
-                // Đang mở
-                $ongoingQuizzes->push($quiz);
+            // Ongoing
+            if ($quiz->status === QuizStatus::PUBLISHED && $start) {
+
+                if (!$end || $now->between($start, $end)) {
+                    $ongoingQuizzes->push($quiz);
+                }
             }
         }
 
         // Assignments
+        $user = auth()->user();
+
         $ongoingAssignments = collect();
         $closedAssignments = collect();
-        foreach ($this->course->assignments as $assignment) {
-            $start = $assignment->pivot->start_at;
-            $end = $assignment->pivot->end_at;
-
-            if ($start && $now->gte($start) && $assignment->status === AssignmentStatus::PUBLISHED) {
-                if (!$end || $now->lte($end)) {
-                    $ongoingAssignments->push($assignment);
-                }
-            }
-        }
-
 
         foreach ($this->course->assignments as $assignment) {
-            $start = $assignment->pivot->start_at;
-            $end = $assignment->pivot->end_at;
-            if ($assignment->status == AssignmentStatus::DRAFT) {
-                continue;
-            }
-            if ($assignment->status !== AssignmentStatus::PUBLISHED) {
-                if ($assignment->status !== AssignmentStatus::DRAFT) {
-                    $closedAssignments->push($assignment);
-                }
-
-
-                continue;
-            }
-
+            $start = $assignment->pivot?->start_at;
+            $end = $assignment->pivot?->end_at;
             if (!$start) {
                 continue;
             }
+            if ($assignment->status === AssignmentStatus::DRAFT && $user->hasRole('student')) {
+                continue;
+            }
 
-            if ($now->gt($start) && (!$end || $now->lte($end))) {
-                // Bài đang mở
+
+            if ($assignment->status === AssignmentStatus::PUBLISHED && $start && (!$end || $now->between($start, $end))) {
                 $ongoingAssignments->push($assignment);
+                continue;
+            }
+
+
+            if ($user->hasRole('student')) {
+                $hasSubmitted = $assignment->submissions()->where('student_id', $user->id)->exists();
+                if ($hasSubmitted || ($end && $now->gt($end)) || (!$end && $now->gte($start))) {
+                    $closedAssignments->push($assignment);
+                }
+            } else {
+                $closedAssignments->push($assignment);
             }
         }
 
@@ -143,24 +148,37 @@ class CourseDetail extends Page
     {
         $ongoingQuizzes = collect();
         $completedQuizzes = collect();
+        $now = now();
 
         foreach ($this->course->quizzes as $quiz) {
             $start = $quiz->pivot?->start_at;
             $end = $quiz->pivot?->end_at;
-
-            // Kiểm tra đã làm (ARCHIVED )
-            if ($quiz->status === QuizStatus::ARCHIVED || $quiz->status === QuizStatus::CLOSED) {
-                // Nếu search rỗng hoặc trùng tên quiz
-                if ($this->search === '' || str_contains(strtolower($quiz->title), strtolower($this->search))) {
+            $user = auth()->user();
+            if ($this->search !== '' && !str_contains(strtolower($quiz->title), strtolower($this->search))) {
+                continue;
+            }
+            if ($user->hasRole('student')) {
+                // Student → chỉ ARCHIVED / CLOSED
+                if (in_array($quiz->status, [QuizStatus::ARCHIVED, QuizStatus::CLOSED])) {
+                    $hasAttempted = $quiz->attempts()->where('student_id', $user->id)->exists();
+                    if ($hasAttempted) {
+                        $completedQuizzes->push($quiz);
+                    } else {
+                        $completedQuizzes->push($quiz);
+                    }
+                }
+            } else {
+                // Teacher/Admin → DRAFT, ARCHIVED, CLOSED
+                if (in_array($quiz->status, [QuizStatus::DRAFT, QuizStatus::ARCHIVED, QuizStatus::CLOSED])) {
                     $completedQuizzes->push($quiz);
                 }
-
-                // Kiểm tra đang mở
-            } elseif ($start && $end && now()->between($start, $end) && $quiz->status === QuizStatus::PUBLISHED) {
-                if ($this->search === '' || str_contains(strtolower($quiz->title), strtolower($this->search))) {
-                    $ongoingQuizzes->push($quiz);
-                }
             }
+            if ($quiz->status === QuizStatus::PUBLISHED && $start && ($end ? $now->between($start, $end) : $now->gte($start))) {
+                $ongoingQuizzes->push($quiz);
+            }
+
+
+
         }
 
 
@@ -173,33 +191,46 @@ class CourseDetail extends Page
         $ongoingAssignments = collect();
         $closedAssignments = collect();
 
+        $now = now();
+
         foreach ($this->course->assignments as $assignment) {
             $start = $assignment->pivot?->start_at;
             $end = $assignment->pivot?->end_at;
-            if ($assignment->status == AssignmentStatus::DRAFT) {
+
+            // Bỏ qua draft cho student
+            if ($assignment->status === AssignmentStatus::DRAFT && auth()->user()->hasRole('student')) {
                 continue;
             }
+
             // Lọc theo search term
             if ($this->search !== '' && !str_contains(strtolower($assignment->title), strtolower($this->search))) {
                 continue;
             }
 
-            // Nếu assignment chưa Published hoặc chưa có thời gian bắt đầu → coi như closed
+            // Nếu chưa Published hoặc không có start → coi như closed
             if ($assignment->status !== AssignmentStatus::PUBLISHED || !$start) {
-                if ($assignment->status !== AssignmentStatus::DRAFT) {
+                if (!auth()->user()->hasRole('student')) {
                     $closedAssignments->push($assignment);
+                } else {
+                    $hasSubmitted = $assignment->submissions()->where('student_id', auth()->id())->exists();
+                    if ($hasSubmitted) {
+                        $closedAssignments->push($assignment);
+                    } else {
+                        $closedAssignments->push($assignment);
+                    }
                 }
-
                 continue;
             }
 
-            // Ongoing: đang trong khoảng start → end
-            if (now()->gte($start) && (!$end || now()->lte($end))) {
+            // Ongoing: đang trong khoảng start → end hoặc end null
+            if ($now->gte($start) && (!$end || $now->lte($end))) {
                 $ongoingAssignments->push($assignment);
             } else {
+                // Qua hạn → closed
                 $closedAssignments->push($assignment);
             }
         }
+
 
         $this->ongoingAssignments = $ongoingAssignments;
         $this->closedAssignments = $closedAssignments;
@@ -225,19 +256,28 @@ class CourseDetail extends Page
         foreach ($this->course->quizzes as $quiz) {
             $start = $quiz->pivot?->start_at;
             $end = $quiz->pivot?->end_at;
+            $user = auth()->user();
 
+            if (in_array($quiz->status, [QuizStatus::DRAFT, QuizStatus::ARCHIVED, QuizStatus::CLOSED])) {
+                if ($user->hasRole('student')) {
+                    // Student → chỉ lấy ARCHIVED / CLOSED
+                    if (in_array($quiz->status, [QuizStatus::ARCHIVED, QuizStatus::CLOSED])) {
+                        $hasAttempted = $quiz->attempts()->where('student_id', $user->id)->exists();
+                        if ($hasAttempted) {
+                            $completedQuizzes->push($quiz);
+                        } else {
+                            $completedQuizzes->push($quiz);
+                        }
 
-            // Quiz đã hoàn thành
-            if ($quiz->status === QuizStatus::ARCHIVED || $quiz->status === QuizStatus::CLOSED) {
-                $completedQuizzes->push($quiz);
+                    }
+                } else {
+                    // Teacher/Admin → lấy cả DRAFT / ARCHIVED / CLOSED
+                    $completedQuizzes->push($quiz);
+                }
+            }
 
-                // Quiz đang mở
-            } elseif (
-                $start &&
-                $now->gte($start) &&
-                (!$end || $now->lte($end)) &&
-                $quiz->status === QuizStatus::PUBLISHED
-            ) {
+            // Ongoing quizzes
+            if ($quiz->status === QuizStatus::PUBLISHED && $start && (!$end || $now->between($start, $end))) {
                 $ongoingQuizzes->push($quiz);
             }
         }
@@ -260,28 +300,47 @@ class CourseDetail extends Page
         $closedAssignments = collect();
         $now = now();
 
+        $user = auth()->user();
+
         foreach ($this->course->assignments as $assignment) {
             $start = $assignment->pivot?->start_at;
             $end = $assignment->pivot?->end_at;
 
-            if ($assignment->status == AssignmentStatus::DRAFT) {
-                continue;
-            }
-            if ($assignment->status !== AssignmentStatus::PUBLISHED || !$start) {
-                if ($assignment->status !== AssignmentStatus::DRAFT) {
+            // Nếu là DRAFT và user là student → bỏ qua
+            if ($assignment->status === AssignmentStatus::DRAFT) {
+                if ($user->hasRole('student')) {
+                    continue;
+                } else {
                     $closedAssignments->push($assignment);
+                    continue;
                 }
-                continue;
             }
 
 
+            if ($assignment->status !== AssignmentStatus::PUBLISHED || !$start) {
+                $closedAssignments->push($assignment);
+                continue;
+            }
 
             if ($now->gte($start) && (!$end || $now->lte($end))) {
                 $ongoingAssignments->push($assignment);
+            }
+            if ($user->hasRole('student')) {
+                $hasSubmitted = $assignment->submissions()
+                    ->where('student_id', $user->id)
+                    ->exists();
+
+                if ($hasSubmitted || ($end && $now->gt($end))) {
+                    $closedAssignments->push($assignment);
+                }
             } else {
-                $closedAssignments->push($assignment);
+                $closedAssignments->push($assignment); // teacher/admin
+
             }
         }
+
+
+
 
         // Áp dụng sắp xếp
         $this->ongoingAssignments = $this->sortCollection($ongoingAssignments);
@@ -302,37 +361,51 @@ class CourseDetail extends Page
 
     public function filterQuizzesByTag($tag)
     {
+        $user = auth()->user();
+
+
+        $this->selectedTag = $tag;
         $now = now();
         $ongoingQuizzes = collect();
         $completedQuizzes = collect();
 
         foreach ($this->course->quizzes as $quiz) {
-            // Kiểm tra pivot tồn tại
-            $this->selectedTag = $tag; // Lưu tag đã chọn
-
             $start = $quiz->pivot?->start_at;
             $end = $quiz->pivot?->end_at;
 
             // Kiểm tra tag
-            $hasSelectedTag = $this->selectedTag
-                ? $quiz->tags->contains('name', $this->selectedTag)
-                : true;
-
-            if (!$hasSelectedTag) {
+            if ($tag && !$quiz->tags->contains('name', $tag)) {
                 continue;
             }
 
-            // Lọc theo trạng thái và thời gian
-            if ($quiz->status === QuizStatus::ARCHIVED || $quiz->status === QuizStatus::CLOSED) {
-                $completedQuizzes->push($quiz);
-            } elseif (
-                $start &&
-                $now->gte($start) &&
-                (!$end || $now->lte($end)) && $quiz->status === QuizStatus::PUBLISHED
-            ) {
+            // Completed quizzes
+            if (in_array($quiz->status, [QuizStatus::DRAFT, QuizStatus::ARCHIVED, QuizStatus::CLOSED])) {
+                if ($user->hasRole('student')) {
+                    // Student chỉ lấy ARCHIVED / CLOSED
+                    if (in_array($quiz->status, [QuizStatus::ARCHIVED, QuizStatus::CLOSED])) {
+                        $hasAttempted = $quiz->attempts()->where('student_id', $user->id)->exists();
+                        if ($hasAttempted) {
+                            $completedQuizzes->push($quiz);
+                        } else {
+                            $completedQuizzes->push($quiz);
+                        }
+
+                    }
+                } else {
+                    // Teacher/Admin lấy tất cả (DRAFT, ARCHIVED, CLOSED)
+                    $completedQuizzes->push(
+                        $quiz,
+                    );
+                }
+
+            }
+
+            // Ongoing quizzes
+            if ($quiz->status === QuizStatus::PUBLISHED && $start && (!$end || $now->between($start, $end))) {
                 $ongoingQuizzes->push($quiz);
             }
         }
+
 
         $this->ongoingQuizzes = $ongoingQuizzes;
         $this->completedQuizzes = $completedQuizzes;
@@ -341,13 +414,15 @@ class CourseDetail extends Page
     {
         $ongoingAssignments = collect();
         $closedAssignments = collect();
+        $now = now();
+        $user = auth()->user();
 
         foreach ($this->course->assignments as $assignment) {
             $this->selectedTag = $tag;
             $start = $assignment->pivot?->start_at;
             $end = $assignment->pivot?->end_at;
 
-
+            // Lọc tag
             $hasSelectedTag = $this->selectedTag
                 ? $assignment->tags->contains('name', $this->selectedTag)
                 : true;
@@ -356,19 +431,36 @@ class CourseDetail extends Page
                 continue;
             }
 
-
-            if ($assignment->status !== AssignmentStatus::PUBLISHED || !$start) {
-                if ($assignment->status !== AssignmentStatus::DRAFT) {
+            // DRAFT chỉ hiển thị cho teacher/admin
+            if ($assignment->status === AssignmentStatus::DRAFT) {
+                if (!$user->hasRole('student')) {
                     $closedAssignments->push($assignment);
                 }
                 continue;
             }
 
+            // Nếu chưa PUBLISHED hoặc chưa có start → coi như closed
+            if ($assignment->status !== AssignmentStatus::PUBLISHED || !$start) {
+                $closedAssignments->push($assignment);
+                continue;
+            }
 
-            if (now()->gte($start) && (!$end || now()->lte($end))) {
+            // Ongoing: trong khoảng start → end hoặc end null
+            if ($now->gte($start) && (!$end || $now->lte($end))) {
                 $ongoingAssignments->push($assignment);
             } else {
-                $closedAssignments->push($assignment);
+                // Student check đã nộp chưa
+                if ($user->hasRole('student')) {
+                    $hasSubmitted = $assignment->submissions()
+                        ->where('student_id', $user->id)
+                        ->exists();
+
+                    if ($hasSubmitted || ($end && $now->gt($end))) {
+                        $closedAssignments->push($assignment);
+                    }
+                } else {
+                    $closedAssignments->push($assignment); // teacher/admin
+                }
             }
         }
 
