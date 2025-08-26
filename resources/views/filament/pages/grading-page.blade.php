@@ -5,7 +5,6 @@
 
             <div class="mb-8 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 flex flex-col gap-6">
                 <div class="flex items-center gap-4 flex-wrap">
-                    {{-- Course Filter Dropdown --}}
                     <div class="flex items-center gap-3 flex-grow">
                         <label for="courseFilter" class="text-sm font-medium text-slate-800 dark:text-slate-100">Khóa học:</label>
                         <div class="flex-grow min-w-[200px]">
@@ -21,7 +20,6 @@
                             </select>
                         </div>
                     </div>
-                    {{-- Search Input --}}
                     <div class="flex items-center gap-3 flex-grow">
                         <label for="searchFilter" class="text-sm font-medium text-slate-800 dark:text-slate-100">Tìm kiếm:</label>
                         <div class="flex-grow min-w-[200px]">
@@ -36,7 +34,6 @@
                     </div>
                 </div>
 
-                {{-- Filter Buttons --}}
                 <div class="pt-4 border-t border-slate-200 dark:border-slate-700">
                     <div class="p-1.5 flex items-center bg-slate-100 dark:bg-slate-900/50 rounded-full border border-slate-200 dark:border-slate-700">
                         @php
@@ -93,19 +90,18 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="p-6 bg-slate-50 dark:bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-700 flex flex-col justify-between lg:w-80 lg:flex-shrink-0">
-                            <div class="mb-4">
+                        <div class="p-6 bg-slate-50 dark:bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-700 flex flex-col justify-center gap-4 lg:w-80 lg:flex-shrink-0">
+                            <div class="flex justify-start w-full">
                                 <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
                                     <x-heroicon-s-user-group class="w-4 h-4" />
-                                    {{ $assignment->graded_submissions_count }} / {{ $assignment->submissions_count }} đã chấm
+                                    {{ $assignment->graded_students_count }} / {{ $assignment->submitted_students_count }} đã chấm
                                 </span>
                             </div>
-                            <div class="flex flex-col lg:flex-row gap-2">
+                            <div class="flex flex-col gap-2 w-full">
                                 <button
                                     type="button"
                                     wire:click="openInstructionsModal('{{ $courseAssignment->id }}')"
-                                    class="w-full lg:flex-1 font-semibold px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-800 dark:hover:text-slate-100 hover:-translate-y-0.5 hover:shadow-lg"
+                                    class="w-full font-semibold px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-800 dark:hover:text-slate-100 hover:-translate-y-0.5 hover:shadow-lg"
                                 >
                                     <x-heroicon-o-document-text class="w-5 h-5" />
                                     <span>Hướng dẫn</span>
@@ -113,7 +109,7 @@
                                 <button
                                     type="button"
                                     wire:click="openSubmissionsModal('{{ $courseAssignment->id }}')"
-                                    class="w-full lg:flex-1 font-semibold px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-transparent bg-blue-500 text-white hover:bg-blue-600 hover:-translate-y-0.5 hover:shadow-lg"
+                                    class="w-full font-semibold px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-transparent bg-blue-500 text-white hover:bg-blue-600 hover:-translate-y-0.5 hover:shadow-lg"
                                 >
                                     <x-heroicon-o-pencil-square class="w-5 h-5" />
                                     <span>Chấm bài</span>
@@ -166,7 +162,7 @@
     </div>
     @endif
 
-    @if ($showSubmissionsModal && $selectedCourseAssignment)
+    @if ($selectedCourseAssignment)
         <x-filament::modal id="submissions-modal" width="5xl" :close-by-clicking-away="false" :close-on-escape="false" @close.stop="$wire.closeSubmissionsModal()">
             <x-slot name="heading">
                 Chấm bài: {{ $selectedCourseAssignment->assignment->title }}
@@ -175,73 +171,133 @@
                 Điểm tối đa: {{ number_format($selectedCourseAssignment->assignment->max_points, 1) }}
             </x-slot>
 
-            <div class="space-y-4">
-                @forelse ($submissions as $submission)
-                    <div wire:key="submission-{{ $submission->id }}" class="border border-slate-200 dark:border-slate-700 rounded-lg p-4">
-                        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                            <div class="flex-1">
-                                <p class="font-semibold text-slate-800 dark:text-slate-100">{{ $submission->student->name ?? 'Không rõ' }}</p>
-                                <p class="text-sm text-slate-500 dark:text-slate-400">Nộp lúc: {{ $submission->submitted_at->format('H:i, d/m/Y') }}</p>
+            <!-- Thêm Tab điều hướng -->
+            <div class="border-b border-slate-200 dark:border-slate-700 mb-4">
+                <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                    <button wire:click="setSubmissionView('submitted')" type="button"
+                            class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors duration-200
+                                   {{ $submissionView === 'submitted'
+                                       ? 'border-blue-500 text-blue-600'
+                                       : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:border-slate-600' }}">
+                        Đã nộp ({{ count($submissions) }})
+                    </button>
+                    <button wire:click="setSubmissionView('not_submitted')" type="button"
+                            class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors duration-200
+                                   {{ $submissionView === 'not_submitted'
+                                       ? 'border-blue-500 text-blue-600'
+                                       : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:border-slate-600' }}">
+                        Chưa nộp ({{ count($notSubmittedStudents) }})
+                    </button>
+                </nav>
+            </div>
 
-                                <div class="mt-3 p-3 bg-slate-100 dark:bg-slate-900/50 rounded-md text-sm">
-                                    @php
-                                        $media = $submission->getFirstMedia('submission_documents');
-                                        $link = Str::of($submission->content)->match('/(https?:\/\/[^\s]+)/');
-                                    @endphp
-
-                                    @if($media)
-                                        <p><strong>Bài nộp:</strong></p>
-                                        <button wire:click="downloadSubmission('{{ $submission->id }}')" class="inline-flex items-center gap-2 text-blue-600 hover:underline dark:text-blue-400 font-medium">
-                                            <x-heroicon-o-arrow-down-tray class="h-4 w-4" />
-                                            {{ $media->name }} ({{ $media->human_readable_size }})
-                                        </button>
-                                    @elseif($link)
-                                        <p><strong>Bài nộp:</strong></p>
-                                        <a href="{{ $link }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-blue-600 hover:underline dark:text-blue-400 font-medium">
-                                            <x-heroicon-o-link class="h-4 w-4" />
-                                            Mở liên kết
-                                        </a>
-                                    @endif
-
-                                    @if($submission->content)
-                                        <p class="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700"><strong>Ghi chú:</strong><br>{{ nl2br(e(Str::of($submission->content)->before('Submitted via link:')->trim())) }}</p>
-                                    @endif
+            <!-- Nội dung Tab -->
+            <div>
+                @if ($submissionView === 'submitted')
+                    <div class="space-y-4">
+                        @forelse ($submissions as $submission)
+                            <div wire:key="submission-{{ $submission->id }}" class="border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+                                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-3 mb-3">
+                                            @if($submission->student)
+                                                <img class="h-10 w-10 rounded-full object-cover"
+                                                     src="{{ $submission->student->getFirstMediaUrl('avatar') ?: 'https://ui-avatars.com/api/?name=' . urlencode($submission->student->name) . '&color=7F9CF5&background=EBF4FF' }}"
+                                                     alt="{{ $submission->student->name }}">
+                                                <div>
+                                                    <p class="font-semibold text-slate-800 dark:text-slate-100">{{ $submission->student->name }}</p>
+                                                    <p class="text-sm text-slate-500 dark:text-slate-400">Nộp lúc: {{ $submission->submitted_at->format('H:i, d/m/Y') }}</p>
+                                                </div>
+                                            @else
+                                                <div class="h-10 w-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                                                    <x-heroicon-o-user class="w-6 h-6 text-slate-400"/>
+                                                </div>
+                                                <div>
+                                                    <p class="font-semibold text-slate-800 dark:text-slate-100">Không rõ</p>
+                                                    <p class="text-sm text-slate-500 dark:text-slate-400">Nộp lúc: {{ $submission->submitted_at->format('H:i, d/m/Y') }}</p>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="p-3 bg-slate-100 dark:bg-slate-900/50 rounded-md text-sm">
+                                            @php
+                                                $media = $submission->getFirstMedia('submission_documents');
+                                                $link = Str::of($submission->content)->match('/(https?:\/\/[^\s]+)/');
+                                            @endphp
+                                            @if($media)
+                                                <p><strong>Bài nộp:</strong></p>
+                                                <button wire:click="downloadSubmission('{{ $submission->id }}')" class="inline-flex items-center gap-2 text-blue-600 hover:underline dark:text-blue-400 font-medium">
+                                                    <x-heroicon-o-arrow-down-tray class="h-4 w-4" />
+                                                    {{ $media->name }} ({{ $media->human_readable_size }})
+                                                </button>
+                                            @elseif($link)
+                                                <p><strong>Bài nộp:</strong></p>
+                                                <a href="{{ $link }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-blue-600 hover:underline dark:text-blue-400 font-medium">
+                                                    <x-heroicon-o-link class="h-4 w-4" />
+                                                    Mở liên kết
+                                                </a>
+                                            @endif
+                                            @if($submission->content)
+                                                <p class="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700"><strong>Ghi chú:</strong><br>{{ nl2br(e(Str::of($submission->content)->before('Submitted via link:')->trim())) }}</p>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="flex-shrink-0 md:w-80">
+                                        <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-1 gap-4">
+                                            <div>
+                                                <label for="points-{{ $submission->id }}" class="text-sm font-medium">Điểm</label>
+                                                <input type="number" id="points-{{ $submission->id }}"
+                                                       wire:model="points.{{ $submission->id }}"
+                                                       step="0.1" min="0" max="{{ $selectedCourseAssignment->assignment->max_points }}"
+                                                       class="fi-input mt-1 block w-full" placeholder="VD: 8.5">
+                                            </div>
+                                            <div class="sm:col-span-2 md:col-span-1">
+                                                <label for="feedback-{{ $submission->id }}" class="text-sm font-medium">Phản hồi</label>
+                                                <textarea id="feedback-{{ $submission->id }}"
+                                                          wire:model="feedback.{{ $submission->id }}"
+                                                          class="fi-input mt-1 block w-full" rows="2" placeholder="Nhập phản hồi..."></textarea>
+                                            </div>
+                                            <div class="sm:col-span-3 md:col-span-1">
+                                                <button type="button" wire:click="saveGrade('{{ $submission->id }}')"
+                                                        wire:loading.attr="disabled" wire:target="saveGrade('{{ $submission->id }}')"
+                                                        class="fi-btn fi-btn-color-primary w-full">
+                                                    Lưu điểm
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="flex-shrink-0 md:w-80">
-                                <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-1 gap-4">
-                                    <div>
-                                        <label for="points-{{ $submission->id }}" class="text-sm font-medium">Điểm</label>
-                                        <input type="number" id="points-{{ $submission->id }}"
-                                               wire:model="points.{{ $submission->id }}"
-                                               step="0.1" min="0" max="{{ $selectedCourseAssignment->assignment->max_points }}"
-                                               class="fi-input mt-1 block w-full" placeholder="VD: 8.5">
-                                    </div>
-                                    <div class="sm:col-span-2 md:col-span-1">
-                                        <label for="feedback-{{ $submission->id }}" class="text-sm font-medium">Phản hồi</label>
-                                        <textarea id="feedback-{{ $submission->id }}"
-                                                  wire:model="feedback.{{ $submission->id }}"
-                                                  class="fi-input mt-1 block w-full" rows="2" placeholder="Nhập phản hồi..."></textarea>
-                                    </div>
-                                    <div class="sm:col-span-3 md:col-span-1">
-                                        <button type="button" wire:click="saveGrade('{{ $submission->id }}')"
-                                                wire:loading.attr="disabled" wire:target="saveGrade('{{ $submission->id }}')"
-                                                class="fi-btn fi-btn-color-primary w-full">
-                                            Lưu điểm
-                                        </button>
-                                    </div>
+                        @empty
+                            <div class="py-12 text-center text-slate-500 dark:text-slate-400">
+                                <div class="mx-auto w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4">
+                                    <x-heroicon-o-user-group class="w-8 h-8 text-slate-400 dark:text-slate-500" />
+                                </div>
+                                <p>Chưa có sinh viên nào nộp bài.</p>
+                            </div>
+                        @endforelse
+                    </div>
+                @elseif ($submissionView === 'not_submitted')
+                    <div class="space-y-3">
+                        @forelse ($notSubmittedStudents as $student)
+                            <div wire:key="not-submitted-{{ $student->id }}" class="border border-slate-200 dark:border-slate-700 rounded-lg p-3 flex items-center">
+                                <img class="h-10 w-10 rounded-full object-cover"
+                                     src="{{ $student->getFirstMediaUrl('avatar') ?: 'https://ui-avatars.com/api/?name=' . urlencode($student->name) . '&color=7F9CF5&background=EBF4FF' }}"
+                                     alt="{{ $student->name }}">
+                                <div class="ml-3">
+                                    <p class="font-semibold text-slate-800 dark:text-slate-100">{{ $student->name }}</p>
+                                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ $student->email }}</p>
                                 </div>
                             </div>
-                        </div>
+                        @empty
+                            <div class="py-12 text-center text-slate-500 dark:text-slate-400">
+                                <div class="mx-auto w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4">
+                                    <x-heroicon-o-check-circle class="w-8 h-8 text-green-500" />
+                                </div>
+                                <p>Tất cả sinh viên đã nộp bài.</p>
+                            </div>
+                        @endforelse
                     </div>
-                @empty
-                    <div class="py-12 text-center text-slate-500 dark:text-slate-400">
-                        <div class="mx-auto w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4">
-                            <x-heroicon-o-user-group class="w-8 h-8 text-slate-400 dark:text-slate-500" />
-                        </div>
-                        <p>Chưa có sinh viên nào nộp bài.</p>
-                    </div>
-                @endforelse
+                @endif
             </div>
 
             <x-slot name="footer">
