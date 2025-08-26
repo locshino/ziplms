@@ -19,6 +19,7 @@ use Spatie\Tags\HasTags;
 use Guava\Calendar\Contracts\Eventable;
 use Guava\Calendar\ValueObjects\CalendarEvent;
 use Illuminate\Support\Collection;
+
 /**
  * @property string $id
  * @property string $title
@@ -120,7 +121,7 @@ class Course extends Model implements HasMedia, Auditable, Eventable
     // Teacher relationship
     public function teacher(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'teacher_id');
+        return $this->belongsTo(User::class, 'teacher_id')->role(RoleSystem::TEACHER);
     }
 
     // Enrolled users relationship
@@ -193,10 +194,5 @@ class Course extends Model implements HasMedia, Auditable, Eventable
             ->title($this->title)
             ->start($this->start_at)
             ->end($this->end_at);
-
-
-
-
     }
-
 }
