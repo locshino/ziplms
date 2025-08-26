@@ -16,7 +16,9 @@ use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Tags\HasTags;
-
+use Guava\Calendar\Contracts\Eventable;
+use Guava\Calendar\ValueObjects\CalendarEvent;
+use Illuminate\Support\Collection;
 /**
  * @property string $id
  * @property string $title
@@ -73,7 +75,7 @@ use Spatie\Tags\HasTags;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Course withoutTrashed()
  * @mixin \Eloquent
  */
-class Course extends Model implements HasMedia, Auditable
+class Course extends Model implements HasMedia, Auditable, Eventable
 {
     use HasFactory,
         HasTags,
@@ -183,4 +185,18 @@ class Course extends Model implements HasMedia, Auditable
                 ...MimeType::archives(),
             ]);
     }
+
+    public function toCalendarEvent(): CalendarEvent
+    {
+
+        return CalendarEvent::make($this)
+            ->title($this->title)
+            ->start($this->start_at)
+            ->end($this->end_at);
+
+
+
+
+    }
+
 }
