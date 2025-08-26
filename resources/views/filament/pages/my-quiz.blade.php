@@ -180,6 +180,102 @@
                 @endforelse
             </div>
 
+            {{-- Pagination --}}
+            @if($this->getTotalPages() > 1)
+                <div class="mt-8 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                    @php
+                        $paginationInfo = $this->getPaginationInfo();
+                    @endphp
+                    
+                    {{-- Pagination Info --}}
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+                        <div class="text-sm text-slate-600 dark:text-slate-400">
+                            Hiển thị <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $paginationInfo['start_item'] }}</span> 
+                            đến <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $paginationInfo['end_item'] }}</span> 
+                            trong tổng số <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $paginationInfo['total_items'] }}</span> quiz
+                        </div>
+                        
+                        <div class="text-sm text-slate-600 dark:text-slate-400">
+                            Trang <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $paginationInfo['current_page'] }}</span> 
+                            / <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $paginationInfo['total_pages'] }}</span>
+                        </div>
+                    </div>
+
+                    {{-- Pagination Controls --}}
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                        {{-- Previous Button --}}
+                        <button 
+                            wire:click="previousPage" 
+                            @if(!$paginationInfo['has_previous']) disabled @endif
+                            class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 
+                                   {{ $paginationInfo['has_previous'] 
+                                      ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg' 
+                                      : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed' }}"
+                        >
+                            <x-heroicon-o-chevron-left class="w-4 h-4" />
+                            Trang trước
+                        </button>
+
+                        {{-- Page Numbers --}}
+                        <div class="flex items-center gap-2">
+                            @php
+                                $currentPage = $paginationInfo['current_page'];
+                                $totalPages = $paginationInfo['total_pages'];
+                                $startPage = max(1, $currentPage - 2);
+                                $endPage = min($totalPages, $currentPage + 2);
+                            @endphp
+
+                            @if($startPage > 1)
+                                <button wire:click="goToPage(1)" 
+                                        class="w-10 h-10 text-sm font-medium rounded-lg transition-all duration-200 
+                                               bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 
+                                               text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-600">
+                                    1
+                                </button>
+                                @if($startPage > 2)
+                                    <span class="text-slate-400 dark:text-slate-500">...</span>
+                                @endif
+                            @endif
+
+                            @for($page = $startPage; $page <= $endPage; $page++)
+                                <button wire:click="goToPage({{ $page }})" 
+                                        class="w-10 h-10 text-sm font-medium rounded-lg transition-all duration-200 
+                                               {{ $page === $currentPage 
+                                                  ? 'bg-blue-500 text-white shadow-md' 
+                                                  : 'bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-600' }}">
+                                    {{ $page }}
+                                </button>
+                            @endfor
+
+                            @if($endPage < $totalPages)
+                                @if($endPage < $totalPages - 1)
+                                    <span class="text-slate-400 dark:text-slate-500">...</span>
+                                @endif
+                                <button wire:click="goToPage({{ $totalPages }})" 
+                                        class="w-10 h-10 text-sm font-medium rounded-lg transition-all duration-200 
+                                               bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 
+                                               text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-600">
+                                    {{ $totalPages }}
+                                </button>
+                            @endif
+                        </div>
+
+                        {{-- Next Button --}}
+                        <button 
+                            wire:click="nextPage" 
+                            @if(!$paginationInfo['has_next']) disabled @endif
+                            class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 
+                                   {{ $paginationInfo['has_next'] 
+                                      ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg' 
+                                      : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed' }}"
+                        >
+                            Trang sau
+                            <x-heroicon-o-chevron-right class="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+            @endif
+
         </div>
     </div>
 </x-filament-panels::page>

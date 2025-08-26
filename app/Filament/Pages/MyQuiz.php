@@ -44,6 +44,11 @@ class MyQuiz extends Page
 
     public string $searchTerm = '';
 
+    // Pagination properties
+    public int $perPage = 10;
+    
+    public int $currentPage = 1;
+
     protected ?QuizFilterService $quizFilterService = null;
 
     public function mount(): void
@@ -179,16 +184,12 @@ class MyQuiz extends Page
         return;
     }
 
-    public function updatedSelectedCourseId()
-    {
-        // Tự động cập nhật danh sách quiz khi thay đổi khóa học
-        // Clear any cached data if needed
-        $this->dispatch('quiz-list-updated');
-    }
 
-    public function updatedSelectedStatus()
+
+    public function updatedSelectedStatus(): void
     {
         // Tự động cập nhật danh sách quiz khi thay đổi trạng thái
+        $this->resetToFirstPage();
         $this->dispatch('quiz-list-updated');
     }
 
@@ -839,7 +840,37 @@ class MyQuiz extends Page
             $this->searchTerm
         );
 
-        return $quizzes;
+        // Áp dụng phân trang
+        $offset = ($this->currentPage - 1) * $this->perPage;
+        return $quizzes->skip($offset)->take($this->perPage);
+    }
+
+    /**
+     * Lấy tổng số quiz (không phân trang) để tính toán phân trang
+     */
+    public function getTotalQuizzesCount(): int
+    {
+        // Kiểm tra nếu quizFilterService chưa được khởi tạo
+        if (!$this->quizFilterService) {
+            $this->quizFilterService = new QuizFilterService();
+        }
+
+        // Lấy quiz theo trạng thái
+        $quizzes = match ($this->selectedFilter) {
+            'unsubmitted' => $this->quizFilterService->getUnsubmittedQuizzes(),
+            'overdue' => $this->quizFilterService->getOverdueQuizzes(),
+            'submitted' => $this->quizFilterService->getSubmittedQuizzes(),
+            default => $this->quizFilterService->getAllQuizzes(),
+        };
+
+        // Áp dụng các bộ lọc khác (khóa học và tìm kiếm)
+        $quizzes = $this->quizFilterService->applyAllFilters(
+            $quizzes,
+            $this->selectedCourseId,
+            $this->searchTerm
+        );
+
+        return $quizzes->count();
     }
 
     /**
@@ -887,10 +918,118 @@ class MyQuiz extends Page
     }
 
     /**
+     * Tính tổng số trang
+     */
+    #[Computed]
+    public function getTotalPages(): int
+    {
+        $totalQuizzes = $this->getTotalQuizzesCount();
+        return (int) ceil($totalQuizzes / $this->perPage);
+    }
+
+    /**
+     * Kiểm tra có trang tiếp theo không
+     */
+    #[Computed]
+    public function hasNextPage(): bool
+    {
+        return $this->currentPage < $this->getTotalPages();
+    }
+
+    /**
+     * Kiểm tra có trang trước không
+     */
+    #[Computed]
+    public function hasPreviousPage(): bool
+    {
+        return $this->currentPage > 1;
+    }
+
+    /**
+     * Lấy thông tin phân trang để hiển thị
+     */
+    #[Computed]
+    public function getPaginationInfo(): array
+    {
+        $totalQuizzes = $this->getTotalQuizzesCount();
+        $totalPages = $this->getTotalPages();
+        $startItem = ($this->currentPage - 1) * $this->perPage + 1;
+        $endItem = min($this->currentPage * $this->perPage, $totalQuizzes);
+
+        return [
+            'current_page' => $this->currentPage,
+            'total_pages' => $totalPages,
+            'total_items' => $totalQuizzes,
+            'start_item' => $startItem,
+            'end_item' => $endItem,
+            'per_page' => $this->perPage,
+            'has_next' => $this->hasNextPage(),
+            'has_previous' => $this->hasPreviousPage(),
+        ];
+    }
+
+    /**
      * Lấy trạng thái chi tiết của quiz từ service
      */
     public function getQuizDetailedStatusFromService(Quiz $quiz): array
     {
         return $this->quizFilterService->getQuizDetailedStatus($quiz);
+    }
+
+    /**
+     * Chuyển đến trang tiếp theo
+     */
+    public function nextPage(): void
+    {
+        if ($this->currentPage < $this->getTotalPages()) {
+            $this->currentPage++;
+        }
+    }
+
+    /**
+     * Chuyển đến trang trước
+     */
+    public function previousPage(): void
+    {
+        if ($this->currentPage > 1) {
+            $this->currentPage--;
+        }
+    }
+
+    /**
+     * Chuyển đến trang cụ thể
+     */
+    public function goToPage(int $page): void
+    {
+        if ($page >= 1 && $page <= $this->getTotalPages()) {
+            $this->currentPage = $page;
+        }
+    }
+
+    /**
+     * Reset về trang đầu khi thay đổi bộ lọc
+     */
+    public function resetToFirstPage(): void
+    {
+        $this->currentPage = 1;
+    }
+
+    /**
+     * Override các phương thức update để reset về trang đầu
+     */
+    public function updatedSelectedFilter(): void
+    {
+        $this->resetToFirstPage();
+    }
+
+    public function updatedSelectedCourseId(): void
+    {
+        $this->resetToFirstPage();
+        $this->dispatch('quiz-list-updated');
+    }
+
+    public function updatedSearchTerm(): void
+    {
+        $this->resetToFirstPage();
     }
 }
