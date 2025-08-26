@@ -9,12 +9,14 @@ use Illuminate\Support\ServiceProvider;
 class AppServiceProvider extends ServiceProvider
 {
     use HasRegisterClass;
+
     /**
      * Register any application services.
      */
     public function register(): void
     {
-        $this->autoRegister();
+        $this->registerServices();
+        $this->registerRepositories();
     }
 
     /**
@@ -22,35 +24,78 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $this->registerPolicies();
+        $this->registerObservers();
     }
 
     /**
-     * Automatically register services and repositories with their interfaces.
-     * This method uses the HasRegisterClass trait to organize the registration logic
-     * and binds implementations to their corresponding interfaces in the service container.
+     * Auto-discover and register services with their interfaces.
      */
-    protected function autoRegister(): void
+    protected function registerServices(): void
     {
-        // Register all services with their interfaces
-        $this->registerClassesFromDirectory(
+        $this->discoverAndRegister(
             path: app_path('Services'),
             namespace: 'App\\Services',
-            interfaceNamespace: 'App\\Services\\Interfaces',
+            registrationLogic: function (string $implementationClass) {
+                $className = class_basename($implementationClass);
+                $interfaceClass = "App\\Services\\Interfaces\\{$className}Interface";
+
+                if (interface_exists($interfaceClass)) {
+                    $this->app->bind($interfaceClass, $implementationClass);
+                }
+            },
             skipClasses: ['BaseService']
         );
+    }
 
-        // Register all repositories with their interfaces
-        $this->registerClassesFromDirectory(
+    /**
+     * Auto-discover and register repositories with their interfaces.
+     */
+    protected function registerRepositories(): void
+    {
+        $this->discoverAndRegister(
             path: app_path('Repositories/Eloquent'),
             namespace: 'App\\Repositories\\Eloquent',
-            interfaceNamespace: 'App\\Repositories\\Interfaces',
+            registrationLogic: function (string $implementationClass) {
+                $className = class_basename($implementationClass);
+                $interfaceClass = "App\\Repositories\\Interfaces\\{$className}Interface";
+
+                if (interface_exists($interfaceClass)) {
+                    $this->app->bind($interfaceClass, $implementationClass);
+                }
+            },
             skipClasses: ['EloquentRepository']
         );
+    }
 
-        // Register all policies with their models
+    /**
+     * Auto-discover and register Eloquent observers with their models.
+     */
+    protected function registerObservers(): void
+    {
+        $this->discoverAndRegister(
+            path: app_path('Observers'),
+            namespace: 'App\\Observers',
+            registrationLogic: function (string $observerClass) {
+                $className = class_basename($observerClass);
+                $modelName = str_replace('Observer', '', $className);
+                $modelClass = "App\\Models\\{$modelName}";
+
+                if (class_exists($modelClass)) {
+                    $modelClass::observe($observerClass);
+                }
+            }
+        );
+    }
+
+    /**
+     * Auto-discover and register model policies.
+     */
+    protected function registerPolicies(): void
+    {
         Gate::guessPolicyNamesUsing(function (string $modelClass) {
-            return str_replace('Models', 'Policies', $modelClass).'Policy';
+            // 'App\Models\User' -> 'App\Policies\UserPolicy'
+            return str_replace('Models', 'Policies', $modelClass) . 'Policy';
         });
     }
 }

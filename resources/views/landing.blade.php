@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="vi">
 
 <head>
   <meta charset="utf-8">
@@ -9,7 +9,24 @@
   <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
   <style>
     body {
-      background: radial-gradient(ellipse at top, #7F56D9 0%, #18122B 60%, #0a0a0a 100%);
+      /* Generated a subtle striped background using CSS gradients.
+         - background-color: A dark gray base.
+         - background-image: Two repeating linear gradients to create a subtle, cross-hatched pattern of white lines.
+      */
+      background-color: #1a1a1a;
+      /* Dark gray base color */
+      background-image:
+        repeating-linear-gradient(45deg,
+          transparent,
+          transparent 30px,
+          rgba(255, 255, 255, 0.05) 30px,
+          rgba(255, 255, 255, 0.05) 31px),
+        repeating-linear-gradient(-45deg,
+          transparent,
+          transparent 30px,
+          rgba(255, 255, 255, 0.05) 30px,
+          rgba(255, 255, 255, 0.05) 31px);
+
       color: #fff;
       font-family: 'Instrument Sans', sans-serif;
       min-height: 100vh;
@@ -17,27 +34,43 @@
     }
 
     .center {
+      /* Added a semi-transparent overlay to the main container to improve text readability */
+      background-color: rgba(0, 0, 0, 0.4);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      padding: 2rem 1rem;
+      /* Added padding for better spacing on small screens */
     }
 
     .gradient-title {
-      transition: all 0.5s;
-      -webkit-text-stroke: 4px #d6f4f4;
-      font-variation-settings: "wght" 900, "ital" 1;
-      font-size: 15rem;
-      text-align: center;
-      color: transparent;
-      font-family: "Meta", sans-serif;
-      text-shadow: 10px 10px 0px #07bccc,
-        15px 15px 0px #e601c0,
-        20px 20px 0px #e9019a,
-        25px 25px 0px #f40468,
-        45px 45px 10px #482896;
-      cursor: pointer;
+      font-size: clamp(2.8rem, 1.5vw, 3rem);
+      font-weight: bold;
+      font-size: 12rem;
+      margin: 5px;
+      background: linear-gradient(to right,
+          #c169e4ff 20%,
+          #00affa 30%,
+          #5bb2d7ff 70%,
+          #e155c2ff 80%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-fill-color: transparent;
+      background-size: 500% auto;
+      animation: textShine 5s ease-in-out infinite alternate;
+    }
+
+    @keyframes textShine {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      100% {
+        background-position: 100% 50%;
+      }
     }
 
     .gradient-title:hover {
@@ -109,6 +142,8 @@
       color: #fff;
       box-shadow: 0 0 18px 4px #7F56D980;
       margin-right: 24px;
+      z-index: 1;
+      /* Ensure dot is above the line */
     }
 
     .timeline-content {
@@ -117,6 +152,8 @@
       border-radius: 16px;
       padding: 18px 24px;
       box-shadow: 0 2px 16px rgba(127, 86, 217, 0.10);
+      backdrop-filter: blur(5px);
+      /* Added blur effect for content boxes */
     }
 
     .timeline-title {
@@ -144,7 +181,7 @@
 
     .footer {
       text-align: center;
-      color: #888;
+      color: #aaa;
       font-size: 0.95rem;
       margin-top: 64px;
       margin-bottom: 16px;
@@ -230,7 +267,7 @@
         </div>
       </div>
     </div>
-    <div class="footer">© {{ date('Y') }} ZipLMS. All rights reserved.</div>
+    <div class="footer">© 2025 ZipLMS. All rights reserved.</div>
   </div>
 </body>
 

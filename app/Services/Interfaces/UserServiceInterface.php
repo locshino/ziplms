@@ -77,4 +77,19 @@ interface UserServiceInterface extends BaseServiceInterface
     public function updateAvatar(User $user, UploadedFile $file);
 
     public function updateUserInfo(User $user, array $data, ?UploadedFile $avatarFile = null): User;
+
+    /**
+     * Check if a user is active.
+     */
+    public function checkActive(string $userId): bool;
+
+    /**
+     * Check if a user does not exist.
+     */
+    public function checkNotExist(string $userId): bool;
+
+    /**
+     * Check if a user is suspended.
+     */
+    public function checkSuspended(string $userId): bool;
 }

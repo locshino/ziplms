@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Enums\MimeType;
 use App\Enums\Status\UserStatus;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
@@ -73,7 +75,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
  * @mixin \Eloquent
  */
-class User extends Authenticatable implements HasMedia
+class User extends Authenticatable implements HasMedia, HasAvatar
 {
     use InteractsWithMedia;
 
@@ -90,13 +92,16 @@ class User extends Authenticatable implements HasMedia
     ];
 
     /**
-     * The attributes that should be cast.
+     * Get the attributes that should be cast.
      *
-     * @var array<string, string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        'status' => UserStatus::class,
-    ];
+    protected function casts(): array
+    {
+        return array_merge(parent::casts(), [
+            'status' => UserStatus::class,
+        ]);
+    }
 
     // Relationships as Teacher
     public function teachingCourses(): HasMany
@@ -147,5 +152,17 @@ class User extends Authenticatable implements HasMedia
         $this->addMediaCollection('avatar')
             ->singleFile()
             ->acceptsMimeTypes(MimeType::images());
+    }
+
+    /**
+     * Get the avatar URL.
+     */
+    public function getFilamentAvatarUrl(): ?string
+    {
+        $avatar_form_media = $this->getFirstMediaUrl('avatar');
+        $avatar_path = isset($avatar_form_media)
+            ? asset('images/avatars/default.png')
+            : $avatar_form_media;
+        return $avatar_path;
     }
 }

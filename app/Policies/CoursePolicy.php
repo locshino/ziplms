@@ -2,8 +2,10 @@
 
 namespace App\Policies;
 
+use App\Libs\Roles\RoleHelper;
 use App\Models\User;
 use App\Models\Course;
+use App\Models\Role;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class CoursePolicy
@@ -23,7 +25,17 @@ class CoursePolicy
      */
     public function view(User $user, Course $course): bool
     {
-        return $user->can('view_courses::course');
+        $isCanView = $user->can('view_courses::course');
+        if ($isCanView == false) {
+            return false;
+        }
+
+        $isManagerCanView = $this->handleManagerPermissions($user, $course);
+        if ($isManagerCanView !== null) {
+            return $isManagerCanView;
+        }
+
+        return $isCanView;
     }
 
     /**
@@ -39,7 +51,18 @@ class CoursePolicy
      */
     public function update(User $user, Course $course): bool
     {
-        return $user->can('update_courses::course');
+        $isCanUpdate = $user->can('update_courses::course');
+
+        if ($isCanUpdate == false) {
+            return false;
+        }
+
+        $isManagerCanView = $this->handleManagerPermissions($user, $course);
+        if ($isManagerCanView !== null) {
+            return $isManagerCanView;
+        }
+
+        return $isCanUpdate;
     }
 
     /**
@@ -47,7 +70,18 @@ class CoursePolicy
      */
     public function delete(User $user, Course $course): bool
     {
-        return $user->can('delete_courses::course');
+        $isCanDelete = $user->can('delete_courses::course');
+
+        if ($isCanDelete == false) {
+            return false;
+        }
+
+        $isManagerCanView = $this->handleManagerPermissions($user, $course);
+        if ($isManagerCanView !== null) {
+            return $isManagerCanView;
+        }
+
+        return $isCanDelete;
     }
 
     /**
@@ -63,7 +97,18 @@ class CoursePolicy
      */
     public function forceDelete(User $user, Course $course): bool
     {
-        return $user->can('force_delete_courses::course');
+        $isCanForceDelete = $user->can('force_delete_courses::course');
+
+        if ($isCanForceDelete == false) {
+            return false;
+        }
+
+        $isManagerCanView = $this->handleManagerPermissions($user, $course);
+        if ($isManagerCanView !== null) {
+            return $isManagerCanView;
+        }
+
+        return $isCanForceDelete;
     }
 
     /**
@@ -79,7 +124,18 @@ class CoursePolicy
      */
     public function restore(User $user, Course $course): bool
     {
-        return $user->can('restore_courses::course');
+        $isCanRestore = $user->can('restore_courses::course');
+
+        if ($isCanRestore == false) {
+            return false;
+        }
+
+        $isManagerCanView = $this->handleManagerPermissions($user, $course);
+        if ($isManagerCanView !== null) {
+            return $isManagerCanView;
+        }
+
+        return $isCanRestore;
     }
 
     /**
@@ -95,7 +151,18 @@ class CoursePolicy
      */
     public function replicate(User $user, Course $course): bool
     {
-        return $user->can('replicate_courses::course');
+        $isCanReplicate = $user->can('replicate_courses::course');
+
+        if ($isCanReplicate == false) {
+            return false;
+        }
+
+        $isManagerCanView = $this->handleManagerPermissions($user, $course);
+        if ($isManagerCanView !== null) {
+            return $isManagerCanView;
+        }
+
+        return $isCanReplicate;
     }
 
     /**
@@ -104,5 +171,12 @@ class CoursePolicy
     public function reorder(User $user): bool
     {
         return $user->can('reorder_courses::course');
+    }
+
+    private function handleManagerPermissions(User $user, Course $course): ?bool
+    {
+        return RoleHelper::isManager($user)
+            ? $course->managers()->where('users.id', $user->id)->exists()
+            : null;
     }
 }

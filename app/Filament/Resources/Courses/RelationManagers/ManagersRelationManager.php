@@ -86,11 +86,6 @@ class ManagersRelationManager extends RelationManager
                     ->label(__('resource_user.table.columns.status'))
                     ->badge()
                     ->searchable(),
-                TextColumn::make('roles.name')
-                    ->label(__('resource_user.table.columns.roles'))
-                    ->badge()
-                    ->separator(', ')
-                    ->searchable(),
                 TextColumn::make('pivot.start_at')
                     ->label('Start At')
                     ->dateTime()

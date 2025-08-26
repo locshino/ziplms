@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Enums\Status\UserStatus;
 use App\Exceptions\Repositories\RepositoryException;
 use App\Exceptions\Repositories\UserRepositoryException;
 use App\Models\User;
@@ -145,10 +146,42 @@ class UserRepository extends EloquentRepository implements UserRepositoryInterfa
             if (empty($excludedIds)) {
                 return $this->model->get();
             }
-            
+
             return $this->model->whereNotIn('id', $excludedIds)->get();
         } catch (Exception $e) {
             throw UserRepositoryException::databaseError($e->getMessage());
         }
+    }
+
+    /**
+     * Check if user is active (not deleted and status is active)
+     */
+    public function isActive(string $userId): bool
+    {
+        $user = $this->model->find($userId);
+        if (! $user) return false;
+        return is_null($user->deleted_at) && $user->status === UserStatus::ACTIVE;
+    }
+
+    /**
+     * Check if user does not exist (deleted or status is inactive or pending)
+     */
+    public function isNotExist(string $userId): bool
+    {
+        $user = $this->model->find($userId);
+        if (! $user) return true;
+        return !is_null($user->deleted_at)
+            || $user->status === UserStatus::INACTIVE
+            || $user->status === UserStatus::PENDING;
+    }
+
+    /**
+     * Check if user is suspended (status is suspended and not deleted)
+     */
+    public function isSuspended(string $userId): bool
+    {
+        $user = $this->model->find($userId);
+        if (! $user) return false;
+        return is_null($user->deleted_at) && $user->status === UserStatus::SUSPENDED;
     }
 }
