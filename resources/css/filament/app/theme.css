@@ -9,6 +9,7 @@
 @source '../../../../vendor/cmsmaxinc/filament-error-pages/resources/**/*.blade.php';
 @source '../../../../vendor/devonab/filament-easy-footer/resources/views/**/*';
 @source '../../../../vendor/bezhansalleh/filament-language-switch/resources/views/**/*.blade.php';
+@source '../../../../vendor/gboquizosanchez/filament-log-viewer/resources/views/**/*.blade.php';
 @source '../../../../vendor/wire-elements/**/*.blade.php';
 
 @import "../../../../vendor/pxlrbt/filament-activity-log/resources/css/styles.css";

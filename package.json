@@ -17,6 +17,7 @@
         "vite": "^7.0.4"
     },
     "dependencies": {
-        "@melloware/coloris": "^0.25.0"
+        "@melloware/coloris": "^0.25.0",
+        "@simplewebauthn/browser": "^13.1.2"
     }
 }

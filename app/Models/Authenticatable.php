@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\System\RoleSystem;
+use App\Libs\Roles\RoleHelper;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,11 +12,13 @@ use Illuminate\Notifications\Notifiable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 use OwenIt\Auditing\Auditable;
 use Rappasoft\LaravelAuthenticationLog\Traits\AuthenticationLoggable;
+use Spatie\LaravelPasskeys\Models\Concerns\HasPasskeys;
 use Spatie\Permission\Traits\HasRoles;
+use Stephenjude\FilamentTwoFactorAuthentication\TwoFactorAuthenticatable;
 use Yebor974\Filament\RenewPassword\Contracts\RenewPasswordContract;
 use Yebor974\Filament\RenewPassword\Traits\RenewPassword;
 
-abstract class Authenticatable extends BaseAuthenticatable implements RenewPasswordContract, AuditableContract
+abstract class Authenticatable extends BaseAuthenticatable implements RenewPasswordContract, AuditableContract, HasPasskeys
 {
     use AuthenticationLoggable,
         HasFactory,
@@ -23,6 +27,7 @@ abstract class Authenticatable extends BaseAuthenticatable implements RenewPassw
         Notifiable,
         Auditable,
         RenewPassword,
+        TwoFactorAuthenticatable,
         SoftDeletes;
 
     /**
@@ -46,5 +51,15 @@ abstract class Authenticatable extends BaseAuthenticatable implements RenewPassw
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function canImpersonate()
+    {
+        return RoleHelper::isSuperAdmin();
+    }
+
+    public function canBeImpersonated()
+    {
+        return !$this->hasRole(RoleSystem::SUPER_ADMIN->value);
     }
 }

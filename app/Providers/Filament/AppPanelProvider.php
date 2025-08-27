@@ -6,9 +6,14 @@ use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\RenewPassword;
 use App\Http\Middleware\CheckUserActive;
+use App\Filament\Pages;
+use App\Models\User;
+use Asmit\ResizedColumn\ResizedColumnPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use Boquizo\FilamentLogViewer\FilamentLogViewerPlugin;
 use Cmsmaxinc\FilamentErrorPages\FilamentErrorPagesPlugin;
 use Devonab\FilamentEasyFooter\EasyFooterPlugin;
+use DutchCodingCompany\FilamentDeveloperLogins\FilamentDeveloperLoginsPlugin;
 use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
 use DutchCodingCompany\FilamentSocialite\Provider;
 use Filafly\Themes\Brisk\BriskTheme;
@@ -30,8 +35,10 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
+use lockscreen\FilamentLockscreen\Lockscreen;
 use pxlrbt\FilamentEnvironmentIndicator\EnvironmentIndicatorPlugin;
 use pxlrbt\FilamentSpotlight\SpotlightPlugin;
+use Stephenjude\FilamentTwoFactorAuthentication\TwoFactorAuthenticationPlugin;
 use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
 use Swis\Filament\Backgrounds\ImageProviders\CuratedBySwis;
 use Swis\Filament\Backgrounds\ImageProviders\MyImages;
@@ -103,23 +110,54 @@ class AppPanelProvider extends PanelProvider
     public function setPlugins(): array
     {
         $config = config('ziplms.plugins');
+        $isAppEnvLocal = app()->environment('local');
 
         $plugins = [
             // Authentication
             FilamentShieldPlugin::make(),
+            Lockscreen::make()
+                // ->usingCustomTableColumns() // Use custom table columns. Default:  email, password.
+                ->enableRateLimit() // Enable rate limit for the lockscreen. Default: Enable, 5 attempts in 1 minute.
+                // ->setUrl() // Customize the lockscreen url.
+                ->enableIdleTimeout() // Enable auto lock during idle time. Default: Enable, 30 minutes.
+                // ->disableDisplayName() // Display the name of the user based on the attribute supplied. Default: name
+                // ->icon() // Customize the icon of the lockscreen.
+                ->enablePlugin(), // Enable the plugin.
+
+            TwoFactorAuthenticationPlugin::make()
+                ->enableTwoFactorAuthentication() // Enable Google 2FA
+                ->enablePasskeyAuthentication() // Enable Passkey
+                ->addTwoFactorMenuItem(), // Add 2FA menu item
 
             // Logs
             FilamentAuthenticationLogPlugin::make(),
             FilamentMailLogPlugin::make(),
+            FilamentLogViewerPlugin::make()
+                ->listLogs(Pages\Logs\ListLogs::class)
+                ->viewLog(Pages\Logs\ViewLog::class),
 
             // UI
             FilamentApexChartsPlugin::make(),
             FilamentErrorPagesPlugin::make(),
             SpotlightPlugin::make(),
             BriskTheme::make()->withoutSuggestedFont(),
+            ResizedColumnPlugin::make()
+                ->preserveOnDB(),
 
             // Pages
             FilamentApiDocsBuilderPlugin::make(),
+
+            // Dev Mode
+            FilamentDeveloperLoginsPlugin::make()
+                ->switchable($isAppEnvLocal)
+                ->enabled($isAppEnvLocal)
+                ->users([
+                    'Super Administrator' => 'superadmin@example.com',
+                    'Administrator' => 'admin@example.com',
+                    'Manager' => 'manager@example.com',
+                    'Teacher' => 'teacher@example.com',
+                    'Student' => 'student@example.com',
+                ]),
         ];
 
         // Authentication

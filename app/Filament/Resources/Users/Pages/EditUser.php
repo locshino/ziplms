@@ -8,6 +8,7 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use STS\FilamentImpersonate\Actions\Impersonate;
 
 class EditUser extends EditRecord
 {
@@ -25,6 +26,13 @@ class EditUser extends EditRecord
             DeleteAction::make(),
             ForceDeleteAction::make(),
             RestoreAction::make(),
+        ];
+    }
+
+    protected function getActions(): array
+    {
+        return [
+            Impersonate::make()->record($this->getRecord())
         ];
     }
 }
