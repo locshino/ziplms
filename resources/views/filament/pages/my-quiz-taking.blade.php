@@ -1,248 +1,236 @@
 <x-filament-panels::page>
+    {{-- CSS được tối ưu hóa cho giao diện mới --}}
     <style>
-        /* Custom radio button styling */
-        input[type="radio"]:checked + .radio-indicator {
-            background: #3b82f6 !important;
-            border-color: #3b82f6 !important;
+        :root {
+            --color-primary: #3b82f6;
+            /* blue-500 */
+            --color-primary-hover: #2563eb;
+            /* blue-600 */
+            --color-primary-text: #ffffff;
+            --color-secondary-text: #6b7280;
+            /* gray-500 */
+            --color-border: #e5e7eb;
+            /* gray-200 */
+            --color-bg-light: #ffffff;
+            --color-bg-muted: #f9fafb;
+            /* gray-50 */
         }
-        
-        input[type="radio"]:checked + .radio-indicator .radio-dot {
-            opacity: 1 !important;
-            transform: scale(1) !important;
+
+        .dark {
+            --color-secondary-text: #9ca3af;
+            /* gray-400 */
+            --color-border: #374151;
+            /* gray-700 */
+            --color-bg-light: #1f2937;
+            /* gray-800 */
+            --color-bg-muted: #111827;
+            /* gray-900 */
         }
-        
-        /* Custom checkbox styling */
-        input[type="checkbox"]:checked + .checkbox-indicator {
-            background: #3b82f6 !important;
-            border-color: #3b82f6 !important;
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
         }
-        
-        input[type="checkbox"]:checked + .checkbox-indicator .checkbox-icon {
-            opacity: 1 !important;
-            transform: scale(1) !important;
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #a0aec0;
+            border-radius: 10px;
+        }
+
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #4a5568;
+        }
+
+        /* Animation cho slide câu hỏi */
+        @keyframes slide-in {
+            from {
+                transform: translateX(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .animate-slide-in {
+            animation: slide-in 0.3s ease-out forwards;
         }
     </style>
-    <div x-data="myQuizTakingApp()" x-init="init()" class="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-            <!-- Main Content: Questions -->
-            <div class="lg:col-span-2 space-y-6">
-                @foreach($this->selectedQuiz->questions as $index => $question)
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                        <div class="flex justify-between items-start gap-4 mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white leading-relaxed">Câu {{ $index + 1 }}: {!! $question->title !!}</h3>
-                            <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap">{{ $question->pivot->points ?? 1 }} điểm</span>
+
+    {{-- AlpineJS Component chính --}}
+    <div x-data="{
+            remainingSeconds: @js($remainingSeconds),
+            isUnlimited: @js($isUnlimited),
+            timeWarning: @js($timeWarning),
+            submitting: @js($submitting),
+            timer: null,
+            init() {
+                if (!this.isUnlimited) {
+                    this.startTimer();
+                }
+                $watch('$wire.submitting', value => this.submitting = value);
+                $watch('$wire.remainingSeconds', value => this.remainingSeconds = value);
+            },
+            startTimer() {
+                if (this.isUnlimited || this.remainingSeconds <= 0) return;
+                if (this.timer) clearInterval(this.timer);
+                this.timer = setInterval(() => {
+                    this.remainingSeconds--;
+                    this.timeWarning = this.remainingSeconds <= 300;
+                    if (this.remainingSeconds <= 0) {
+                        clearInterval(this.timer);
+                        this.timer = null;
+                        this.$wire.autoSubmit();
+                    }
+                }, 1000);
+            },
+            formatTime(seconds) {
+                if (seconds === null || seconds < 0) seconds = 0;
+                const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+                const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+                const s = (seconds % 60).toString().padStart(2, '0');
+                return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`;
+            }
+        }"
+        @question-changed.window="document.getElementById('question-card').classList.remove('animate-slide-in'); void document.getElementById('question-card').offsetWidth; document.getElementById('question-card').classList.add('animate-slide-in');">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+
+            <div class="lg:col-span-8 space-y-6">
+                @if($this->currentQuestion)
+                    <div id="question-card"
+                        class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 animate-slide-in">
+                        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                            <div class="flex justify-between items-start gap-4">
+                                <div class="flex-grow">
+                                    <p class="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-1">Câu
+                                        {{ $this->currentQuestionIndex + 1 }} / {{ $this->totalQuestions }}</p>
+                                    <div
+                                        class="text-lg font-semibold text-gray-900 dark:text-white leading-relaxed prose prose-blue dark:prose-invert max-w-none">
+                                        {!! $this->currentQuestion->title !!}
+                                    </div>
+                                </div>
+                                <span
+                                    class="bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 text-sm font-bold px-3 py-1 rounded-full whitespace-nowrap">
+                                    {{ $this->currentQuestion->pivot->points ?? 1 }} điểm
+                                </span>
+                            </div>
+
+                            @if($this->currentQuestion->question_image)
+                                <div class="mt-4">
+                                    <img src="{{ Storage::url($this->currentQuestion->question_image) }}" alt="Question Image"
+                                        class="max-w-full h-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                                </div>
+                            @endif
                         </div>
 
-                        @if($question->question_image)
-                            <div class="mb-4">
-                                <img src="{{ $question->question_image }}" alt="Question Image" class="max-w-full h-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div class="p-6">
+                            @if($this->currentQuestion->is_multiple_response)
+                                <p class="text-sm italic text-gray-500 dark:text-gray-400 mb-4">Chọn một hoặc nhiều đáp án đúng.
+                                </p>
+                            @endif
+                            <div class="space-y-3">
+                                @foreach($this->currentQuestion->answerChoices as $choice)
+                                    <label
+                                        class="flex items-start p-4 border-2 border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer transition-all duration-200 hover:border-blue-500 dark:hover:border-blue-500 has-[:checked]:border-blue-500 has-[:checked]:ring-2 has-[:checked]:ring-blue-300 dark:has-[:checked]:border-blue-500">
+                                        @if($this->currentQuestion->is_multiple_response)
+                                            <input type="checkbox" value="{{ $choice->id }}"
+                                                wire:click="updateAnswer('{{ $this->currentQuestion->id }}', '{{ $choice->id }}')"
+                                                @if(isset($this->answers[$this->currentQuestion->id]) && is_array($this->answers[$this->currentQuestion->id]) && in_array($choice->id, $this->answers[$this->currentQuestion->id])) checked @endif
+                                                class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-0.5 flex-shrink-0">
+                                        @else
+                                            <input type="radio" name="answers_{{ $this->currentQuestion->id }}"
+                                                value="{{ $choice->id }}"
+                                                wire:click="updateAnswer('{{ $this->currentQuestion->id }}', '{{ $choice->id }}')"
+                                                @if(isset($this->answers[$this->currentQuestion->id]) && $this->answers[$this->currentQuestion->id] == $choice->id) checked @endif
+                                                class="h-5 w-5 border-gray-300 text-blue-600 focus:ring-blue-500 mt-0.5 flex-shrink-0">
+                                        @endif
+                                        <span
+                                            class="ml-4 text-gray-700 dark:text-gray-300 prose prose-blue dark:prose-invert max-w-none">{!! $choice->title !!}</span>
+                                    </label>
+                                @endforeach
                             </div>
-                        @endif
-
-                        @if($question->is_multiple_response)
-                            <p class="text-sm italic text-gray-600 dark:text-gray-400 mb-2 pl-2">Chọn một hoặc nhiều đáp án</p>
-                        @endif
-
-                        <div class="space-y-3">
-                            @foreach($question->answerChoices as $choice)
-                                <label class="flex items-center p-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer transition-all duration-200 hover:border-blue-500 hover:bg-gray-50 dark:hover:bg-gray-700 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/20">
-                                    @if($question->is_multiple_response)
-                                        <input type="checkbox" name="answers_{{ $question->id }}[]" value="{{ $choice->id }}"
-                                            wire:key="checkbox-{{ $question->id }}-{{ $choice->id }}"
-                                            wire:click="updateAnswer('{{ $question->id }}', '{{ $choice->id }}')"
-                                            @if(isset($this->currentAnswers[$question->id]) && is_array($this->currentAnswers[$question->id]) && in_array($choice->id, $this->currentAnswers[$question->id])) checked @endif
-                                            class="peer sr-only"
-                                            onchange="this.closest('label').querySelector('.checkbox-indicator').style.backgroundColor = this.checked ? '#3b82f6' : 'transparent'; this.closest('label').querySelector('.checkbox-indicator').style.borderColor = this.checked ? '#3b82f6' : '#9ca3af'; this.closest('label').querySelector('.checkbox-icon').style.opacity = this.checked ? '1' : '0';">
-                                        <div class="checkbox-indicator w-5 h-5 border-2 border-gray-400 rounded flex items-center justify-center flex-shrink-0 transition-all duration-200 peer-checked:bg-blue-500 peer-checked:border-blue-500">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="checkbox-icon w-3.5 h-3.5 text-white opacity-0 scale-50 transition-all duration-200 peer-checked:opacity-100 peer-checked:scale-100">
-                                                <path fill-rule="evenodd"
-                                                    d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                        </div>
-                                    @else
-                                        <input type="radio" name="answers_{{ $question->id }}" value="{{ $choice->id }}"
-                                            wire:key="radio-{{ $question->id }}-{{ $choice->id }}"
-                                            wire:model.live="currentAnswers.{{ $question->id }}"
-                                            wire:click="updateAnswer('{{ $question->id }}', '{{ $choice->id }}')"
-                                            @if(isset($this->currentAnswers[$question->id]) && $this->currentAnswers[$question->id] == $choice->id)
-                                            checked @endif
-                                            class="peer sr-only"
-                                            onchange="this.closest('label').querySelector('.radio-indicator').style.backgroundColor = this.checked ? '#3b82f6' : 'transparent'; this.closest('label').querySelector('.radio-indicator').style.borderColor = this.checked ? '#3b82f6' : '#9ca3af'; this.closest('label').querySelector('.radio-dot').style.opacity = this.checked ? '1' : '0';">
-                                        <div class="radio-indicator w-5 h-5 border-2 border-gray-400 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200">
-                                            <div class="radio-dot w-2 h-2 bg-white rounded-full opacity-0 scale-50 transition-all duration-200"></div>
-                                        </div>
-                                    @endif
-                                    <span class="ml-3 text-gray-600 dark:text-gray-400 peer-checked:text-blue-800 dark:peer-checked:text-white peer-checked:font-medium">{!! $choice->title !!}</span>
-                                </label>
-                            @endforeach
                         </div>
                     </div>
-                @endforeach
+                @else
+                    <div
+                        class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
+                        <p class="text-lg text-gray-600 dark:text-gray-400">Quiz này không có câu hỏi nào.</p>
+                    </div>
+                @endif
+
+                <div
+                    class="flex justify-between items-center bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4">
+                    <button wire:click="previousQuestion" @disabled(!$this->hasPreviousQuestion)
+                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 dark:text-gray-300 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600">
+                        <x-heroicon-s-chevron-left class="w-5 h-5" />
+                        Câu trước
+                    </button>
+                    <span
+                        class="text-sm font-semibold text-gray-600 dark:text-gray-400">{{ $this->questionProgress }}</span>
+                    <button wire:click="nextQuestion" @disabled(!$this->hasNextQuestion)
+                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-white bg-blue-600 hover:bg-blue-700">
+                        Câu tiếp
+                        <x-heroicon-s-chevron-right class="w-5 h-5" />
+                    </button>
+                </div>
             </div>
 
-            <!-- Sidebar: Info, Timer, and Actions -->
-            <div class="space-y-6">
-                <!-- Quiz Header Card -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                    <div class="space-y-4">
-                        <div class="space-y-2">
-                            <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ $this->selectedQuiz->title }}</h1>
-                            @if($this->selectedQuiz->description)
-                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ $this->selectedQuiz->description }}</p>
-                            @endif
-                        </div>
-                        <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                            @if($this->selectedQuiz->time_limit_minutes)
-                                <div class="text-center p-3 rounded-lg" :class="{ 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300': timeWarning, 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300': !timeWarning }">
-                                    <div class="text-xs font-medium mb-1">Thời gian còn lại</div>
-                                    <div class="text-lg font-mono font-bold" x-text="formatTime(remainingSeconds)"></div>
-                                    <div class="text-xs opacity-75 mt-1">Tổng thời gian: {{ $this->selectedQuiz->time_limit_minutes }} phút</div>
-                                </div>
-                            @else
-                                <div class="text-center p-3 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg">
-                                    <div class="text-xs font-medium mb-1">Thời gian</div>
-                                    <div class="text-lg font-bold">Không giới hạn</div>
-                                </div>
-                            @endif
+            <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-20">
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-5">
+                    <div class="text-center p-4 rounded-lg transition-colors duration-300 mb-5"
+                        :class="{ 'bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-500/30': timeWarning, 'bg-gray-100 dark:bg-gray-700/50': !timeWarning }">
+                        <div class="text-sm font-medium"
+                            :class="{'text-red-800 dark:text-red-300': timeWarning, 'text-gray-600 dark:text-gray-400': !timeWarning}">
+                            Thời gian còn lại</div>
+                        <div class="text-3xl font-mono font-bold mt-1"
+                            :class="{'text-red-600 dark:text-red-300': timeWarning, 'text-gray-900 dark:text-white': !timeWarning}">
+                            <span x-text="isUnlimited ? '∞' : formatTime(remainingSeconds)"></span>
                         </div>
                     </div>
-                    <div class="mt-6 space-y-3">
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="text-gray-600 dark:text-gray-400">Tiến độ:
-                                {{ $this->getAnsweredCount() }}/{{ $this->selectedQuiz->questions->count() }} câu</span>
-                            <span class="font-semibold text-blue-600 dark:text-blue-400">{{ $this->getProgressPercentage() }}%</span>
-                        </div>
-                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                            <div class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: {{ $this->getProgressPercentage() }}%"></div>
+
+                    <div class="flex justify-between items-center text-sm mb-1">
+                        <span class="font-medium text-gray-600 dark:text-gray-400">Tiến độ</span>
+                        <span class="font-bold text-gray-800 dark:text-gray-200">{{ $this->answeredCount }} /
+                            {{ $this->totalQuestions }} câu</span>
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                        <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                            style="width: {{ $this->progressPercentage }}%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                    <h3
+                        class="text-md font-semibold text-gray-900 dark:text-white p-4 border-b border-gray-200 dark:border-gray-700">
+                        Danh sách câu hỏi</h3>
+                    <div class="p-4 max-h-64 overflow-y-auto custom-scrollbar">
+                        <div class="grid grid-cols-5 gap-2">
+                            @foreach($this->questionsWithStatus as $q)
+                                <button wire:click="goToQuestion({{ $q['index'] }})"
+                                    class="h-10 w-10 flex items-center justify-center font-bold text-sm rounded-md transition-all duration-200 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-blue-500
+                                        {{ $q['is_current'] ? 'bg-blue-600 text-white ring-2 ring-offset-2 ring-blue-500 dark:ring-offset-gray-800' : '' }}
+                                        {{ !$q['is_current'] && $q['is_answered'] ? 'bg-green-500 text-white' : '' }}
+                                        {{ !$q['is_current'] && !$q['is_answered'] ? 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300' : '' }}">
+                                    {{ $q['index'] + 1 }}
+                                </button>
+                            @endforeach
                         </div>
                     </div>
                 </div>
 
-                <!-- Submit Card -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                    <div class="space-y-4">
-                        <x-filament::button color="success" icon="heroicon-o-check"
-                             x-on:click="confirmSubmit()"
-                             x-bind:disabled="$wire.submitting"
-                             class="w-full">
-                             <span x-show="!$wire.submitting">Nộp bài</span>
-                             <span x-show="$wire.submitting">Đang nộp...</span>
-                         </x-filament::button>
-                         
-                         <x-filament::button color="gray" icon="heroicon-o-arrow-left"
-                             wire:click="backToQuizList"
-                             class="w-full">
-                             Quay lại
-                         </x-filament::button>
-                     </div>
-                 </div>
-             </div>
-         </div>
-
-         <script>
-             function myQuizTakingApp() {
-                 return {
-                     remainingSeconds: @js($this->selectedQuiz->time_limit_minutes ? $this->selectedQuiz->time_limit_minutes * 60 : null),
-                     isUnlimited: @js(!$this->selectedQuiz->time_limit_minutes),
-                     timeWarning: false,
-                     submitting: false,
-                     quizId: @js($this->selectedQuiz->id),
-                     attemptId: @js($this->currentAttempt->id ?? null),
-                     timer: null,
-
-                     init() {
-                         if (!this.isUnlimited) {
-                             this.timeWarning = this.remainingSeconds <= 300;
-                             this.startTimer();
-                         }
-                         this.bindAnswerEvents();
-                         this.$watch('$wire.submitting', (value) => {
-                             this.submitting = value;
-                         });
-                     },
-
-                     bindAnswerEvents() {
-                         this.$watch('$wire.currentAnswers', (newAnswers) => {
-                             this.saveToStorage(newAnswers);
-                         });
-                     },
-
-                     saveToStorage(answers) {
-                         const storageKey = `myquiz_${this.quizId}_attempt_${this.attemptId}`;
-                         localStorage.setItem(storageKey, JSON.stringify(answers));
-                     },
-
-                     startTimer() {
-                         if (this.isUnlimited) return;
-                         
-                         // Clear any existing timer to prevent multiple timers
-                         if (this.timer) {
-                             clearInterval(this.timer);
-                         }
-                         
-                         // Check if time is already up
-                         if (this.remainingSeconds <= 0) {
-                             this.autoSubmit();
-                             return;
-                         }
-                         
-                         this.timer = setInterval(() => {
-                             this.remainingSeconds--;
-                             this.timeWarning = this.remainingSeconds <= 300;
-                             if (this.remainingSeconds <= 0) {
-                                 clearInterval(this.timer);
-                                 this.timer = null;
-                                 this.autoSubmit();
-                             }
-                         }, 1000);
-                     },
-
-                     formatTime(seconds) {
-                         if (seconds === null || seconds < 0) seconds = 0;
-                         const hours = Math.floor(seconds / 3600);
-                         const minutes = Math.floor((seconds % 3600) / 60);
-                         const secs = seconds % 60;
-                         if (hours > 0) {
-                             return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                         }
-                         return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                     },
-
-                     confirmSubmit() {
-                         if (this.submitting) return;
-                         
-                         // Call custom action instead of direct method
-                         this.$wire.mountAction('customSubmit');
-                         
-                         event.preventDefault();
-                     },
-
-                     autoSubmit() {
-                         // Show Filament notification for auto-submit
-                         this.$wire.call('showAutoSubmitNotification');
-                         this.$wire.mountAction('customSubmit');
-                     }
-                 }
-             }
-         </script>
-         
-         <script>
-             document.addEventListener('DOMContentLoaded', function() {
-                 // Đảm bảo hiển thị trạng thái đã chọn khi trang được tải
-                 document.querySelectorAll('input[type="radio"]:checked, input[type="checkbox"]:checked').forEach(function(input) {
-                     const event = new Event('change');
-                     input.dispatchEvent(event);
-                 });
-             });
-             
-             // Lắng nghe sự kiện Livewire để cập nhật hiển thị
-             document.addEventListener('livewire:updated', function() {
-                 document.querySelectorAll('input[type="radio"]:checked, input[type="checkbox"]:checked').forEach(function(input) {
-                     const event = new Event('change');
-                     input.dispatchEvent(event);
-                 });
-             });
-         </script>
-     </div>
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-5 space-y-3">
+                    {{ ($this->customSubmitAction)() }}
+                    {{ ($this->customBackAction)() }}
+                </div>
+            </div>
+        </div>
+    </div>
 </x-filament-panels::page>

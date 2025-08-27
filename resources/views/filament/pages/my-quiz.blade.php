@@ -40,6 +40,7 @@
                                 ['key' => 'unsubmitted', 'label' => 'Chưa nộp'],
                                 ['key' => 'overdue', 'label' => 'Quá hạn'],
                                 ['key' => 'submitted', 'label' => 'Đã nộp'],
+                                ['key' => 'retakeable', 'label' => 'Làm lại'],
                             ];
                         @endphp
 

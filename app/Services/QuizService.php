@@ -11,6 +11,7 @@ use App\Models\StudentQuizAnswer;
 use App\Repositories\Interfaces\QuizAttemptRepositoryInterface;
 use App\Repositories\Interfaces\QuizRepositoryInterface;
 use App\Services\Interfaces\QuizServiceInterface;
+use App\Services\Interfaces\QuizCacheServiceInterface;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
@@ -31,7 +32,7 @@ class QuizService extends BaseService implements QuizServiceInterface
 {
     protected QuizAttemptRepositoryInterface $quizAttemptRepository;
 
-    protected QuizCacheService $cacheService;
+    protected QuizCacheServiceInterface $cacheService;
 
     /**
      * Constructor.
@@ -39,7 +40,7 @@ class QuizService extends BaseService implements QuizServiceInterface
     public function __construct(
         QuizRepositoryInterface $repository,
         QuizAttemptRepositoryInterface $quizAttemptRepository,
-        QuizCacheService $cacheService
+        QuizCacheServiceInterface $cacheService
     ) {
         parent::__construct($repository);
         $this->quizAttemptRepository = $quizAttemptRepository;

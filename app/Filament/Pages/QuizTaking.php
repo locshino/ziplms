@@ -48,6 +48,11 @@ class QuizTaking extends Page
 
     public bool $submitting = false;
 
+    // Pagination properties
+    public int $currentQuestionIndex = 0;
+    
+    public int $totalQuestions = 0;
+
     protected QuizServiceInterface $quizService;
 
     public function boot(QuizServiceInterface $quizService): void
@@ -84,6 +89,7 @@ class QuizTaking extends Page
         $this->initializeQuizAttempt();
         $this->loadExistingAnswers();
         $this->calculateRemainingTime();
+        $this->initializePagination();
 
         // Force Livewire to re-render after loading answers
         $this->dispatch('answers-loaded');
@@ -167,6 +173,92 @@ class QuizTaking extends Page
 
         $this->remainingSeconds = $now->diffInSeconds($endTime);
         $this->timeWarning = $this->remainingSeconds <= 300; // 5 minutes warning
+    }
+
+    protected function initializePagination(): void
+    {
+        $this->totalQuestions = $this->quizModel->questions->count();
+        
+        // Load current question index from session or localStorage
+        $savedIndex = session('quiz_current_question_' . $this->quizModel->id, 0);
+        $this->currentQuestionIndex = max(0, min($savedIndex, $this->totalQuestions - 1));
+    }
+
+    public function nextQuestion(): void
+    {
+        if ($this->currentQuestionIndex < $this->totalQuestions - 1) {
+            $this->currentQuestionIndex++;
+            $this->saveCurrentQuestionIndex();
+            $this->dispatch('question-changed');
+        }
+    }
+
+    public function previousQuestion(): void
+    {
+        if ($this->currentQuestionIndex > 0) {
+            $this->currentQuestionIndex--;
+            $this->saveCurrentQuestionIndex();
+            $this->dispatch('question-changed');
+        }
+    }
+
+    public function goToQuestion(int $index): void
+    {
+        if ($index >= 0 && $index < $this->totalQuestions) {
+            $this->currentQuestionIndex = $index;
+            $this->saveCurrentQuestionIndex();
+            $this->dispatch('question-changed');
+        }
+    }
+
+    protected function saveCurrentQuestionIndex(): void
+    {
+        session(['quiz_current_question_' . $this->quizModel->id => $this->currentQuestionIndex]);
+    }
+
+    #[Computed]
+    public function currentQuestion()
+    {
+        return $this->quizModel->questions->get($this->currentQuestionIndex);
+    }
+
+    #[Computed]
+    public function hasNextQuestion(): bool
+    {
+        return $this->currentQuestionIndex < $this->totalQuestions - 1;
+    }
+
+    #[Computed]
+    public function hasPreviousQuestion(): bool
+    {
+        return $this->currentQuestionIndex > 0;
+    }
+
+    #[Computed]
+    public function questionProgress(): string
+    {
+        return ($this->currentQuestionIndex + 1) . ' / ' . $this->totalQuestions;
+    }
+
+    #[Computed]
+    public function questionsWithStatus(): array
+    {
+        $questions = [];
+        foreach ($this->quizModel->questions as $index => $question) {
+            $isAnswered = isset($this->answers[$question->id]) && 
+                         (is_array($this->answers[$question->id]) ? 
+                          !empty($this->answers[$question->id]) : 
+                          $this->answers[$question->id] !== null);
+            
+            $questions[] = [
+                'index' => $index,
+                'id' => $question->id,
+                'title' => $question->title,
+                'is_answered' => $isAnswered,
+                'is_current' => $index === $this->currentQuestionIndex
+            ];
+        }
+        return $questions;
     }
 
     public function updateAnswer(string $questionId, string $choiceId): void

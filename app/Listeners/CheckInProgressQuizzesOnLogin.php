@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Services\QuizNotificationService;
+use App\Services\Interfaces\QuizNotificationServiceInterface;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -12,7 +12,7 @@ class CheckInProgressQuizzesOnLogin implements ShouldQueue
     use InteractsWithQueue;
 
     public function __construct(
-        private QuizNotificationService $quizNotificationService
+        private QuizNotificationServiceInterface $quizNotificationService
     ) {
         //
     }

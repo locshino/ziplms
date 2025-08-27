@@ -12,9 +12,12 @@ use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
+use Livewire\WithPagination;
 
 class QuizResults extends Page
 {
+    use WithPagination;
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar';
 
     protected string $view = 'filament.pages.quiz-results';
@@ -41,6 +44,10 @@ class QuizResults extends Page
     public int $unansweredQuestions = 0;
 
     public array $attemptHistory = [];
+
+    // Pagination properties
+    public int $perPage = 10;
+    public int $currentPage = 1;
 
     protected QuizServiceInterface $quizService;
 
@@ -342,6 +349,74 @@ class QuizResults extends Page
             return $this->quizService->canTakeQuiz($this->quiz->id, Auth::id());
         } catch (\Exception $e) {
             return false;
+        }
+    }
+
+    // Pagination methods
+    #[Computed]
+    public function paginatedQuestions()
+    {
+        $questions = $this->quiz->questions;
+        $total = $questions->count();
+        $offset = ($this->currentPage - 1) * $this->perPage;
+        
+        return $questions->slice($offset, $this->perPage);
+    }
+
+    #[Computed]
+    public function getTotalPages(): int
+    {
+        return (int) ceil($this->quiz->questions->count() / $this->perPage);
+    }
+
+    #[Computed]
+    public function getPaginationInfo(): array
+    {
+        $totalQuestions = $this->quiz->questions->count();
+        $totalPages = $this->getTotalPages();
+        $startItem = ($this->currentPage - 1) * $this->perPage + 1;
+        $endItem = min($this->currentPage * $this->perPage, $totalQuestions);
+
+        return [
+            'current_page' => $this->currentPage,
+            'total_pages' => $totalPages,
+            'total_items' => $totalQuestions,
+            'start_item' => $startItem,
+            'end_item' => $endItem,
+            'per_page' => $this->perPage,
+            'has_next' => $this->hasNextPage(),
+            'has_previous' => $this->hasPreviousPage(),
+        ];
+    }
+
+    public function hasNextPage(): bool
+    {
+        return $this->currentPage < $this->getTotalPages();
+    }
+
+    public function hasPreviousPage(): bool
+    {
+        return $this->currentPage > 1;
+    }
+
+    public function nextPage(): void
+    {
+        if ($this->hasNextPage()) {
+            $this->currentPage++;
+        }
+    }
+
+    public function previousPage(): void
+    {
+        if ($this->hasPreviousPage()) {
+            $this->currentPage--;
+        }
+    }
+
+    public function goToPage(int $page): void
+    {
+        if ($page >= 1 && $page <= $this->getTotalPages()) {
+            $this->currentPage = $page;
         }
     }
 }

@@ -6,7 +6,7 @@ use App\Enums\Status\QuizStatus;
 use App\Models\Course;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
-use App\Services\QuizFilterService;
+use App\Services\Interfaces\QuizFilterServiceInterface;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -49,11 +49,11 @@ class MyQuiz extends Page
     
     public int $currentPage = 1;
 
-    protected ?QuizFilterService $quizFilterService = null;
+    protected QuizFilterServiceInterface $quizFilterService;
 
     public function mount(): void
     {
-        $this->quizFilterService = new QuizFilterService();
+        $this->quizFilterService = app(QuizFilterServiceInterface::class);
         $this->selectedFilter = request('filter', 'all');
         $this->selectedCourseId = request('course_id', null);
         $this->searchTerm = request('search', '');
@@ -771,10 +771,7 @@ class MyQuiz extends Page
      */
     public function getFilteredQuizStatistics(): array
     {
-        // Kiểm tra nếu quizFilterService chưa được khởi tạo
-        if (!$this->quizFilterService) {
-            $this->quizFilterService = new QuizFilterService();
-        }
+        // QuizFilterService đã được inject qua dependency injection
 
         // Nếu có bộ lọc khóa học hoặc tìm kiếm, tính toán thống kê dựa trên kết quả lọc
         if ($this->selectedCourseId || !empty($this->searchTerm)) {
@@ -820,16 +817,14 @@ class MyQuiz extends Page
      */
     public function getFilteredQuizzes()
     {
-        // Kiểm tra nếu quizFilterService chưa được khởi tạo
-        if (!$this->quizFilterService) {
-            $this->quizFilterService = new QuizFilterService();
-        }
+        // QuizFilterService đã được inject qua dependency injection
 
         // Lấy quiz theo trạng thái
         $quizzes = match ($this->selectedFilter) {
             'unsubmitted' => $this->quizFilterService->getUnsubmittedQuizzes(),
             'overdue' => $this->quizFilterService->getOverdueQuizzes(),
             'submitted' => $this->quizFilterService->getSubmittedQuizzes(),
+            'retakeable' => $this->quizFilterService->getRetakeableQuizzes(),
             default => $this->quizFilterService->getAllQuizzes(),
         };
 
@@ -850,16 +845,14 @@ class MyQuiz extends Page
      */
     public function getTotalQuizzesCount(): int
     {
-        // Kiểm tra nếu quizFilterService chưa được khởi tạo
-        if (!$this->quizFilterService) {
-            $this->quizFilterService = new QuizFilterService();
-        }
+        // QuizFilterService đã được inject qua dependency injection
 
         // Lấy quiz theo trạng thái
         $quizzes = match ($this->selectedFilter) {
             'unsubmitted' => $this->quizFilterService->getUnsubmittedQuizzes(),
             'overdue' => $this->quizFilterService->getOverdueQuizzes(),
             'submitted' => $this->quizFilterService->getSubmittedQuizzes(),
+            'retakeable' => $this->quizFilterService->getRetakeableQuizzes(),
             default => $this->quizFilterService->getAllQuizzes(),
         };
 

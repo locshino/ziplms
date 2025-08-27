@@ -5,11 +5,13 @@ namespace App\Services;
 use App\Libs\Roles\RoleHelper;
 use App\Models\Quiz;
 use App\Models\User;
+use App\Services\Interfaces\QuizAccessServiceInterface;
+use App\Services\Interfaces\QuizServiceInterface;
 
-class QuizAccessService
+class QuizAccessService implements QuizAccessServiceInterface
 {
     public function __construct(
-        private QuizService $quizService
+        private QuizServiceInterface $quizService
     ) {}
 
     /**
@@ -184,7 +186,7 @@ class QuizAccessService
     /**
      * Check if user is enrolled in any course that contains the quiz
      */
-    private function isEnrolledInQuizCourses(User $user, Quiz $quiz): bool
+    public function isEnrolledInQuizCourses(User $user, Quiz $quiz): bool
     {
         return $quiz->courses()
             ->whereHas('users', function ($query) use ($user) {
@@ -206,5 +208,96 @@ class QuizAccessService
             'is_enrolled' => RoleHelper::isStudent($user) ?
                 $this->isEnrolledInQuizCourses($user, $quiz) : null,
         ];
+    }
+
+    /**
+     * Check if user can edit quiz
+     */
+    public function canEditQuiz(User $user, Quiz $quiz): bool
+    {
+        return $this->canManageQuiz($user, $quiz);
+    }
+
+    /**
+     * Check if user can delete quiz
+     */
+    public function canDeleteQuiz(User $user, Quiz $quiz): bool
+    {
+        return $this->canManageQuiz($user, $quiz);
+    }
+
+    /**
+     * Check if user can view quiz results
+     */
+    public function canViewQuizResults(User $user, Quiz $quiz): bool
+    {
+        return $this->canViewResults($user, $quiz);
+    }
+
+    /**
+     * Check if user can grade quiz
+     */
+    public function canGradeQuiz(User $user, Quiz $quiz): bool
+    {
+        // Teachers and admins can grade quizzes
+        return $user->hasRole(['teacher', 'admin', 'super_admin']);
+    }
+
+    /**
+     * Get accessible quizzes for user
+     */
+    public function getAccessibleQuizzes(User $user): \Illuminate\Database\Eloquent\Collection
+    {
+        if ($user->hasRole(['super_admin', 'admin'])) {
+            return Quiz::all();
+        }
+
+        if ($user->hasRole('teacher')) {
+            return Quiz::all(); // Teachers can view all for grading
+        }
+
+        if (RoleHelper::isStudent($user)) {
+            return Quiz::whereHas('courses.users', function ($query) use ($user) {
+                $query->where('users.id', $user->id);
+            })->get();
+        }
+
+        return collect();
+    }
+
+    /**
+     * Check if quiz is accessible at current time
+     */
+    public function isQuizAccessibleNow(Quiz $quiz): bool
+    {
+        $now = now();
+        
+        // Check if quiz has time restrictions
+        if ($quiz->start_time && $now->lt($quiz->start_time)) {
+            return false;
+        }
+        
+        if ($quiz->end_time && $now->gt($quiz->end_time)) {
+            return false;
+        }
+        
+        return true;
+    }
+
+    /**
+     * Check if user has permission for specific quiz action
+     */
+    public function hasQuizPermission(User $user, Quiz $quiz, string $permission): bool
+    {
+        return match($permission) {
+            'view' => $this->canViewQuiz($user, $quiz),
+            'take' => $this->canTakeQuiz($user, $quiz),
+            'edit' => $this->canEditQuiz($user, $quiz),
+            'delete' => $this->canDeleteQuiz($user, $quiz),
+            'manage' => $this->canManageQuiz($user, $quiz),
+            'grade' => $this->canGradeQuiz($user, $quiz),
+            'view_results' => $this->canViewQuizResults($user, $quiz),
+            default => false,
+        };
     }
 }
