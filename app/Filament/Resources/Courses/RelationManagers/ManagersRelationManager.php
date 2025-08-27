@@ -147,10 +147,12 @@ class ManagersRelationManager extends RelationManager
                 ->default(function () {
                     $owner = $this->getOwnerRecord();
                     $now = now();
-                    if ($now->between($owner->start_at, $owner->end_at)) {
-                        return $now;
-                    }
-                    return $owner->start_at;
+
+                    return match (true) {
+                        !isset($owner->start_at) || !isset($owner->end_at) => $now,
+                        $now->between($owner->start_at, $owner->end_at) => $now,
+                        default => $owner->start_at,
+                    };
                 })
                 ->minDate($this->getOwnerRecord()->start_at)
                 ->maxDate($this->getOwnerRecord()->end_at)

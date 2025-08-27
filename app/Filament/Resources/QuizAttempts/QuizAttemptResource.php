@@ -56,7 +56,7 @@ class QuizAttemptResource extends Resource
         return [
             'index' => ListQuizAttempts::route('/'),
             'create' => CreateQuizAttempt::route('/create'),
-            'view' => ViewQuizAttempt::route('/{record}'),
+            // 'view' => ViewQuizAttempt::route('/{record}'),
             'edit' => EditQuizAttempt::route('/{record}/edit'),
         ];
     }

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Roles;
 
-use App\Filament\Resources\Role\Pages\CreateRole;
 use App\Filament\Resources\Roles\Pages\EditRole;
 use App\Filament\Resources\Roles\Pages\ListRoles;
 use App\Filament\Resources\Roles\Pages\ViewRole;
@@ -152,7 +151,6 @@ class RoleResource extends Resource implements HasShieldPermissions
     {
         return [
             'index' => ListRoles::route('/'),
-            'create' => CreateRole::route('/create'),
             'view' => ViewRole::route('/{record}'),
             'edit' => EditRole::route('/{record}/edit'),
         ];

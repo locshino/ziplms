@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Courses\Tables;
 
 use App\Enums\Status\CourseStatus;
+use App\Filament\Tables\Filters\SelectTagsFilter;
 use App\Models\Course;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -18,6 +19,7 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Malzariey\FilamentDaterangepickerFilter\Filters\DateRangeFilter;
+use pxlrbt\FilamentExcel\Actions\ExportBulkAction;
 
 class CoursesTable
 {
@@ -46,8 +48,10 @@ class CoursesTable
                     ->searchable(),
                 TextColumn::make('price')
                     ->money(currency: config('ziplms.currency.default'))
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable(),
                 IconColumn::make('is_featured')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->boolean(),
                 SpatieTagsColumn::make('tags')
                     ->label('Phân loại')
@@ -76,12 +80,8 @@ class CoursesTable
                 DateRangeFilter::make('end_at'),
                 SelectFilter::make('status')
                     ->options(CourseStatus::class),
-                SelectFilter::make('tags')
-                    ->label('Phân loại')
-                    ->relationship('tags', 'name')
-                    ->searchable()
-                    ->multiple()
-                    ->preload(),
+                SelectTagsFilter::make('tags')
+                    ->type(Course::class),
                 TernaryFilter::make('is_featured'),
             ])
             ->recordActions([
@@ -93,6 +93,7 @@ class CoursesTable
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                 ]),
+                ExportBulkAction::make(),
             ]);
     }
 }

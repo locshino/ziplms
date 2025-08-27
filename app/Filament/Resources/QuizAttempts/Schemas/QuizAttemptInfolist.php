@@ -11,23 +11,31 @@ class QuizAttemptInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('id')
-                    ->label('ID'),
-                TextEntry::make('quiz.title'),
-                TextEntry::make('student.name'),
+                TextEntry::make('quiz.title')
+                    ->label('Quiz'),
+                TextEntry::make('student.name')
+                    ->label('Student'),
                 TextEntry::make('points')
-                    ->numeric(),
+                    ->numeric()
+                    ->label('Points'),
+                TextEntry::make('status')
+                    ->label('Status'),
                 TextEntry::make('start_at')
-                    ->dateTime(),
+                    ->dateTime()
+                    ->label('Start At'),
                 TextEntry::make('end_at')
-                    ->dateTime(),
-                TextEntry::make('status'),
-                TextEntry::make('created_at')
-                    ->dateTime(),
-                TextEntry::make('updated_at')
-                    ->dateTime(),
-                TextEntry::make('deleted_at')
-                    ->dateTime(),
+                    ->dateTime()
+                    ->label('End At'),
+                // Hiển thị phần Answers bằng Livewire component (nếu hỗ trợ trong Infolist)
+                // Nếu không hỗ trợ, có thể dùng TextEntry hoặc custom component
+                \Filament\Schemas\Components\Section::make('Answers')
+                    ->columnSpanFull()
+                    ->collapsed()
+                    ->lazy()
+                    ->schema([
+                        \Filament\Schemas\Components\Livewire::make(\App\Livewire\ShowQuizAnswers::class)
+                            ->key(fn($record) => $record?->id),
+                    ]),
             ]);
     }
 }
