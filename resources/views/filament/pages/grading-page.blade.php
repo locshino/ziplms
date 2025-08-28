@@ -268,9 +268,11 @@
                                             @endphp
                                             @if($media)
                                                 <p><strong>Bài nộp:</strong></p>
-                                                <button wire:click="downloadSubmission('{{ $submission->id }}')" class="inline-flex items-center gap-2 text-blue-600 hover:underline dark:text-blue-400 font-medium">
+                                                <button wire:click="downloadSubmission('{{ $submission->id }}')"
+                                                        title="{{ $media->file_name }}"
+                                                        class="inline-flex items-center gap-2 text-blue-600 hover:underline dark:text-blue-400 font-medium">
                                                     <x-heroicon-o-arrow-down-tray class="h-4 w-4" />
-                                                    {{ $media->file_name }} ({{ $media->human_readable_size }})
+                                                    <span>Tải xuống bài nộp ({{ $media->human_readable_size }})</span>
                                                 </button>
                                             @elseif($link)
                                                 <p><strong>Bài nộp:</strong></p>

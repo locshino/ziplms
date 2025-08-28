@@ -399,7 +399,7 @@
 
     @if($showGradingResultModal && $selectedCourseAssignment && $selectedSubmission)
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/75" wire:click.self="closeGradingResultModal">
-        <div class="relative w-full max-w-4xl bg-white dark:bg-slate-800 rounded-xl shadow-xl transform scale-100 transition-all duration-300 mx-4 max-h-[90vh] flex flex-col" wire:click.stop>
+        <div class="relative w-full max-w-2xl bg-white dark:bg-slate-800 rounded-xl shadow-xl transform scale-100 transition-all duration-300 mx-4 max-h-[90vh] flex flex-col" wire:click.stop>
             <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-start flex-shrink-0">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100">Kết quả: {{ $selectedCourseAssignment->assignment->title }}</h2>
@@ -409,29 +409,30 @@
                     <x-heroicon-o-x-mark class="w-6 h-6" />
                 </button>
             </div>
-            <div class="px-6 py-4 overflow-y-auto flex-grow space-y-6">
-                <div class="bg-slate-100 dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
-                    <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">Điểm số</h3>
+            <div class="px-6 py-8 overflow-y-auto flex-grow space-y-6">
+                <div class="text-center">
+                    <h3 class="text-lg font-medium text-slate-600 dark:text-slate-400 mb-2">Điểm số của bạn</h3>
                     <div class="flex items-baseline justify-center text-center">
-                        <span class="text-6xl font-bold text-blue-500">{{ number_format($selectedSubmission->points, 1) }}</span>
-                        <span class="text-2xl font-medium text-slate-500 dark:text-slate-400">/ {{ number_format($selectedCourseAssignment->assignment->max_points, 1) }}</span>
-                    </div>
-                     <div class="text-center mt-3 text-sm text-slate-600 dark:text-slate-400">
-                        <p>Người chấm: {{ $selectedSubmission->grader->name ?? 'N/A' }}</p>
-                        <p>Ngày chấm: {{ $selectedSubmission->graded_at?->format('d/m/Y H:i') ?? 'N/A' }}</p>
+                        <span class="text-7xl font-bold text-blue-500">{{ number_format($selectedSubmission->points, 1) }}</span>
+                        <span class="text-3xl font-medium text-slate-500 dark:text-slate-400">/{{ number_format($selectedCourseAssignment->assignment->max_points, 1) }}</span>
                     </div>
                 </div>
 
+                <div class="text-center text-sm text-slate-600 dark:text-slate-400 space-y-1">
+                    <p><strong class="font-semibold text-slate-700 dark:text-slate-300">Người chấm:</strong> {{ $selectedSubmission->grader->name ?? 'N/A' }}</p>
+                    <p><strong class="font-semibold text-slate-700 dark:text-slate-300">Ngày chấm:</strong> {{ $selectedSubmission->graded_at?->format('d/m/Y H:i') ?? 'N/A' }}</p>
+                </div>
+
                 @if($selectedSubmission->feedback)
-                <div class="bg-slate-100 dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
-                    <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">Phản hồi của giáo viên</h3>
-                    <div class="prose max-w-none dark:prose-invert">
+                <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <h4 class="font-semibold text-slate-800 dark:text-slate-100 mb-2">Phản hồi của giáo viên</h4>
+                    <div class="prose prose-sm max-w-none dark:prose-invert text-slate-600 dark:text-slate-300">
                         <p>{{ nl2br(e($selectedSubmission->feedback)) }}</p>
                     </div>
                 </div>
                 @endif
             </div>
-            <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-700 flex justify-end gap-3 flex-shrink-0">
+            <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-700 flex justify-end gap-3 flex-shrink-0 rounded-b-xl">
                 <x-filament::button color="gray" wire:click="closeGradingResultModal">
                     Đóng
                 </x-filament::button>
@@ -468,7 +469,7 @@
                                 @if($media)
                                     <button wire:click="downloadSubmissionFile('{{ $historySubmission->id }}')" class="inline-flex items-center gap-2 text-blue-600 hover:underline dark:text-blue-400 font-medium" title="{{ $media->file_name }}">
                                         <x-heroicon-o-arrow-down-tray class="h-4 w-4" />
-                                        <span>{{ Str::limit($media->file_name, 30) }} ({{ $media->human_readable_size }})</span>
+                                        <span>Tải xuống ({{ $media->human_readable_size }})</span>
                                     </button>
                                 @elseif($link)
                                     <a href="{{ $link }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-blue-600 hover:underline dark:text-blue-400 font-medium">
@@ -512,17 +513,17 @@
                 <div class="space-y-3">
                     @forelse ($assignmentDocuments as $document)
                         <div wire:key="doc-{{ $document->id }}" class="border border-slate-200 dark:border-slate-700 rounded-lg p-4 flex justify-between items-center">
-                            <div class="flex items-center gap-3">
-                                <x-heroicon-o-document class="h-6 w-6 text-slate-500 dark:text-slate-400" />
-                                <div>
-                                    <p class="font-medium text-slate-800 dark:text-slate-100">Tài liệu {{ $loop->iteration }}</p>
-                                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ number_format($document->size / 1024, 2) }} KB</p>
+                            <div class="flex items-center gap-3 min-w-0">
+                                <x-heroicon-o-document class="h-6 w-6 text-slate-500 dark:text-slate-400 flex-shrink-0" />
+                                <div class="truncate">
+                                    <p class="font-medium text-slate-800 dark:text-slate-100 truncate" title="{{ $document->file_name }}">{{ $document->file_name }}</p>
+                                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ $document->human_readable_size }}</p>
                                 </div>
                             </div>
                             <a
                                 href="{{ $document->getUrl() }}"
-                                download
-                                class="inline-flex items-center gap-2 text-blue-600 hover:underline dark:text-blue-400 font-medium"
+                                download="{{ $document->file_name }}"
+                                class="inline-flex items-center gap-2 text-blue-600 hover:underline dark:text-blue-400 font-medium flex-shrink-0 ml-4"
                             >
                                 <x-heroicon-o-arrow-down-tray class="h-5 w-5" />
                                 <span>Tải về</span>
