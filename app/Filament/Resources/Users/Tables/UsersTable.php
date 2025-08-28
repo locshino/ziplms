@@ -18,7 +18,9 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use pxlrbt\FilamentExcel\Actions\ExportBulkAction;
 use Spatie\Permission\Models\Role;
+use STS\FilamentImpersonate\Actions\Impersonate;
 
 class UsersTable
 {
@@ -30,8 +32,7 @@ class UsersTable
                     ->collection('avatar')
                     ->label(__('resource_user.table.columns.avatar'))
                     ->circular()
-                    ->size(40)
-                    ->defaultImageUrl(url('/images/avatar/default.png'))
+                    // ->defaultImageUrl(asset('images/avatar/default.png'))
                     ->toggleable(),
                 TextColumn::make('id')
                     ->label(__('resource_user.table.columns.id'))
@@ -88,6 +89,8 @@ class UsersTable
             ])
             ->recordActions([
                 // ViewAction::make(),
+                Impersonate::make()
+                    ->redirectTo(url('/app')),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
@@ -97,6 +100,7 @@ class UsersTable
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                 ]),
+                ExportBulkAction::make(),
             ]);
     }
 }

@@ -5,13 +5,18 @@ namespace App\Filament\Resources\QuizAttempts\Schemas;
 use App\Enums\Status\QuizAttemptStatus;
 use App\Filament\Resources\Quizzes\Tables\QuizzesTable;
 use App\Filament\Resources\Users\Tables\UsersTable;
+use App\Livewire\ShowQuizAnswers;
 use App\Models\Quiz;
+use App\Models\QuizAttempt;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\ModalTableSelect;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Schemas\Components\Livewire;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Novadaemon\FilamentPrettyJson\Form\PrettyJsonField;
 
 class QuizAttemptForm
 {
@@ -29,13 +34,24 @@ class QuizAttemptForm
                     ->required(),
                 TextInput::make('points')
                     ->numeric(),
-                Textarea::make('answers')
-                    ->columnSpanFull(),
-                DateTimePicker::make('start_at'),
-                DateTimePicker::make('end_at'),
                 Select::make('status')
                     ->options(QuizAttemptStatus::class)
                     ->required(),
+                DateTimePicker::make('start_at'),
+                DateTimePicker::make('end_at'),
+
+                // PrettyJsonField::make('answers')
+                //     ->columnSpanFull(),
+
+                Section::make('Answers')
+                    ->columnSpanFull()
+                    ->collapsed()
+                    ->lazy() // This is the key for lazy loading
+                    ->schema([
+                        // The Livewire component will only be mounted when the Accordion is opened
+                        Livewire::make(ShowQuizAnswers::class)
+                            ->key(fn(?QuizAttempt $record) => $record?->id),
+                    ]),
             ]);
     }
 }

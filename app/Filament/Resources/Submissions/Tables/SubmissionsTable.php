@@ -16,6 +16,7 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Malzariey\FilamentDaterangepickerFilter\Filters\DateRangeFilter;
+use pxlrbt\FilamentExcel\Actions\ExportBulkAction;
 
 class SubmissionsTable
 {
@@ -64,16 +65,13 @@ class SubmissionsTable
                 TrashedFilter::make(),
                 SelectFilter::make('assignment')
                     ->relationship('assignment', 'title')
-                    ->searchable()
-                    ->preload(),
+                    ->searchable(),
                 SelectFilter::make('student')
                     ->relationship('student', 'name')
-                    ->searchable()
-                    ->preload(),
+                    ->searchable(),
                 SelectFilter::make('grader')
                     ->relationship('grader', 'name')
-                    ->searchable()
-                    ->preload(),
+                    ->searchable(),
                 DateRangeFilter::make('submitted_at'),
                 DateRangeFilter::make('graded_at'),
                 SelectFilter::make('status')
@@ -89,6 +87,7 @@ class SubmissionsTable
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                 ]),
+                ExportBulkAction::make(),
             ]);
     }
 }

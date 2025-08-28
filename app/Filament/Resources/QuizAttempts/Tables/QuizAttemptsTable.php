@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\QuizAttempts\Tables;
 
+use App\Enums\Status\QuizAttemptStatus;
+use EncoreDigitalGroup\Filament\Helpers\InputTypes\Select\Select;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -9,8 +11,13 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Malzariey\FilamentDaterangepickerFilter\Filters\DateRangeFilter;
+use pxlrbt\FilamentExcel\Actions\ExportBulkAction;
+use pxlrbt\FilamentExcel\Columns\Column;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class QuizAttemptsTable
 {
@@ -20,7 +27,8 @@ class QuizAttemptsTable
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('quiz.title')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -52,6 +60,19 @@ class QuizAttemptsTable
             ])
             ->defaultGroup('quiz.title')
             ->filters([
+                SelectFilter::make('quiz.title')
+                    ->label('Quiz')
+                    ->searchable()
+                    ->relationship('quiz', 'title'),
+                SelectFilter::make('student.name')
+                    ->label('Student')
+                    ->searchable()
+                    ->relationship('student', 'name'),
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options(QuizAttemptStatus::class),
+                DateRangeFilter::make('start_at'),
+                DateRangeFilter::make('end_at'),
                 TrashedFilter::make(),
             ])
             ->recordActions([
@@ -63,6 +84,21 @@ class QuizAttemptsTable
                     DeleteBulkAction::make(),
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),
+                ]),
+                ExportBulkAction::make()->exports([
+                    ExcelExport::make()->withColumns([
+                        Column::make('id'),
+                        Column::make('quiz.title'),
+                        Column::make('student.name'),
+                        Column::make('points'),
+                        Column::make('start_at'),
+                        Column::make('end_at'),
+                        Column::make('status'),
+                        Column::make('created_at'),
+                        Column::make('updated_at'),
+                    ])
+                        // Optional: you can customize the filename
+                        ->withFilename(fn($resource) => $resource::getModelLabel() . '-' . date('Y-m-d'))
                 ]),
             ]);
     }

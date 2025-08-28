@@ -20,6 +20,10 @@ class UserPolicy
      */
     public function viewAny(User $user): bool
     {
+        if (app('impersonate')->isImpersonating()) {
+            return true;
+        }
+
         return $user->can('view_any_users::user');
     }
 
