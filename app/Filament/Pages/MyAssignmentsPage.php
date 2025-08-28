@@ -19,6 +19,8 @@ use Illuminate\Validation\Rule;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use UnitEnum;
 
 class MyAssignmentsPage extends Page
@@ -31,6 +33,7 @@ class MyAssignmentsPage extends Page
     protected static ?string $slug = 'my-assignments';
     protected string $view = 'filament.pages.my-assignments';
 
+    // Các thuộc tính public để lưu trữ trạng thái của trang.
     public string $search = '';
     public string $filter = 'all';
     public string $courseId = '';
@@ -38,9 +41,11 @@ class MyAssignmentsPage extends Page
     public bool $showInstructionsModal = false;
     public bool $showGradingResultModal = false;
     public bool $showSubmissionHistoryModal = false;
+    public bool $showDocumentsModal = false;
     public ?CourseAssignment $selectedCourseAssignment = null;
     public ?Submission $selectedSubmission = null;
     public $submissionHistory = [];
+    public $assignmentDocuments = [];
     public string $submissionType = 'file';
     public $file;
     public string $link_url = '';
@@ -57,12 +62,13 @@ class MyAssignmentsPage extends Page
         'orange' => ['bg' => 'bg-orange-100 dark:bg-orange-900', 'text' => 'text-orange-800 dark:text-orange-200'],
     ];
 
+    // Phương thức mount(): Được gọi khi component Livewire được khởi tạo.
     public function mount(): void
     {
         $this->assignCourseColors();
     }
 
-    // Gán màu sắc cho từng khóa học để dễ phân biệt.
+    // Phương thức gán màu sắc cho các khóa học.
     public function assignCourseColors(): void
     {
         $courses = $this->getCoursesProperty();
@@ -77,7 +83,7 @@ class MyAssignmentsPage extends Page
         }
     }
 
-    // Đồng bộ các thuộc tính filter với query string trên URL.
+    // Phương thức queryString(): Cấu hình Livewire để đồng bộ các thuộc tính với URL.
     protected function queryString(): array
     {
         return [
@@ -87,7 +93,7 @@ class MyAssignmentsPage extends Page
         ];
     }
 
-    // Định nghĩa các quy tắc validation cho form nộp bài.
+    // Phương thức rules(): Định nghĩa các quy tắc kiểm tra dữ liệu (validation).
     protected function rules(): array
     {
         return [
@@ -95,7 +101,7 @@ class MyAssignmentsPage extends Page
                 Rule::requiredIf($this->submissionType === 'file'),
                 'nullable',
                 'file',
-                'max:25600',
+                'max:25600', // Kích thước tối đa 25MB.
                 'mimes:pdf,doc,docx,zip,rar,png,jpg,jpeg,txt,ppt,pptx,xls,xlsx',
             ],
             'link_url' => [
@@ -108,37 +114,40 @@ class MyAssignmentsPage extends Page
         ];
     }
 
-    // Lấy danh sách khóa học mà sinh viên đang tham gia.
+    // Getter property getCoursesProperty(): Lấy danh sách các khóa học mà sinh viên đang học.
     public function getCoursesProperty()
     {
         return Auth::user()->courses()->whereHas('assignments')->orderBy('title')->get();
     }
 
-    // Lấy danh sách bài tập của sinh viên, có áp dụng filter, tìm kiếm và sắp xếp.
+    // Getter property getCourseAssignmentsProperty(): Lấy danh sách bài tập của khóa học.
     public function getCourseAssignmentsProperty(): LengthAwarePaginator
     {
         $studentId = Auth::id();
 
+        // Xây dựng truy vấn để lấy bài tập của khóa học.
         $query = CourseAssignment::query()
             ->whereIn('course_id', $this->getCoursesProperty()->pluck('id'))
             ->whereHas('assignment', function (Builder $q) {
                 $q->where('status', AssignmentStatus::PUBLISHED);
             })
-            ->with(['assignment', 'course', 'assignment.submissions' => function ($query) use ($studentId) {
+            ->with(['assignment.media', 'course', 'assignment.submissions' => function ($query) use ($studentId) {
                 $query->where('student_id', $studentId)->orderBy('submitted_at', 'desc');
             }]);
 
+        // Thêm điều kiện tìm kiếm nếu có.
         if ($this->search) {
             $query->whereHas('assignment', function (Builder $q) {
                 $q->where('title', 'like', '%'.$this->search.'%');
             });
         }
 
+        // Thêm điều kiện lọc theo khóa học nếu có.
         if ($this->courseId) {
             $query->where('course_id', $this->courseId);
         }
         
-        // Logic filter bài tập theo trạng thái.
+        // Sử dụng match expression để xử lý các bộ lọc khác nhau.
         match ($this->filter) {
             'submitted' => $query->whereHas(
                 'assignment.submissions',
@@ -157,7 +166,6 @@ class MyAssignmentsPage extends Page
             default => null,
         };
 
-        // Sắp xếp bài tập: ưu tiên bài chưa hết hạn lên trước, sau đó sắp xếp theo hạn nộp.
         $query->orderByRaw(
             'CASE WHEN end_submission_at >= ? OR end_submission_at IS NULL THEN 0 ELSE 1 END,
              CASE WHEN end_submission_at >= ? OR end_submission_at IS NULL THEN end_submission_at END ASC,
@@ -168,7 +176,7 @@ class MyAssignmentsPage extends Page
         return $query->paginate(10);
     }
 
-    // Hook `updated` xử lý khi một thuộc tính thay đổi (reset page, reset form...).
+    // Phương thức updated(): Được gọi khi một thuộc tính public được cập nhật.
     public function updated($property): void
     {
         if (in_array($property, ['courseId', 'search', 'filter'])) {
@@ -179,14 +187,15 @@ class MyAssignmentsPage extends Page
             $this->resetErrorBag();
         }
     }
-
-    // Cập nhật giá trị cho bộ lọc.
+    
+    // Phương thức setFilter(): Đặt bộ lọc và reset trang.
     public function setFilter(string $filter): void
     {
         $this->filter = $filter;
+        $this->resetPage();
     }
 
-    // Các phương thức để MỞ các modal.
+    // Các phương thức open/closeModal: Quản lý trạng thái hiển thị của các modal.
     public function openInstructionsModal(string $courseAssignmentId): void
     {
         $this->selectedCourseAssignment = CourseAssignment::with(['assignment', 'course'])->find($courseAssignmentId);
@@ -197,6 +206,7 @@ class MyAssignmentsPage extends Page
 
     public function openSubmissionModal(string $courseAssignmentId): void
     {
+        // Tải thông tin bài tập và bài nộp gần nhất của sinh viên.
         $this->selectedCourseAssignment = CourseAssignment::with([
             'assignment.submissions' => fn ($q) => $q->where('student_id', Auth::id())->orderBy('submitted_at', 'desc'),
             'course',
@@ -206,7 +216,7 @@ class MyAssignmentsPage extends Page
             return;
         }
 
-        // Kiểm tra các điều kiện trước khi cho phép mở form nộp bài.
+        // Kiểm tra các điều kiện trước khi mở modal nộp bài.
         $isEnrolled = Auth::user()->courses()->where('course_id', $this->selectedCourseAssignment->course_id)->exists();
         if (! $isEnrolled) {
             Notification::make()->title('Không thể thực hiện')->body('Bạn không có trong danh sách sinh viên của khóa học này.')->warning()->send();
@@ -238,6 +248,7 @@ class MyAssignmentsPage extends Page
     public function openGradingResultModal(string $courseAssignmentId): void
     {
         $this->selectedCourseAssignment = CourseAssignment::with(['assignment', 'course'])->find($courseAssignmentId);
+        // Lấy bài nộp gần nhất của sinh viên cho bài tập này.
         $this->selectedSubmission = Submission::where('assignment_id', $this->selectedCourseAssignment->assignment_id)
             ->where('student_id', Auth::id())
             ->with('grader')
@@ -253,6 +264,7 @@ class MyAssignmentsPage extends Page
     {
         $this->selectedCourseAssignment = CourseAssignment::with(['assignment'])->find($courseAssignmentId);
         if ($this->selectedCourseAssignment) {
+            // Lấy tất cả bài nộp của sinh viên cho bài tập này.
             $this->submissionHistory = Submission::where('assignment_id', $this->selectedCourseAssignment->assignment_id)
                 ->where('student_id', Auth::id())
                 ->with('media')
@@ -262,7 +274,16 @@ class MyAssignmentsPage extends Page
         }
     }
 
-    // Các phương thức để ĐÓNG các modal và reset trạng thái.
+    public function openDocumentsModal(string $courseAssignmentId): void
+    {
+        $this->selectedCourseAssignment = CourseAssignment::with(['assignment.media'])->find($courseAssignmentId);
+        if ($this->selectedCourseAssignment) {
+            // Lấy tài liệu đính kèm của bài tập.
+            $this->assignmentDocuments = $this->selectedCourseAssignment->assignment->getMedia('assignment_documents');
+            $this->showDocumentsModal = true;
+        }
+    }
+
     public function closeInstructionsModal(): void
     {
         $this->showInstructionsModal = false;
@@ -289,7 +310,14 @@ class MyAssignmentsPage extends Page
         $this->submissionHistory = [];
     }
 
-    // Xử lý logic nộp bài của sinh viên.
+    public function closeDocumentsModal(): void
+    {
+        $this->showDocumentsModal = false;
+        $this->selectedCourseAssignment = null;
+        $this->assignmentDocuments = [];
+    }
+
+    // Phương thức submitAssignment(): Xử lý logic nộp bài.
     public function submitAssignment(): void
     {
         if (! $this->selectedCourseAssignment) {
@@ -301,10 +329,14 @@ class MyAssignmentsPage extends Page
             return;
         }
         try {
+            // Sử dụng transaction để đảm bảo dữ liệu nhất quán.
             DB::transaction(function () use ($user) {
                 $endAt = $this->selectedCourseAssignment->end_submission_at;
+                // Xác định trạng thái nộp bài: đúng hạn hay muộn.
                 $isLate = $endAt ? now()->isAfter($endAt) : false;
                 $status = $isLate ? SubmissionStatus::LATE : SubmissionStatus::SUBMITTED;
+                
+                // Tạo một bản ghi bài nộp mới.
                 $submission = Submission::create([
                     'assignment_id' => $this->selectedCourseAssignment->assignment_id,
                     'student_id' => $user->id,
@@ -312,8 +344,13 @@ class MyAssignmentsPage extends Page
                     'status' => $status,
                     'submitted_at' => now(),
                 ]);
+                
+                // Xử lý file đính kèm.
                 if ($this->submissionType === 'file' && $this->file) {
-                    $submission->addMedia($this->file->getRealPath())->usingName($this->file->getClientOriginalName())->toMediaCollection('submission_documents');
+                    $submission->addMedia($this->file->getRealPath())
+                                ->usingFileName($this->file->getClientOriginalName())
+                                ->toMediaCollection('submission_documents');
+                // Xử lý nộp bài bằng link.
                 } elseif ($this->submissionType === 'link') {
                     $submission->content = "Submitted via link: {$this->link_url}\n\nNotes:\n".$this->notes;
                     $submission->save();
@@ -328,9 +365,10 @@ class MyAssignmentsPage extends Page
         }
     }
 
-    // Hàm helper kiểm tra các điều kiện tiên quyết trước khi nộp bài.
+    // Phương thức kiểm tra các điều kiện nộp bài.
     protected function checkSubmissionPreconditions($user): bool
     {
+        // Kiểm tra sinh viên có trong khóa học không.
         $isEnrolled = $user->courses()->where('course_id', $this->selectedCourseAssignment->course_id)->exists();
         if (! $isEnrolled) {
             Notification::make()->title('Nộp bài thất bại!')->body('Bạn không có trong danh sách sinh viên của khóa học này.')->danger()->send();
@@ -342,21 +380,24 @@ class MyAssignmentsPage extends Page
         $submissions = $assignment->submissions()->where('student_id', $user->id)->get();
         $lastSubmission = $submissions->sortByDesc('submitted_at')->first();
 
+        // Kiểm tra bài tập đã được chấm điểm chưa.
         if ($lastSubmission && in_array($lastSubmission->status, [SubmissionStatus::GRADED, SubmissionStatus::RETURNED])) {
             Notification::make()->title('Nộp bài thất bại!')->body('Bài tập đã được chấm điểm.')->warning()->send();
             $this->closeSubmissionModal();
             return false;
         }
 
+        // Kiểm tra số lần nộp bài tối đa.
         $maxAttempts = $assignment->max_attempts;
         $submissionCount = $submissions->count();
 
         if ($maxAttempts !== null && $maxAttempts > 0 && $submissionCount >= $maxAttempts) {
-            Notification::make()->title('Nộp bài thất bại!')->body('Bạn đã hết số lần nộp bài cho phép.')->warning()->send();
+            Notification::make()->title('Hết lượt nộp bài!')->body('Bạn đã hết số lần nộp bài cho phép.')->warning()->send();
             $this->closeSubmissionModal();
             return false;
         }
 
+        // Kiểm tra thời gian bắt đầu làm bài.
         $startAt = $this->selectedCourseAssignment->start_at;
         if ($startAt && now()->isBefore($startAt)) {
             Notification::make()->title('Nộp bài thất bại!')->body('Chưa đến thời gian làm bài.')->warning()->send();
@@ -367,16 +408,18 @@ class MyAssignmentsPage extends Page
         return true;
     }
 
-    // Xử lý việc tải xuống tệp bài nộp.
-    public function downloadSubmissionFile(string $submissionId)
+    // Phương thức downloadSubmissionFile(): Tải xuống file bài nộp.
+    public function downloadSubmissionFile(string $submissionId): ?StreamedResponse
     {
         $submission = Submission::with('media')->find($submissionId);
 
+        // Kiểm tra quyền truy cập.
         if ($submission?->student_id !== Auth::id()) {
             Notification::make()->title('Lỗi')->body('Không có quyền truy cập.')->danger()->send();
             return null;
         }
 
+        // Lấy file từ thư viện media.
         $mediaItem = $submission?->getFirstMedia('submission_documents');
 
         if (! $mediaItem) {
@@ -384,6 +427,9 @@ class MyAssignmentsPage extends Page
             return null;
         }
 
-        return response()->download($mediaItem->getPath(), $mediaItem->file_name);
+        // Tạo và trả về response để tải file.
+        return response()->streamDownload(function () use ($mediaItem) {
+            fpassthru($mediaItem->stream());
+        }, $mediaItem->file_name);
     }
 }

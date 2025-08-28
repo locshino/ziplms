@@ -2,7 +2,6 @@
 
 namespace App\Filament\Pages;
 
-// Khai báo namespace và import các lớp, thư viện cần thiết cho trang.
 use App\Enums\Status\SubmissionStatus;
 use App\Libs\Roles\RoleHelper;
 use App\Models\CourseAssignment;
@@ -14,6 +13,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator as IlluminatePaginator;
 use Illuminate\Support\Facades\Auth;
 use Livewire\WithPagination;
 use UnitEnum;
@@ -24,23 +24,26 @@ class GradingPage extends Page
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-pencil-square';
     protected static ?string $navigationLabel = 'Chấm điểm';
-    protected static UnitEnum|string|null $navigationGroup = 'Teacher Section';
     protected string $view = 'filament.pages.grading-page';
     protected static ?string $slug = 'grading';
     protected static ?string $title = 'Chấm điểm bài tập';
 
-    // Các thuộc tính (biến) công khai để quản lý trạng thái của trang.
+    // Các thuộc tính public để lưu trữ trạng thái của trang.
     public string $search = '';
     public string $filter = 'all';
     public string $courseId = '';
     public bool $showInstructionsModal = false;
+    public bool $showDocumentsModal = false;
     public ?CourseAssignment $selectedCourseAssignment = null;
     public $submissions = [];
+    public $assignmentDocuments = [];
     public $notSubmittedStudents = [];
     public string $submissionView = 'submitted';
     public array $points = [];
     public array $feedback = [];
     public array $courseColors = [];
+    public string $studentSearch = '';
+    public bool $isGradingExpired = false;
     public array $colorPalette = [
         'blue' => ['bg' => 'bg-blue-100 dark:bg-blue-900', 'text' => 'text-blue-800 dark:text-blue-200'],
         'green' => ['bg' => 'bg-green-100 dark:bg-green-900', 'text' => 'text-green-800 dark:text-green-200'],
@@ -52,12 +55,13 @@ class GradingPage extends Page
         'orange' => ['bg' => 'bg-orange-100 dark:bg-orange-900', 'text' => 'text-orange-800 dark:text-orange-200'],
     ];
 
+    // Phương thức mount(): Được gọi khi component Livewire được khởi tạo.
     public function mount(): void
     {
         $this->assignCourseColors();
     }
 
-    // Gán màu sắc cho từng khóa học để dễ phân biệt trên giao diện.
+    // Phương thức gán màu sắc cho các khóa học.
     public function assignCourseColors(): void
     {
         $courses = $this->getCoursesProperty();
@@ -72,7 +76,7 @@ class GradingPage extends Page
         }
     }
 
-    // Đồng bộ các thuộc tính filter, search với query string trên URL.
+    // Phương thức queryString(): Cấu hình Livewire để đồng bộ các thuộc tính với URL.
     protected function queryString(): array
     {
         return [
@@ -82,32 +86,24 @@ class GradingPage extends Page
         ];
     }
 
-    // Lấy danh sách các khóa học mà người dùng hiện tại đang dạy.
+    // Getter property getCoursesProperty(): Lấy danh sách các khóa học mà giáo viên đang dạy.
     public function getCoursesProperty()
     {
         return Auth::user()->teachingCourses()->whereHas('assignments')->orderBy('title')->get();
     }
 
-    // Lấy danh sách bài tập, áp dụng các bộ lọc, tìm kiếm và phân trang.
+    // Getter property getCourseAssignmentsProperty(): Lấy danh sách bài tập của khóa học để chấm điểm.
     public function getCourseAssignmentsProperty(): LengthAwarePaginator
     {
         $teacherCourseIds = $this->getCoursesProperty()->pluck('id');
-
         $query = CourseAssignment::query()
             ->whereIn('course_id', $teacherCourseIds)
             ->where(function (Builder $q) {
                 $q->where('start_grading_at', '<=', now())
                     ->orWhereNull('start_grading_at');
             })
-            ->with([
-                'course',
-                'assignment' => function ($assignmentQuery) {
-                    $assignmentQuery->withCount([
-                        'submissions as submitted_students_count' => fn(Builder $q) => $q->selectRaw('count(distinct student_id)'),
-                        'submissions as graded_students_count' => fn(Builder $q) => $q->whereNotNull('points')->selectRaw('count(distinct student_id)'),
-                    ]);
-                }
-            ]);
+            ->with(['course', 'assignment'])
+            ->orderBy('end_submission_at', 'desc');
 
         if ($this->search) {
             $query->whereHas('assignment', function (Builder $q) {
@@ -118,44 +114,124 @@ class GradingPage extends Page
             $query->where('course_id', $this->courseId);
         }
 
-        match ($this->filter) {
-            'graded' => $query->whereHas('assignment', function (Builder $assignmentQuery) {
-                    $assignmentQuery->whereHas('submissions', fn($q) => $q->whereNotNull('points'));
-                }),
-            'ungraded' => $query->where(function (Builder $mainQuery) {
-                    $mainQuery->whereHas('assignment', function (Builder $assignmentQuery) {
-                        $assignmentQuery->whereDoesntHave('submissions', fn($q) => $q->whereNotNull('points'));
-                    });
-                }),
-            default => null,
-        };
+        $paginated = $query->paginate(10);
 
-        $query->orderBy('end_submission_at', 'desc');
+        $assignmentIds = $paginated->getCollection()->pluck('assignment_id')->unique()->values()->all();
 
-        return $query->paginate(10);
+        // Lấy số lượng bài nộp và bài đã chấm cho từng bài tập.
+        $submittedCounts = Submission::whereIn('assignment_id', $assignmentIds)
+            ->selectRaw('assignment_id, count(distinct student_id) as cnt')
+            ->groupBy('assignment_id')
+            ->pluck('cnt', 'assignment_id')
+            ->toArray();
+
+        $gradedCounts = Submission::whereIn('assignment_id', $assignmentIds)
+            ->whereNotNull('points')
+            ->selectRaw('assignment_id, count(distinct student_id) as cnt')
+            ->groupBy('assignment_id')
+            ->pluck('cnt', 'assignment_id')
+            ->toArray();
+
+        // Gắn số lượng vào từng đối tượng bài tập.
+        $paginated->getCollection()->transform(function ($courseAssignment) use ($submittedCounts, $gradedCounts) {
+            $assignment = $courseAssignment->assignment;
+            if ($assignment) {
+                $aid = $assignment->id;
+                $assignment->submitted_students_count = $submittedCounts[$aid] ?? 0;
+                $assignment->graded_students_count = $gradedCounts[$aid] ?? 0;
+            } else {
+                $courseAssignment->assignment = (object) [
+                    'submitted_students_count' => 0,
+                    'graded_students_count' => 0,
+                ];
+            }
+            return $courseAssignment;
+        });
+
+        // Lọc kết quả dựa trên 'graded' và 'ungraded'.
+        if ($this->filter === 'graded') {
+            $paginated->setCollection(
+                $paginated->getCollection()->filter(function ($ca) {
+                    return $ca->assignment->submitted_students_count > 0 &&
+                           $ca->assignment->submitted_students_count === $ca->assignment->graded_students_count;
+                })
+            );
+        } elseif ($this->filter === 'ungraded') {
+            $paginated->setCollection(
+                $paginated->getCollection()->filter(function ($ca) {
+                    return $ca->assignment->submitted_students_count > 0 &&
+                           $ca->assignment->submitted_students_count > $ca->assignment->graded_students_count;
+                })
+            );
+        }
+
+        return $paginated;
     }
 
-    // Hook `updated` sẽ reset phân trang khi người dùng thay đổi bộ lọc.
+
+    // Getter property getPaginatedSubmissionsProperty(): Lấy danh sách bài nộp đã phân trang.
+    public function getPaginatedSubmissionsProperty(): IlluminatePaginator
+    {
+        $perPage = 5;
+        $items = collect($this->submissions);
+
+        if ($this->studentSearch) {
+            $search = strtolower($this->studentSearch);
+            $items = $items->filter(function ($submission) use ($search) {
+                return $submission->student && str_contains(strtolower($submission->student->name), $search);
+            });
+        }
+
+        $currentPage = $this->getPage('submissionsPage');
+
+        return new IlluminatePaginator(
+            $items->forPage($currentPage, $perPage),
+            $items->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'pageName' => 'submissionsPage']
+        );
+    }
+
+    // Getter property getFilteredNotSubmittedStudentsProperty(): Lấy danh sách sinh viên chưa nộp bài đã lọc.
+    public function getFilteredNotSubmittedStudentsProperty()
+    {
+        $students = collect($this->notSubmittedStudents);
+
+        if ($this->studentSearch) {
+            $search = strtolower($this->studentSearch);
+            $students = $students->filter(function ($student) use ($search) {
+                return str_contains(strtolower($student->name), $search);
+            });
+        }
+
+        return $students;
+    }
+
+    // Phương thức updated(): Được gọi khi một thuộc tính public được cập nhật.
     public function updated($property): void
     {
         if (in_array($property, ['courseId', 'search', 'filter'])) {
             $this->resetPage();
         }
+        if ($property === 'studentSearch') {
+            $this->resetPage('submissionsPage');
+        }
     }
 
-    // Cập nhật giá trị cho bộ lọc.
+    // Các phương thức setFilter() và setSubmissionView()
     public function setFilter(string $filter): void
     {
         $this->filter = $filter;
+        $this->resetPage();
     }
 
-    // Thay đổi tab đang xem trong modal chấm bài (đã nộp / chưa nộp).
     public function setSubmissionView(string $view): void
     {
         $this->submissionView = $view;
     }
 
-    // Mở modal hiển thị hướng dẫn bài tập.
+    // Các phương thức open/closeModal: Quản lý trạng thái hiển thị của các modal.
     public function openInstructionsModal(string $courseAssignmentId): void
     {
         $this->selectedCourseAssignment = CourseAssignment::with(['assignment'])->find($courseAssignmentId);
@@ -164,14 +240,29 @@ class GradingPage extends Page
         }
     }
 
-    // Đóng modal hướng dẫn.
     public function closeInstructionsModal(): void
     {
         $this->showInstructionsModal = false;
         $this->selectedCourseAssignment = null;
     }
+    
+    public function openDocumentsModal(string $courseAssignmentId): void
+    {
+        $this->selectedCourseAssignment = CourseAssignment::with(['assignment.media'])->find($courseAssignmentId);
+        if ($this->selectedCourseAssignment) {
+            $this->assignmentDocuments = $this->selectedCourseAssignment->assignment->getMedia('assignment_documents');
+            $this->showDocumentsModal = true;
+        }
+    }
 
-    // Mở modal chấm bài và tải dữ liệu cần thiết.
+    public function closeDocumentsModal(): void
+    {
+        $this->showDocumentsModal = false;
+        $this->selectedCourseAssignment = null;
+        $this->assignmentDocuments = [];
+    }
+
+    // Phương thức openSubmissionsModal(): Mở modal chấm điểm và tải dữ liệu.
     public function openSubmissionsModal(string $courseAssignmentId): void
     {
         $this->selectedCourseAssignment = CourseAssignment::with(['assignment', 'course.students'])->find($courseAssignmentId);
@@ -179,34 +270,50 @@ class GradingPage extends Page
             Notification::make()->title('Không tìm thấy bài tập!')->warning()->send();
             return;
         }
+        // Kiểm tra xem đã hết hạn chấm bài chưa.
+        $this->isGradingExpired = $this->selectedCourseAssignment->end_at && now()->isAfter($this->selectedCourseAssignment->end_at);
 
+        // Lấy tất cả bài nộp cho bài tập này.
         $allSubmissions = Submission::where('assignment_id', $this->selectedCourseAssignment->assignment_id)
             ->with(['student.media', 'media'])
             ->orderBy('submitted_at', 'desc')
             ->get();
-        $this->submissions = $allSubmissions->unique('student_id');
-        $this->points = $this->submissions->pluck('points', 'id')->toArray();
-        $this->feedback = $this->submissions->pluck('feedback', 'id')->toArray();
 
-        $submittedStudentIds = $this->submissions->pluck('student_id');
+        $latestSubmissions = $allSubmissions->unique('student_id');
+
+        $sortedSubmissions = $latestSubmissions->sortBy(function ($submission) {
+            $gradedStatus = !is_null($submission->points) ? 1 : 0;
+            $timestamp = optional($submission->submitted_at)->getTimestamp() ?? 0;
+            return $gradedStatus . '_' . str_pad(PHP_INT_MAX - $timestamp, 20, '0', STR_PAD_LEFT);
+        })->values();
+
+        $this->submissions = $sortedSubmissions;
+        $this->points = $latestSubmissions->pluck('points', 'id')->toArray();
+        $this->feedback = $latestSubmissions->pluck('feedback', 'id')->toArray();
+
+        // Lấy danh sách sinh viên chưa nộp bài.
+        $submittedStudentIds = $latestSubmissions->pluck('student_id');
         $allStudentsInCourse = $this->selectedCourseAssignment->course->students;
 
         $this->notSubmittedStudents = $allStudentsInCourse->filter(function ($student) use ($submittedStudentIds) {
             return !$submittedStudentIds->contains($student->id);
         });
 
+        $this->reset('studentSearch');
+        $this->resetPage('submissionsPage');
+        // Mở modal.
         $this->dispatch('open-modal', id: 'submissions-modal');
     }
 
-    // Đóng modal chấm bài và reset trạng thái.
+    // Phương thức closeSubmissionsModal(): Đóng modal chấm điểm và reset trạng thái.
     public function closeSubmissionsModal(): void
     {
         $this->selectedCourseAssignment = null;
         $this->submissions = [];
-        $this->reset('points', 'feedback', 'submissionView', 'notSubmittedStudents');
+        $this->reset('points', 'feedback', 'submissionView', 'notSubmittedStudents', 'studentSearch', 'isGradingExpired');
     }
 
-    // Lưu điểm và phản hồi cho một bài nộp.
+    // Phương thức saveGrade(): Lưu điểm và phản hồi của bài nộp.
     public function saveGrade(string $submissionId): void
     {
         $submission = Submission::find($submissionId);
@@ -219,7 +326,7 @@ class GradingPage extends Page
             return;
         }
 
-        // Kiểm tra quyền và thời gian chấm bài.
+        // Kiểm tra quyền của người dùng.
         $course = $this->selectedCourseAssignment->course;
         $user = Auth::user();
         $isCourseTeacher = $user->id === $course->teacher_id;
@@ -234,6 +341,7 @@ class GradingPage extends Page
         $startGrading = $this->selectedCourseAssignment->start_grading_at;
         $endGrading = $this->selectedCourseAssignment->end_at;
 
+        // Kiểm tra thời gian chấm bài.
         if ($startGrading && $now->isBefore($startGrading)) {
             Notification::make()->title('Chưa đến thời gian chấm bài')->body("Thời gian chấm bài bắt đầu từ: {$startGrading->format('d/m/Y H:i')}.")->warning()->send();
             return;
@@ -243,11 +351,12 @@ class GradingPage extends Page
             return;
         }
 
-        // Kiểm tra dữ liệu điểm.
+        // Lấy điểm và feedback.
         $points = $this->points[$submissionId] ?? null;
         $feedback = $this->feedback[$submissionId] ?? '';
         $maxPoints = $this->selectedCourseAssignment->assignment->max_points;
 
+        // Kiểm tra tính hợp lệ của điểm.
         if ($points !== null && (!is_numeric($points) || $points < 0 || $points > $maxPoints)) {
             Notification::make()->title('Dữ liệu không hợp lệ')->body("Điểm phải là một số từ 0 đến {$maxPoints}.")->danger()->send();
             return;
@@ -261,7 +370,7 @@ class GradingPage extends Page
             $newStatus = $isLate ? SubmissionStatus::LATE : SubmissionStatus::SUBMITTED;
         }
 
-        // Lưu thông tin vào cơ sở dữ liệu.
+        // Cập nhật bản ghi bài nộp trong database.
         $submission->update([
             'points' => $points,
             'feedback' => $feedback,
@@ -273,7 +382,7 @@ class GradingPage extends Page
         Notification::make()->title('Thành công')->body("Đã cập nhật điểm cho {$submission->student->name}.")->success()->send();
     }
 
-    // Xử lý việc tải xuống tệp bài nộp của sinh viên.
+    // Phương thức downloadSubmission(): Tải xuống file bài nộp.
     public function downloadSubmission(string $submissionId)
     {
         $submission = Submission::with('media')->find($submissionId);

@@ -55,6 +55,7 @@ class AssignmentForm
                             ->label('Tài liệu bài tập')
                             ->collection('assignment_documents')
                             ->multiple()
+                            ->preserveFilenames()
                             ->acceptedFileTypes([
                                 ...MimeType::documents(),
                                 ...MimeType::images(),
@@ -65,7 +66,6 @@ class AssignmentForm
                             ->reorderable()
                             ->downloadable()
                             ->openable()
-                            ->mediaName(fn($file) => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document')
                             ->customProperties(fn($file) => ['title' => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document']),
                     ]),
             ]);
