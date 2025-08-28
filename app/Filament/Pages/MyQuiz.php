@@ -15,9 +15,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Enums\Status\QuizAttemptStatus;
 use Livewire\Attributes\Computed;
+// use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class MyQuiz extends Page
 {
+    // use HasPageShield;
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-academic-cap';
 
     protected string $view = 'filament.pages.my-quiz';
@@ -46,14 +48,13 @@ class MyQuiz extends Page
 
     // Pagination properties
     public int $perPage = 10;
-    
+
     public int $currentPage = 1;
 
-    protected QuizFilterServiceInterface $quizFilterService;
+
 
     public function mount(): void
     {
-        $this->quizFilterService = app(QuizFilterServiceInterface::class);
         $this->selectedFilter = request('filter', 'all');
         $this->selectedCourseId = request('course_id', null);
         $this->searchTerm = request('search', '');
@@ -775,30 +776,28 @@ class MyQuiz extends Page
 
         // Nếu có bộ lọc khóa học hoặc tìm kiếm, tính toán thống kê dựa trên kết quả lọc
         if ($this->selectedCourseId || !empty($this->searchTerm)) {
-            $allQuizzes = $this->quizFilterService->getAllQuizzes();
-            $filteredQuizzes = $this->quizFilterService->applyAllFilters(
-                $allQuizzes,
-                $this->selectedCourseId,
-                $this->searchTerm
-            );
+            $allQuizzes = app(QuizFilterServiceInterface::class)->getAllQuizzes();
+        $filteredQuizzes = app(QuizFilterServiceInterface::class)->applyAllFilters(
+            $allQuizzes,
+            $this->selectedCourseId,
+            $this->searchTerm
+        );
 
-            $unsubmittedQuizzes = $this->quizFilterService->applyAllFilters(
-                $this->quizFilterService->getUnsubmittedQuizzes(),
-                $this->selectedCourseId,
-                $this->searchTerm
-            );
-
-            $overdueQuizzes = $this->quizFilterService->applyAllFilters(
-                $this->quizFilterService->getOverdueQuizzes(),
-                $this->selectedCourseId,
-                $this->searchTerm
-            );
-
-            $submittedQuizzes = $this->quizFilterService->applyAllFilters(
-                $this->quizFilterService->getSubmittedQuizzes(),
-                $this->selectedCourseId,
-                $this->searchTerm
-            );
+        $unsubmittedQuizzes = app(QuizFilterServiceInterface::class)->applyAllFilters(
+            app(QuizFilterServiceInterface::class)->getUnsubmittedQuizzes(),
+            $this->selectedCourseId,
+            $this->searchTerm
+        );
+        $overdueQuizzes = app(QuizFilterServiceInterface::class)->applyAllFilters(
+            app(QuizFilterServiceInterface::class)->getOverdueQuizzes(),
+            $this->selectedCourseId,
+            $this->searchTerm
+        );
+        $submittedQuizzes = app(QuizFilterServiceInterface::class)->applyAllFilters(
+            app(QuizFilterServiceInterface::class)->getSubmittedQuizzes(),
+            $this->selectedCourseId,
+            $this->searchTerm
+        );
 
             return [
                 'total' => $filteredQuizzes->count(),
@@ -809,7 +808,7 @@ class MyQuiz extends Page
         }
 
         // Nếu không có bộ lọc, trả về thống kê tổng
-        return $this->quizFilterService->getQuizStatistics();
+        return app(QuizFilterServiceInterface::class)->getQuizStatistics();
     }
 
     /**
@@ -820,16 +819,18 @@ class MyQuiz extends Page
         // QuizFilterService đã được inject qua dependency injection
 
         // Lấy quiz theo trạng thái
+
+
         $quizzes = match ($this->selectedFilter) {
-            'unsubmitted' => $this->quizFilterService->getUnsubmittedQuizzes(),
-            'overdue' => $this->quizFilterService->getOverdueQuizzes(),
-            'submitted' => $this->quizFilterService->getSubmittedQuizzes(),
-            'retakeable' => $this->quizFilterService->getRetakeableQuizzes(),
-            default => $this->quizFilterService->getAllQuizzes(),
+            'unsubmitted' => app(QuizFilterServiceInterface::class)->getUnsubmittedQuizzes(),
+            'overdue' => app(QuizFilterServiceInterface::class)->getOverdueQuizzes(),
+            'submitted' => app(QuizFilterServiceInterface::class)->getSubmittedQuizzes(),
+            'retakeable' => app(QuizFilterServiceInterface::class)->getRetakeableQuizzes(),
+            default => app(QuizFilterServiceInterface::class)->getAllQuizzes(),
         };
 
         // Áp dụng các bộ lọc khác (khóa học và tìm kiếm)
-        $quizzes = $this->quizFilterService->applyAllFilters(
+        $quizzes = app(QuizFilterServiceInterface::class)->applyAllFilters(
             $quizzes,
             $this->selectedCourseId,
             $this->searchTerm
@@ -849,15 +850,15 @@ class MyQuiz extends Page
 
         // Lấy quiz theo trạng thái
         $quizzes = match ($this->selectedFilter) {
-            'unsubmitted' => $this->quizFilterService->getUnsubmittedQuizzes(),
-            'overdue' => $this->quizFilterService->getOverdueQuizzes(),
-            'submitted' => $this->quizFilterService->getSubmittedQuizzes(),
-            'retakeable' => $this->quizFilterService->getRetakeableQuizzes(),
-            default => $this->quizFilterService->getAllQuizzes(),
+            'unsubmitted' => app(QuizFilterServiceInterface::class)->getUnsubmittedQuizzes(),
+            'overdue' => app(QuizFilterServiceInterface::class)->getOverdueQuizzes(),
+            'submitted' => app(QuizFilterServiceInterface::class)->getSubmittedQuizzes(),
+            'retakeable' => app(QuizFilterServiceInterface::class)->getRetakeableQuizzes(),
+            default => app(QuizFilterServiceInterface::class)->getAllQuizzes(),
         };
 
         // Áp dụng các bộ lọc khác (khóa học và tìm kiếm)
-        $quizzes = $this->quizFilterService->applyAllFilters(
+        $quizzes = app(QuizFilterServiceInterface::class)->applyAllFilters(
             $quizzes,
             $this->selectedCourseId,
             $this->searchTerm
@@ -966,7 +967,7 @@ class MyQuiz extends Page
      */
     public function getQuizDetailedStatusFromService(Quiz $quiz): array
     {
-        return $this->quizFilterService->getQuizDetailedStatus($quiz);
+        return app(QuizFilterServiceInterface::class)->getQuizDetailedStatus($quiz);
     }
 
     /**

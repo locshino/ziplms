@@ -34,14 +34,18 @@
                         class="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-lg p-4 border border-blue-200 dark:border-blue-700">
                         <div class="flex items-center gap-3">
                             <div class="bg-blue-500 rounded-full p-2">
-                                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                    width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M10 11h2v5m-2 0h4m-2.586-8.586a2 2 0 1 1 2.828 2.828L12 10.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                 </svg>
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-blue-600 dark:text-blue-400">Tổng số câu</p>
                                 <p class="text-2xl font-bold text-blue-800 dark:text-blue-200">
-                                    {{ $this->quizModel->questions->count() }}</p>
+                                    {{ $this->quizModel->questions->count() }}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -73,15 +77,17 @@
                         class="bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 rounded-lg p-4 border border-amber-200 dark:border-amber-700">
                         <div class="flex items-center gap-3">
                             <div class="bg-amber-500 rounded-full p-2">
-                                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path
-                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                <svg class="w-4 h-4 lg:w-5 lg:h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                        clip-rule="evenodd" />
                                 </svg>
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-amber-600 dark:text-amber-400">Điểm tối đa</p>
                                 <p class="text-2xl font-bold text-amber-800 dark:text-amber-200">
-                                    {{ $this->quizModel->max_points ?? $this->quizModel->questions->sum('points') }}</p>
+                                    {{ $this->quizModel->max_points ?? $this->quizModel->questions->sum('points') }}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -100,7 +106,8 @@
                         </svg>
                         <div class="text-center">
                             <div class="text-base lg:text-lg font-mono" x-text="formatTime(remainingSeconds)">
-                                {{ $this->quizModel->time_limit_minutes }}:00</div>
+                                {{ $this->quizModel->time_limit_minutes }}:00
+                            </div>
                             <div class="text-xs opacity-80 hidden lg:block">/ {{ $this->quizModel->time_limit_minutes }}
                                 phút</div>
                         </div>
@@ -157,8 +164,7 @@
                                                 value="{{ $choice->id }}"
                                                 wire:key="checkbox-{{ $this->currentQuestion->id }}-{{ $choice->id }}"
                                                 wire:click="updateAnswer('{{ $this->currentQuestion->id }}', '{{ $choice->id }}')"
-                                                @if(isset($this->answers[$this->currentQuestion->id]) && is_array($this->answers[$this->currentQuestion->id]) && in_array($choice->id, $this->answers[$this->currentQuestion->id])) checked @endif class="peer sr-only"
-                                                onchange="this.closest('label').querySelector('.checkbox-indicator').style.backgroundColor = this.checked ? '#3b82f6' : 'transparent'; this.closest('label').querySelector('.checkbox-indicator').style.borderColor = this.checked ? '#3b82f6' : '#9ca3af'; this.closest('label').querySelector('.checkbox-icon').style.opacity = this.checked ? '1' : '0';">
+                                                @if(isset($this->answers[$this->currentQuestion->id]) && is_array($this->answers[$this->currentQuestion->id]) && in_array($choice->id, $this->answers[$this->currentQuestion->id])) checked @endif class="peer sr-only">
                                             <div
                                                 class="checkbox-indicator w-5 h-5 lg:w-6 lg:h-6 border-2 border-gray-400 rounded-md flex items-center justify-center flex-shrink-0 transition-all duration-300 peer-checked:bg-gradient-to-r peer-checked:from-blue-500 peer-checked:to-blue-600 peer-checked:border-blue-500 peer-checked:shadow-md mt-0.5">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
@@ -175,8 +181,7 @@
                                                 wire:model.live="answers.{{ $this->currentQuestion->id }}"
                                                 wire:click="updateAnswer('{{ $this->currentQuestion->id }}', '{{ $choice->id }}')"
                                                 @if(isset($this->answers[$this->currentQuestion->id]) && $this->answers[$this->currentQuestion->id] == $choice->id) checked @endif
-                                                class="peer sr-only"
-                                                onchange="this.closest('label').querySelector('.radio-indicator').style.backgroundColor = this.checked ? '#3b82f6' : 'transparent'; this.closest('label').querySelector('.radio-indicator').style.borderColor = this.checked ? '#3b82f6' : '#9ca3af'; this.closest('label').querySelector('.radio-dot').style.opacity = this.checked ? '1' : '0';">
+                                                class="peer sr-only">
                                             <div
                                                 class="radio-indicator w-5 h-5 lg:w-6 lg:h-6 border-2 border-gray-400 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 peer-checked:bg-gradient-to-r peer-checked:from-blue-500 peer-checked:to-blue-600 peer-checked:border-blue-500 peer-checked:shadow-md mt-0.5">
                                                 <div
@@ -232,22 +237,32 @@
                 </div>
 
                 <div class="w-full lg:w-80 lg:order-2 order-1 space-y-4 lg:space-y-6">
+
+                    <div
+                        class="lg:hidden bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                        <div class="space-y-3">
+                            {{ $this->customSubmitAction }}
+                        </div>
+                    </div>
+
                     <div
                         class="lg:hidden bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3">
                         <div class="flex items-center justify-between mb-3">
                             <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Câu hỏi</h3>
                             <span class="text-xs text-gray-500 dark:text-gray-400">{{ $this->questionProgress }}</span>
                         </div>
-                        <div class="flex gap-1 overflow-x-auto pb-2">
+
+                        {{-- THAY ĐỔI TẠI ĐÂY --}}
+                        <div class="flex flex-wrap gap-2">
                             @foreach($this->questionsWithStatus as $questionData)
-                                <button wire:click="goToQuestion({{ $questionData['index'] }})" class="flex-shrink-0 w-8 h-8 rounded-md text-xs font-medium transition-all duration-200 hover:scale-110 active:scale-95
-                                            @if($questionData['is_current'])
-                                                bg-blue-500 text-white shadow-md
-                                            @elseif($questionData['is_answered'])
-                                                bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700 hover:bg-green-200 dark:hover:bg-green-900/50
-                                            @else
-                                                bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600
-                                            @endif"
+                                <button wire:click="goToQuestion({{ $questionData['index'] }})" class="w-8 h-8 rounded-md text-xs font-medium transition-all duration-200 hover:scale-110 active:scale-95
+                                                    @if($questionData['is_current'])
+                                                        bg-blue-500 text-white shadow-md
+                                                    @elseif($questionData['is_answered'])
+                                                        bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700 hover:bg-green-200 dark:hover:bg-green-900/50
+                                                    @else
+                                                        bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600
+                                                    @endif"
                                     title="Câu {{ $questionData['index'] + 1 }}{{ $questionData['is_answered'] ? ' (Đã trả lời)' : '' }}">
                                     {{ $questionData['index'] + 1 }}
                                 </button>
@@ -258,17 +273,24 @@
                     <div class="hidden lg:block lg:sticky lg:top-6 space-y-6">
                         <div
                             class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                            <div class="space-y-3">
+                                {{ $this->customSubmitAction }}
+                            </div>
+                        </div>
+
+                        <div
+                            class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Danh sách câu hỏi</h3>
                             <div class="grid grid-cols-5 gap-2">
                                 @foreach($this->questionsWithStatus as $questionData)
                                     <button wire:click="goToQuestion({{ $questionData['index'] }})" class="w-10 h-10 rounded-lg text-sm font-medium transition-all duration-200
-                                                @if($questionData['is_current'])
-                                                    bg-blue-500 text-white shadow-md
-                                                @elseif($questionData['is_answered'])
-                                                    bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700
-                                                @else
-                                                    bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600
-                                                @endif"
+                                                            @if($questionData['is_current'])
+                                                                bg-blue-500 text-white shadow-md
+                                                            @elseif($questionData['is_answered'])
+                                                                bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700
+                                                            @else
+                                                                bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600
+                                                            @endif"
                                         title="Câu {{ $questionData['index'] + 1 }}{{ $questionData['is_answered'] ? ' (Đã trả lời)' : '' }}">
                                         {{ $questionData['index'] + 1 }}
                                     </button>
@@ -293,6 +315,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div
                             class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                             <div class="space-y-4">
@@ -343,45 +366,14 @@
                                     <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500 ease-out shadow-sm"
                                         style="width: {{ $this->progressPercentage }}%"></div>
                                 </div>
-
-                                <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-                                    <button @click="confirmSubmit()" :disabled="submitting"
-                                        class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-3 lg:py-4 px-4 lg:px-6 rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-lg disabled:hover:scale-100 disabled:hover:shadow-none flex items-center justify-center gap-2 lg:gap-3 group text-sm lg:text-base">
-                                        <svg class="w-4 h-4 lg:w-5 lg:h-5 transition-transform group-hover:scale-110"
-                                            fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd"
-                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                        <span x-show="!submitting">Nộp bài</span>
-                                        <span x-show="submitting" class="flex items-center gap-2">
-                                            <svg class="animate-spin w-3 h-3 lg:w-4 lg:h-4" fill="none"
-                                                viewBox="0 0 24 24">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                                    stroke-width="4"></circle>
-                                                <path class="opacity-75" fill="currentColor"
-                                                    d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                                </path>
-                                            </svg>
-                                            Đang nộp...
-                                        </span>
-                                    </button>
-
-                                    <div class="mt-3 text-center">
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">
-                                            <svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            Bạn không thể thay đổi sau khi nộp bài
-                                        </p>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="mt-8">
+                {{ $this->customBackAction }}
             </div>
 
         </div>
@@ -584,14 +576,5 @@
         </script>
     </div>
 
-    {{-- Custom Actions Demo --}}
-    <div class="mt-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
-        <div class="flex gap-4">
-            {{ $this->customBackAction }}
-            {{ $this->customSubmitAction }}
-        </div>
-    </div>
-
-    {{-- Required for Filament Actions modals --}}
     <x-filament-actions::modals />
 </x-filament-panels::page>

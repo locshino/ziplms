@@ -2,6 +2,7 @@
 
 namespace App\Services\Interfaces;
 
+use App\Models\Quiz;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -76,4 +77,34 @@ interface QuizFilterServiceInterface
      * Lọc quiz theo thời gian làm bài
      */
     public function getQuizzesByDuration(int $minDuration, int $maxDuration, ?User $user = null): Collection;
+
+    /**
+     * Áp dụng tất cả các bộ lọc (khóa học và tìm kiếm)
+     */
+    public function applyAllFilters($quizzes, ?string $courseId = null, ?string $searchTerm = null);
+
+    /**
+     * Lấy thống kê quiz theo từng loại
+     */
+    public function getQuizStatistics(?User $user = null): array;
+
+    /**
+     * Lọc quiz theo loại
+     */
+    public function getQuizzesByType(string $type, ?User $user = null): Collection;
+
+    /**
+     * Lấy trạng thái chi tiết của quiz cho user
+     */
+    public function getQuizDetailedStatus(Quiz $quiz, ?User $user = null): array;
+
+    /**
+     * Lọc quiz theo khóa học
+     */
+    public function filterByCourse($quizzes, ?string $courseId = null);
+
+    /**
+     * Lọc quiz theo từ khóa tìm kiếm
+     */
+    public function filterBySearch($quizzes, ?string $searchTerm = null);
 }
