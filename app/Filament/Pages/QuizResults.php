@@ -13,10 +13,12 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\WithPagination;
+// use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class QuizResults extends Page
 {
     use WithPagination;
+    // use HasPageShield;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar';
 
@@ -359,7 +361,7 @@ class QuizResults extends Page
         $questions = $this->quiz->questions;
         $total = $questions->count();
         $offset = ($this->currentPage - 1) * $this->perPage;
-        
+
         return $questions->slice($offset, $this->perPage);
     }
 

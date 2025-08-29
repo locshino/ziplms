@@ -17,9 +17,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
+// use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class QuizTaking extends Page
 {
+    // use HasPageShield;
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-academic-cap';
 
     // [SỬA LỖI 1] - Trỏ đến đúng file view, không phải tên route
@@ -50,7 +53,7 @@ class QuizTaking extends Page
 
     // Pagination properties
     public int $currentQuestionIndex = 0;
-    
+
     public int $totalQuestions = 0;
 
     protected QuizServiceInterface $quizService;
@@ -180,7 +183,7 @@ class QuizTaking extends Page
     protected function initializePagination(): void
     {
         $this->totalQuestions = $this->quizModel->questions->count();
-        
+
         // Load current question index from session or localStorage
         $savedIndex = session('quiz_current_question_' . $this->quizModel->id, 0);
         $this->currentQuestionIndex = max(0, min($savedIndex, $this->totalQuestions - 1));
@@ -247,11 +250,11 @@ class QuizTaking extends Page
     {
         $questions = [];
         foreach ($this->quizModel->questions as $index => $question) {
-            $isAnswered = isset($this->answers[$question->id]) && 
-                         (is_array($this->answers[$question->id]) ? 
-                          !empty($this->answers[$question->id]) : 
-                          $this->answers[$question->id] !== null);
-            
+            $isAnswered = isset($this->answers[$question->id]) &&
+                (is_array($this->answers[$question->id]) ?
+                    !empty($this->answers[$question->id]) :
+                    $this->answers[$question->id] !== null);
+
             $questions[] = [
                 'index' => $index,
                 'id' => $question->id,
