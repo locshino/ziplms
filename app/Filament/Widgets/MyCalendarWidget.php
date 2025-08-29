@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\Widget;
 use \Guava\Calendar\Filament\CalendarWidget;
 
@@ -16,9 +17,13 @@ use App\Enums\Status\QuizStatus;
 use Filament\Actions\Action;
 use Guava\Calendar\ValueObjects\EventClickInfo;
 use Illuminate\Support\HtmlString;
+use Filament\Tables\Concerns\InteractsWithTable;
+
 
 class MyCalendarWidget extends CalendarWidget
 {
+    use HasWidgetShield;
+
     protected bool $eventClickEnabled = true;
     protected ?string $defaultEventClickAction = 'viewAssignment';
 
@@ -34,13 +39,13 @@ class MyCalendarWidget extends CalendarWidget
 
 
         $user = auth()->user();
-        $role = $user->getRoleNames()->first(); 
+        $role = $user->getRoleNames()->first();
 
         $query = Course::query();
 
         if ($role === 'student') {
             $query->whereHas('users', fn($q) => $q->where('users.id', $user->id));
-        } elseif ($role === 'teacher') {
+        } else {
             $query->where('teacher_id', $user->id);
         }
 
@@ -60,18 +65,17 @@ class MyCalendarWidget extends CalendarWidget
                             ->title("Quiz:{$quiz->title} \n ({$course->title})")
                             ->start($quiz->pivot->start_at ?? $course->start_at)
                             ->end($quiz->pivot->end_at ?? $course->end_at)
-                            ->backgroundColor('#ffffff')
-                            ->textColor('#ff5722')
+                            ->backgroundColor('#ffffffff')
+                            ->textColor('#1976d2')
                             ->allDay(true)
                             ->styles([
-                                'border' => $isUpcoming ? '2px dashed #1976d2' : '2px solid #ff5722',
+                                'border' => $isUpcoming ? '2px dashed #e50d0dff' : '2px solid #1976d2',
                                 'border-radius' => '12px',
                                 'box-shadow' => '0 4px 12px rgba(0,0,0,0.15)',
                                 'padding' => '6px 12px',
                                 'font-weight' => '600',
                                 'font-size' => '14px',
                                 'transition' => 'all 0.3s ease',
-                                "border-left" => "6px solid #6f9bc6",
                                 "border-radius" => "4px",
                                 "padding" => "6px 10px",
 
@@ -98,14 +102,13 @@ class MyCalendarWidget extends CalendarWidget
                             ->textColor('#4caf50')
                             ->allDay(true)
                             ->styles([
-                                'border' => $isUpcoming ? '2px dashed #33691e' : '2px solid #4caf50',
+                                'border' => $isUpcoming ? '2px dashed #e50d0dff' : '2px solid #4caf50',
                                 'border-radius' => '12px',
                                 'box-shadow' => '0 4px 12px rgba(0,0,0,0.15)',
                                 'padding' => '6px 12px',
                                 'font-weight' => '600',
                                 'font-size' => '14px',
                                 'transition' => 'all 0.3s ease',
-                                "border-left" => "6px solid #f0d748ff",
                                 "border-radius" => "4px",
                                 "padding" => "6px 10px",
                             ])
@@ -154,6 +157,7 @@ class MyCalendarWidget extends CalendarWidget
     <p class='text-gray-700 mb-4'>{$record->description}</p>
    <div class='text-sm text-gray-500 mb-4'>
         <span class='font-semibold'>Điểm tối đa:</span> {$max_points}
+       
     </div>
 
     <div class='flex items-center space-x-2'>
@@ -178,6 +182,7 @@ class MyCalendarWidget extends CalendarWidget
     <p class='text-gray-700 mb-4'>{$record->description}</p>
    <div class='text-sm text-gray-500 mb-4'>
         <span class='font-semibold'>Time limit:</span>  {$timeLimit}
+       
     </div>
     <div class='flex items-center space-x-2'>
       
