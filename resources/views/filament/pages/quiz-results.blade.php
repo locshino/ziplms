@@ -298,6 +298,7 @@
         color: white;
         text-decoration: none;
         transition: transform 0.2s ease, background-color 0.2s ease;
+        scroll-behavior: smooth;
     }
 
     .question-nav-link:hover {
@@ -704,9 +705,15 @@
                 <h3
                     style="font-size: 0.875rem; font-weight: 600; color: var(--color-text-secondary-light); margin-top: 1rem; margin-bottom: 0.75rem;">
                     Chuyển đến câu hỏi</h3>
+                <!-- Quiz Navigation Info -->
+                <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--color-text-secondary-light); font-size: 0.875rem; margin-bottom: 0.75rem;">
+                    <x-heroicon-o-document-text style="width: 1rem; height: 1rem;" />
+                    Tổng số câu hỏi: {{ count($this->quiz->questions) }}
+                </div>
                 <div class="question-nav-container">
-                    @foreach($this->quiz->questions as $index => $question)
+                    @foreach($this->paginatedQuestions as $index => $question)
                         @php
+                            $actualIndex = ($this->currentPage - 1) * $this->perPage + $index;
                             $status = $this->getAnswerStatus($question->id);
                             $statusClass = [
                                 'correct' => 'status-correct',
@@ -715,15 +722,89 @@
                                 'unanswered' => 'status-unanswered',
                             ][$status] ?? 'status-unanswered';
                         @endphp
-                        <a href="#question-{{ $index + 1 }}" class="question-nav-link {{ $statusClass }}">
-                            {{ $index + 1 }}
+                        <a href="#question-{{ $actualIndex + 1 }}" class="question-nav-link {{ $statusClass }}">
+                            {{ $actualIndex + 1 }}
                         </a>
                     @endforeach
                 </div>
+                
+                {{-- Show total questions info --}}
+                <div class="text-center mt-4 text-sm text-slate-600 dark:text-slate-400">
+                    Tổng số câu hỏi: <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $this->quiz->questions->count() }}</span>
+                </div>
             </div>
 
+            {{-- Pagination Info --}}
+            @if($this->getTotalPages() > 1)
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 mb-6">
+                    @php
+                        $paginationInfo = $this->getPaginationInfo();
+                    @endphp
+                    
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+                        <div class="text-sm text-slate-600 dark:text-slate-400">
+                            Hiển thị <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $paginationInfo['start_item'] }}</span> 
+                            đến <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $paginationInfo['end_item'] }}</span> 
+                            trong tổng số <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $paginationInfo['total_items'] }}</span> câu hỏi
+                        </div>
+                        
+                        <div class="text-sm text-slate-600 dark:text-slate-400">
+                            Trang <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $paginationInfo['current_page'] }}</span> 
+                            / <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $paginationInfo['total_pages'] }}</span>
+                        </div>
+                    </div>
+
+                    {{-- Pagination Controls --}}
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                        {{-- Previous Button --}}
+                        <button 
+                            wire:click="previousPage" 
+                            @if(!$paginationInfo['has_previous']) disabled @endif
+                            class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 
+                                   {{ $paginationInfo['has_previous'] 
+                                       ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg' 
+                                       : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed' }}"
+                        >
+                            <x-heroicon-s-chevron-left class="w-4 h-4" />
+                            Trang trước
+                        </button>
+
+                        {{-- Page Numbers --}}
+                        <div class="flex items-center gap-2">
+                            @for($i = 1; $i <= $paginationInfo['total_pages']; $i++)
+                                <button 
+                                    wire:click="goToPage({{ $i }})"
+                                    class="w-10 h-10 rounded-lg text-sm font-medium transition-all duration-200
+                                           {{ $i == $paginationInfo['current_page'] 
+                                               ? 'bg-blue-500 text-white shadow-md' 
+                                               : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600' }}"
+                                >
+                                    {{ $i }}
+                                </button>
+                            @endfor
+                        </div>
+
+                        {{-- Next Button --}}
+                        <button 
+                            wire:click="nextPage" 
+                            @if(!$paginationInfo['has_next']) disabled @endif
+                            class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 
+                                   {{ $paginationInfo['has_next'] 
+                                       ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg' 
+                                       : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed' }}"
+                        >
+                            Trang sau
+                            <x-heroicon-s-chevron-right class="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+            @endif
+
             <div class="question-card-list">
-                @foreach($this->quiz->questions as $index => $question)
+                @foreach($this->paginatedQuestions as $index => $question)
+                    @php
+                        $actualIndex = ($this->currentPage - 1) * $this->perPage + $index;
+                    @endphp
                     @php
                         $answerStatus = $this->getAnswerStatus($question->id);
                         $userAnswerIds = $this->getUserAnswers($question->id);
@@ -741,11 +822,11 @@
                         ][$answerStatus] ?? '';
                     @endphp
 
-                    <div id="question-{{ $index + 1 }}" class="question-card {{ $statusClass }}">
+                    <div id="question-{{ $actualIndex + 1 }}" class="question-card {{ $statusClass }}">
                         <div class="question-header">
                             <div class="question-title-section">
                                 <div class="question-meta">
-                                    <h3 class="question-number">Câu {{ $index + 1 }}</h3>
+                                    <h3 class="question-number">Câu {{ $actualIndex + 1 }}</h3>
                                     <span class="question-status-badge">{{ $badgeLabel }}</span>
                                 </div>
                                 <div class="question-content">{!! $question->title !!}</div>
@@ -797,6 +878,64 @@
                     </div>
                 @endforeach
             </div>
+            
+            {{-- Bottom Pagination --}}
+            @if($this->getTotalPages() > 1)
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 mt-6">
+                    @php
+                        $paginationInfo = $this->getPaginationInfo();
+                    @endphp
+                    
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                        {{-- Previous Button --}}
+                        <button 
+                            wire:click="previousPage" 
+                            @if(!$paginationInfo['has_previous']) disabled @endif
+                            class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 
+                                   {{ $paginationInfo['has_previous'] 
+                                       ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg' 
+                                       : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed' }}"
+                        >
+                            <x-heroicon-s-chevron-left class="w-4 h-4" />
+                            Trang trước
+                        </button>
+
+                        {{-- Page Numbers --}}
+                        <div class="flex items-center gap-2">
+                            @for($i = 1; $i <= $paginationInfo['total_pages']; $i++)
+                                <button 
+                                    wire:click="goToPage({{ $i }})"
+                                    class="w-10 h-10 rounded-lg text-sm font-medium transition-all duration-200
+                                           {{ $i == $paginationInfo['current_page'] 
+                                               ? 'bg-blue-500 text-white shadow-md' 
+                                               : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600' }}"
+                                >
+                                    {{ $i }}
+                                </button>
+                            @endfor
+                        </div>
+
+                        {{-- Next Button --}}
+                        <button 
+                            wire:click="nextPage" 
+                            @if(!$paginationInfo['has_next']) disabled @endif
+                            class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 
+                                   {{ $paginationInfo['has_next'] 
+                                       ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg' 
+                                       : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed' }}"
+                        >
+                            Trang sau
+                            <x-heroicon-s-chevron-right class="w-4 h-4" />
+                        </button>
+                    </div>
+                    
+                    <div class="text-center mt-4 text-sm text-slate-600 dark:text-slate-400">
+                        Hiển thị <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $paginationInfo['start_item'] }}</span> 
+                        đến <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $paginationInfo['end_item'] }}</span> 
+                        trong tổng số <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $paginationInfo['total_items'] }}</span> câu hỏi
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 

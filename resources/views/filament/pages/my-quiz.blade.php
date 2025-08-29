@@ -40,6 +40,7 @@
                                 ['key' => 'unsubmitted', 'label' => 'Chưa nộp'],
                                 ['key' => 'overdue', 'label' => 'Quá hạn'],
                                 ['key' => 'submitted', 'label' => 'Đã nộp'],
+                                ['key' => 'retakeable', 'label' => 'Làm lại'],
                             ];
                         @endphp
 
@@ -138,14 +139,7 @@
 
                             <div class="mt-4 space-y-2">
                                 @if ($quizStatus['status'] === 'in_progress')
-                                    <a href="{{ route('filament.app.pages.quiz-taking', ['quiz' => $quiz->id]) }}"
-                                        class="w-full text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2"
-                                        style="background-color: #f97316 !important; border-color: #f97316 !important;"
-                                        onmouseover="this.style.backgroundColor='#ea580c'" 
-                                        onmouseout="this.style.backgroundColor='#f97316'">
-                                        <x-heroicon-o-play class="w-4 h-4" />
-                                        Tiếp tục
-                                    </a>
+                                    {{ ($this->takeQuizAction)(['quiz' => $quiz->id])->label('Tiếp tục')->color('warning')->extraAttributes(['class' => 'w-full text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2', 'style' => 'background-color: #f97316 !important; border-color: #f97316 !important;', 'onmouseover' => 'this.style.backgroundColor="#ea580c"', 'onmouseout' => 'this.style.backgroundColor="#f97316"']) }}
                                 @elseif($quizStatus['canTake'])
                                     {{ ($this->takeQuizAction)(['quiz' => $quiz->id])->extraAttributes(['class' => 'w-full text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2', 'style' => 'background-color: #16a34a !important; border-color: #16a34a !important;', 'onmouseover' => 'this.style.backgroundColor="#15803d"', 'onmouseout' => 'this.style.backgroundColor="#16a34a"']) }}
                                 @endif

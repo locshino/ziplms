@@ -11,9 +11,12 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+// use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class QuizAnswers extends Page
 {
+    // use HasPageShield;
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-academic-cap';
 
     protected string $view = 'filament.pages.quiz-answers';
@@ -24,7 +27,7 @@ class QuizAnswers extends Page
     public ?Quiz $quiz = null;
 
     public ?QuizAttempt $attempt = null;
-    
+
     public ?QuizAttempt $attemptModel = null;
 
     public Collection $allAttempts;
@@ -96,7 +99,7 @@ class QuizAnswers extends Page
             $this->attempt = $this->allAttempts->first();
             $this->selectedAttemptId = $this->attempt->id;
         }
-        
+
         // Sync attemptModel with attempt for compatibility
         $this->attemptModel = $this->attempt;
 
@@ -211,7 +214,7 @@ class QuizAnswers extends Page
 
     public function getTitle(): string
     {
-        return 'Đáp án: '.($this->quiz?->title ?? 'Quiz');
+        return 'Đáp án: ' . ($this->quiz?->title ?? 'Quiz');
     }
 
     public function isCorrectAnswer(string $questionId): bool
@@ -231,7 +234,7 @@ class QuizAnswers extends Page
 
         return $userAnswer && $correctChoice && $userAnswer->answer_choice_id == $correctChoice->id;
     }
-    
+
     public function isAnswered(string $questionId): bool
     {
         return $this->attemptModel->studentAnswers
