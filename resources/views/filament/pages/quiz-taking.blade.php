@@ -33,14 +33,7 @@
                     <div
                         class="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-lg p-4 border border-blue-200 dark:border-blue-700">
                         <div class="flex items-center gap-3">
-                            <div class="bg-blue-500 rounded-full p-2">
-                                <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                                    width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M10 11h2v5m-2 0h4m-2.586-8.586a2 2 0 1 1 2.828 2.828L12 10.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                </svg>
-                            </div>
+
                             <div>
                                 <p class="text-sm font-medium text-blue-600 dark:text-blue-400">Tổng số câu</p>
                                 <p class="text-2xl font-bold text-blue-800 dark:text-blue-200">
@@ -94,27 +87,6 @@
                 </div>
             </div>
 
-            @if($this->quizModel->time_limit_minutes && !$this->isUnlimited)
-                <div id="timer"
-                    class="fixed top-4 right-4 lg:top-6 lg:right-6 px-4 py-2 lg:px-6 lg:py-3 rounded-xl font-bold z-50 shadow-xl backdrop-blur-sm transition-all duration-300"
-                    :class="{ 'bg-gradient-to-r from-red-500 to-red-600 text-white border border-red-400 animate-pulse': timeWarning, 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border border-blue-400': !timeWarning }">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 lg:w-5 lg:h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        <div class="text-center">
-                            <div class="text-base lg:text-lg font-mono" x-text="formatTime(remainingSeconds)">
-                                {{ $this->quizModel->time_limit_minutes }}:00
-                            </div>
-                            <div class="text-xs opacity-80 hidden lg:block">/ {{ $this->quizModel->time_limit_minutes }}
-                                phút</div>
-                        </div>
-                    </div>
-                </div>
-            @endif
-
             <div class="flex flex-col lg:flex-row gap-6">
                 <div class="flex-1 lg:order-1 order-2 space-y-6">
                     @if($this->currentQuestion)
@@ -137,17 +109,18 @@
                                         </svg>
                                         {{ $this->currentQuestion->pivot->points ?? $this->currentQuestion->points }} điểm
                                     </span>
-                                    @if($this->currentQuestion->is_multiple_response)
-                                        @php
-                                            $correctAnswersCount = $this->currentQuestion->answerChoices->where('is_correct', true)->count();
-                                        @endphp
-                                        <div class="text-xs text-gray-600 dark:text-gray-400">
-                                            {{ $correctAnswersCount }} đáp án đúng
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
 
+                                </div>
+
+                            </div>
+                            @if($this->currentQuestion->is_multiple_response)
+                                @php
+                                    $correctAnswersCount = $this->currentQuestion->answerChoices->where('is_correct', true)->count();
+                                @endphp
+                                <div class="text-xs text-gray-600 dark:text-gray-400 p-2">
+                                    {{ $correctAnswersCount }} đáp án đúng
+                                </div>
+                            @endif
                             @if($this->currentQuestion->question_image)
                                 <div class="mb-4">
                                     <img src="{{ $this->currentQuestion->question_image }}" alt="Question Image"
@@ -241,7 +214,48 @@
                     <div
                         class="lg:hidden bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                         <div class="space-y-3">
-                            {{ $this->customSubmitAction }}
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="text-sm text-gray-600 dark:text-gray-400">
+                                    <span class="font-medium text-gray-900 dark:text-white">Tiến độ:</span>
+                                    <span
+                                        class="ml-1 font-semibold text-blue-600 dark:text-blue-400">{{ $this->answeredCount }}</span>
+                                    <span class="text-gray-500 dark:text-gray-400">/</span>
+                                    <span
+                                        class="font-semibold text-gray-700 dark:text-gray-300">{{ $this->totalQuestions }}</span>
+                                    <span class="text-gray-500 dark:text-gray-400">câu</span>
+                                </div>
+                                <div class="text-xs px-2 py-1 rounded-full
+                                    @if($this->progressPercentage >= 100)
+                                        bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300
+                                    @elseif($this->progressPercentage >= 50)
+                                        bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300
+                                    @else
+                                        bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400
+                                    @endif">
+                                    {{ $this->progressPercentage }}%
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between gap-4">
+                                {{ $this->customSubmitAction }}
+
+                                @if($this->quizModel->time_limit_minutes && !$this->isUnlimited)
+                                    <div id="timer-mobile"
+                                        class="px-3 py-2 rounded-xl font-bold transition-all duration-300"
+                                        :class="{ 'bg-gradient-to-r from-red-500 to-red-600 text-white animate-pulse': timeWarning, 'bg-gradient-to-r from-blue-500 to-blue-600 text-white': !timeWarning }">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            <div class="font-mono text-base" x-text="formatTime(remainingSeconds)">
+                                                {{ $this->quizModel->time_limit_minutes }}:00
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
                         </div>
                     </div>
 
@@ -252,17 +266,16 @@
                             <span class="text-xs text-gray-500 dark:text-gray-400">{{ $this->questionProgress }}</span>
                         </div>
 
-                        {{-- THAY ĐỔI TẠI ĐÂY --}}
                         <div class="flex flex-wrap gap-2">
                             @foreach($this->questionsWithStatus as $questionData)
                                 <button wire:click="goToQuestion({{ $questionData['index'] }})" class="w-8 h-8 rounded-md text-xs font-medium transition-all duration-200 hover:scale-110 active:scale-95
-                                                    @if($questionData['is_current'])
-                                                        bg-blue-500 text-white shadow-md
-                                                    @elseif($questionData['is_answered'])
-                                                        bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700 hover:bg-green-200 dark:hover:bg-green-900/50
-                                                    @else
-                                                        bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600
-                                                    @endif"
+                                        @if($questionData['is_current'])
+                                            bg-blue-500 text-white shadow-md
+                                        @elseif($questionData['is_answered'])
+                                            bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700 hover:bg-green-200 dark:hover:bg-green-900/50
+                                        @else
+                                            bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600
+                                        @endif"
                                     title="Câu {{ $questionData['index'] + 1 }}{{ $questionData['is_answered'] ? ' (Đã trả lời)' : '' }}">
                                     {{ $questionData['index'] + 1 }}
                                 </button>
@@ -274,7 +287,47 @@
                         <div
                             class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                             <div class="space-y-3">
-                                {{ $this->customSubmitAction }}
+                                <div
+                                    class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                                    <div class="text-sm">
+                                        <span class="text-gray-600 dark:text-gray-400">Tiến độ:</span>
+                                        <span
+                                            class="ml-1 font-semibold text-blue-600 dark:text-blue-400">{{ $this->answeredCount }}</span>
+                                        <span class="text-gray-500 dark:text-gray-400">/</span>
+                                        <span
+                                            class="font-semibold text-gray-700 dark:text-gray-300">{{ $this->totalQuestions }}</span>
+                                        <span class="text-gray-500 dark:text-gray-400">câu</span>
+                                    </div>
+                                    <div class="text-xs px-2 py-1 rounded-full font-medium
+                                        @if($this->progressPercentage >= 100)
+                                            bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300
+                                        @elseif($this->progressPercentage >= 50)
+                                            bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300
+                                        @else
+                                            bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300
+                                        @endif">
+                                        {{ $this->progressPercentage }}%
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between gap-4">
+                                    {{ $this->customSubmitAction }}
+                                    @if($this->quizModel->time_limit_minutes && !$this->isUnlimited)
+                                        <div id="timer" class="px-3 py-2 rounded-xl font-bold transition-all duration-300"
+                                            :class="{ 'bg-gradient-to-r from-red-500 to-red-600 text-white animate-pulse': timeWarning, 'bg-gradient-to-r from-blue-500 to-blue-600 text-white': !timeWarning }">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd"
+                                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                                <div class="font-mono text-lg" x-text="formatTime(remainingSeconds)">
+                                                    {{ $this->quizModel->time_limit_minutes }}:00
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
                         </div>
 
@@ -284,13 +337,13 @@
                             <div class="grid grid-cols-5 gap-2">
                                 @foreach($this->questionsWithStatus as $questionData)
                                     <button wire:click="goToQuestion({{ $questionData['index'] }})" class="w-10 h-10 rounded-lg text-sm font-medium transition-all duration-200
-                                                            @if($questionData['is_current'])
-                                                                bg-blue-500 text-white shadow-md
-                                                            @elseif($questionData['is_answered'])
-                                                                bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700
-                                                            @else
-                                                                bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600
-                                                            @endif"
+                                                @if($questionData['is_current'])
+                                                    bg-blue-500 text-white shadow-md
+                                                @elseif($questionData['is_answered'])
+                                                    bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700
+                                                @else
+                                                    bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600
+                                                @endif"
                                         title="Câu {{ $questionData['index'] + 1 }}{{ $questionData['is_answered'] ? ' (Đã trả lời)' : '' }}">
                                         {{ $questionData['index'] + 1 }}
                                     </button>
@@ -315,69 +368,12 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div
-                            class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                            <div class="space-y-4">
-                                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                                    @if(!$this->isUnlimited)
-                                        <div class="text-center p-4 rounded-xl shadow-sm"
-                                            :class="{ 'bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-700': timeWarning, 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700': !timeWarning }">
-                                            <div class="flex items-center justify-center gap-2 mb-2">
-                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd"
-                                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                                                        clip-rule="evenodd" />
-                                                </svg>
-                                                <div class="text-xs font-semibold uppercase tracking-wide">Thời gian còn lại
-                                                </div>
-                                            </div>
-                                            <div class="text-2xl font-mono font-bold" x-text="formatTime(remainingSeconds)">
-                                            </div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                                                Tổng thời gian: {{ $this->quizModel->time_limit_minutes }} phút
-                                            </div>
-                                        </div>
-                                    @else
-                                        <div
-                                            class="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 text-blue-700 dark:text-blue-300 rounded-xl border border-blue-200 dark:border-blue-700 shadow-sm">
-                                            <div class="flex items-center justify-center gap-2 mb-2">
-                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd"
-                                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                        clip-rule="evenodd" />
-                                                </svg>
-                                                <div class="text-xs font-semibold uppercase tracking-wide">Không giới hạn
-                                                </div>
-                                            </div>
-                                            <div class="text-2xl font-bold">∞</div>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="mt-6 space-y-4">
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="text-gray-600 dark:text-gray-400 font-medium">Tiến độ:
-                                        {{ $this->answeredCount }}/{{ $this->quizModel->questions->count() }} câu</span>
-                                    <span
-                                        class="font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-lg">{{ $this->progressPercentage }}%</span>
-                                </div>
-                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 shadow-inner">
-                                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500 ease-out shadow-sm"
-                                        style="width: {{ $this->progressPercentage }}%"></div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
-
-            <div class="mt-8">
-                {{ $this->customBackAction }}
-            </div>
-
         </div>
         <script>
+            // Javascript không thay đổi
             function quizTakingApp() {
                 return {
                     remainingSeconds: @js($this->remainingSeconds),

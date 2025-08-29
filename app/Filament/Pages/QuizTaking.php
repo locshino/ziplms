@@ -109,6 +109,8 @@ class QuizTaking extends Page
                 $this->attempt = $this->quizService->startQuizAttempt($this->quizModel->id, Auth::id());
                 // Clear any previous localStorage for this quiz when starting new attempt
                 $this->dispatch('clear-previous-quiz-storage', ['quizId' => $this->quizModel->id]);
+                // Clear session for current question index to start from question 1
+                session()->forget('quiz_current_question_' . $this->quizModel->id);
             } catch (\Exception $e) {
                 Notification::make()
                     ->title('Lỗi!')
