@@ -22,26 +22,31 @@ class QuizForm
                     ->columnSpanFull()
                     ->components([
                         TextInput::make('title')
+                            ->label(__('resource_quiz.form.fields.title'))
                             ->required(),
                         Section::make('Thiết lập')
                             ->columns(4)
                             ->components([
                                 TextInput::make('max_attempts')
+                                    ->label(__('resource_quiz.form.fields.max_attempts'))
                                     ->minValue(0)
                                     ->helperText('Số lần làm bài tối đa (0 là không giới hạn)')
                                     ->numeric(),
                                 TextInput::make('time_limit_minutes')
+                                    ->label(__('resource_quiz.form.fields.time_limit_minutes'))
                                     ->minValue(0)
                                     ->numeric(),
                                 Select::make('status')
+                                    ->label(__('resource_quiz.form.fields.status'))
                                     ->options(QuizStatus::class)
                                     ->required(),
                                 Toggle::make('is_single_session')
+                                    ->label(__('resource_quiz.form.fields.is_single_session'))
                                     ->helperText('Người dùng làm bài trong một phiên duy nhất (không được tạm dừng, không được quay lại tiếp tục làm bài)')
                                     ->required(),
                             ]),
                         SpatieTagsInput::make('tags')
-                            ->label('Phân loại')
+                            ->label(__('resource_quiz.form.fields.tags'))
                             ->type(Quiz::class),
                     ]),
 
@@ -50,6 +55,7 @@ class QuizForm
                     ->collapsible()
                     ->components([
                         LexicalEditor::make('description')
+                            ->label(__('resource_quiz.form.fields.description'))
                             ->columnSpanFull(),
                     ]),
             ]);

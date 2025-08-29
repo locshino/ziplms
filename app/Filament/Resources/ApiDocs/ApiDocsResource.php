@@ -11,6 +11,21 @@ class ApiDocsResource extends FilamentApiDocsResource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'System';
+        return __('resource_api_docs.resource.navigation_group');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('resource_api_docs.resource.navigation_label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('resource_api_docs.resource.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('resource_api_docs.resource.plural_label');
     }
 }

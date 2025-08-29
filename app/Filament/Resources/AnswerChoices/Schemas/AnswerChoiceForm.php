@@ -21,23 +21,29 @@ class AnswerChoiceForm
                     ->columnSpanFull()
                     ->schema([
                         ModalTableSelect::make('question_id')
+                            ->label(__('resource_answer_choice.form.fields.question_id'))
                             ->relationship('question', 'title')
                             ->tableConfiguration(QuestionsTable::class)
                             ->required(),
                         Toggle::make('is_multi_choice')
+                            ->label(__('resource_answer_choice.form.fields.is_multi_choice'))
                             ->live(),
                     ]),
                 Repeater::make('answer_choices')
+                    ->label(__('resource_answer_choice.form.fields.answer_choices'))
                     ->columnSpanFull()
                     ->schema([
                         Textarea::make('title')
+                            ->label(__('resource_answer_choice.form.fields.title'))
                             ->required()
                             ->columnSpanFull(),
                         Textarea::make('description')
+                            ->label(__('resource_answer_choice.form.fields.description'))
                             ->columnSpanFull(),
                         Toggle::make('is_correct')
+                            ->label(__('resource_answer_choice.form.fields.is_correct'))
                             ->reactive()
-                            ->fixIndistinctState(fn ($get) => ! ($get('../../is_multi_choice'))),
+                            ->fixIndistinctState(fn($get) => ! ($get('../../is_multi_choice'))),
                     ])
                     ->defaultItems(4),
             ]);

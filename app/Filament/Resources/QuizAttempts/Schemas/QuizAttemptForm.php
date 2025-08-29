@@ -23,32 +23,38 @@ class QuizAttemptForm
         return $schema
             ->components([
                 ModalTableSelect::make('quiz_id')
+                    ->label(__('resource_quiz_attempt.form.fields.quiz_id'))
                     ->relationship('quiz', 'title')
                     ->tableConfiguration(QuizzesTable::class)
                     ->required(),
                 ModalTableSelect::make('student_id')
+                    ->label(__('resource_quiz_attempt.form.fields.student_id'))
                     ->relationship('student', 'name')
                     ->tableConfiguration(UsersTable::class)
                     ->required(),
                 TextInput::make('points')
+                    ->label(__('resource_quiz_attempt.form.fields.points'))
                     ->numeric(),
                 Select::make('status')
+                    ->label(__('resource_quiz_attempt.form.fields.status'))
                     ->options(QuizAttemptStatus::class)
                     ->required(),
-                DateTimePicker::make('start_at'),
-                DateTimePicker::make('end_at'),
+                DateTimePicker::make('start_at')
+                    ->label(__('resource_quiz_attempt.form.fields.start_at')),
+                DateTimePicker::make('end_at')
+                    ->label(__('resource_quiz_attempt.form.fields.end_at')),
 
                 // PrettyJsonField::make('answers')
                 //     ->columnSpanFull(),
 
-                Section::make('Answers')
+                Section::make(__('resource_quiz_attempt.form.fields.answers'))
                     ->columnSpanFull()
                     ->collapsed()
                     ->lazy() // This is the key for lazy loading
                     ->schema([
                         // The Livewire component will only be mounted when the Accordion is opened
                         Livewire::make(ShowQuizAnswers::class)
-                            ->key(fn (?QuizAttempt $record) => $record?->id),
+                            ->key(fn(?QuizAttempt $record) => $record?->id),
                     ]),
             ]);
     }

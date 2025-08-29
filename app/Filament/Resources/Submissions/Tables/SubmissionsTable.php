@@ -23,37 +23,47 @@ class SubmissionsTable
         return $table
             ->columns([
                 TextColumn::make('id')
-                    ->label('ID')
+                    ->label(__('resource_submission.table.columns.id'))
                     ->searchable()
                     ->copyable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('assignment.title')
+                    ->label(__('resource_submission.table.columns.assignment.title'))
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('student.name')
+                    ->label(__('resource_submission.table.columns.student.name'))
                     ->searchable(),
                 TextColumn::make('status')
+                    ->label(__('resource_submission.table.columns.status'))
                     ->searchable(),
                 TextColumn::make('submitted_at')
+                    ->label(__('resource_submission.table.columns.submitted_at'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('grader.name')
+                    ->label(__('resource_submission.table.columns.grader.name'))
                     ->searchable(),
                 TextColumn::make('points')
+                    ->label(__('resource_submission.table.columns.points'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('graded_at')
+                    ->label(__('resource_submission.table.columns.graded_at'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(__('resource_submission.table.columns.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(__('resource_submission.table.columns.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('deleted_at')
+                    ->label(__('resource_submission.table.columns.deleted_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

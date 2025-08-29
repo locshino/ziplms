@@ -12,13 +12,17 @@ class QuestionInfolist
         return $schema
             ->components([
                 TextEntry::make('id')
-                    ->label('ID'),
-                TextEntry::make('status'),
+                    ->label(__('resource_question.infolist.entries.id')),
+                TextEntry::make('status')
+                    ->label(__('resource_question.infolist.entries.status')),
                 TextEntry::make('created_at')
+                    ->label(__('resource_question.infolist.entries.created_at'))
                     ->dateTime(),
                 TextEntry::make('updated_at')
+                    ->label(__('resource_question.infolist.entries.updated_at'))
                     ->dateTime(),
                 TextEntry::make('deleted_at')
+                    ->label(__('resource_question.infolist.entries.deleted_at'))
                     ->dateTime(),
             ]);
     }

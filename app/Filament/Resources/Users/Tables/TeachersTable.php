@@ -66,10 +66,10 @@ class TeachersTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                TrashedFilter::make(),
                 SelectFilter::make('status')
-                    ->options(UserStatus::class)
-                    ->label(__('resource_user.table.filters.status')),
+                    ->label(__('resource_user.table.columns.status'))
+                    ->options(UserStatus::class),
+                TrashedFilter::make(),
             ])
             ->recordActions([
                 // ViewAction::make(),

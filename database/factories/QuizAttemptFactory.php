@@ -19,16 +19,27 @@ class QuizAttemptFactory extends Factory
      */
     public function definition(): array
     {
-        $startAt = $this->faker->dateTimeBetween('-1 month', 'now');
+        $startAt = $this->faker->dateTimeBetween('-2 months', 'now');
+        $endAt = $this->faker->optional(0.8)->dateTimeBetween($startAt, 'now'); // 80% chance to have an end_at
+
+        $status = QuizAttemptStatus::STARTED;
+        if ($endAt) {
+            $status = $this->faker->randomElement([QuizAttemptStatus::COMPLETED, QuizAttemptStatus::GRADED]);
+        }
+
+        $points = null;
+        if ($status === QuizAttemptStatus::GRADED) {
+            $points = $this->faker->randomFloat(2, 0, 100);
+        }
 
         return [
             'quiz_id' => Quiz::factory(),
             'student_id' => User::factory(),
-            'points' => null,
-            'answers' => null,
+            'points' => $points,
+            'answers' => null, // You might want to generate some JSON answers here
             'start_at' => $startAt,
-            'end_at' => null,
-            'status' => QuizAttemptStatus::STARTED->value,
+            'end_at' => $endAt,
+            'status' => $status->value,
         ];
     }
 
@@ -37,7 +48,7 @@ class QuizAttemptFactory extends Factory
      */
     public function withStatus(QuizAttemptStatus $status): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'status' => $status->value,
         ]);
     }

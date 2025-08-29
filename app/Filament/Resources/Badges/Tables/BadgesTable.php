@@ -19,23 +19,29 @@ class BadgesTable
         return $table
             ->columns([
                 TextColumn::make('id')
-                    ->label('ID')
+                    ->label(__('resource_badge.table.columns.id'))
                     ->searchable(),
                 TextColumn::make('title')
+                    ->label(__('resource_badge.table.columns.title'))
                     ->searchable(),
                 TextColumn::make('slug')
+                    ->label(__('resource_badge.table.columns.slug'))
                     ->searchable(),
                 TextColumn::make('status')
+                    ->label(__('resource_badge.table.columns.status'))
                     ->searchable(),
                 TextColumn::make('created_at')
+                    ->label(__('resource_badge.table.columns.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(__('resource_badge.table.columns.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('deleted_at')
+                    ->label(__('resource_badge.table.columns.deleted_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

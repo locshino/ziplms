@@ -24,32 +24,39 @@ class AssignmentsTable
         return $table
             ->columns([
                 TextColumn::make('id')
-                    ->label('ID')
+                    ->label(__('resource_assignment.table.columns.id'))
                     ->copyable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('title')
+                    ->label(__('resource_assignment.table.columns.title'))
                     ->searchable(),
                 TextColumn::make('max_points')
+                    ->label(__('resource_assignment.table.columns.max_points'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('max_attempts')
+                    ->label(__('resource_assignment.table.columns.max_attempts'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('status')
+                    ->label(__('resource_assignment.table.columns.status'))
                     ->searchable(),
                 SpatieTagsColumn::make('tags')
-                    ->label('Phân loại')
+                    ->label(__('resource_assignment.table.columns.tags'))
                     ->type(Assignment::class)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
+                    ->label(__('resource_assignment.table.columns.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(__('resource_assignment.table.columns.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('deleted_at')
+                    ->label(__('resource_assignment.table.columns.deleted_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

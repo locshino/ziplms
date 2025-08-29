@@ -14,11 +14,14 @@ class QuestionForm
         return $schema
             ->components([
                 Textarea::make('title')
+                    ->label(__('resource_question.form.fields.title'))
                     ->required()
                     ->columnSpanFull(),
                 Textarea::make('description')
+                    ->label(__('resource_question.form.fields.description'))
                     ->columnSpanFull(),
                 Select::make('status')
+                    ->label(__('resource_question.form.fields.status'))
                     ->options(QuestionStatus::class)
                     ->required(),
             ]);

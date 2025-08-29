@@ -26,6 +26,21 @@ class AssignmentResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
+    public static function getModelLabel(): string
+    {
+        return __('resource_assignment.resource.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('resource_assignment.resource.plural_label');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('resource_assignment.resource.navigation_label');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return AssignmentForm::configure($schema);
@@ -43,7 +58,7 @@ class AssignmentResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Learning Management';
+        return __('resource_assignment.resource.navigation_group');
     }
 
     public static function getRelations(): array

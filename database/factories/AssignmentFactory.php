@@ -19,11 +19,11 @@ class AssignmentFactory extends Factory
     public function definition(): array
     {
         return [
-            'title' => $this->faker->sentence(4),
-            'description' => $this->faker->paragraph(2),
-            'max_points' => $this->faker->randomFloat(2, 10, 100),
-            'max_attempts' => $this->faker->numberBetween(1, 5),
-            'status' => AssignmentStatus::PUBLISHED->value,
+            'title' => $this->faker->unique()->sentence(5),
+            'description' => $this->faker->paragraph(4),
+            'max_points' => $this->faker->randomElement([10, 20, 50, 100]),
+            'max_attempts' => $this->faker->randomElement([1, 2, 3, null]),
+            'status' => $this->faker->randomElement(AssignmentStatus::cases())->value,
         ];
     }
 
@@ -32,7 +32,7 @@ class AssignmentFactory extends Factory
      */
     public function withStatus(AssignmentStatus $status): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'status' => $status->value,
         ]);
     }

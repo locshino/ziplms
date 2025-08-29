@@ -28,44 +28,15 @@ class UserSeeder extends Seeder
 
         // Get or create users with caching
         $this->getCachedData('users', function () {
-            // Tạo các tài khoản mặc định từ danh sách
+            // Create default users from the list
             foreach ($this->getDefaultUsers() as $userInfo) {
                 $this->createDefaultUser($userInfo['name'], $userInfo['email'], $userInfo['role']);
             }
 
-            // Xóa các dòng tạo tài khoản mặc định lặp lại
-            // Create Admin (1 default user)
-            // $this->createDefaultUser('Administrator', 'admin@example.com', RoleSystem::ADMIN->value);
-
-            // Create Manager (1 default user + 9 additional users)
-            // $this->createDefaultUser('Default Manager', 'manager@example.com', RoleSystem::MANAGER->value);
-            $managers = User::factory(9)->create([
-                'email_verified_at' => now(),
-                'status' => UserStatus::ACTIVE->value,
-            ]);
-            foreach ($managers as $manager) {
-                $manager->assignRole(RoleSystem::MANAGER->value);
-            }
-
-            // Create Teacher (1 default user + 29 additional users)
-            // $this->createDefaultUser('Default Teacher', 'teacher@example.com', RoleSystem::TEACHER->value);
-            $teachers = User::factory(29)->create([
-                'email_verified_at' => now(),
-                'status' => UserStatus::ACTIVE->value,
-            ]);
-            foreach ($teachers as $teacher) {
-                $teacher->assignRole(RoleSystem::TEACHER->value);
-            }
-
-            // Create Student (1 default user + 599 additional users)
-            // $this->createDefaultUser('Default Student', 'student@example.com', RoleSystem::STUDENT->value);
-            $students = User::factory(599)->create([
-                'email_verified_at' => now(),
-                'status' => UserStatus::ACTIVE->value,
-            ]);
-            foreach ($students as $student) {
-                $student->assignRole(RoleSystem::STUDENT->value);
-            }
+            // Create additional random users for each role
+            $this->createRandomUsers(RoleSystem::MANAGER, 9);
+            $this->createRandomUsers(RoleSystem::TEACHER, 29);
+            $this->createRandomUsers(RoleSystem::STUDENT, 599);
 
             return true;
         });
@@ -86,25 +57,32 @@ class UserSeeder extends Seeder
     }
 
     /**
-     * Create roles if they don't exist.
+     * Create a specified number of random users for a given role.
      */
-    private function createRoles(): void
+    private function createRandomUsers(RoleSystem $role, int $count): void
     {
-        $roles = [
-            RoleSystem::SUPER_ADMIN->value,
-            RoleSystem::ADMIN->value,
-            RoleSystem::MANAGER->value,
-            RoleSystem::TEACHER->value,
-            RoleSystem::STUDENT->value,
-        ];
+        $users = User::factory($count)->create([
+            'email_verified_at' => now(),
+            'status' => UserStatus::ACTIVE->value,
+        ]);
 
-        foreach ($roles as $role) {
-            Role::firstOrCreate(['name' => $role]);
+        foreach ($users as $user) {
+            $user->assignRole($role->value);
         }
     }
 
     /**
-     * Danh sách tài khoản mặc định cho từng role.
+     * Create roles if they don't exist.
+     */
+    private function createRoles(): void
+    {
+        foreach (RoleSystem::cases() as $role) {
+            Role::firstOrCreate(['name' => $role->value]);
+        }
+    }
+
+    /**
+     * Get the list of default accounts for each role.
      */
     private function getDefaultUsers(): array
     {

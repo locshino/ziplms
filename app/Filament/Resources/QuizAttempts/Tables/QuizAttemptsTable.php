@@ -25,34 +25,43 @@ class QuizAttemptsTable
         return $table
             ->columns([
                 TextColumn::make('id')
-                    ->label('ID')
+                    ->label(__('resource_quiz_attempt.table.columns.id'))
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('quiz.title')
+                    ->label(__('resource_quiz_attempt.table.columns.quiz.title'))
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('student.name')
+                    ->label(__('resource_quiz_attempt.table.columns.student.name'))
                     ->searchable(),
                 TextColumn::make('points')
+                    ->label(__('resource_quiz_attempt.table.columns.points'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('start_at')
+                    ->label(__('resource_quiz_attempt.table.columns.start_at'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('end_at')
+                    ->label(__('resource_quiz_attempt.table.columns.end_at'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('status')
+                    ->label(__('resource_quiz_attempt.table.columns.status'))
                     ->searchable(),
                 TextColumn::make('created_at')
+                    ->label(__('resource_quiz_attempt.table.columns.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(__('resource_quiz_attempt.table.columns.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('deleted_at')
+                    ->label(__('resource_quiz_attempt.table.columns.deleted_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -97,7 +106,7 @@ class QuizAttemptsTable
                         Column::make('updated_at'),
                     ])
                         // Optional: you can customize the filename
-                        ->withFilename(fn ($resource) => $resource::getModelLabel().'-'.date('Y-m-d')),
+                        ->withFilename(fn($resource) => $resource::getModelLabel() . '-' . date('Y-m-d')),
                 ]),
             ]);
     }

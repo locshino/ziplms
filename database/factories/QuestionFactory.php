@@ -19,9 +19,9 @@ class QuestionFactory extends Factory
     public function definition(): array
     {
         return [
-            'title' => $this->faker->sentence().'?',
-            'description' => $this->faker->paragraph(2),
-            'status' => QuestionStatus::PUBLISHED->value,
+            'title' => $this->faker->unique()->sentence(8) . '?',
+            'description' => $this->faker->optional()->paragraph(2),
+            'status' => $this->faker->randomElement(QuestionStatus::cases())->value,
         ];
     }
 
@@ -30,7 +30,7 @@ class QuestionFactory extends Factory
      */
     public function withStatus(QuestionStatus $status): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'status' => $status->value,
         ]);
     }
@@ -40,7 +40,7 @@ class QuestionFactory extends Factory
      */
     public function multipleChoice(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'is_multi_choice' => true,
         ]);
     }
@@ -50,7 +50,7 @@ class QuestionFactory extends Factory
      */
     public function trueFalse(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'question_type' => 'true_false',
         ]);
     }
@@ -60,7 +60,7 @@ class QuestionFactory extends Factory
      */
     public function shortAnswer(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'question_type' => 'short_answer',
         ]);
     }

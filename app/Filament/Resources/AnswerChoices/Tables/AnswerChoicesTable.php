@@ -19,26 +19,31 @@ class AnswerChoicesTable
         return $table
             ->columns([
                 TextColumn::make('id')
-                    ->label('ID')
+                    ->label(__('resource_answer_choice.table.columns.id'))
                     ->copyable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('question.title')
+                    ->label(__('resource_answer_choice.table.columns.question.title'))
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('title')
-                    ->label('Câu trả lời')
+                    ->label(__('resource_answer_choice.table.columns.title'))
                     ->searchable(),
-                ToggleColumn::make('is_correct'),
+                ToggleColumn::make('is_correct')
+                    ->label(__('resource_answer_choice.table.columns.is_correct')),
                 TextColumn::make('created_at')
+                    ->label(__('resource_answer_choice.table.columns.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(__('resource_answer_choice.table.columns.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('deleted_at')
+                    ->label(__('resource_answer_choice.table.columns.deleted_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -55,12 +60,12 @@ class AnswerChoicesTable
                             ->tableConfiguration(\App\Filament\Resources\Questions\Tables\QuestionsTable::class)
                             ->required(),
                         \Filament\Forms\Components\TextInput::make('title')
-                            ->label('Câu trả lời')
+                            ->label(__('resource_answer_choice.table.columns.title'))
                             ->required(),
                         \Filament\Forms\Components\Textarea::make('description')
-                            ->label('Mô tả'),
+                            ->label(__('resource_answer_choice.form.fields.description')),
                         \Filament\Forms\Components\Toggle::make('is_correct')
-                            ->label('Đáp án đúng'),
+                            ->label(__('resource_answer_choice.table.columns.is_correct')),
                     ]),
             ])
             ->toolbarActions([

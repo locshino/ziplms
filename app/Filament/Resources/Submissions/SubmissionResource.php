@@ -24,6 +24,21 @@ class SubmissionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPaperAirplane;
 
+    public static function getModelLabel(): string
+    {
+        return __('resource_submission.resource.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('resource_submission.resource.plural_label');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('resource_submission.resource.navigation_label');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return SubmissionForm::configure($schema);
@@ -41,7 +56,7 @@ class SubmissionResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Learning Management';
+        return __('resource_submission.resource.navigation_group');
     }
 
     public static function getRelations(): array

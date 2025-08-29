@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Enums\Status\BadgeStatus;
 use App\Models\Badge;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Badge>
@@ -18,11 +19,13 @@ class BadgeFactory extends Factory
      */
     public function definition(): array
     {
+        $title = $this->faker->unique()->words(3, true);
+
         return [
-            'title' => $this->faker->words(2, true),
-            'slug' => $this->faker->unique()->slug(2),
-            'description' => $this->faker->paragraph(2),
-            'status' => BadgeStatus::ACTIVE->value,
+            'title' => Str::title($title),
+            'slug' => Str::slug($title),
+            'description' => $this->faker->sentence(10),
+            'status' => $this->faker->randomElement(BadgeStatus::cases())->value,
         ];
     }
 
@@ -31,7 +34,7 @@ class BadgeFactory extends Factory
      */
     public function withStatus(BadgeStatus $status): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'status' => $status->value,
         ]);
     }
@@ -41,7 +44,7 @@ class BadgeFactory extends Factory
      */
     public function active(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'status' => BadgeStatus::ACTIVE->value,
         ]);
     }
@@ -51,7 +54,7 @@ class BadgeFactory extends Factory
      */
     public function inactive(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'status' => BadgeStatus::INACTIVE->value,
         ]);
     }

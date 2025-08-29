@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\Status\SubmissionStatus;
 use App\Models\Assignment;
 use App\Models\Submission;
 use App\Models\User;
@@ -19,11 +20,18 @@ class SubmissionFactory extends Factory
      */
     public function definition(): array
     {
+        $submittedAt = $this->faker->optional(0.9)->dateTimeBetween('-2 months', 'now'); // 90% chance to have a submission date
+        $status = SubmissionStatus::DRAFT;
+        if ($submittedAt) {
+            $status = $this->faker->randomElement([SubmissionStatus::SUBMITTED, SubmissionStatus::GRADED, SubmissionStatus::LATE]);
+        }
+
         return [
             'assignment_id' => Assignment::factory(),
             'student_id' => User::factory(),
-            'content' => $this->faker->paragraph(3),
-            'submitted_at' => $this->faker->dateTimeBetween('-1 month', 'now'),
+            'content' => $this->faker->optional()->paragraph(4),
+            'submitted_at' => $submittedAt,
+            'status' => $status->value,
             'points' => null,
             'graded_by' => null,
             'graded_at' => null,
@@ -53,7 +61,7 @@ class SubmissionFactory extends Factory
      */
     public function late(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'submitted_at' => $this->faker->dateTimeBetween('now', '+1 week'),
         ]);
     }
@@ -63,7 +71,7 @@ class SubmissionFactory extends Factory
      */
     public function onTime(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'submitted_at' => $this->faker->dateTimeBetween('-1 week', 'now'),
         ]);
     }

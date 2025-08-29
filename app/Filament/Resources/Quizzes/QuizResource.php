@@ -28,6 +28,21 @@ class QuizResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
+    public static function getModelLabel(): string
+    {
+        return __('resource_quiz.resource.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('resource_quiz.resource.plural_label');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('resource_quiz.resource.navigation_label');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return QuizForm::configure($schema);
@@ -45,7 +60,7 @@ class QuizResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Quiz Management';
+        return __('resource_quiz.resource.navigation_group');
     }
 
     public static function getRelations(): array

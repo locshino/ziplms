@@ -29,6 +29,21 @@ class CourseResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
+    public static function getModelLabel(): string
+    {
+        return __('resource_course.resource.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('resource_course.resource.plural_label');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('resource_course.resource.navigation_label');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return CourseForm::configure($schema);
@@ -41,7 +56,7 @@ class CourseResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Learning Management';
+        return __('resource_course.resource.navigation_group');
     }
 
     public static function getRelations(): array
