@@ -9,7 +9,6 @@ use App\Models\Media;
 use App\Models\User;
 use App\Repositories\Interfaces\MediaRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Media repository implementation.
@@ -20,8 +19,6 @@ class MediaRepository extends EloquentRepository implements MediaRepositoryInter
 {
     /**
      * Get the model class name.
-     *
-     * @return string
      */
     protected function model(): string
     {
@@ -35,7 +32,7 @@ class MediaRepository extends EloquentRepository implements MediaRepositoryInter
     {
         try {
             $query = $this->model->where('model_type', $modelType)
-                                ->where('model_id', $modelId);
+                ->where('model_id', $modelId);
 
             if ($collection) {
                 $query->where('collection_name', $collection);
@@ -43,7 +40,7 @@ class MediaRepository extends EloquentRepository implements MediaRepositoryInter
 
             return $query->get();
         } catch (\Exception $e) {
-            throw new RepositoryException('Failed to get media by model: ' . $e->getMessage());
+            throw new RepositoryException('Failed to get media by model: '.$e->getMessage());
         }
     }
 
@@ -64,13 +61,14 @@ class MediaRepository extends EloquentRepository implements MediaRepositoryInter
             // For Assignment documents
             if ($model instanceof Assignment) {
                 $course = $model->course;
+
                 // Check if user is enrolled in the course that contains the assignment
                 return $course->enrollments()->where('student_id', $user->id)->exists();
             }
 
             return false;
         } catch (\Exception $e) {
-            throw new RepositoryException('Failed to check user media access: ' . $e->getMessage());
+            throw new RepositoryException('Failed to check user media access: '.$e->getMessage());
         }
     }
 
@@ -82,7 +80,7 @@ class MediaRepository extends EloquentRepository implements MediaRepositoryInter
         try {
             return $this->model->where('collection_name', $collection)->get();
         } catch (\Exception $e) {
-            throw new RepositoryException('Failed to get media by collection: ' . $e->getMessage());
+            throw new RepositoryException('Failed to get media by collection: '.$e->getMessage());
         }
     }
 
@@ -93,9 +91,10 @@ class MediaRepository extends EloquentRepository implements MediaRepositoryInter
     {
         try {
             $filePath = $media->getPath();
+
             return file_exists($filePath);
         } catch (\Exception $e) {
-            throw new RepositoryException('Failed to check media file existence: ' . $e->getMessage());
+            throw new RepositoryException('Failed to check media file existence: '.$e->getMessage());
         }
     }
 
@@ -107,7 +106,7 @@ class MediaRepository extends EloquentRepository implements MediaRepositoryInter
         try {
             return $this->model->with('model')->find($mediaId);
         } catch (\Exception $e) {
-            throw new RepositoryException('Failed to get media with model: ' . $e->getMessage());
+            throw new RepositoryException('Failed to get media with model: '.$e->getMessage());
         }
     }
 }

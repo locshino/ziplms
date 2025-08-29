@@ -2,37 +2,29 @@
 
 namespace App\Exceptions;
 
-use Exception;
 use App\Enums\HttpStatusCode;
+use Exception;
 
 /**
  * Base application exception class.
  *
  * This abstract class provides a foundation for all application-specific exceptions
  * with built-in localization support and common utility methods.
- *
- * @abstract
  */
 abstract class ApplicationException extends Exception
 {
     /**
      * The default language key for this exception type.
-     *
-     * @var string
      */
     protected static string $defaultKey = 'exceptions.application_error';
 
     /**
      * The language key used for this exception instance.
-     *
-     * @var string|null
      */
     protected ?string $key = null;
 
     /**
      * The HTTP status code for this exception.
-     *
-     * @var HttpStatusCode
      */
     protected HttpStatusCode $httpStatusCode;
 
@@ -52,7 +44,7 @@ abstract class ApplicationException extends Exception
     ) {
         $this->key = $key ?? static::$defaultKey;
         $message = __($this->key, $replace);
-        
+
         // Handle HttpStatusCode enum or integer code
         if ($code instanceof HttpStatusCode) {
             $this->httpStatusCode = $code;
@@ -61,7 +53,7 @@ abstract class ApplicationException extends Exception
             $this->httpStatusCode = HttpStatusCode::INTERNAL_SERVER_ERROR;
             $intCode = $code;
         }
-        
+
         parent::__construct($message, $intCode, $previous);
     }
 
@@ -71,14 +63,13 @@ abstract class ApplicationException extends Exception
      * @param  string|null  $reason  The failure reason
      * @param  string|null  $key  Custom language key (optional)
      * @param  int  $code  The exception code
-     * @return static
      */
     public static function withReason(?string $reason = null, ?string $key = null, int $code = 0): static
     {
-        if ($reason && !$key) {
-            $key = static::$defaultKey . '_with_reason';
+        if ($reason && ! $key) {
+            $key = static::$defaultKey.'_with_reason';
         }
-        
+
         return new static($key, ['reason' => $reason], $code);
     }
 
@@ -88,7 +79,6 @@ abstract class ApplicationException extends Exception
      * @param  string  $key  The language key
      * @param  array  $replace  Parameters to replace in the message
      * @param  int  $code  The exception code
-     * @return static
      */
     public static function withKey(string $key, array $replace = [], int $code = 0): static
     {
@@ -101,20 +91,17 @@ abstract class ApplicationException extends Exception
      * @param  string  $message  The error message
      * @param  int  $code  The exception code
      * @param  Exception|null  $previous  The previous exception
-     * @return static
      */
     public static function withMessage(string $message, int $code = 0, ?Exception $previous = null): static
     {
         $instance = new static(null, [], $code, $previous);
         $instance->message = $message;
-        
+
         return $instance;
     }
 
     /**
      * Get the default language key for this exception type.
-     *
-     * @return string
      */
     public static function getDefaultKey(): string
     {
@@ -125,7 +112,6 @@ abstract class ApplicationException extends Exception
      * Set the default language key for this exception type.
      *
      * @param  string  $key  The default language key
-     * @return void
      */
     public static function setDefaultKey(string $key): void
     {
@@ -136,7 +122,6 @@ abstract class ApplicationException extends Exception
      * Check if the exception has a specific error code.
      *
      * @param  int  $code  The error code to check
-     * @return bool
      */
     public function hasCode(int $code): bool
     {
@@ -147,7 +132,6 @@ abstract class ApplicationException extends Exception
      * Check if the exception is of a specific type by class name.
      *
      * @param  string  $className  The class name to check
-     * @return bool
      */
     public function isType(string $className): bool
     {
@@ -156,8 +140,6 @@ abstract class ApplicationException extends Exception
 
     /**
      * Get the HTTP status code for this exception.
-     *
-     * @return HttpStatusCode
      */
     public function getHttpStatusCode(): HttpStatusCode
     {
@@ -166,8 +148,6 @@ abstract class ApplicationException extends Exception
 
     /**
      * Get the language key used for this exception.
-     *
-     * @return string|null
      */
     public function getKey(): ?string
     {
@@ -176,8 +156,6 @@ abstract class ApplicationException extends Exception
 
     /**
      * Get exception context information for logging.
-     *
-     * @return array
      */
     public function getContext(): array
     {

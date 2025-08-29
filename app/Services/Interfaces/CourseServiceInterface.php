@@ -4,8 +4,8 @@ namespace App\Services\Interfaces;
 
 use App\Models\Course;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 interface CourseServiceInterface extends BaseServiceInterface
 {

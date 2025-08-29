@@ -16,6 +16,6 @@ enum CourseStatus: string implements HasStatusStyles
 
     public function getDescription(): ?string
     {
-        return __('enums_status_course.description.' . $this->value);
+        return __('enums_status_course.description.'.$this->value);
     }
 }

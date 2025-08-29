@@ -5,20 +5,18 @@ namespace App\Models;
 use App\Enums\MimeType;
 use App\Enums\Status\CourseStatus;
 use App\Enums\System\RoleSystem;
+use Guava\Calendar\Contracts\Eventable;
+use Guava\Calendar\ValueObjects\CalendarEvent;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Tags\HasTags;
-use Guava\Calendar\Contracts\Eventable;
-use Guava\Calendar\ValueObjects\CalendarEvent;
-use Illuminate\Support\Collection;
 
 /**
  * @property string $id
@@ -48,6 +46,7 @@ use Illuminate\Support\Collection;
  * @property-read \App\Models\User $teacher
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
  * @property-read int|null $users_count
+ *
  * @method static \Database\Factories\CourseFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Course newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Course newQuery()
@@ -74,16 +73,17 @@ use Illuminate\Support\Collection;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Course withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Course withoutTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Course withoutTrashed()
+ *
  * @mixin \Eloquent
  */
-class Course extends Model implements HasMedia, Auditable, Eventable
+class Course extends Model implements Auditable, Eventable, HasMedia
 {
     use HasFactory,
         HasTags,
         HasUuids,
         InteractsWithMedia,
-        SoftDeletes,
-        \OwenIt\Auditing\Auditable;
+        \OwenIt\Auditing\Auditable,
+        SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

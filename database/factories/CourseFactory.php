@@ -35,7 +35,6 @@ class CourseFactory extends Factory
         ];
     }
 
-
     /**
      * Indicate that the course is featured.
      */

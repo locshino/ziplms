@@ -31,6 +31,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \App\Models\Media> $media
  * @property-read int|null $media_count
  * @property-read \App\Models\User $student
+ *
  * @method static \Database\Factories\SubmissionFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Submission newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Submission newQuery()
@@ -51,6 +52,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Submission whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Submission withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Submission withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Submission extends Model implements HasMedia

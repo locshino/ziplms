@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Auditable;
-use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
 /**
  * @property string $id
@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\Question $question
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\StudentQuizAnswer> $studentAnswers
  * @property-read int|null $student_answers_count
+ *
  * @method static \Database\Factories\AnswerChoiceFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AnswerChoice newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AnswerChoice newQuery()
@@ -40,11 +41,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AnswerChoice whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AnswerChoice withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AnswerChoice withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class AnswerChoice extends Model implements AuditableContract
 {
-    use HasFactory, HasUuids, SoftDeletes, Auditable;
+    use Auditable, HasFactory, HasUuids, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

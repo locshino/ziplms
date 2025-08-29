@@ -14,6 +14,7 @@ use Spatie\Tags\Tag as SpatieTag;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read mixed $translations
+ *
  * @method static Builder<static>|Tag containing(string $name, $locale = null)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tag newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tag newQuery()
@@ -31,6 +32,7 @@ use Spatie\Tags\Tag as SpatieTag;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tag whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tag whereUpdatedAt($value)
  * @method static Builder<static>|Tag withType(?string $type = null)
+ *
  * @mixin \Eloquent
  */
 class Tag extends SpatieTag

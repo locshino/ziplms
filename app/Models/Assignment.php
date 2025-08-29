@@ -36,6 +36,7 @@ use Spatie\Tags\HasTags;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Submission> $submissions
  * @property-read int|null $submissions_count
  * @property-read int|null $tags_count
+ *
  * @method static \Database\Factories\AssignmentFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment newQuery()
@@ -58,16 +59,17 @@ use Spatie\Tags\HasTags;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment withoutTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Assignment withoutTrashed()
+ *
  * @mixin \Eloquent
  */
-class Assignment extends Model implements HasMedia, Auditable
+class Assignment extends Model implements Auditable, HasMedia
 {
     use HasFactory,
         HasTags,
         HasUuids,
         InteractsWithMedia,
-        SoftDeletes,
-        \OwenIt\Auditing\Auditable;
+        \OwenIt\Auditing\Auditable,
+        SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

@@ -115,7 +115,7 @@ class UserSearchData
      */
     public function hasExcludeIds(): bool
     {
-        return !empty($this->excludeIds);
+        return ! empty($this->excludeIds);
     }
 
     /**
@@ -123,7 +123,7 @@ class UserSearchData
      */
     public function hasIncludeIds(): bool
     {
-        return !empty($this->includeIds);
+        return ! empty($this->includeIds);
     }
 
     /**
@@ -171,7 +171,7 @@ class UserSearchData
     {
         return [
             'column' => $this->sortBy,
-            'direction' => strtolower($this->sortDirection) === 'asc' ? 'asc' : 'desc'
+            'direction' => strtolower($this->sortDirection) === 'asc' ? 'asc' : 'desc',
         ];
     }
 
@@ -202,8 +202,8 @@ class UserSearchData
             'keyword' => "sometimes|string|max:{$maxFieldLength}",
             'name' => "sometimes|string|max:{$maxFieldLength}",
             'email' => "sometimes|email|max:{$maxFieldLength}",
-            'status' => 'sometimes|in:' . implode(',', array_column(UserStatus::cases(), 'value')),
-            'role' => 'sometimes|in:' . implode(',', array_column(RoleSystem::cases(), 'value')),
+            'status' => 'sometimes|in:'.implode(',', array_column(UserStatus::cases(), 'value')),
+            'role' => 'sometimes|in:'.implode(',', array_column(RoleSystem::cases(), 'value')),
             'created_after' => 'sometimes|date',
             'created_before' => 'sometimes|date|after_or_equal:created_after',
             'last_login_after' => 'sometimes|date',
@@ -216,7 +216,7 @@ class UserSearchData
             'include_ids.*' => 'integer|exists:users,id',
             'sort_by' => 'sometimes|string|in:id,name,email,status,created_at,updated_at',
             'sort_direction' => 'sometimes|string|in:asc,desc',
-            'limit' => "sometimes|integer|min:1|max:{$maxLimit}"
+            'limit' => "sometimes|integer|min:1|max:{$maxLimit}",
         ];
     }
 }

@@ -4,14 +4,15 @@ namespace Database\Seeders;
 
 use App\Enums\Status\UserStatus;
 use App\Enums\System\RoleSystem;
+use App\Models\Role;
 use App\Models\User;
 use Database\Seeders\Contracts\HasCacheSeeder;
 use Illuminate\Database\Seeder;
-use App\Models\Role;
 
 class UserSeeder extends Seeder
 {
     use HasCacheSeeder;
+
     /**
      * Run the database seeds.
      */

@@ -21,36 +21,56 @@ use Livewire\WithPagination;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use UnitEnum;
 
 class MyAssignmentsPage extends Page
 {
     use HasPageShield, WithFileUploads, WithPagination;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-academic-cap';
+
     protected static ?string $navigationLabel = 'My Assignments';
+
     protected static ?string $title = 'My Assignments';
+
     protected static ?string $slug = 'my-assignments';
+
     protected string $view = 'filament.pages.my-assignments';
 
     // Các thuộc tính public để lưu trữ trạng thái của trang.
     public string $search = '';
+
     public string $filter = 'all';
+
     public string $courseId = '';
+
     public bool $showSubmissionModal = false;
+
     public bool $showInstructionsModal = false;
+
     public bool $showGradingResultModal = false;
+
     public bool $showSubmissionHistoryModal = false;
+
     public bool $showDocumentsModal = false;
+
     public ?CourseAssignment $selectedCourseAssignment = null;
+
     public ?Submission $selectedSubmission = null;
+
     public $submissionHistory = [];
+
     public $assignmentDocuments = [];
+
     public string $submissionType = 'file';
+
     public $file;
+
     public string $link_url = '';
+
     public string $notes = '';
+
     public array $courseColors = [];
+
     public array $colorPalette = [
         'blue' => ['bg' => 'bg-blue-100 dark:bg-blue-900', 'text' => 'text-blue-800 dark:text-blue-200'],
         'green' => ['bg' => 'bg-green-100 dark:bg-green-900', 'text' => 'text-green-800 dark:text-green-200'],
@@ -146,7 +166,7 @@ class MyAssignmentsPage extends Page
         if ($this->courseId) {
             $query->where('course_id', $this->courseId);
         }
-        
+
         // Sử dụng match expression để xử lý các bộ lọc khác nhau.
         match ($this->filter) {
             'submitted' => $query->whereHas(
@@ -187,7 +207,7 @@ class MyAssignmentsPage extends Page
             $this->resetErrorBag();
         }
     }
-    
+
     // Phương thức setFilter(): Đặt bộ lọc và reset trang.
     public function setFilter(string $filter): void
     {
@@ -220,23 +240,27 @@ class MyAssignmentsPage extends Page
         $isEnrolled = Auth::user()->courses()->where('course_id', $this->selectedCourseAssignment->course_id)->exists();
         if (! $isEnrolled) {
             Notification::make()->title('Không thể thực hiện')->body('Bạn không có trong danh sách sinh viên của khóa học này.')->warning()->send();
+
             return;
         }
         $assignment = $this->selectedCourseAssignment->assignment;
         $lastSubmission = $assignment->submissions->first();
         if ($lastSubmission && in_array($lastSubmission->status, [SubmissionStatus::GRADED, SubmissionStatus::RETURNED])) {
             Notification::make()->title('Không thể nộp bài')->body('Bài tập của bạn đã được chấm điểm. Bạn không thể nộp lại.')->warning()->send();
+
             return;
         }
         $maxAttempts = $assignment->max_attempts;
         $submissionCount = $assignment->submissions->count();
         if ($maxAttempts !== null && $maxAttempts > 0 && $submissionCount >= $maxAttempts) {
             Notification::make()->title('Hết lượt nộp bài')->body("Bạn đã sử dụng hết {$submissionCount}/{$maxAttempts} lần nộp bài.")->warning()->send();
+
             return;
         }
         $startAt = $this->selectedCourseAssignment->start_at;
         if ($startAt && now()->isBefore($startAt)) {
             Notification::make()->title('Chưa đến thời gian làm bài')->body("Bài tập này sẽ bắt đầu vào lúc: {$startAt->format('d/m/Y H:i')}.")->info()->send();
+
             return;
         }
 
@@ -335,7 +359,7 @@ class MyAssignmentsPage extends Page
                 // Xác định trạng thái nộp bài: đúng hạn hay muộn.
                 $isLate = $endAt ? now()->isAfter($endAt) : false;
                 $status = $isLate ? SubmissionStatus::LATE : SubmissionStatus::SUBMITTED;
-                
+
                 // Tạo một bản ghi bài nộp mới.
                 $submission = Submission::create([
                     'assignment_id' => $this->selectedCourseAssignment->assignment_id,
@@ -344,13 +368,13 @@ class MyAssignmentsPage extends Page
                     'status' => $status,
                     'submitted_at' => now(),
                 ]);
-                
+
                 // Xử lý file đính kèm.
                 if ($this->submissionType === 'file' && $this->file) {
                     $submission->addMedia($this->file->getRealPath())
-                                ->usingFileName($this->file->getClientOriginalName())
-                                ->toMediaCollection('submission_documents');
-                // Xử lý nộp bài bằng link.
+                        ->usingFileName($this->file->getClientOriginalName())
+                        ->toMediaCollection('submission_documents');
+                    // Xử lý nộp bài bằng link.
                 } elseif ($this->submissionType === 'link') {
                     $submission->content = "Submitted via link: {$this->link_url}\n\nNotes:\n".$this->notes;
                     $submission->save();
@@ -361,7 +385,9 @@ class MyAssignmentsPage extends Page
         } catch (Exception $e) {
             $message = $e instanceof FileIsTooBig ? 'Tệp tải lên vượt quá dung lượng cho phép.' : 'Đã có lỗi không mong muốn xảy ra. Vui lòng thử lại.';
             Notification::make()->title('Nộp bài thất bại!')->body($message)->danger()->send();
-            if (!($e instanceof FileIsTooBig)) report($e);
+            if (! ($e instanceof FileIsTooBig)) {
+                report($e);
+            }
         }
     }
 
@@ -373,6 +399,7 @@ class MyAssignmentsPage extends Page
         if (! $isEnrolled) {
             Notification::make()->title('Nộp bài thất bại!')->body('Bạn không có trong danh sách sinh viên của khóa học này.')->danger()->send();
             $this->closeSubmissionModal();
+
             return false;
         }
 
@@ -384,6 +411,7 @@ class MyAssignmentsPage extends Page
         if ($lastSubmission && in_array($lastSubmission->status, [SubmissionStatus::GRADED, SubmissionStatus::RETURNED])) {
             Notification::make()->title('Nộp bài thất bại!')->body('Bài tập đã được chấm điểm.')->warning()->send();
             $this->closeSubmissionModal();
+
             return false;
         }
 
@@ -394,6 +422,7 @@ class MyAssignmentsPage extends Page
         if ($maxAttempts !== null && $maxAttempts > 0 && $submissionCount >= $maxAttempts) {
             Notification::make()->title('Hết lượt nộp bài!')->body('Bạn đã hết số lần nộp bài cho phép.')->warning()->send();
             $this->closeSubmissionModal();
+
             return false;
         }
 
@@ -402,6 +431,7 @@ class MyAssignmentsPage extends Page
         if ($startAt && now()->isBefore($startAt)) {
             Notification::make()->title('Nộp bài thất bại!')->body('Chưa đến thời gian làm bài.')->warning()->send();
             $this->closeSubmissionModal();
+
             return false;
         }
 
@@ -416,6 +446,7 @@ class MyAssignmentsPage extends Page
         // Kiểm tra quyền truy cập.
         if ($submission?->student_id !== Auth::id()) {
             Notification::make()->title('Lỗi')->body('Không có quyền truy cập.')->danger()->send();
+
             return null;
         }
 
@@ -424,6 +455,7 @@ class MyAssignmentsPage extends Page
 
         if (! $mediaItem) {
             Notification::make()->title('Lỗi')->body('Không tìm thấy tệp đính kèm.')->danger()->send();
+
             return null;
         }
 

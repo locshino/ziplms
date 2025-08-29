@@ -2,37 +2,27 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Pages\Page;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Support\Facades\Auth;
-use App\Filament\Tables\AssignmentTable;
+use App\Enums\Status\QuizAttemptStatus;
+use App\Enums\Status\SubmissionStatus;
+use App\Filament\Resources\QuizAttempts\Tables\QuizAttemptsTable;
+use App\Filament\Resources\Submissions\Tables\SubmissionsTable;
 use App\Models\Course;
 use App\Models\QuizAttempt;
 use App\Models\Submission;
-use App\Enums\Status\QuizStatus;
-use App\Enums\Status\AssignmentStatus;
-use Illuminate\Support\Collection;
 use BackedEnum;
-use App\Filament\Resources\Submissions\Tables\SubmissionsTable;
-use App\Filament\Resources\QuizAttempts\Tables\QuizAttemptsTable;
-use Filament\Tables\Columns\TextColumn;
-use App\Enums\Status\QuizAttemptStatus;
 use Filament\Actions\ViewAction;
+use Filament\Pages\Page;
+use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Malzariey\FilamentDaterangepickerFilter\Filters\DateRangeFilter;
 use pxlrbt\FilamentExcel\Actions\ExportBulkAction;
 use pxlrbt\FilamentExcel\Columns\Column;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
-use App\Enums\Status\SubmissionStatus;
-
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreBulkAction;
-
 
 class Reports extends Page implements Tables\Contracts\HasTable
 {
@@ -40,24 +30,32 @@ class Reports extends Page implements Tables\Contracts\HasTable
     // use HasPageShield;
 
     protected string $view = 'filament.pages.reports';
+
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-chart-bar';
 
     public $courses = [];
+
     public $totalCourse = [];
+
     public $selectedCourseId = null;
+
     public string $activeTab = 'quizzes';
+
     public $startDate;
+
     public $endDate;
 
-
     public Collection $publishedQuizzes;
+
     public Collection $publishedAssignments;
+
     public Collection $closedQuizzes;
+
     public Collection $closedAssignments;
+
     public Collection $totalQuizzes;
+
     public Collection $totalAssignments;
-
-
 
     /**
      * Hàm mount để khởi tạo dữ liệu ban đầu.
@@ -89,7 +87,6 @@ class Reports extends Page implements Tables\Contracts\HasTable
         $this->closedQuizzes = collect();
         $this->closedAssignments = collect();
 
-
     }
 
     /**
@@ -101,6 +98,7 @@ class Reports extends Page implements Tables\Contracts\HasTable
             $this->resetTable();
         }
     }
+
     public function applyFilters()
     {
         $this->resetTable(); // nếu có method này dùng để reload lại table theo filter
@@ -115,9 +113,11 @@ class Reports extends Page implements Tables\Contracts\HasTable
         if ($this->activeTab === 'quizzes') {
             return $this->quiz($table);
         }
+
         return $this->submission($table);
 
     }
+
     public function quiz($table)
     {
         $teacherId = auth()->id();
@@ -127,8 +127,7 @@ class Reports extends Page implements Tables\Contracts\HasTable
             $query = QuizAttempt::with(['quiz.courses', 'student'])
                 ->whereHas('quiz.courses', function ($q) use ($teacherId) {
                     $q->where('teacher_id', $teacherId);
-                })
-            ;
+                });
         } else {
             $query = QuizAttempt::with(['quiz', 'student', 'quiz.courses'])
                 ->whereHas('quiz.courses', function ($q) use ($teacherId) {
@@ -136,7 +135,7 @@ class Reports extends Page implements Tables\Contracts\HasTable
                         $subQuery->where('users.id', $teacherId);
                     });
                 });
-            ;
+
         }
         $query->when($this->selectedCourseId, function ($q) {
             $q->whereHas('quiz.courses', function ($q) {
@@ -224,10 +223,11 @@ class Reports extends Page implements Tables\Contracts\HasTable
                         Column::make('updated_at'),
                     ])
                         // Optional: you can customize the filename
-                        ->withFilename('quiz_point&report_' . now())
+                        ->withFilename('quiz_point&report_'.now()),
                 ]),
-            ])->query(fn() => $query);
+            ])->query(fn () => $query);
     }
+
     public function submission($table)
     {
         $teacherId = auth()->id();
@@ -334,10 +334,10 @@ class Reports extends Page implements Tables\Contracts\HasTable
                             Column::make('updated_at'),
                         ])
                             // Optional: you can customize the filename
-                            ->withFilename('assignment&report_' . now())
+                            ->withFilename('assignment&report_'.now()),
                     ]),
             ])
-            ->query(fn() => $query);
+            ->query(fn () => $query);
 
     }
 }

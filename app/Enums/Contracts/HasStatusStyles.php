@@ -11,7 +11,7 @@ use Filament\Support\Contracts\HasLabel;
  * Interface for status enums that provides styling capabilities
  * including label, description, icon, and color support for Filament components.
  */
-interface HasStatusStyles extends HasLabel, HasDescription, HasIcon, HasColor
+interface HasStatusStyles extends HasColor, HasDescription, HasIcon, HasLabel
 {
     //
 }

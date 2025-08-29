@@ -6,13 +6,11 @@ use App\Enums\Status\QuizAttemptStatus;
 use App\Filament\Resources\Quizzes\Tables\QuizzesTable;
 use App\Filament\Resources\Users\Tables\UsersTable;
 use App\Livewire\ShowQuizAnswers;
-use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\ModalTableSelect;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -50,7 +48,7 @@ class QuizAttemptForm
                     ->schema([
                         // The Livewire component will only be mounted when the Accordion is opened
                         Livewire::make(ShowQuizAnswers::class)
-                            ->key(fn(?QuizAttempt $record) => $record?->id),
+                            ->key(fn (?QuizAttempt $record) => $record?->id),
                     ]),
             ]);
     }

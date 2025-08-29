@@ -4,14 +4,10 @@ namespace App\Filament\Resources\Courses\RelationManagers;
 
 use App\Enums\Status\AssignmentStatus;
 use App\Filament\Resources\Assignments\AssignmentResource;
-use Filament\Actions\CreateAction;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -42,7 +38,6 @@ class AssignmentsRelationManager extends RelationManager
                 ...$this->getTimeCoursePicker(),
             ]);
     }
-
 
     public function table(Table $table): Table
     {
@@ -109,7 +104,7 @@ class AssignmentsRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    ->schema(fn(AttachAction $action): array => [
+                    ->schema(fn (AttachAction $action): array => [
                         $action->getRecordSelect(),
                         ...$this->getTimeCoursePicker(),
                     ])
@@ -133,7 +128,7 @@ class AssignmentsRelationManager extends RelationManager
                     $now = now();
 
                     return match (true) {
-                        !isset($owner->start_at) || !isset($owner->end_at) => $now,
+                        ! isset($owner->start_at) || ! isset($owner->end_at) => $now,
                         $now->between($owner->start_at, $owner->end_at) => $now,
                         default => $owner->start_at,
                     };

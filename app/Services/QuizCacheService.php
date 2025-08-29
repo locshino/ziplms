@@ -164,10 +164,10 @@ class QuizCacheService implements QuizCacheServiceInterface
 
                     $totalAttempts = $attempts->count();
                     $averageScore = $totalAttempts > 0 ? $attempts->avg('points') : 0;
-        $maxScore = $totalAttempts > 0 ? $attempts->max('points') : 0;
-        $minScore = $totalAttempts > 0 ? $attempts->min('points') : 0;
-        $passRate = $totalAttempts > 0 ?
-            $attempts->where('points', '>=', 70)->count() / $totalAttempts * 100 : 0;
+                    $maxScore = $totalAttempts > 0 ? $attempts->max('points') : 0;
+                    $minScore = $totalAttempts > 0 ? $attempts->min('points') : 0;
+                    $passRate = $totalAttempts > 0 ?
+                        $attempts->where('points', '>=', 70)->count() / $totalAttempts * 100 : 0;
 
                     return [
                         'total_attempts' => $totalAttempts,
@@ -398,7 +398,7 @@ class QuizCacheService implements QuizCacheServiceInterface
             Log::error('Cache student attempts error', [
                 'quiz_id' => $quizId,
                 'student_id' => $studentId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }

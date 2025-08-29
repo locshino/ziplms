@@ -70,7 +70,7 @@ class UserUpdateData
     /**
      * Get validation rules for user update.
      *
-     * @param mixed $userId Current user ID for unique email validation
+     * @param  mixed  $userId  Current user ID for unique email validation
      * @return array<string, string|array>
      */
     public function getValidationRules(
@@ -90,7 +90,7 @@ class UserUpdateData
         if ($this->email !== null) {
             $emailRule = "required|email|max:{$maxEmailLength}";
             if ($userId !== null) {
-                $emailRule .= '|unique:users,email,' . $userId;
+                $emailRule .= '|unique:users,email,'.$userId;
             } else {
                 $emailRule .= '|unique:users,email';
             }
@@ -102,11 +102,11 @@ class UserUpdateData
         }
 
         if ($this->status !== null) {
-            $rules['status'] = 'required|in:' . implode(',', array_column(UserStatus::cases(), 'value'));
+            $rules['status'] = 'required|in:'.implode(',', array_column(UserStatus::cases(), 'value'));
         }
 
         if ($this->role !== null) {
-            $rules['role'] = 'required|in:' . implode(',', array_column(RoleSystem::cases(), 'value'));
+            $rules['role'] = 'required|in:'.implode(',', array_column(RoleSystem::cases(), 'value'));
         }
 
         if ($this->avatar !== null) {

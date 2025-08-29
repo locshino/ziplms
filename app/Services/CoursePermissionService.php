@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
+use App\Libs\Roles\RoleHelper;
 use App\Models\Course;
 use App\Models\User;
 use Spatie\Permission\Models\Permission;
-use App\Libs\Roles\RoleHelper;
 
 class CoursePermissionService
 {

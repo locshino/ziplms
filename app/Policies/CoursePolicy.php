@@ -3,9 +3,8 @@
 namespace App\Policies;
 
 use App\Libs\Roles\RoleHelper;
-use App\Models\User;
 use App\Models\Course;
-use App\Models\Role;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class CoursePolicy

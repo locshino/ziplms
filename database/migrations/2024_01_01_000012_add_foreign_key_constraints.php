@@ -19,7 +19,6 @@ return new class extends Migration
 
         });
 
-
         // Add foreign keys for course_user table
         Schema::table('course_user', function (Blueprint $table) {
             $table->foreign('course_id', 'fk_course_user_course_id')

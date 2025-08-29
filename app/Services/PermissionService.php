@@ -322,25 +322,26 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
     /**
      * Ensure a permission exists, create it if it doesn't.
      *
-     * @param string $permissionName The permission name to ensure exists
-     * @param string|null $guardName The guard name (defaults to 'web')
+     * @param  string  $permissionName  The permission name to ensure exists
+     * @param  string|null  $guardName  The guard name (defaults to 'web')
      * @return Permission The existing or newly created permission
+     *
      * @throws ServiceException When permission creation fails
      */
     public function ensurePermissionExists(string $permissionName, ?string $guardName = null): Permission
     {
         try {
             $guardName = $guardName ?? 'web';
-            
+
             // Check if permission already exists
             $permission = Permission::where('name', $permissionName)
                 ->where('guard_name', $guardName)
                 ->first();
-                
+
             if ($permission) {
                 return $permission;
             }
-            
+
             // Create the permission if it doesn't exist
             return Permission::create([
                 'name' => $permissionName,
@@ -348,7 +349,7 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
                 'is_system' => false,
             ]);
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to ensure permission exists: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to ensure permission exists: '.$e->getMessage());
         }
     }
 

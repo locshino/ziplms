@@ -3,24 +3,23 @@
 namespace App\Services;
 
 use App\Exceptions\Services\ServiceException;
+use App\Libs\Permissions\PermissionHelper;
 use App\Models\Course;
-use App\Models\User;
 use App\Models\Enrollment;
 use App\Models\Permission;
+use App\Models\User;
 use App\Repositories\Interfaces\CourseRepositoryInterface;
-use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Repositories\Interfaces\EnrollmentRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Services\Interfaces\StudentEnrollmentServiceInterface;
-use App\Services\PermissionService;
-use App\Libs\Permissions\PermissionHelper;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Student Enrollment Service
- * 
+ *
  * Handles student enrollment operations for courses
  */
 class StudentEnrollmentService implements StudentEnrollmentServiceInterface
@@ -42,7 +41,7 @@ class StudentEnrollmentService implements StudentEnrollmentServiceInterface
         } catch (Exception $e) {
             throw new ServiceException(
                 'exceptions_services.service_error',
-                ['message' => "Failed to get enrolled students for course {$course->id}: " . $e->getMessage()],
+                ['message' => "Failed to get enrolled students for course {$course->id}: ".$e->getMessage()],
                 0,
                 $e
             );
@@ -53,9 +52,9 @@ class StudentEnrollmentService implements StudentEnrollmentServiceInterface
      * Bulk enroll students in a course
      */
     public function bulkEnrollStudents(
-        Course $course, 
-        array $studentIds, 
-        ?Carbon $enrollmentDate = null, 
+        Course $course,
+        array $studentIds,
+        ?Carbon $enrollmentDate = null,
         ?string $notes = null
     ): array {
         try {
@@ -72,9 +71,10 @@ class StudentEnrollmentService implements StudentEnrollmentServiceInterface
             foreach ($studentIds as $studentId) {
                 try {
                     $user = $this->userRepository->findById($studentId);
-                    if (!$user) {
+                    if (! $user) {
                         $errors[] = "User with ID {$studentId} not found";
                         $skippedCount++;
+
                         continue;
                     }
 
@@ -82,6 +82,7 @@ class StudentEnrollmentService implements StudentEnrollmentServiceInterface
                     if ($this->enrollmentRepository->isUserEnrolledInCourse($studentId, $course->id)) {
                         $errors[] = "User {$user->name} is already enrolled";
                         $skippedCount++;
+
                         continue;
                     }
 
@@ -99,7 +100,7 @@ class StudentEnrollmentService implements StudentEnrollmentServiceInterface
 
                     $enrolledCount++;
                 } catch (Exception $e) {
-                    $errors[] = "Failed to enroll user {$studentId}: " . $e->getMessage();
+                    $errors[] = "Failed to enroll user {$studentId}: ".$e->getMessage();
                     $skippedCount++;
                 }
             }
@@ -111,13 +112,13 @@ class StudentEnrollmentService implements StudentEnrollmentServiceInterface
                 'enrolled_count' => $enrolledCount,
                 'skipped_count' => $skippedCount,
                 'errors' => $errors,
-                'message' => $this->generateEnrollmentMessage($enrolledCount, $skippedCount)
+                'message' => $this->generateEnrollmentMessage($enrolledCount, $skippedCount),
             ];
         } catch (Exception $e) {
             DB::rollBack();
             throw new ServiceException(
                 'exceptions_services.service_error',
-                ['message' => "Failed to bulk enroll students in course {$course->id}: " . $e->getMessage()],
+                ['message' => "Failed to bulk enroll students in course {$course->id}: ".$e->getMessage()],
                 0,
                 $e
             );
@@ -133,7 +134,7 @@ class StudentEnrollmentService implements StudentEnrollmentServiceInterface
             DB::beginTransaction();
 
             $user = $this->userRepository->findById($studentId);
-            if (!$user) {
+            if (! $user) {
                 throw new ServiceException(
                     'exceptions_services.service_error',
                     ['message' => "User with ID {$studentId} not found"]
@@ -141,7 +142,7 @@ class StudentEnrollmentService implements StudentEnrollmentServiceInterface
             }
 
             // Check if enrolled
-            if (!$this->enrollmentRepository->isUserEnrolledInCourse($studentId, $course->id)) {
+            if (! $this->enrollmentRepository->isUserEnrolledInCourse($studentId, $course->id)) {
                 throw new ServiceException(
                     'exceptions_services.service_error',
                     ['message' => "User {$user->name} is not enrolled in this course"]
@@ -158,13 +159,13 @@ class StudentEnrollmentService implements StudentEnrollmentServiceInterface
 
             return [
                 'success' => true,
-                'message' => "Student {$user->name} has been unenrolled from the course"
+                'message' => "Student {$user->name} has been unenrolled from the course",
             ];
         } catch (Exception $e) {
             DB::rollBack();
             throw new ServiceException(
                 'exceptions_services.service_error',
-                ['message' => "Failed to unenroll student from course {$course->id}: " . $e->getMessage()],
+                ['message' => "Failed to unenroll student from course {$course->id}: ".$e->getMessage()],
                 0,
                 $e
             );
@@ -179,24 +180,24 @@ class StudentEnrollmentService implements StudentEnrollmentServiceInterface
         try {
             // Get users who are not teachers, managers, or already enrolled
             $excludedUserIds = collect();
-            
+
             // Exclude teachers
             $teachers = $this->userRepository->getUsersByRole('teacher');
             $excludedUserIds = $excludedUserIds->merge($teachers->pluck('id'));
-            
+
             // Exclude course managers
             $managers = $this->getCourseManagers($course);
             $excludedUserIds = $excludedUserIds->merge($managers->pluck('id'));
-            
+
             // Exclude already enrolled students
             $enrolled = $this->enrollmentRepository->getEnrolledUserIds($course->id);
             $excludedUserIds = $excludedUserIds->merge($enrolled);
-            
+
             return $this->userRepository->getUsersNotInIds($excludedUserIds->unique()->toArray());
         } catch (Exception $e) {
             throw new ServiceException(
                 'exceptions_services.service_error',
-                ['message' => "Failed to get available students for course {$course->id}: " . $e->getMessage()],
+                ['message' => "Failed to get available students for course {$course->id}: ".$e->getMessage()],
                 0,
                 $e
             );
@@ -225,14 +226,14 @@ class StudentEnrollmentService implements StudentEnrollmentServiceInterface
     {
         // Grant enrolled permissions
         foreach ($this->getEnrolledPermissions() as $permission) {
-            if (!$user->hasPermissionTo($permission)) {
+            if (! $user->hasPermissionTo($permission)) {
                 $user->givePermissionTo($permission);
             }
         }
 
         // Grant course-specific permissions
         foreach ($this->getCourseSpecificPermissions($course) as $permission) {
-            if (!$user->hasPermissionTo($permission)) {
+            if (! $user->hasPermissionTo($permission)) {
                 $user->givePermissionTo($permission);
             }
         }
@@ -252,7 +253,7 @@ class StudentEnrollmentService implements StudentEnrollmentServiceInterface
 
         // Check if user is enrolled in other courses before revoking general enrolled permissions
         $otherEnrollments = $this->enrollmentRepository->getUserEnrollmentsExcludingCourse(
-            $user->id, 
+            $user->id,
             $course->id
         );
 
@@ -304,14 +305,14 @@ class StudentEnrollmentService implements StudentEnrollmentServiceInterface
                 ->course()
                 ->id($course->id)
                 ->build();
-                
+
             // Check if permission exists first
             $permission = Permission::where('name', $permissionName)->first();
-            if (!$permission) {
+            if (! $permission) {
                 // Permission doesn't exist, return empty collection
                 return collect();
             }
-                
+
             return $this->userRepository->getUsersWithPermission($permissionName);
         } catch (Exception $e) {
             // If there's any error, return empty collection to avoid breaking the flow
@@ -329,7 +330,7 @@ class StudentEnrollmentService implements StudentEnrollmentServiceInterface
         } elseif ($enrolledCount > 0) {
             return "Successfully enrolled {$enrolledCount} students.";
         } else {
-            return "No students were enrolled.";
+            return 'No students were enrolled.';
         }
     }
 }

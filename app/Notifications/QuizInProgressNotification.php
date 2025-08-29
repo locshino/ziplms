@@ -41,7 +41,7 @@ class QuizInProgressNotification extends Notification implements ShouldQueue
             'quiz_id' => $this->quizAttempt->quiz_id,
             'quiz_title' => $this->quizAttempt->quiz->title,
             'started_at' => $this->quizAttempt->start_at,
-            'action_url' => route('filament.app.pages.quiz-taking', ['quiz' => $this->quizAttempt->quiz_id])
+            'action_url' => route('filament.app.pages.quiz-taking', ['quiz' => $this->quizAttempt->quiz_id]),
         ]);
     }
 
@@ -60,7 +60,7 @@ class QuizInProgressNotification extends Notification implements ShouldQueue
             'quiz_id' => $this->quizAttempt->quiz_id,
             'quiz_title' => $this->quizAttempt->quiz->title,
             'started_at' => $this->quizAttempt->start_at,
-            'action_url' => route('filament.app.pages.quiz-taking', ['quiz' => $this->quizAttempt->quiz_id])
+            'action_url' => route('filament.app.pages.quiz-taking', ['quiz' => $this->quizAttempt->quiz_id]),
         ];
     }
 }

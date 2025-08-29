@@ -25,6 +25,7 @@ use Tapp\FilamentMailLog\Models\MailLog as FilamentMailLogModel;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read mixed $data_json
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MailLog newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MailLog newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MailLog query()
@@ -46,6 +47,7 @@ use Tapp\FilamentMailLog\Models\MailLog as FilamentMailLogModel;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MailLog whereSubject($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MailLog whereTo($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MailLog whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class MailLog extends FilamentMailLogModel

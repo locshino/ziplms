@@ -24,6 +24,7 @@ class Login extends FilamentLogin
         } catch (TooManyRequestsException $exception) {
             // If too many requests, send notification and stop authentication
             $this->getRateLimitedNotification($exception)?->send();
+
             return null;
         }
 
@@ -45,7 +46,7 @@ class Login extends FilamentLogin
         // Step 6: Check user account status
         $userService = $this->getUserService();
 
-        $isNotExistOrActiveUser = !$user || !$userService->checkActive($user?->id);
+        $isNotExistOrActiveUser = ! $user || ! $userService->checkActive($user?->id);
 
         if ($isNotExistOrActiveUser || (! $authProvider->validateCredentials($user, $credentials))) {
             /** @var \Illuminate\Contracts\Auth\Guard $authGuard */
@@ -76,6 +77,7 @@ class Login extends FilamentLogin
             // If MFA is required, fill challenge form and stop authentication until challenge is complete
             if (filled($this->userUndertakingMultiFactorAuthentication)) {
                 $this->multiFactorChallengeForm->fill();
+
                 return null;
             }
         }
@@ -85,6 +87,7 @@ class Login extends FilamentLogin
             if (! ($user instanceof FilamentUser)) {
                 return true;
             }
+
             // Only allow login if user can access the current panel
             return $user->canAccessPanel(Filament::getCurrentOrDefaultPanel());
         }, $data['remember'] ?? false)) {

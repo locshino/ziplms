@@ -2,12 +2,11 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Flex;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
 use Filament\Schemas\Schema;
 
 class UserInfolist

@@ -50,13 +50,13 @@ class AssignmentService extends BaseService implements AssignmentServiceInterfac
                 }
             } elseif ($submissionType === 'link') {
                 $link_url = $data['link_url'] ?? 'No link provided.';
-                $content = "Submission Link: " . $link_url;
+                $content = 'Submission Link: '.$link_url;
                 if ($notes) {
-                    $content .= "\n\nNotes From Student:\n" . $notes;
+                    $content .= "\n\nNotes From Student:\n".$notes;
                 }
                 $submission->addMediaFromString($content)
-                           ->usingFileName('link_submission_for_assignment_' . $assignmentId . '.txt')
-                           ->toMediaCollection('submission_files');
+                    ->usingFileName('link_submission_for_assignment_'.$assignmentId.'.txt')
+                    ->toMediaCollection('submission_files');
             }
 
             return $submission;

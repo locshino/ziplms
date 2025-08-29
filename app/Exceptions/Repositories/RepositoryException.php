@@ -2,8 +2,8 @@
 
 namespace App\Exceptions\Repositories;
 
-use App\Exceptions\ApplicationException;
 use App\Enums\HttpStatusCode;
+use App\Exceptions\ApplicationException;
 use Exception;
 
 /**
@@ -18,15 +18,11 @@ class RepositoryException extends ApplicationException
 {
     /**
      * The default language key for repository exceptions.
-     *
-     * @var string
      */
     protected static string $defaultKey = 'exceptions.repositories.resource_not_found';
 
     /**
      * The default HTTP status code for repository exceptions.
-     *
-     * @var HttpStatusCode
      */
     protected HttpStatusCode $httpStatusCode;
 
@@ -58,8 +54,6 @@ class RepositoryException extends ApplicationException
 
     /**
      * Get the HTTP status code for this exception.
-     *
-     * @return HttpStatusCode
      */
     public function getHttpStatusCode(): HttpStatusCode
     {
@@ -71,7 +65,6 @@ class RepositoryException extends ApplicationException
      *
      * @param  string|null  $id  The resource ID
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function notFound(?string $id = null, ?string $reason = null): static
     {
@@ -93,7 +86,6 @@ class RepositoryException extends ApplicationException
      * Create exception for create operation failure.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function createFailed(?string $reason = null): static
     {
@@ -109,7 +101,6 @@ class RepositoryException extends ApplicationException
      *
      * @param  string|null  $id  The resource ID
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function updateFailed(?string $id = null, ?string $reason = null): static
     {
@@ -132,7 +123,6 @@ class RepositoryException extends ApplicationException
      *
      * @param  string|null  $id  The resource ID
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function deleteFailed(?string $id = null, ?string $reason = null): static
     {
@@ -154,7 +144,6 @@ class RepositoryException extends ApplicationException
      * Create exception for validation failure.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function validationFailed(?string $reason = null): static
     {
@@ -169,7 +158,6 @@ class RepositoryException extends ApplicationException
      * Create exception for database error.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function databaseError(?string $reason = null): static
     {
@@ -184,7 +172,6 @@ class RepositoryException extends ApplicationException
      * Create exception for duplicate entry.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function duplicateEntry(?string $reason = null): static
     {
@@ -199,7 +186,6 @@ class RepositoryException extends ApplicationException
      * Create exception for resource in use.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function resourceInUse(?string $reason = null): static
     {

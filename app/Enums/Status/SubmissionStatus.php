@@ -17,6 +17,6 @@ enum SubmissionStatus: string implements HasStatusStyles
 
     public function getDescription(): ?string
     {
-        return __('enums_status_submission.description.' . $this->value);
+        return __('enums_status_submission.description.'.$this->value);
     }
 }

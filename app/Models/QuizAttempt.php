@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Enums\Status\QuizAttemptStatus;
 use App\Enums\System\RoleSystem;
-use App\Models\StudentQuizAnswer;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -30,6 +29,7 @@ use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
  * @property-read \App\Models\User $student
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\StudentQuizAnswer> $studentAnswers
  * @property-read int|null $student_answers_count
+ *
  * @method static \Database\Factories\QuizAttemptFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt newQuery()
@@ -48,11 +48,12 @@ use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizAttempt withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class QuizAttempt extends Model implements AuditableContract
 {
-    use HasFactory, HasUuids, SoftDeletes, Auditable;
+    use Auditable, HasFactory, HasUuids, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -120,7 +121,7 @@ class QuizAttempt extends Model implements AuditableContract
     {
         return $this->hasMany(StudentQuizAnswer::class, 'quiz_attempt_id');
     }
-    
+
     // Alternative relationship name to avoid conflicts
     public function quizAnswers(): HasMany
     {

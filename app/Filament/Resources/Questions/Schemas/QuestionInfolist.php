@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Questions\Schemas;
 
-use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 

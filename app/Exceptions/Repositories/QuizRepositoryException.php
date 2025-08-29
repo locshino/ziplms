@@ -17,8 +17,6 @@ class QuizRepositoryException extends RepositoryException
 {
     /**
      * The default language key for quiz repository exceptions.
-     *
-     * @var string
      */
     protected static string $defaultKey = 'exceptions.repositories.quiz.quiz_not_found';
 
@@ -26,7 +24,6 @@ class QuizRepositoryException extends RepositoryException
      * Create exception for quiz not published.
      *
      * @param  string|null  $quizId  The quiz ID
-     * @return static
      */
     public static function notPublished(?string $quizId = null): static
     {
@@ -41,7 +38,6 @@ class QuizRepositoryException extends RepositoryException
      * Create exception for quiz not available.
      *
      * @param  string|null  $quizId  The quiz ID
-     * @return static
      */
     public static function notAvailable(?string $quizId = null): static
     {
@@ -56,7 +52,6 @@ class QuizRepositoryException extends RepositoryException
      * Create exception for quiz not started.
      *
      * @param  string|null  $quizId  The quiz ID
-     * @return static
      */
     public static function notStarted(?string $quizId = null): static
     {
@@ -71,7 +66,6 @@ class QuizRepositoryException extends RepositoryException
      * Create exception for quiz ended.
      *
      * @param  string|null  $quizId  The quiz ID
-     * @return static
      */
     public static function ended(?string $quizId = null): static
     {
@@ -86,7 +80,6 @@ class QuizRepositoryException extends RepositoryException
      * Create exception for attempt not found.
      *
      * @param  string|null  $attemptId  The attempt ID
-     * @return static
      */
     public static function attemptNotFound(?string $attemptId = null): static
     {
@@ -102,7 +95,6 @@ class QuizRepositoryException extends RepositoryException
      *
      * @param  string  $quizId  The quiz ID
      * @param  int  $maxAttempts  The maximum attempts allowed
-     * @return static
      */
     public static function maxAttemptsReached(string $quizId, int $maxAttempts): static
     {
@@ -117,7 +109,6 @@ class QuizRepositoryException extends RepositoryException
      * Create exception for attempt already submitted.
      *
      * @param  string  $attemptId  The attempt ID
-     * @return static
      */
     public static function attemptAlreadySubmitted(string $attemptId): static
     {
@@ -132,7 +123,6 @@ class QuizRepositoryException extends RepositoryException
      * Create exception for attempt not submitted.
      *
      * @param  string  $attemptId  The attempt ID
-     * @return static
      */
     public static function attemptNotSubmitted(string $attemptId): static
     {
@@ -147,7 +137,6 @@ class QuizRepositoryException extends RepositoryException
      * Create exception for time limit exceeded.
      *
      * @param  string  $attemptId  The attempt ID
-     * @return static
      */
     public static function timeLimitExceeded(string $attemptId): static
     {
@@ -162,7 +151,6 @@ class QuizRepositoryException extends RepositoryException
      * Create exception for attempt start failure.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function attemptStartFailed(?string $reason = null): static
     {
@@ -177,7 +165,6 @@ class QuizRepositoryException extends RepositoryException
      * Create exception for attempt submission failure.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function attemptSubmissionFailed(?string $reason = null): static
     {
@@ -192,7 +179,6 @@ class QuizRepositoryException extends RepositoryException
      * Create exception for statistics calculation failure.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function statisticsCalculationFailed(?string $reason = null): static
     {
@@ -207,7 +193,6 @@ class QuizRepositoryException extends RepositoryException
      * Create exception for insufficient permissions.
      *
      * @param  string|null  $action  The action being attempted
-     * @return static
      */
     public static function insufficientPermissions(?string $action = null): static
     {

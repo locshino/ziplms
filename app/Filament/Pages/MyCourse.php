@@ -7,22 +7,27 @@ use App\Models\Course;
 use App\Models\User;
 use BackedEnum;
 use Filament\Pages\Page;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 class MyCourse extends Page
 {
     protected string $view = 'filament.pages.my-course';
+
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-book-open';
 
     public Collection|EloquentCollection $ongoingCourses;
-    public Collection|EloquentCollection $completedCourses;
-    public string $searchCourse;
-    public array $tags = [];
-    public $teachers = [];
-    public $selectedTeacher;
 
+    public Collection|EloquentCollection $completedCourses;
+
+    public string $searchCourse;
+
+    public array $tags = [];
+
+    public $teachers = [];
+
+    public $selectedTeacher;
 
     public function mount(): void
     {
@@ -44,14 +49,14 @@ class MyCourse extends Page
             $pivot = $course->pivot;
 
             if ($pivot) { // chỉ student mới có pivot
-                if (!$pivot->end_at || $pivot->end_at->isAfter($now)) {
+                if (! $pivot->end_at || $pivot->end_at->isAfter($now)) {
                     $ongoingCourses->push($course);
                 } elseif ($pivot->end_at && $pivot->end_at->isBefore($now)) {
                     $completedCourses->push($course);
                 }
             } else {
                 // teacher: dùng start/end của course trực tiếp
-                if (!$course->end_at || $course->end_at->isAfter($now)) {
+                if (! $course->end_at || $course->end_at->isAfter($now)) {
                     $ongoingCourses->push($course);
                 } elseif ($course->end_at && $course->end_at->isBefore($now)) {
                     $completedCourses->push($course);
@@ -94,6 +99,7 @@ class MyCourse extends Page
             ->orderBy('courses.created_at', 'asc')
             ->paginate(10);
     }
+
     public function getTeachingCourses()
     {
         /** @var User $user */
@@ -114,7 +120,6 @@ class MyCourse extends Page
 
     }
 
-
     public function searchCourses()
     {
         $ongoingCourses = collect();
@@ -128,16 +133,15 @@ class MyCourse extends Page
 
         }
 
-
         foreach ($enrolledCourses as $course) {
 
-            if ($this->searchCourse !== '' && !str_contains(strtolower($course->title), strtolower($this->searchCourse))) {
+            if ($this->searchCourse !== '' && ! str_contains(strtolower($course->title), strtolower($this->searchCourse))) {
                 continue;
             }
 
-
             if ($course->status !== CourseStatus::PUBLISHED) {
                 $closedCourses->push($course);
+
                 continue;
             }
             $ongoingCourses->push($course);
@@ -146,11 +150,13 @@ class MyCourse extends Page
         $this->ongoingCourses = $ongoingCourses;
         $this->closedCourses = $closedCourses;
     }
+
     public function sortCourses(string $sort)
     {
         $this->sortBy = $sort;
         $this->filterCourses();
     }
+
     protected function filterCourses()
     {
         $ongoingCourses = collect();
@@ -167,6 +173,7 @@ class MyCourse extends Page
         foreach ($enrolledCourses as $course) {
             if ($course->status !== CourseStatus::PUBLISHED) {
                 $closedCourses->push($course);
+
                 continue;
             }
 
@@ -178,15 +185,17 @@ class MyCourse extends Page
         $this->ongoingCourses = $this->sortCollection($ongoingCourses);
         $this->closedCourses = $this->sortCollection($closedCourses);
     }
+
     protected function sortCollection($collection)
     {
         return match ($this->sortBy) {
             'newest' => $collection->sortByDesc('created_at')->values(),
             'oldest' => $collection->sortBy('created_at')->values(),
-            'end_at' => $collection->sortBy(fn($q) => $q->pivot?->end_at ?? now())->values(),
+            'end_at' => $collection->sortBy(fn ($q) => $q->pivot?->end_at ?? now())->values(),
             default => $collection,
         };
     }
+
     public function filterCoursesByTag($tag = null)
     {
         $ongoingCourses = collect();
@@ -208,14 +217,14 @@ class MyCourse extends Page
             $hasSelectedTag = $this->selectedTag
                 ? $course->tags->contains('name', $this->selectedTag)
                 : true;
-            if (!$hasSelectedTag) {
+            if (! $hasSelectedTag) {
                 continue;
             }
             if ($course->status !== CourseStatus::PUBLISHED) {
                 $closedCourses->push($course);
+
                 continue;
             }
-
 
             // Course ongoing
             $ongoingCourses->push($course);
@@ -224,6 +233,7 @@ class MyCourse extends Page
         $this->ongoingCourses = $ongoingCourses;
         $this->closedCourses = $closedCourses;
     }
+
     public function filterCoursesByTeacher($teacherId)
     {
         $ongoingCourses = collect();
@@ -241,17 +251,17 @@ class MyCourse extends Page
 
         foreach ($enrolledCourses as $course) {
 
-
             $hasSelectedTeacher = $this->selectedTeacher
                 ? $course->teacher_id == $this->selectedTeacher
                 : true;
 
-            if (!$hasSelectedTeacher) {
+            if (! $hasSelectedTeacher) {
                 continue;
             }
 
             if ($course->status !== CourseStatus::PUBLISHED) {
                 $closedCourses->push($course);
+
                 continue;
             }
 
@@ -261,6 +271,4 @@ class MyCourse extends Page
         $this->ongoingCourses = $ongoingCourses;
         $this->closedCourses = $closedCourses;
     }
-
-
 }

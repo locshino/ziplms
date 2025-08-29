@@ -2,11 +2,11 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages;
 use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\RenewPassword;
 use App\Http\Middleware\CheckUserActive;
-use App\Filament\Pages;
 use App\Models\User;
 use Asmit\ResizedColumn\ResizedColumnPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -40,7 +40,6 @@ use pxlrbt\FilamentEnvironmentIndicator\EnvironmentIndicatorPlugin;
 use pxlrbt\FilamentSpotlight\SpotlightPlugin;
 use Stephenjude\FilamentTwoFactorAuthentication\TwoFactorAuthenticationPlugin;
 use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
-use Swis\Filament\Backgrounds\ImageProviders\CuratedBySwis;
 use Swis\Filament\Backgrounds\ImageProviders\MyImages;
 use Tapp\FilamentAuthenticationLog\FilamentAuthenticationLogPlugin;
 use Tapp\FilamentMailLog\FilamentMailLogPlugin;
@@ -99,7 +98,7 @@ class AppPanelProvider extends PanelProvider
             ->databaseNotifications()
             ->renderHook(
                 PanelsRenderHook::BODY_END,
-                fn(): string => view('filament.components.quiz-in-progress-global-alert')->render()
+                fn (): string => view('filament.components.quiz-in-progress-global-alert')->render()
             );
     }
 

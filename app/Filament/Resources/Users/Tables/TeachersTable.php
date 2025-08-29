@@ -3,8 +3,6 @@
 namespace App\Filament\Resources\Users\Tables;
 
 use App\Enums\Status\UserStatus;
-use App\Enums\System\RoleSystem;
-use App\Libs\Roles\RoleHelper;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -12,13 +10,11 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Auth;
-use Spatie\Permission\Models\Role;
 
 class TeachersTable
 {

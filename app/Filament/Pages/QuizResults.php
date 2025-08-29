@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\WithPagination;
+
 // use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class QuizResults extends Page
@@ -49,6 +50,7 @@ class QuizResults extends Page
 
     // Pagination properties
     public int $perPage = 10;
+
     public int $currentPage = 1;
 
     protected QuizServiceInterface $quizService;
@@ -122,6 +124,7 @@ class QuizResults extends Page
             // Ensure percentage doesn't exceed 100%
             $attemptArray['percentage'] = round(min($percentage, 100), 2);
             $attemptArray['completed_at'] = $attempt->end_at; // Add completed_at field
+
             return $attemptArray;
         })->toArray();
     }
@@ -174,7 +177,7 @@ class QuizResults extends Page
             if (
                 $userAnswers->isNotEmpty() && (
                     count($correctChoiceIds) !== count($userChoiceIds) ||
-                    !empty(array_diff($correctChoiceIds, $userChoiceIds))
+                    ! empty(array_diff($correctChoiceIds, $userChoiceIds))
                 )
             ) {
                 $incorrect++;
@@ -257,7 +260,7 @@ class QuizResults extends Page
         $userIncorrectChoices = array_diff($userChoiceIds, $correctChoiceIds);
 
         // If user selected incorrect choices, it's incorrect
-        if (!empty($userIncorrectChoices)) {
+        if (! empty($userIncorrectChoices)) {
             return 'incorrect';
         }
 
@@ -267,7 +270,7 @@ class QuizResults extends Page
         }
 
         // If user selected some correct choices but not all, it's partially correct
-        if (!empty($userCorrectChoices)) {
+        if (! empty($userCorrectChoices)) {
             return 'partially_correct';
         }
 
@@ -304,7 +307,7 @@ class QuizResults extends Page
 
         return [
             'selected' => count($userCorrectChoices),
-            'total' => count($correctChoiceIds)
+            'total' => count($correctChoiceIds),
         ];
     }
 
@@ -340,7 +343,6 @@ class QuizResults extends Page
                 ->icon('heroicon-o-arrow-left')
                 ->color('gray')
                 ->url(route('filament.app.pages.my-quiz')),
-
 
         ];
     }

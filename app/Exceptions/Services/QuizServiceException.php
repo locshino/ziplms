@@ -8,7 +8,7 @@ class QuizServiceException extends Exception
 {
     public static function quizNotFound($quizId = null): self
     {
-        return new self('Quiz not found' . ($quizId ? ": $quizId" : ''));
+        return new self('Quiz not found'.($quizId ? ": $quizId" : ''));
     }
 
     public static function quizNotPublished(): self
@@ -58,11 +58,11 @@ class QuizServiceException extends Exception
 
     public static function calculationError($msg = null): self
     {
-        return new self('Quiz score calculation error' . ($msg ? ": $msg" : ''));
+        return new self('Quiz score calculation error'.($msg ? ": $msg" : ''));
     }
 
     public static function databaseError($msg = null): self
     {
-        return new self('Database error' . ($msg ? ": $msg" : ''));
+        return new self('Database error'.($msg ? ": $msg" : ''));
     }
 }

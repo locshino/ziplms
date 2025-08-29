@@ -61,7 +61,7 @@ class QuizAccessService implements QuizAccessServiceInterface
     public function canTakeQuiz(User $user, Quiz $quiz): bool
     {
         // Check if user is a student
-        if (!RoleHelper::isStudent($user)) {
+        if (! RoleHelper::isStudent($user)) {
             return false;
         }
 
@@ -70,7 +70,7 @@ class QuizAccessService implements QuizAccessServiceInterface
             ->withPivot(['start_at', 'end_at'])
             ->first();
 
-        if (!$courseQuiz) {
+        if (! $courseQuiz) {
             return false;
         }
 
@@ -271,16 +271,16 @@ class QuizAccessService implements QuizAccessServiceInterface
     public function isQuizAccessibleNow(Quiz $quiz): bool
     {
         $now = now();
-        
+
         // Check if quiz has time restrictions
         if ($quiz->start_time && $now->lt($quiz->start_time)) {
             return false;
         }
-        
+
         if ($quiz->end_time && $now->gt($quiz->end_time)) {
             return false;
         }
-        
+
         return true;
     }
 
@@ -289,7 +289,7 @@ class QuizAccessService implements QuizAccessServiceInterface
      */
     public function hasQuizPermission(User $user, Quiz $quiz, string $permission): bool
     {
-        return match($permission) {
+        return match ($permission) {
             'view' => $this->canViewQuiz($user, $quiz),
             'take' => $this->canTakeQuiz($user, $quiz),
             'edit' => $this->canEditQuiz($user, $quiz),

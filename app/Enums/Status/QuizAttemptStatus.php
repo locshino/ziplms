@@ -17,6 +17,6 @@ enum QuizAttemptStatus: string implements HasStatusStyles
 
     public function getDescription(): ?string
     {
-        return __('enums_status_quiz_attempt.description.' . $this->value);
+        return __('enums_status_quiz_attempt.description.'.$this->value);
     }
 }

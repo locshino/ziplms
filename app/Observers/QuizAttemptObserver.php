@@ -28,9 +28,9 @@ class QuizAttemptObserver
         if ($quizAttempt->isDirty('status') && $quizAttempt->status === QuizAttemptStatus::IN_PROGRESS) {
             $this->sendInProgressNotification($quizAttempt);
         }
-        
+
         // Xóa notification khi quiz hoàn thành hoặc bị hủy
-        if ($quizAttempt->isDirty('status') && 
+        if ($quizAttempt->isDirty('status') &&
             in_array($quizAttempt->status, [QuizAttemptStatus::COMPLETED, QuizAttemptStatus::ABANDONED, QuizAttemptStatus::GRADED])) {
             $this->removeInProgressNotification($quizAttempt);
         }
@@ -43,7 +43,7 @@ class QuizAttemptObserver
     {
         // Xóa notification cũ trước khi gửi notification mới
         $this->removeInProgressNotification($quizAttempt);
-        
+
         // Gửi notification mới
         $quizAttempt->student->notify(new QuizInProgressNotification($quizAttempt));
     }

@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Enums\Status\QuizAttemptStatus;
 use App\Models\Quiz;
-use App\Models\QuizAttempt;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -21,7 +20,7 @@ class QuizAttemptFactory extends Factory
     public function definition(): array
     {
         $startAt = $this->faker->dateTimeBetween('-1 month', 'now');
-        
+
         return [
             'quiz_id' => Quiz::factory(),
             'student_id' => User::factory(),
@@ -50,7 +49,7 @@ class QuizAttemptFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $endAt = $this->faker->dateTimeBetween($attributes['start_at'], 'now');
-            
+
             return [
                 'status' => QuizAttemptStatus::COMPLETED->value,
                 'end_at' => $endAt,
@@ -65,7 +64,7 @@ class QuizAttemptFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $endAt = $this->faker->dateTimeBetween($attributes['start_at'], 'now');
-            
+
             return [
                 'status' => QuizAttemptStatus::GRADED->value,
                 'end_at' => $endAt,

@@ -19,8 +19,8 @@ return new class extends Migration
             $morphPrefix = config('audit.user.morph_prefix', 'user');
 
             $table->uuid('id')->primary();
-            $table->string($morphPrefix . '_type')->nullable();
-            $table->uuid($morphPrefix . '_id')->nullable();
+            $table->string($morphPrefix.'_type')->nullable();
+            $table->uuid($morphPrefix.'_id')->nullable();
             $table->string('event');
             $table->uuidMorphs('auditable');
             $table->text('old_values')->nullable();
@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('tags')->nullable();
             $table->timestamps();
 
-            $table->index([$morphPrefix . '_id', $morphPrefix . '_type']);
+            $table->index([$morphPrefix.'_id', $morphPrefix.'_type']);
         });
     }
 

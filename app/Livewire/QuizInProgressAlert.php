@@ -10,6 +10,7 @@ use Livewire\Component;
 class QuizInProgressAlert extends Component
 {
     public $inProgressQuizzes = [];
+
     public $showAlert = false;
 
     protected $listeners = ['refreshAlert' => 'loadInProgressQuizzes'];
@@ -22,7 +23,7 @@ class QuizInProgressAlert extends Component
 
     public function loadInProgressQuizzes()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return;
         }
 
@@ -46,7 +47,7 @@ class QuizInProgressAlert extends Component
                     'quiz_id' => $attempt->quiz_id,
                     'quiz_title' => $attempt->quiz->title,
                     'started_at' => $attempt->start_at,
-                    'url' => route('filament.app.pages.quiz-taking', ['quiz' => $attempt->quiz_id])
+                    'url' => route('filament.app.pages.quiz-taking', ['quiz' => $attempt->quiz_id]),
                 ];
             })
             ->toArray();

@@ -13,7 +13,7 @@ trait StatusStyles
      */
     public function getLabel(): ?string
     {
-        return __('enums_status.' . $this->value, [], null) ?? $this->name;
+        return __('enums_status.'.$this->value, [], null) ?? $this->name;
     }
 
     /**

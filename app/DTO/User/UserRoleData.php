@@ -40,13 +40,13 @@ class UserRoleData
             return true;
         }
 
-        return in_array($role->value, array_map(fn($r) => is_string($r) ? $r : $r->value, $this->roles));
+        return in_array($role->value, array_map(fn ($r) => is_string($r) ? $r : $r->value, $this->roles));
     }
 
     /**
      * Check if user has any of the specified roles.
      *
-     * @param array<RoleSystem> $roles
+     * @param  array<RoleSystem>  $roles
      */
     public function hasAnyRole(array $roles): bool
     {
@@ -62,12 +62,12 @@ class UserRoleData
     /**
      * Check if user has all of the specified roles.
      *
-     * @param array<RoleSystem> $roles
+     * @param  array<RoleSystem>  $roles
      */
     public function hasAllRoles(array $roles): bool
     {
         foreach ($roles as $role) {
-            if (!$this->hasRole($role)) {
+            if (! $this->hasRole($role)) {
                 return false;
             }
         }
@@ -80,14 +80,14 @@ class UserRoleData
      */
     public function hasPermission(string $permission): bool
     {
-        return in_array($permission, $this->permissions) || 
+        return in_array($permission, $this->permissions) ||
                in_array($permission, $this->directPermissions);
     }
 
     /**
      * Check if user has any of the specified permissions.
      *
-     * @param array<string> $permissions
+     * @param  array<string>  $permissions
      */
     public function hasAnyPermission(array $permissions): bool
     {
@@ -103,12 +103,12 @@ class UserRoleData
     /**
      * Check if user has all of the specified permissions.
      *
-     * @param array<string> $permissions
+     * @param  array<string>  $permissions
      */
     public function hasAllPermissions(array $permissions): bool
     {
         foreach ($permissions as $permission) {
-            if (!$this->hasPermission($permission)) {
+            if (! $this->hasPermission($permission)) {
                 return false;
             }
         }
@@ -185,7 +185,7 @@ class UserRoleData
      */
     public function isValid(): bool
     {
-        return !$this->hasExpired();
+        return ! $this->hasExpired();
     }
 
     /**
@@ -207,7 +207,7 @@ class UserRoleData
         foreach ($this->roles as $role) {
             $roleValue = is_string($role) ? $role : $role->value;
             $priority = $rolePriority[$roleValue] ?? 0;
-            
+
             if ($priority > $highestPriority) {
                 $highestPriority = $priority;
                 $highestRole = RoleSystem::from($roleValue);
@@ -224,7 +224,7 @@ class UserRoleData
      */
     public function getRoleNames(): array
     {
-        return array_map(fn($role) => is_string($role) ? $role : $role->value, $this->roles);
+        return array_map(fn ($role) => is_string($role) ? $role : $role->value, $this->roles);
     }
 
     /**
@@ -272,7 +272,7 @@ class UserRoleData
             $data['reason'] = $this->reason;
         }
 
-        if (!empty($this->metadata)) {
+        if (! empty($this->metadata)) {
             $data['metadata'] = $this->metadata;
         }
 
@@ -315,9 +315,9 @@ class UserRoleData
     {
         return [
             'user_id' => 'required|exists:users,id',
-            'role' => 'sometimes|in:' . implode(',', array_column(RoleSystem::cases(), 'value')),
+            'role' => 'sometimes|in:'.implode(',', array_column(RoleSystem::cases(), 'value')),
             'roles' => 'sometimes|array',
-            'roles.*' => 'in:' . implode(',', array_column(RoleSystem::cases(), 'value')),
+            'roles.*' => 'in:'.implode(',', array_column(RoleSystem::cases(), 'value')),
             'permissions' => 'sometimes|array',
             'permissions.*' => "string|max:{$maxPermissionLength}",
             'course_id' => 'sometimes|exists:courses,id',
@@ -333,14 +333,14 @@ class UserRoleData
     /**
      * Create role data from user model.
      *
-     * @param mixed $user User model instance
+     * @param  mixed  $user  User model instance
      */
     public static function fromUser($user): self
     {
         $roles = method_exists($user, 'getRoleNames') ? $user->getRoleNames() : [];
-        $permissions = method_exists($user, 'getAllPermissions') ? 
+        $permissions = method_exists($user, 'getAllPermissions') ?
                       $user->getAllPermissions()->pluck('name')->toArray() : [];
-        $directPermissions = method_exists($user, 'getDirectPermissions') ? 
+        $directPermissions = method_exists($user, 'getDirectPermissions') ?
                             $user->getDirectPermissions()->pluck('name')->toArray() : [];
 
         return new self(
@@ -366,13 +366,13 @@ class UserRoleData
      */
     public function getCoursePermissions(): array
     {
-        if (!$this->hasCourseRole()) {
+        if (! $this->hasCourseRole()) {
             return [];
         }
 
         // Filter permissions that are course-specific
         return array_filter($this->getAllPermissions(), function ($permission) {
-            return str_contains($permission, 'course') || 
+            return str_contains($permission, 'course') ||
                    str_contains($permission, 'lesson') ||
                    str_contains($permission, 'assignment') ||
                    str_contains($permission, 'quiz');

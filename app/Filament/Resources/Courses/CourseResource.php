@@ -5,10 +5,11 @@ namespace App\Filament\Resources\Courses;
 use App\Filament\Resources\Courses\Pages\CreateCourse;
 use App\Filament\Resources\Courses\Pages\EditCourse;
 use App\Filament\Resources\Courses\Pages\ListCourses;
-use App\Filament\Resources\Courses\Pages\ViewCourse;
-use App\Filament\Resources\Courses\RelationManagers\UsersRelationManager;
+use App\Filament\Resources\Courses\RelationManagers\AssignmentsRelationManager;
+use App\Filament\Resources\Courses\RelationManagers\ManagersRelationManager;
+use App\Filament\Resources\Courses\RelationManagers\QuizzesRelationManager;
+use App\Filament\Resources\Courses\RelationManagers\StudentsRelationManager;
 use App\Filament\Resources\Courses\Schemas\CourseForm;
-use App\Filament\Resources\Courses\Schemas\CourseInfolist;
 use App\Filament\Resources\Courses\Tables\CoursesTable;
 use App\Models\Course;
 use BackedEnum;
@@ -19,12 +20,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
-use App\Filament\Resources\Courses\RelationManagers\ManagersRelationManager;
-use App\Filament\Resources\Courses\RelationManagers\StudentsRelationManager;
-use App\Filament\Resources\Courses\RelationManagers\QuizzesRelationManager;
-use App\Filament\Resources\Courses\RelationManagers\AssignmentsRelationManager;
-use App\Filament\Resources\Courses\RelationManagers\DocumentsRelationManager;
-use Illuminate\Database\Capsule\Manager;
 
 class CourseResource extends Resource
 {

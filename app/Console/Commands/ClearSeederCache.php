@@ -26,7 +26,7 @@ class ClearSeederCache extends Command
      */
     public function handle(): int
     {
-        $seeder = new DatabaseSeeder();
+        $seeder = new DatabaseSeeder;
         $seeder->setCommand($this);
         $seeder->clearCache();
 

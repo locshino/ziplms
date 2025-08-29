@@ -2,17 +2,15 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Enums\CourseStatusEnum;
 use App\Models\Course;
 use App\Models\User;
-use App\Enums\CourseStatusEnum;
-use App\Repositories\Eloquent\EloquentRepository;
 use App\Repositories\Interfaces\CourseRepositoryInterface;
 use App\States\Status;
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * Class CourseRepository
@@ -28,6 +26,7 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
     {
         /** @var Status $statusState */
         $statusState = $course->status;
+
         return $statusState::label();
     }
 
@@ -39,7 +38,7 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
     public function getAvailableParents(?int $excludeId = null): Collection
     {
         return $this->model->query()
-            ->when($excludeId, fn($query) => $query->where('id', '!=', $excludeId))
+            ->when($excludeId, fn ($query) => $query->where('id', '!=', $excludeId))
             ->pluck('title', 'id');
     }
 
@@ -48,11 +47,11 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
         return $query
             ->when(
                 $from,
-                fn(Builder $q, $fromDate): Builder => $q->where('created_at', '>=', Carbon::parse($fromDate)->startOfDay()),
+                fn (Builder $q, $fromDate): Builder => $q->where('created_at', '>=', Carbon::parse($fromDate)->startOfDay()),
             )
             ->when(
                 $to,
-                fn(Builder $q, $untilDate): Builder => $q->where('created_at', '<=', Carbon::parse($untilDate)->endOfDay()),
+                fn (Builder $q, $untilDate): Builder => $q->where('created_at', '<=', Carbon::parse($untilDate)->endOfDay()),
             );
     }
 
@@ -71,7 +70,7 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -100,7 +99,7 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
             }
         } else {
             $query->orderBy('start_date', 'asc')
-                  ->orderBy('created_at', 'asc');
+                ->orderBy('created_at', 'asc');
         }
 
         return $query->paginate($perPage);
@@ -134,9 +133,9 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
     public function searchCourses(string $search): Collection
     {
         return $this->model->where(function ($query) use ($search) {
-                $query->where('title', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%");
-            })
+            $query->where('title', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%");
+        })
             ->with(['teacher', 'enrollments'])
             ->orderBy('title')
             ->get();
@@ -153,11 +152,11 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
     public function getCourseWithDetails(string $courseId): ?Course
     {
         return $this->model->with([
-                'teacher',
-                'enrollments.student',
-                'assignments',
-                'quizzes'
-            ])
+            'teacher',
+            'enrollments.student',
+            'assignments',
+            'quizzes',
+        ])
             ->find($courseId);
     }
 
@@ -175,14 +174,14 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
         // Filter active courses (not ended or no end date)
         $query->where(function ($q) {
             $q->where('end_date', '>', now())
-              ->orWhereNull('end_date');
+                ->orWhereNull('end_date');
         });
 
         // Apply filters
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -204,19 +203,19 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
 
         // Order by start_date and created_at
         $query->orderBy('start_date', 'asc')
-              ->orderBy('created_at', 'asc');
+            ->orderBy('created_at', 'asc');
 
         $total = $query->count();
         $courses = $query->skip(($page - 1) * $perPage)
-                        ->take($perPage)
-                        ->get();
+            ->take($perPage)
+            ->get();
 
         return [
             'courses' => $courses,
             'total' => $total,
             'per_page' => $perPage,
             'current_page' => $page,
-            'last_page' => ceil($total / $perPage)
+            'last_page' => ceil($total / $perPage),
         ];
     }
 
@@ -240,9 +239,9 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
     public function getActiveCourses(): Collection
     {
         return $this->model->where(function ($query) {
-                $query->where('end_date', '>', now())
-                      ->orWhereNull('end_date');
-            })
+            $query->where('end_date', '>', now())
+                ->orWhereNull('end_date');
+        })
             ->with(['teacher', 'enrollments'])
             ->orderBy('start_date', 'asc')
             ->get();
@@ -259,8 +258,8 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
     public function getCoursesEnrolledByUser(string $userId): Collection
     {
         return $this->model->whereHas('enrollments', function ($query) use ($userId) {
-                $query->where('student_id', $userId);
-            })
+            $query->where('student_id', $userId);
+        })
             ->with(['teacher', 'enrollments'])
             ->orderBy('created_at', 'desc')
             ->get();
@@ -274,14 +273,14 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
 
         if ($user->hasRole('teacher')) {
             return $this->model->where('id', $courseId)
-                              ->where('teacher_id', $user->id)
-                              ->exists();
+                ->where('teacher_id', $user->id)
+                ->exists();
         }
 
         if ($user->hasRole('student')) {
             return $user->enrollments()
-                       ->where('course_id', $courseId)
-                       ->exists();
+                ->where('course_id', $courseId)
+                ->exists();
         }
 
         return false;
@@ -290,8 +289,8 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
     public function getTeachersForFilter(): Collection
     {
         return User::whereHas('roles', function ($query) {
-                $query->where('name', 'teacher');
-            })
+            $query->where('name', 'teacher');
+        })
             ->select('id', 'name')
             ->orderBy('name')
             ->get();
@@ -313,10 +312,13 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
     public function getCurrentStatus(string $courseId): ?string
     {
         $course = $this->findById($courseId);
-        if (!$course) return null;
-        
+        if (! $course) {
+            return null;
+        }
+
         // Use latestStatus() method from HasStatuses trait
         $latestStatus = $course->latestStatus();
+
         return $latestStatus ? $latestStatus->name : null;
     }
 
@@ -326,6 +328,7 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
     public function getCurrentStatusEnum(string $courseId): ?CourseStatusEnum
     {
         $status = $this->getCurrentStatus($courseId);
+
         return $status ? CourseStatusEnum::tryFrom($status) : null;
     }
 
@@ -335,6 +338,7 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
     public function isPublished(string $courseId): bool
     {
         $course = $this->findById($courseId);
+
         // Use hasStatus() method from HasStatuses trait
         return $course ? $course->hasStatus(CourseStatusEnum::PUBLISHED->value) : false;
     }
@@ -345,6 +349,7 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
     public function isDraft(string $courseId): bool
     {
         $course = $this->findById($courseId);
+
         return $course ? $course->hasStatus(CourseStatusEnum::DRAFT->value) : false;
     }
 
@@ -354,6 +359,7 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
     public function isArchived(string $courseId): bool
     {
         $course = $this->findById($courseId);
+
         return $course ? $course->hasStatus(CourseStatusEnum::ARCHIVED->value) : false;
     }
 
@@ -363,6 +369,7 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
     public function isSuspended(string $courseId): bool
     {
         $course = $this->findById($courseId);
+
         return $course ? $course->hasStatus(CourseStatusEnum::SUSPENDED->value) : false;
     }
 
@@ -394,6 +401,7 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
     public function hasEverHadStatus(string $courseId, string $status): bool
     {
         $course = $this->findById($courseId);
+
         return $course ? $course->hasEverHadStatus($status) : false;
     }
 
@@ -403,6 +411,7 @@ class CourseRepository extends EloquentRepository implements CourseRepositoryInt
     public function hasNeverHadStatus(string $courseId, string $status): bool
     {
         $course = $this->findById($courseId);
+
         return $course ? $course->hasNeverHadStatus($status) : false;
     }
 }

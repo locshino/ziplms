@@ -37,7 +37,7 @@ trait HasCacheSeeder
     /**
      * Clear specific cache key.
      */
-    protected function clearCache(string $key = null): void
+    protected function clearCache(?string $key = null): void
     {
         if ($key) {
             Cache::forget("_seeder_faker_{$key}");
@@ -75,12 +75,13 @@ trait HasCacheSeeder
     {
         $isCacheDriverDatabase = config('cache.default') === 'database';
         // If table is empty, we should seed regardless of cache
-        if ($this->isTableEmpty($tableName) && !$isCacheDriverDatabase) {
+        if ($this->isTableEmpty($tableName) && ! $isCacheDriverDatabase) {
             return false;
         }
 
         // If table has data and cache exists, skip seeding
         $fullCacheKey = "_seeder_faker_{$cacheKey}";
+
         return Cache::has($fullCacheKey);
     }
 }

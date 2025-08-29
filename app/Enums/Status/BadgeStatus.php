@@ -15,6 +15,6 @@ enum BadgeStatus: string implements HasStatusStyles
 
     public function getDescription(): ?string
     {
-        return __('enums_status_badge.description.' . $this->value);
+        return __('enums_status_badge.description.'.$this->value);
     }
 }

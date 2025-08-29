@@ -17,8 +17,6 @@ class CourseRepositoryException extends RepositoryException
 {
     /**
      * The default language key for course repository exceptions.
-     *
-     * @var string
      */
     protected static string $defaultKey = 'exceptions.repositories.course.course_not_found';
 
@@ -26,7 +24,6 @@ class CourseRepositoryException extends RepositoryException
      * Create exception for course not published.
      *
      * @param  string|null  $courseId  The course ID
-     * @return static
      */
     public static function notPublished(?string $courseId = null): static
     {
@@ -41,7 +38,6 @@ class CourseRepositoryException extends RepositoryException
      * Create exception for course not available.
      *
      * @param  string|null  $courseId  The course ID
-     * @return static
      */
     public static function notAvailable(?string $courseId = null): static
     {
@@ -56,7 +52,6 @@ class CourseRepositoryException extends RepositoryException
      * Create exception for course enrollment closed.
      *
      * @param  string|null  $courseId  The course ID
-     * @return static
      */
     public static function enrollmentClosed(?string $courseId = null): static
     {
@@ -72,7 +67,6 @@ class CourseRepositoryException extends RepositoryException
      *
      * @param  string|null  $courseId  The course ID
      * @param  int|null  $capacity  The course capacity
-     * @return static
      */
     public static function capacityFull(?string $courseId = null, ?int $capacity = null): static
     {
@@ -88,7 +82,6 @@ class CourseRepositoryException extends RepositoryException
      *
      * @param  string  $courseId  The course ID
      * @param  string  $studentId  The student ID
-     * @return static
      */
     public static function alreadyEnrolled(string $courseId, string $studentId): static
     {
@@ -104,7 +97,6 @@ class CourseRepositoryException extends RepositoryException
      *
      * @param  string  $courseId  The course ID
      * @param  string  $studentId  The student ID
-     * @return static
      */
     public static function notEnrolled(string $courseId, string $studentId): static
     {
@@ -121,7 +113,6 @@ class CourseRepositoryException extends RepositoryException
      * @param  string  $courseId  The course ID
      * @param  string  $studentId  The student ID
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function enrollmentFailed(string $courseId, string $studentId, ?string $reason = null): static
     {
@@ -138,7 +129,6 @@ class CourseRepositoryException extends RepositoryException
      * @param  string  $courseId  The course ID
      * @param  string  $studentId  The student ID
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function unenrollmentFailed(string $courseId, string $studentId, ?string $reason = null): static
     {
@@ -154,7 +144,6 @@ class CourseRepositoryException extends RepositoryException
      *
      * @param  string  $courseId  The course ID
      * @param  string  $instructorId  The instructor ID
-     * @return static
      */
     public static function instructorNotAssigned(string $courseId, string $instructorId): static
     {
@@ -170,7 +159,6 @@ class CourseRepositoryException extends RepositoryException
      *
      * @param  string  $courseId  The course ID
      * @param  string  $instructorId  The instructor ID
-     * @return static
      */
     public static function instructorAlreadyAssigned(string $courseId, string $instructorId): static
     {
@@ -186,7 +174,6 @@ class CourseRepositoryException extends RepositoryException
      *
      * @param  string  $courseId  The course ID
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function progressCalculationFailed(string $courseId, ?string $reason = null): static
     {
@@ -201,7 +188,6 @@ class CourseRepositoryException extends RepositoryException
      * Create exception for statistics calculation failure.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function statisticsCalculationFailed(?string $reason = null): static
     {
@@ -216,7 +202,6 @@ class CourseRepositoryException extends RepositoryException
      * Create exception for insufficient permissions.
      *
      * @param  string|null  $action  The action being attempted
-     * @return static
      */
     public static function insufficientPermissions(?string $action = null): static
     {

@@ -10,10 +10,10 @@ trait HasRegisterClass
      * Scans a directory for classes and executes a callback for each valid class found.
      * This generic function is highly reusable for auto-registering services, observers, etc.
      *
-     * @param string $path The directory path to scan.
-     * @param string $namespace The base namespace for the classes in the directory.
-     * @param callable $registrationLogic The callback to execute for each class. It receives the fully qualified class name.
-     * @param array $skipClasses An array of simple class names (without namespace) to skip.
+     * @param  string  $path  The directory path to scan.
+     * @param  string  $namespace  The base namespace for the classes in the directory.
+     * @param  callable  $registrationLogic  The callback to execute for each class. It receives the fully qualified class name.
+     * @param  array  $skipClasses  An array of simple class names (without namespace) to skip.
      */
     protected function discoverAndRegister(
         string $path,
@@ -21,7 +21,7 @@ trait HasRegisterClass
         callable $registrationLogic,
         array $skipClasses = []
     ): void {
-        if (!File::isDirectory($path)) {
+        if (! File::isDirectory($path)) {
             return;
         }
 

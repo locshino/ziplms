@@ -11,7 +11,6 @@ use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -69,7 +68,7 @@ class UserService extends BaseService implements UserServiceInterface
         } catch (ServiceException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to create user: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to create user: '.$e->getMessage());
         }
     }
 
@@ -89,7 +88,7 @@ class UserService extends BaseService implements UserServiceInterface
         } catch (RepositoryException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to update password: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to update password: '.$e->getMessage());
         }
     }
 
@@ -105,7 +104,7 @@ class UserService extends BaseService implements UserServiceInterface
         } catch (RepositoryException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to find user by email: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to find user by email: '.$e->getMessage());
         }
     }
 
@@ -121,7 +120,7 @@ class UserService extends BaseService implements UserServiceInterface
         } catch (RepositoryException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to get users by role: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to get users by role: '.$e->getMessage());
         }
     }
 
@@ -139,7 +138,7 @@ class UserService extends BaseService implements UserServiceInterface
         } catch (ServiceException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to get teachers: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to get teachers: '.$e->getMessage());
         }
     }
 
@@ -157,7 +156,7 @@ class UserService extends BaseService implements UserServiceInterface
         } catch (ServiceException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to get students: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to get students: '.$e->getMessage());
         }
     }
 
@@ -173,7 +172,7 @@ class UserService extends BaseService implements UserServiceInterface
         } catch (RepositoryException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to search users: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to search users: '.$e->getMessage());
         }
     }
 
@@ -189,7 +188,7 @@ class UserService extends BaseService implements UserServiceInterface
         } catch (RepositoryException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to get active users: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to get active users: '.$e->getMessage());
         }
     }
 
@@ -205,7 +204,7 @@ class UserService extends BaseService implements UserServiceInterface
         } catch (RepositoryException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to soft delete user: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to soft delete user: '.$e->getMessage());
         }
     }
 
@@ -231,7 +230,7 @@ class UserService extends BaseService implements UserServiceInterface
         } catch (ServiceException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to toggle user status: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to toggle user status: '.$e->getMessage());
         }
     }
 
@@ -258,7 +257,7 @@ class UserService extends BaseService implements UserServiceInterface
         } catch (RepositoryException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to assign role: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to assign role: '.$e->getMessage());
         }
     }
 
@@ -285,7 +284,7 @@ class UserService extends BaseService implements UserServiceInterface
         } catch (RepositoryException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to remove role: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to remove role: '.$e->getMessage());
         }
     }
 
@@ -327,7 +326,7 @@ class UserService extends BaseService implements UserServiceInterface
         } catch (RepositoryException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to check if user is active: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to check if user is active: '.$e->getMessage());
         }
     }
 
@@ -341,7 +340,7 @@ class UserService extends BaseService implements UserServiceInterface
         } catch (RepositoryException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to check if user does not exist: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to check if user does not exist: '.$e->getMessage());
         }
     }
 
@@ -355,7 +354,7 @@ class UserService extends BaseService implements UserServiceInterface
         } catch (RepositoryException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw ServiceException::operationFailed('Failed to check if user is suspended: ' . $e->getMessage());
+            throw ServiceException::operationFailed('Failed to check if user is suspended: '.$e->getMessage());
         }
     }
 }

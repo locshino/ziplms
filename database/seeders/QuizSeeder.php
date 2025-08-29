@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Enums\Status\QuestionStatus;
-use App\Enums\Status\QuizAttemptStatus;
 use App\Enums\Status\QuizStatus;
 use App\Enums\System\RoleSystem;
 use App\Models\AnswerChoice;
@@ -18,6 +17,7 @@ use Illuminate\Database\Seeder;
 class QuizSeeder extends Seeder
 {
     use HasCacheSeeder;
+
     /**
      * Run the database seeds.
      */
