@@ -10,4 +10,6 @@ Route::get('/landing', function () {
     return view('landing');
 });
 
-Route::passkeys();
+if (method_exists(Route::class, 'passkeys')) {
+    Route::passkeys();
+}
