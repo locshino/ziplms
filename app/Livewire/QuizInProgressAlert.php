@@ -12,6 +12,8 @@ class QuizInProgressAlert extends Component
     public $inProgressQuizzes = [];
     public $showAlert = false;
 
+    protected $listeners = ['refreshAlert' => 'loadInProgressQuizzes'];
+
     public function mount()
     {
         $this->loadInProgressQuizzes();
@@ -24,10 +26,20 @@ class QuizInProgressAlert extends Component
             return;
         }
 
-        $this->inProgressQuizzes = QuizAttempt::with('quiz')
+        $attempts = QuizAttempt::with('quiz')
             ->where('student_id', Auth::id())
             ->where('status', QuizAttemptStatus::IN_PROGRESS)
-            ->get()
+            ->get();
+
+        // Clean up orphaned attempts (where quiz has been deleted)
+        $orphanedAttempts = $attempts->whereNull('quiz');
+        if ($orphanedAttempts->count() > 0) {
+            QuizAttempt::whereIn('id', $orphanedAttempts->pluck('id'))
+                ->update(['status' => QuizAttemptStatus::ABANDONED]);
+        }
+
+        $this->inProgressQuizzes = $attempts
+            ->whereNotNull('quiz')
             ->map(function ($attempt) {
                 return [
                     'id' => $attempt->id,
@@ -43,6 +55,11 @@ class QuizInProgressAlert extends Component
         $this->checkCurrentPage();
     }
 
+    public function refreshAlert()
+    {
+        $this->loadInProgressQuizzes();
+    }
+
     public function dismissAlert()
     {
         $this->showAlert = false;
@@ -50,9 +67,9 @@ class QuizInProgressAlert extends Component
 
     public function checkCurrentPage()
     {
-        // Ẩn thông báo nếu đang ở trang quiz-taking
+        // Ẩn thông báo nếu đang ở trang quiz-taking hoặc my-quiz (lịch sử quiz)
         $currentUrl = request()->url();
-        if (str_contains($currentUrl, '/quiz-taking')) {
+        if (str_contains($currentUrl, '/quiz-taking') || str_contains($currentUrl, '/my-quiz')) {
             $this->showAlert = false;
         }
     }

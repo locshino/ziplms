@@ -8,6 +8,7 @@ use App\Models\Question;
 use App\Models\Quiz;
 use App\Repositories\Interfaces\QuestionRepositoryInterface;
 use App\Services\Interfaces\QuestionServiceInterface;
+use App\Services\Interfaces\QuizCacheServiceInterface;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -18,11 +19,11 @@ class QuestionService extends BaseService implements QuestionServiceInterface
 {
     protected QuestionRepositoryInterface $questionRepository;
 
-    protected QuizCacheService $cacheService;
+    protected QuizCacheServiceInterface $cacheService;
 
     public function __construct(
         QuestionRepositoryInterface $questionRepository,
-        QuizCacheService $cacheService
+        QuizCacheServiceInterface $cacheService
     ) {
         parent::__construct($questionRepository);
         $this->questionRepository = $questionRepository;

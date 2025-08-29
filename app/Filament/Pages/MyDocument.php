@@ -10,9 +10,12 @@ use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+// use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class MyDocument extends Page
 {
+    // use HasPageShield;
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
 
     protected string $view = 'filament.pages.my-document';
@@ -68,7 +71,7 @@ class MyDocument extends Page
             if ($this->selectedCourseId && $course->id !== $this->selectedCourseId) {
                 continue;
             }
-            
+
             $courseMedia = $course->getMedia('course_documents');
             if ($courseMedia->isNotEmpty()) {
                 $courseDocuments->push([
