@@ -47,7 +47,7 @@ class AssignmentRepository extends EloquentRepository implements AssignmentRepos
         }
 
         if ($search) {
-            $query->where('title', 'like', '%' . $search . '%');
+            $query->where('title', 'like', '%'.$search.'%');
         }
 
         $this->applyStatusFilter($query, $studentId, $filter);
@@ -60,16 +60,16 @@ class AssignmentRepository extends EloquentRepository implements AssignmentRepos
      */
     private function applyStatusFilter(Builder $query, string $studentId, ?string $filter): void
     {
-        if (!$filter || $filter === 'all') {
+        if (! $filter || $filter === 'all') {
             return;
         }
         $now = Carbon::now();
         match ($filter) {
             'submitted' => $query->whereHas('submissions', fn ($q) => $q->where('student_id', $studentId)),
             'overdue' => $query->whereDoesntHave('submissions', fn ($q) => $q->where('student_id', $studentId))
-                                ->where('due_at', '<', $now),
+                ->where('due_at', '<', $now),
             'not_submitted' => $query->whereDoesntHave('submissions', fn ($q) => $q->where('student_id', $studentId))
-                                     ->where('due_at', '>=', $now),
+                ->where('due_at', '>=', $now),
             default => null,
         };
     }

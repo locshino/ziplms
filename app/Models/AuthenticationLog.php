@@ -17,6 +17,7 @@ use Rappasoft\LaravelAuthenticationLog\Models\AuthenticationLog as LaravelAuthen
  * @property bool $cleared_by_user
  * @property array<array-key, mixed>|null $location
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $authenticatable
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AuthenticationLog newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AuthenticationLog newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AuthenticationLog query()
@@ -30,6 +31,7 @@ use Rappasoft\LaravelAuthenticationLog\Models\AuthenticationLog as LaravelAuthen
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AuthenticationLog whereLoginSuccessful($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AuthenticationLog whereLogoutAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AuthenticationLog whereUserAgent($value)
+ *
  * @mixin \Eloquent
  */
 class AuthenticationLog extends LaravelAuthenticationLogModel

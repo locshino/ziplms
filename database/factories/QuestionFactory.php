@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Enums\Status\QuestionStatus;
 use App\Models\Question;
-use App\Models\Quiz;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,7 +19,7 @@ class QuestionFactory extends Factory
     public function definition(): array
     {
         return [
-            'title' => $this->faker->sentence() . '?',
+            'title' => $this->faker->sentence().'?',
             'description' => $this->faker->paragraph(2),
             'status' => QuestionStatus::PUBLISHED->value,
         ];

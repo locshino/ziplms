@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Enums\Status\BadgeConditionStatus;
-use App\Models\BadgeCondition;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

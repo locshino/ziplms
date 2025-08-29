@@ -16,13 +16,18 @@ class ShowQuizAnswers extends Component
     use WithPagination;
 
     public QuizAttempt $record;
+
     public int $perPage = 5;
+
     public array $perPageOptions = [5, 10, 15, 25, 50];
 
     // Properties to hold the processed data and statistics
     public array $allProcessedAnswers = [];
+
     public int $correctCount = 0;
+
     public int $partiallyCorrectCount = 0;
+
     public int $incorrectCount = 0;
 
     // Property to hold the current filter status
@@ -34,7 +39,7 @@ class ShowQuizAnswers extends Component
      */
     public function mount(): void
     {
-        $cacheKey = 'quiz-attempt-answers-' . $this->record->id;
+        $cacheKey = 'quiz-attempt-answers-'.$this->record->id;
 
         // Retrieve data from cache or compute and store it for 5 minutes.
         $cachedData = Cache::remember($cacheKey, now()->addMinutes(5), function () {
@@ -94,15 +99,13 @@ class ShowQuizAnswers extends Component
         );
 
         return view('livewire.show-quiz-answers', [
-            'processedAnswers' => $paginatedAnswers
+            'processedAnswers' => $paginatedAnswers,
         ]);
     }
 
     /**
      * Process all answers and return the data and statistics.
      * This method is now called only when the cache is empty.
-     *
-     * @return array
      */
     protected function processAllAnswers(): array
     {
@@ -126,7 +129,7 @@ class ShowQuizAnswers extends Component
         $choiceModels = $allChoicesForQuestions->keyBy('id');
         $correctChoicesByQuestion = $allChoicesForQuestions->where('is_correct', true)
             ->groupBy('question_id')
-            ->map(fn($choices) => $choices->pluck('id')->sort()->values());
+            ->map(fn ($choices) => $choices->pluck('id')->sort()->values());
 
         $correct = 0;
         $partial = 0;
@@ -142,7 +145,7 @@ class ShowQuizAnswers extends Component
                 if ($studentChoiceIds->all() === $actualCorrectIds->all()) {
                     $status = 'correct';
                 } else {
-                    $hasIncorrectSelection = $studentChoiceIds->contains(fn($id) => !$choiceModels->get($id)?->is_correct);
+                    $hasIncorrectSelection = $studentChoiceIds->contains(fn ($id) => ! $choiceModels->get($id)?->is_correct);
                     $status = $hasIncorrectSelection ? 'incorrect' : 'partially_correct';
                 }
             }
@@ -153,7 +156,7 @@ class ShowQuizAnswers extends Component
                 'incorrect' => $incorrect++,
             };
 
-            $answerTexts = $studentChoiceIds->map(fn($id) => $choiceModels->get($id)?->title ?? 'Answer not found');
+            $answerTexts = $studentChoiceIds->map(fn ($id) => $choiceModels->get($id)?->title ?? 'Answer not found');
 
             return [
                 'question_text' => $questions[$questionId] ?? 'Question not found',
@@ -172,8 +175,6 @@ class ShowQuizAnswers extends Component
 
     /**
      * Get the page name for pagination.
-     *
-     * @return string
      */
     private function getPageName(): string
     {

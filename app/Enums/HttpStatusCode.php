@@ -4,10 +4,10 @@ namespace App\Enums;
 
 /**
  * HTTP Status Code Enum
- * 
+ *
  * Comprehensive enumeration of HTTP status codes as defined in RFC 7231, RFC 6585, and other RFCs.
  * Provides standardized status codes with their corresponding integer values and human-readable messages.
- * 
+ *
  * @see https://tools.ietf.org/html/rfc7231#section-6
  * @see https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
  */
@@ -151,7 +151,7 @@ enum HttpStatusCode: int
 
     /**
      * Get the human-readable message for the HTTP status code.
-     * 
+     *
      * @return string The descriptive message for this status code
      */
     public function getMessage(): string
@@ -231,13 +231,13 @@ enum HttpStatusCode: int
             self::NETWORK_AUTHENTICATION_REQUIRED => 'Network Authentication Required',
 
             // Fallback for any unhandled status codes
-            default => 'HTTP Status ' . $this->value,
+            default => 'HTTP Status '.$this->value,
         };
     }
 
     /**
      * Get the numeric HTTP status code.
-     * 
+     *
      * @return int The HTTP status code as an integer
      */
     public function getCode(): int
@@ -247,7 +247,7 @@ enum HttpStatusCode: int
 
     /**
      * Check if the status code indicates a successful response (2xx).
-     * 
+     *
      * @return bool True if the status code is in the 2xx range
      */
     public function isSuccess(): bool
@@ -257,7 +257,7 @@ enum HttpStatusCode: int
 
     /**
      * Check if the status code indicates a client error (4xx).
-     * 
+     *
      * @return bool True if the status code is in the 4xx range
      */
     public function isClientError(): bool
@@ -267,7 +267,7 @@ enum HttpStatusCode: int
 
     /**
      * Check if the status code indicates a server error (5xx).
-     * 
+     *
      * @return bool True if the status code is in the 5xx range
      */
     public function isServerError(): bool
@@ -277,7 +277,7 @@ enum HttpStatusCode: int
 
     /**
      * Check if the status code indicates a redirection (3xx).
-     * 
+     *
      * @return bool True if the status code is in the 3xx range
      */
     public function isRedirection(): bool
@@ -287,7 +287,7 @@ enum HttpStatusCode: int
 
     /**
      * Check if the status code indicates an informational response (1xx).
-     * 
+     *
      * @return bool True if the status code is in the 1xx range
      */
     public function isInformational(): bool
@@ -297,7 +297,7 @@ enum HttpStatusCode: int
 
     /**
      * Get the category name of the HTTP status code.
-     * 
+     *
      * @return string The category name (Informational, Success, Redirection, Client Error, Server Error, or Unknown)
      */
     public function getCategory(): string

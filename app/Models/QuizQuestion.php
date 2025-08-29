@@ -21,6 +21,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property-read int|null $audits_count
  * @property-read \App\Models\Question $question
  * @property-read \App\Models\Quiz $quiz
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizQuestion newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizQuestion newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizQuestion onlyTrashed()
@@ -34,14 +35,15 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizQuestion whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizQuestion withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|QuizQuestion withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class QuizQuestion extends Pivot implements Auditable
 {
     use HasFactory,
         HasUuids,
-        SoftDeletes,
-        \OwenIt\Auditing\Auditable;
+        \OwenIt\Auditing\Auditable,
+        SoftDeletes;
 
     /**
      * The table associated with the model.

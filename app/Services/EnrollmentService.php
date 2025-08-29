@@ -2,15 +2,13 @@
 
 namespace App\Services;
 
-use App\Models\Course;
-use App\Models\User;
-use App\Models\Enrollment;
 use App\Enums\CourseStatusEnum;
+use App\Models\Course;
+use App\Models\Enrollment;
+use App\Models\User;
 use App\Repositories\Interfaces\EnrollmentRepositoryInterface;
-use App\Services\BaseService;
 use App\Services\Interfaces\EnrollmentServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -23,8 +21,6 @@ class EnrollmentService extends BaseService implements EnrollmentServiceInterfac
 {
     /**
      * The enrollment repository instance.
-     *
-     * @var EnrollmentRepositoryInterface
      */
     protected EnrollmentRepositoryInterface $enrollmentRepository;
 
@@ -65,10 +61,10 @@ class EnrollmentService extends BaseService implements EnrollmentServiceInterfac
             $user = User::findOrFail($userId);
 
             // Check if course is published
-            if (!$course->hasStatus(CourseStatusEnum::PUBLISHED->value)) {
+            if (! $course->hasStatus(CourseStatusEnum::PUBLISHED->value)) {
                 return [
                     'success' => false,
-                    'message' => 'This course is not available for enrollment.'
+                    'message' => 'This course is not available for enrollment.',
                 ];
             }
 
@@ -76,7 +72,7 @@ class EnrollmentService extends BaseService implements EnrollmentServiceInterfac
             if ($course->max_students > 0 && $course->enrollments()->count() >= $course->max_students) {
                 return [
                     'success' => false,
-                    'message' => 'This course is full.'
+                    'message' => 'This course is full.',
                 ];
             }
 
@@ -84,7 +80,7 @@ class EnrollmentService extends BaseService implements EnrollmentServiceInterfac
             if ($this->isUserEnrolledInCourse($userId, $courseId)) {
                 return [
                     'success' => false,
-                    'message' => 'You are already enrolled in this course.'
+                    'message' => 'You are already enrolled in this course.',
                 ];
             }
 
@@ -95,13 +91,14 @@ class EnrollmentService extends BaseService implements EnrollmentServiceInterfac
 
             return [
                 'success' => true,
-                'message' => 'Successfully enrolled in course.'
+                'message' => 'Successfully enrolled in course.',
             ];
         } catch (\Exception $e) {
             DB::rollBack();
+
             return [
                 'success' => false,
-                'message' => 'Failed to enroll in course: ' . $e->getMessage()
+                'message' => 'Failed to enroll in course: '.$e->getMessage(),
             ];
         }
     }
@@ -118,10 +115,10 @@ class EnrollmentService extends BaseService implements EnrollmentServiceInterfac
                 ->where('course_id', $courseId)
                 ->first();
 
-            if (!$enrollment) {
+            if (! $enrollment) {
                 return [
                     'success' => false,
-                    'message' => 'You are not enrolled in this course.'
+                    'message' => 'You are not enrolled in this course.',
                 ];
             }
 
@@ -131,13 +128,14 @@ class EnrollmentService extends BaseService implements EnrollmentServiceInterfac
 
             return [
                 'success' => true,
-                'message' => 'Successfully unenrolled from course.'
+                'message' => 'Successfully unenrolled from course.',
             ];
         } catch (\Exception $e) {
             DB::rollBack();
+
             return [
                 'success' => false,
-                'message' => 'Failed to unenroll from course: ' . $e->getMessage()
+                'message' => 'Failed to unenroll from course: '.$e->getMessage(),
             ];
         }
     }

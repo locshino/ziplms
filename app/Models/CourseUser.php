@@ -22,6 +22,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property-read int|null $audits_count
  * @property-read \App\Models\Course $course
  * @property-read \App\Models\User $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseUser newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseUser newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseUser onlyTrashed()
@@ -36,23 +37,27 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseUser whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseUser withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseUser withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class CourseUser extends Pivot implements Auditable
 {
     use HasFactory,
         HasUuids,
-        SoftDeletes,
-        \OwenIt\Auditing\Auditable;
+        \OwenIt\Auditing\Auditable,
+        SoftDeletes;
 
     protected $table = 'course_user';
+
     public $incrementing = false;
+
     protected $fillable = [
         'course_id',
         'user_id',
         'start_at',
         'end_at',
     ];
+
     protected function casts(): array
     {
         return [
@@ -60,10 +65,12 @@ class CourseUser extends Pivot implements Auditable
             'end_at' => 'datetime',
         ];
     }
+
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
     }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

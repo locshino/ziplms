@@ -159,7 +159,10 @@ class UserRepository extends EloquentRepository implements UserRepositoryInterfa
     public function isActive(string $userId): bool
     {
         $user = $this->model->find($userId);
-        if (! $user) return false;
+        if (! $user) {
+            return false;
+        }
+
         return is_null($user->deleted_at) && $user->status === UserStatus::ACTIVE;
     }
 
@@ -169,8 +172,11 @@ class UserRepository extends EloquentRepository implements UserRepositoryInterfa
     public function isNotExist(string $userId): bool
     {
         $user = $this->model->find($userId);
-        if (! $user) return true;
-        return !is_null($user->deleted_at)
+        if (! $user) {
+            return true;
+        }
+
+        return ! is_null($user->deleted_at)
             || $user->status === UserStatus::INACTIVE
             || $user->status === UserStatus::PENDING;
     }
@@ -181,7 +187,10 @@ class UserRepository extends EloquentRepository implements UserRepositoryInterfa
     public function isSuspended(string $userId): bool
     {
         $user = $this->model->find($userId);
-        if (! $user) return false;
+        if (! $user) {
+            return false;
+        }
+
         return is_null($user->deleted_at) && $user->status === UserStatus::SUSPENDED;
     }
 }

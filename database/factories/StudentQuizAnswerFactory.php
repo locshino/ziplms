@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Models\AnswerChoice;
 use App\Models\Question;
 use App\Models\QuizAttempt;
-use App\Models\StudentQuizAnswer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -36,8 +35,8 @@ class StudentQuizAnswerFactory extends Factory
             // Get a correct answer choice for the question
             $question = Question::find($attributes['question_id']) ?? Question::factory()->create();
             $correctChoice = $question->answerChoices()->where('is_correct', true)->first();
-            
-            if (!$correctChoice) {
+
+            if (! $correctChoice) {
                 $correctChoice = AnswerChoice::factory()->correct()->create([
                     'question_id' => $question->id,
                 ]);
@@ -59,8 +58,8 @@ class StudentQuizAnswerFactory extends Factory
             // Get an incorrect answer choice for the question
             $question = Question::find($attributes['question_id']) ?? Question::factory()->create();
             $incorrectChoice = $question->answerChoices()->where('is_correct', false)->first();
-            
-            if (!$incorrectChoice) {
+
+            if (! $incorrectChoice) {
                 $incorrectChoice = AnswerChoice::factory()->incorrect()->create([
                     'question_id' => $question->id,
                 ]);

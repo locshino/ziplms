@@ -3,8 +3,8 @@
 namespace App\Services\Interfaces;
 
 use App\Models\Course;
-use Illuminate\Support\Collection;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 /**
  * Student Enrollment Service Interface
@@ -20,9 +20,9 @@ interface StudentEnrollmentServiceInterface
      * Bulk enroll students in a course
      */
     public function bulkEnrollStudents(
-        Course $course, 
-        array $studentIds, 
-        ?Carbon $enrollmentDate = null, 
+        Course $course,
+        array $studentIds,
+        ?Carbon $enrollmentDate = null,
         ?string $notes = null
     ): array;
 

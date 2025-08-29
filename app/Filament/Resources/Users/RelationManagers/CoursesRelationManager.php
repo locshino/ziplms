@@ -3,17 +3,14 @@
 namespace App\Filament\Resources\Users\RelationManagers;
 
 use App\Models\Course;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
-use Filament\Tables\Table;
-use courses;
-use Filament\Actions\AttachAction;
-use Filament\Actions\ViewAction;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\SpatieTagsColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
 
 class CoursesRelationManager extends RelationManager
 {

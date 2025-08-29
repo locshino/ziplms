@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Enums\MimeType;
 use App\Enums\Status\UserStatus;
-use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -50,6 +49,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property-read int|null $submissions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Course> $teachingCourses
  * @property-read int|null $teaching_courses_count
+ *
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
@@ -73,9 +73,10 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutPermission($permissions)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutRole($roles, $guard = null)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
+ *
  * @mixin \Eloquent
  */
-class User extends Authenticatable implements HasMedia, HasAvatar
+class User extends Authenticatable implements HasAvatar, HasMedia
 {
     use InteractsWithMedia;
 
@@ -163,6 +164,7 @@ class User extends Authenticatable implements HasMedia, HasAvatar
         $avatar_path = isset($avatar_form_media)
             ? asset('images/avatars/default.png')
             : $avatar_form_media;
+
         return $avatar_path;
     }
 }

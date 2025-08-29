@@ -38,7 +38,7 @@ class SubmissionFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $gradedAt = $this->faker->dateTimeBetween($attributes['submitted_at'], 'now');
-            
+
             return [
                 'points' => $this->faker->randomFloat(2, 0, 100),
                 'graded_by' => User::factory(),

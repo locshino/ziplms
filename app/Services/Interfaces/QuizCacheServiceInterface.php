@@ -3,7 +3,6 @@
 namespace App\Services\Interfaces;
 
 use App\Models\Quiz;
-use App\Models\QuizAttempt;
 use Illuminate\Database\Eloquent\Collection;
 
 interface QuizCacheServiceInterface

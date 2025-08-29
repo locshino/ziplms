@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Courses\RelationManagers;
 
 use App\Filament\Resources\Quizzes\QuizResource;
-use Filament\Actions\CreateAction;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DetachAction;
@@ -85,7 +84,7 @@ class QuizzesRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    ->schema(fn(AttachAction $action): array => [
+                    ->schema(fn (AttachAction $action): array => [
                         $action->getRecordSelect(),
                         DateTimePicker::make('start_at')
                             ->before('end_at')
@@ -94,7 +93,7 @@ class QuizzesRelationManager extends RelationManager
                             ->after('start_at')
                             ->required(),
                     ])
-                    ->multiple()
+                    ->multiple(),
             ])
             ->recordActions([
                 EditAction::make(),

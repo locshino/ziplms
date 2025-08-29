@@ -54,7 +54,7 @@ class UserQuizAssignmentService implements UserQuizAssignmentServiceInterface
     public function getAssignedQuizzesByCourse(User $user, int $courseId): Collection
     {
         // Kiểm tra user có đăng ký khóa học không
-        if (!$this->isUserEnrolledInCourse($user, $courseId)) {
+        if (! $this->isUserEnrolledInCourse($user, $courseId)) {
             return collect();
         }
 
@@ -71,7 +71,7 @@ class UserQuizAssignmentService implements UserQuizAssignmentServiceInterface
     public function canUserAccessQuiz(User $user, Quiz $quiz): bool
     {
         // Kiểm tra user có phải student không
-        if (!RoleHelper::isStudent($user)) {
+        if (! RoleHelper::isStudent($user)) {
             return false;
         }
 
@@ -82,12 +82,12 @@ class UserQuizAssignmentService implements UserQuizAssignmentServiceInterface
             })
             ->exists();
 
-        if (!$isEnrolledInQuizCourse) {
+        if (! $isEnrolledInQuizCourse) {
             return false;
         }
 
         // Kiểm tra trạng thái quiz
-        if (!$quiz->is_active) {
+        if (! $quiz->is_active) {
             return false;
         }
 
@@ -104,7 +104,7 @@ class UserQuizAssignmentService implements UserQuizAssignmentServiceInterface
 
         // Kiểm tra điều kiện tiên quyết (nếu có)
         if ($quiz->prerequisite_quiz_id) {
-            if (!$this->hasCompletedPrerequisite($user, $quiz->prerequisite_quiz_id)) {
+            if (! $this->hasCompletedPrerequisite($user, $quiz->prerequisite_quiz_id)) {
                 return false;
             }
         }

@@ -2,8 +2,8 @@
 
 namespace App\Exceptions\Services;
 
-use App\Exceptions\ApplicationException;
 use App\Enums\HttpStatusCode;
+use App\Exceptions\ApplicationException;
 use Exception;
 
 /**
@@ -18,15 +18,11 @@ class ServiceException extends ApplicationException
 {
     /**
      * The default language key for service exceptions.
-     *
-     * @var string
      */
     protected static string $defaultKey = 'exceptions.services.service_error';
 
     /**
      * The default HTTP status code for service exceptions.
-     *
-     * @var HttpStatusCode
      */
     protected HttpStatusCode $httpStatusCode;
 
@@ -58,8 +54,6 @@ class ServiceException extends ApplicationException
 
     /**
      * Get the HTTP status code for this exception.
-     *
-     * @return HttpStatusCode
      */
     public function getHttpStatusCode(): HttpStatusCode
     {
@@ -70,7 +64,6 @@ class ServiceException extends ApplicationException
      * Create exception for business logic error.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function businessLogicError(?string $reason = null): static
     {
@@ -85,7 +78,6 @@ class ServiceException extends ApplicationException
      * Create exception for operation failed.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function operationFailed(?string $reason = null): static
     {
@@ -100,7 +92,6 @@ class ServiceException extends ApplicationException
      * Create exception for operation not permitted.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function operationNotPermitted(?string $reason = null): static
     {
@@ -115,7 +106,6 @@ class ServiceException extends ApplicationException
      * Create exception for invalid input.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function invalidInput(?string $reason = null): static
     {
@@ -130,7 +120,6 @@ class ServiceException extends ApplicationException
      * Create exception for validation error.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function validationError(?string $reason = null): static
     {
@@ -145,7 +134,6 @@ class ServiceException extends ApplicationException
      * Create exception for authorization failed.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function authorizationFailed(?string $reason = null): static
     {
@@ -160,7 +148,6 @@ class ServiceException extends ApplicationException
      * Create exception for resource conflict.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function resourceConflict(?string $reason = null): static
     {
@@ -175,7 +162,6 @@ class ServiceException extends ApplicationException
      * Create exception for dependency error.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function dependencyError(?string $reason = null): static
     {
@@ -190,7 +176,6 @@ class ServiceException extends ApplicationException
      * Create exception for transaction failed.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function transactionFailed(?string $reason = null): static
     {
@@ -205,7 +190,6 @@ class ServiceException extends ApplicationException
      * Create exception for external service error.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function externalServiceError(?string $reason = null): static
     {
@@ -220,7 +204,6 @@ class ServiceException extends ApplicationException
      * Create exception for configuration error.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function configurationError(?string $reason = null): static
     {
@@ -235,7 +218,6 @@ class ServiceException extends ApplicationException
      * Create exception for timeout error.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function timeoutError(?string $reason = null): static
     {
@@ -250,7 +232,6 @@ class ServiceException extends ApplicationException
      * Create exception for rate limit exceeded.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function rateLimitExceeded(?string $reason = null): static
     {
@@ -265,7 +246,6 @@ class ServiceException extends ApplicationException
      * Create exception for quota exceeded.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function quotaExceeded(?string $reason = null): static
     {
@@ -280,7 +260,6 @@ class ServiceException extends ApplicationException
      * Create exception for service unavailable.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function serviceUnavailable(?string $reason = null): static
     {
@@ -295,7 +274,6 @@ class ServiceException extends ApplicationException
      * Create exception for maintenance mode.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function maintenanceMode(?string $reason = null): static
     {
@@ -310,7 +288,6 @@ class ServiceException extends ApplicationException
      * Create exception for feature disabled.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function featureDisabled(?string $reason = null): static
     {
@@ -325,7 +302,6 @@ class ServiceException extends ApplicationException
      * Create exception for insufficient data.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function insufficientData(?string $reason = null): static
     {
@@ -340,7 +316,6 @@ class ServiceException extends ApplicationException
      * Create exception for data integrity error.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function dataIntegrityError(?string $reason = null): static
     {

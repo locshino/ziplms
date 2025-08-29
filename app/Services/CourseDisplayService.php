@@ -7,15 +7,12 @@ use App\Models\Course;
 use App\Models\User;
 use App\Repositories\Interfaces\CourseRepositoryInterface;
 use App\Services\Interfaces\CourseDisplayServiceInterface;
-use App\Services\CourseService;
-use App\Services\EnrollmentService;
-use Illuminate\Support\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Exception;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
  * Course Display Service
- * 
+ *
  * Handles course display logic for different tabs and user contexts
  */
 class CourseDisplayService implements CourseDisplayServiceInterface
@@ -33,7 +30,7 @@ class CourseDisplayService implements CourseDisplayServiceInterface
     {
         try {
             $result = $this->courseService->getUserEnrolledCourses($user->id, $perPage, $currentPage);
-            
+
             // Convert array result to LengthAwarePaginator
             return new LengthAwarePaginator(
                 $result['courses'],
@@ -48,7 +45,7 @@ class CourseDisplayService implements CourseDisplayServiceInterface
         } catch (Exception $e) {
             throw new ServiceException(
                 'exceptions_services.service_error',
-                ['message' => "Failed to get enrolled courses for user {$user->id}: " . $e->getMessage()],
+                ['message' => "Failed to get enrolled courses for user {$user->id}: ".$e->getMessage()],
                 0,
                 $e
             );
@@ -62,7 +59,7 @@ class CourseDisplayService implements CourseDisplayServiceInterface
     {
         try {
             $result = $this->courseService->getAllPublishedCourses($perPage, $currentPage);
-            
+
             // Convert array result to LengthAwarePaginator
             return new LengthAwarePaginator(
                 $result['courses'],
@@ -77,7 +74,7 @@ class CourseDisplayService implements CourseDisplayServiceInterface
         } catch (Exception $e) {
             throw new ServiceException(
                 'exceptions_services.service_error',
-                ['message' => "Failed to get published courses: " . $e->getMessage()],
+                ['message' => 'Failed to get published courses: '.$e->getMessage()],
                 0,
                 $e
             );
@@ -91,7 +88,7 @@ class CourseDisplayService implements CourseDisplayServiceInterface
     {
         try {
             $result = $this->courseService->getUserCompletedCourses($user->id, $perPage, $currentPage);
-            
+
             // Convert array result to LengthAwarePaginator
             return new LengthAwarePaginator(
                 $result['courses'],
@@ -106,7 +103,7 @@ class CourseDisplayService implements CourseDisplayServiceInterface
         } catch (Exception $e) {
             throw new ServiceException(
                 'exceptions_services.service_error',
-                ['message' => "Failed to get completed courses for user {$user->id}: " . $e->getMessage()],
+                ['message' => "Failed to get completed courses for user {$user->id}: ".$e->getMessage()],
                 0,
                 $e
             );
@@ -123,7 +120,7 @@ class CourseDisplayService implements CourseDisplayServiceInterface
         } catch (Exception $e) {
             throw new ServiceException(
                 'exceptions_services.service_error',
-                ['message' => "Failed to get course progress for user {$user->id} in course {$course->id}: " . $e->getMessage()],
+                ['message' => "Failed to get course progress for user {$user->id} in course {$course->id}: ".$e->getMessage()],
                 0,
                 $e
             );
@@ -140,7 +137,7 @@ class CourseDisplayService implements CourseDisplayServiceInterface
         } catch (Exception $e) {
             throw new ServiceException(
                 'exceptions_services.service_error',
-                ['message' => "Failed to enroll user {$userId} in course {$courseId}: " . $e->getMessage()],
+                ['message' => "Failed to enroll user {$userId} in course {$courseId}: ".$e->getMessage()],
                 0,
                 $e
             );
@@ -157,7 +154,7 @@ class CourseDisplayService implements CourseDisplayServiceInterface
         } catch (Exception $e) {
             throw new ServiceException(
                 'exceptions_services.service_error',
-                ['message' => "Failed to unenroll user {$userId} from course {$courseId}: " . $e->getMessage()],
+                ['message' => "Failed to unenroll user {$userId} from course {$courseId}: ".$e->getMessage()],
                 0,
                 $e
             );
@@ -174,7 +171,7 @@ class CourseDisplayService implements CourseDisplayServiceInterface
         } catch (Exception $e) {
             throw new ServiceException(
                 'exceptions_services.service_error',
-                ['message' => "Failed to check if user {$user->id} can view course {$course->id}: " . $e->getMessage()],
+                ['message' => "Failed to check if user {$user->id} can view course {$course->id}: ".$e->getMessage()],
                 0,
                 $e
             );
@@ -188,12 +185,12 @@ class CourseDisplayService implements CourseDisplayServiceInterface
     {
         $colors = [
             '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-            '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
+            '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
         ];
-        
+
         $colorIndex = abs(crc32($courseId)) % count($colors);
         $backgroundColor = $colors[$colorIndex];
-        
+
         return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='{$backgroundColor}'/%3E%3Ctext x='200' y='100' font-family='Arial, sans-serif' font-size='24' fill='white' text-anchor='middle' dy='.3em'%3ECourse {$courseId}%3C/text%3E%3C/svg%3E";
     }
 
@@ -220,7 +217,7 @@ class CourseDisplayService implements CourseDisplayServiceInterface
         } catch (Exception $e) {
             throw new ServiceException(
                 'exceptions_services.service_error',
-                ['message' => "Failed to check enrollment status for user {$userId} in course {$courseId}: " . $e->getMessage()],
+                ['message' => "Failed to check enrollment status for user {$userId} in course {$courseId}: ".$e->getMessage()],
                 0,
                 $e
             );

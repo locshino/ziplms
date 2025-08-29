@@ -95,7 +95,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::guessPolicyNamesUsing(function (string $modelClass) {
             // 'App\Models\User' -> 'App\Policies\UserPolicy'
-            return str_replace('Models', 'Policies', $modelClass) . 'Policy';
+            return str_replace('Models', 'Policies', $modelClass).'Policy';
         });
     }
 }

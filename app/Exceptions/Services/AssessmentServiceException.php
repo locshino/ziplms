@@ -127,6 +127,7 @@ class AssessmentServiceException extends Exception
     public static function missingAnswers(array $missingQuestionIds): self
     {
         $questionList = implode(', ', $missingQuestionIds);
+
         return new self("Missing answers for questions: {$questionList}");
     }
 
@@ -139,6 +140,7 @@ class AssessmentServiceException extends Exception
         if ($reason) {
             $message .= ": {$reason}";
         }
+
         return new self($message);
     }
 
@@ -159,6 +161,7 @@ class AssessmentServiceException extends Exception
         if ($reason) {
             $message .= ". Reason: {$reason}";
         }
+
         return new self($message);
     }
 }

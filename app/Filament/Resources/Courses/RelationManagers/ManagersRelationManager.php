@@ -6,16 +6,9 @@ use App\Enums\Status\UserStatus;
 use App\Libs\Roles\RoleHelper;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreAction;
-use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -25,8 +18,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Malzariey\FilamentDaterangepickerFilter\Filters\DateRangeFilter;
 
 class ManagersRelationManager extends RelationManager
@@ -122,7 +113,7 @@ class ManagersRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    ->schema(fn(AttachAction $action): array => [
+                    ->schema(fn (AttachAction $action): array => [
                         $action->getRecordSelect(),
                         ...$this->getTimeCoursePicker(),
                     ])
@@ -149,7 +140,7 @@ class ManagersRelationManager extends RelationManager
                     $now = now();
 
                     return match (true) {
-                        !isset($owner->start_at) || !isset($owner->end_at) => $now,
+                        ! isset($owner->start_at) || ! isset($owner->end_at) => $now,
                         $now->between($owner->start_at, $owner->end_at) => $now,
                         default => $owner->start_at,
                     };

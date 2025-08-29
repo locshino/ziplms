@@ -23,7 +23,7 @@ class UserObserver
     {
         if ($user->isDirty('status')) {
             Log::info("UserObserver triggered for User ID: {$user->id}. Forgetting status cache.");
-            Cache::forget('_user_active_' . $user->id);
+            Cache::forget('_user_active_'.$user->id);
         }
     }
 

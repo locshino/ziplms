@@ -16,6 +16,7 @@ use ZPMLabs\FilamentApiDocsBuilder\Models\ApiDocs as BaseApiDocs;
  * @property string|null $tenant_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ApiDocs newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ApiDocs newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ApiDocs query()
@@ -29,6 +30,7 @@ use ZPMLabs\FilamentApiDocsBuilder\Models\ApiDocs as BaseApiDocs;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ApiDocs whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ApiDocs whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ApiDocs whereVersion($value)
+ *
  * @mixin \Eloquent
  */
 class ApiDocs extends BaseApiDocs

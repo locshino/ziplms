@@ -63,6 +63,4 @@ class BadgeFactory extends Factory
     {
         return $this->withStatus(BadgeStatus::ARCHIVED);
     }
-
-
 }

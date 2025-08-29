@@ -2,14 +2,15 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\Course;
 use App\Models\Assignment;
+use App\Models\Course;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+
 // use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class MyDocument extends Page
@@ -40,7 +41,7 @@ class MyDocument extends Page
         // ✅ Gọi lại phương thức đã có để lấy danh sách khóa học
         $enrolledCourses = $this->getEnrolledCourses();
 
-        $documents = new Collection();
+        $documents = new Collection;
         foreach ($enrolledCourses as $course) {
             // Áp dụng bộ lọc nếu người dùng chọn một khóa học cụ thể
             if ($this->selectedCourseId && $course->id !== $this->selectedCourseId) {
@@ -64,7 +65,7 @@ class MyDocument extends Page
     public function getDocumentsByCourse(): Collection
     {
         $enrolledCourses = $this->getEnrolledCourses();
-        $courseDocuments = new Collection();
+        $courseDocuments = new Collection;
 
         foreach ($enrolledCourses as $course) {
             // Áp dụng bộ lọc nếu người dùng chọn một khóa học cụ thể
@@ -76,7 +77,7 @@ class MyDocument extends Page
             if ($courseMedia->isNotEmpty()) {
                 $courseDocuments->push([
                     'course' => $course,
-                    'documents' => $courseMedia->sortByDesc('created_at')
+                    'documents' => $courseMedia->sortByDesc('created_at'),
                 ]);
             }
         }
@@ -206,7 +207,8 @@ class MyDocument extends Page
         }
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
         $i = floor(log($bytes, 1024));
-        return round($bytes / (1024 ** $i), 2) . ' ' . $units[$i];
+
+        return round($bytes / (1024 ** $i), 2).' '.$units[$i];
     }
 
     /**
@@ -215,6 +217,7 @@ class MyDocument extends Page
     public function getFileIcon(Media $media): string
     {
         $extension = strtolower(pathinfo($media->file_name, PATHINFO_EXTENSION));
+
         return match ($extension) {
             'pdf', 'doc', 'docx' => 'heroicon-o-document-text',
             'xls', 'xlsx' => 'heroicon-o-table-cells',
@@ -256,6 +259,7 @@ class MyDocument extends Page
             ->color('success')
             ->url(function (array $arguments) {
                 $media = Media::find($arguments['media_id']);
+
                 return $media ? $media->getUrl() : null;
             })
             ->openUrlInNewTab(true);
@@ -272,6 +276,7 @@ class MyDocument extends Page
             ->color('warning')
             ->url(function (array $arguments) {
                 $media = Media::find($arguments['media_id']);
+
                 return $media ? $media->getUrl() : null;
             })
             ->openUrlInNewTab(true);

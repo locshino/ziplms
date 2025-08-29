@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\QuizAttempts\Tables;
 
 use App\Enums\Status\QuizAttemptStatus;
-use EncoreDigitalGroup\Filament\Helpers\InputTypes\Select\Select;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -98,7 +97,7 @@ class QuizAttemptsTable
                         Column::make('updated_at'),
                     ])
                         // Optional: you can customize the filename
-                        ->withFilename(fn($resource) => $resource::getModelLabel() . '-' . date('Y-m-d'))
+                        ->withFilename(fn ($resource) => $resource::getModelLabel().'-'.date('Y-m-d')),
                 ]),
             ]);
     }

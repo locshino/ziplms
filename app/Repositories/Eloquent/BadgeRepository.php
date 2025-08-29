@@ -11,8 +11,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection as SupportCollection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -25,8 +23,6 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
 {
     /**
      * Specify Model class name.
-     *
-     * @return string
      */
     public function model(): string
     {
@@ -36,9 +32,6 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
     /**
      * Find badge by ID or fail.
      *
-     * @param  string  $id
-     * @param  array  $relations
-     * @return Badge
      * @throws BadgeRepositoryException
      */
     public function findBadgeByIdOrFail(string $id, array $relations = []): Badge
@@ -57,9 +50,6 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
     /**
      * Update badge by ID.
      *
-     * @param  string  $id
-     * @param  array  $data
-     * @return Badge
      * @throws BadgeRepositoryException
      */
     public function updateBadgeById(string $id, array $data): Badge
@@ -67,6 +57,7 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
         try {
             $badge = $this->findBadgeByIdOrFail($id);
             $badge->update($data);
+
             return $badge->fresh();
         } catch (BadgeRepositoryException $e) {
             throw $e;
@@ -82,14 +73,13 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
     /**
      * Delete badge by ID.
      *
-     * @param  string  $id
-     * @return bool
      * @throws BadgeRepositoryException
      */
     public function deleteBadgeById(string $id): bool
     {
         try {
             $badge = $this->findBadgeByIdOrFail($id);
+
             return $badge->delete();
         } catch (BadgeRepositoryException $e) {
             throw $e;
@@ -104,7 +94,6 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      * Get badges by status.
      *
      * @param  string  $status  The badge status
-     * @return Collection
      */
     public function getBadgesByStatus(string $status): Collection
     {
@@ -115,7 +104,6 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      * Get badges by category.
      *
      * @param  string  $category  The badge category
-     * @return Collection
      */
     public function getBadgesByCategory(string $category): Collection
     {
@@ -128,7 +116,6 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      * Get badges by type.
      *
      * @param  string  $type  The badge type
-     * @return Collection
      */
     public function getBadgesByType(string $type): Collection
     {
@@ -140,8 +127,6 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
     /**
      * Get badge with conditions.
      *
-     * @param  string  $badgeId
-     * @return Badge
      * @throws BadgeRepositoryException
      */
     public function getBadgeWithConditions(string $badgeId): Badge
@@ -160,8 +145,6 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
     /**
      * Get badge with user achievements.
      *
-     * @param  string  $badgeId
-     * @return Badge
      * @throws BadgeRepositoryException
      */
     public function getBadgeWithUserAchievements(string $badgeId): Badge
@@ -183,12 +166,13 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      * Get conditions by badge.
      *
      * @param  string  $badgeId  The badge ID
-     * @return Collection
+     *
      * @throws BadgeRepositoryException
      */
     public function getConditionsByBadge(string $badgeId): Collection
     {
         $badge = $this->findByIdOrFail($badgeId);
+
         return $badge->conditions;
     }
 
@@ -196,12 +180,13 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      * Get user achievements by badge.
      *
      * @param  string  $badgeId  The badge ID
-     * @return Collection
+     *
      * @throws BadgeRepositoryException
      */
     public function getUserAchievementsByBadge(string $badgeId): Collection
     {
         $badge = $this->findByIdOrFail($badgeId);
+
         return $badge->users;
     }
 
@@ -209,12 +194,13 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      * Get achievements count for badge.
      *
      * @param  string  $badgeId  The badge ID
-     * @return int
+     *
      * @throws BadgeRepositoryException
      */
     public function getAchievementsCount(string $badgeId): int
     {
         $badge = $this->findByIdOrFail($badgeId);
+
         return $badge->users()->count();
     }
 
@@ -222,7 +208,7 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      * Get badge achievement statistics.
      *
      * @param  string  $badgeId  The badge ID
-     * @return array
+     *
      * @throws BadgeRepositoryException
      */
     public function getBadgeAchievementStats(string $badgeId): array
@@ -253,7 +239,7 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      * Get badge progress distribution.
      *
      * @param  string  $badgeId  The badge ID
-     * @return array
+     *
      * @throws BadgeRepositoryException
      */
     public function getBadgeProgressDistribution(string $badgeId): array
@@ -281,7 +267,7 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      * Get average completion time for badge.
      *
      * @param  string  $badgeId  The badge ID
-     * @return float|null
+     *
      * @throws BadgeRepositoryException
      */
     public function getAverageCompletionTime(string $badgeId): ?float
@@ -301,7 +287,6 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      * Get badges by IDs.
      *
      * @param  array  $badgeIds  Array of badge IDs
-     * @return Collection
      */
     public function getBadgesByIds(array $badgeIds): Collection
     {
@@ -313,13 +298,12 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      *
      * @param  string  $keyword  The search keyword
      * @param  array  $filters  Additional filters
-     * @return Collection
      */
     public function searchBadges(string $keyword, array $filters = []): Collection
     {
         $query = $this->model->where(function ($q) use ($keyword) {
             $q->where('title', 'like', "%{$keyword}%")
-              ->orWhere('description', 'like', "%{$keyword}%");
+                ->orWhere('description', 'like', "%{$keyword}%");
         });
 
         if (isset($filters['status'])) {
@@ -340,7 +324,6 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      *
      * @param  int  $perPage  Items per page
      * @param  array  $filters  Additional filters
-     * @return LengthAwarePaginator
      */
     public function getPaginatedBadges(int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
@@ -353,7 +336,7 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
         if (isset($filters['search'])) {
             $query->where(function ($q) use ($filters) {
                 $q->where('title', 'like', "%{$filters['search']}%")
-                  ->orWhere('description', 'like', "%{$filters['search']}%");
+                    ->orWhere('description', 'like', "%{$filters['search']}%");
             });
         }
 
@@ -364,7 +347,6 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      * Get featured badges.
      *
      * @param  int  $limit  Maximum number of badges to return
-     * @return Collection
      */
     public function getFeaturedBadges(int $limit = 10): Collection
     {
@@ -377,7 +359,6 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      * Get popular badges.
      *
      * @param  int  $limit  Maximum number of badges to return
-     * @return Collection
      */
     public function getPopularBadges(int $limit = 10): Collection
     {
@@ -391,7 +372,6 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      * Get recent badges.
      *
      * @param  int  $limit  Maximum number of badges to return
-     * @return Collection
      */
     public function getRecentBadges(int $limit = 10): Collection
     {
@@ -405,7 +385,6 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      *
      * @param  string  $status  The badge status
      * @param  string  $category  The badge category
-     * @return Collection
      */
     public function getBadgesByStatusAndCategory(string $status, string $category): Collection
     {
@@ -419,7 +398,6 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      * Get badges with minimum achievements.
      *
      * @param  int  $minAchievements  Minimum number of achievements
-     * @return Collection
      */
     public function getBadgesWithMinAchievements(int $minAchievements): Collection
     {
@@ -432,7 +410,6 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      * Get badges by difficulty level.
      *
      * @param  string  $difficulty  The difficulty level
-     * @return Collection
      */
     public function getBadgesByDifficulty(string $difficulty): Collection
     {
@@ -446,14 +423,13 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      *
      * @param  int  $minPoints  Minimum points
      * @param  int  $maxPoints  Maximum points
-     * @return Collection
      */
     public function getBadgesByPointsRange(int $minPoints, int $maxPoints): Collection
     {
         // Since Badge model doesn't have points field, we'll use tags or conditions
         return $this->model->whereHas('conditions', function ($query) use ($minPoints, $maxPoints) {
             $query->where('condition_type', 'points_earned')
-                  ->whereJsonBetween('condition_data->minimum_points', [$minPoints, $maxPoints]);
+                ->whereJsonBetween('condition_data->minimum_points', [$minPoints, $maxPoints]);
         })->get();
     }
 
@@ -461,7 +437,6 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      * Get user badges.
      *
      * @param  string  $userId  The user ID
-     * @return Collection
      */
     public function getUserBadges(string $userId): Collection
     {
@@ -477,7 +452,7 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      *
      * @param  string  $userId  The user ID
      * @param  string  $badgeId  The badge ID
-     * @return array
+     *
      * @throws BadgeRepositoryException
      */
     public function getUserBadgeProgress(string $userId, string $badgeId): array
@@ -488,6 +463,7 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
 
             if ($hasEarned) {
                 $earnedAt = $badge->users()->where('user_id', $userId)->first()?->pivot?->earned_at;
+
                 return [
                     'earned' => true,
                     'earned_at' => $earnedAt,
@@ -519,7 +495,6 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      *
      * @param  string  $userId  The user ID
      * @param  string  $badgeId  The badge ID
-     * @return bool
      */
     public function userHasBadge(string $userId, string $badgeId): bool
     {
@@ -532,7 +507,6 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      * Get eligible badges for user.
      *
      * @param  string  $userId  The user ID
-     * @return Collection
      */
     public function getEligibleBadgesForUser(string $userId): Collection
     {
@@ -547,7 +521,7 @@ class BadgeRepository extends EloquentRepository implements BadgeRepositoryInter
      *
      * @param  string  $badgeId  The badge ID
      * @param  int  $limit  Maximum number of users to return
-     * @return Collection
+     *
      * @throws BadgeRepositoryException
      */
     public function getBadgeLeaderboard(string $badgeId, int $limit = 10): Collection

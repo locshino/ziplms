@@ -5,15 +5,11 @@ namespace App\Filament\Resources\Quizzes\RelationManagers;
 use App\Enums\Status\QuestionStatus;
 use App\Filament\Resources\Questions\QuestionResource;
 use App\Filament\Resources\Questions\Tables\QuestionsTable;
-use App\Models\Question;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\ModalTableSelect;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -83,7 +79,7 @@ class QuestionsRelationManager extends RelationManager
                 CreateAction::make(),
                 AttachAction::make()
                     // ->multiple()
-                    ->schema(fn(AttachAction $action) => [
+                    ->schema(fn (AttachAction $action) => [
                         $action->getRecordSelect(),
                         ModalTableSelect::make('recordId')
                             ->label('Question')
@@ -93,7 +89,7 @@ class QuestionsRelationManager extends RelationManager
                             ->label('Points')
                             ->numeric()
                             ->minValue(0)
-                            ->required()
+                            ->required(),
                     ]),
             ])
             ->filters([

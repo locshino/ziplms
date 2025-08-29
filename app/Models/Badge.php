@@ -34,6 +34,7 @@ use Spatie\Tags\HasTags;
  * @property-read int|null $tags_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
  * @property-read int|null $users_count
+ *
  * @method static \Database\Factories\BadgeFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge newQuery()
@@ -55,16 +56,17 @@ use Spatie\Tags\HasTags;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge withoutTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Badge withoutTrashed()
+ *
  * @mixin \Eloquent
  */
-class Badge extends Model implements HasMedia, Auditable
+class Badge extends Model implements Auditable, HasMedia
 {
     use HasFactory,
         HasTags,
         HasUuids,
         InteractsWithMedia,
-        SoftDeletes,
-        \OwenIt\Auditing\Auditable;
+        \OwenIt\Auditing\Auditable,
+        SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

@@ -16,6 +16,6 @@ enum UserStatus: string implements HasStatusStyles
 
     public function getDescription(): ?string
     {
-        return __('enums_status_user.description.' . $this->value);
+        return __('enums_status_user.description.'.$this->value);
     }
 }

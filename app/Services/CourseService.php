@@ -2,19 +2,17 @@
 
 namespace App\Services;
 
-use App\Models\Course;
-use App\Models\User;
-use App\Models\Enrollment;
 use App\Enums\CourseStatusEnum;
-use App\Repositories\Interfaces\CourseRepositoryInterface;
-use App\Services\BaseService;
-use App\Services\Interfaces\CourseServiceInterface;
 use App\Enums\Permissions\PermissionNounEnum;
 use App\Enums\Permissions\PermissionVerbEnum;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Auth;
 use App\Libs\Roles\RoleHelper;
+use App\Models\Course;
+use App\Models\Enrollment;
+use App\Models\User;
+use App\Repositories\Interfaces\CourseRepositoryInterface;
+use App\Services\Interfaces\CourseServiceInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Course service implementation.
@@ -26,8 +24,6 @@ class CourseService extends BaseService implements CourseServiceInterface
 {
     /**
      * The course repository instance.
-     *
-     * @var CourseRepositoryInterface
      */
     protected CourseRepositoryInterface $courseRepository;
 
@@ -112,7 +108,7 @@ class CourseService extends BaseService implements CourseServiceInterface
         $enrolledCourseIds = Enrollment::where('student_id', $user->id)
             ->pluck('course_id')
             ->toArray();
-            
+
         return $allCompleted->whereNotIn('id', $enrolledCourseIds);
     }
 
@@ -147,7 +143,7 @@ class CourseService extends BaseService implements CourseServiceInterface
     {
         // Only admin and super admin can create courses
         return RoleHelper::isAdministrative($user) ||
-               $user->can(PermissionVerbEnum::CREATE->value . '.' . PermissionNounEnum::COURSE->value);
+               $user->can(PermissionVerbEnum::CREATE->value.'.'.PermissionNounEnum::COURSE->value);
     }
 
     /**
@@ -166,7 +162,7 @@ class CourseService extends BaseService implements CourseServiceInterface
         }
 
         // Check for custom edit permission
-        if ($user->can(PermissionVerbEnum::UPDATE->value . '.' . PermissionNounEnum::COURSE->value)) {
+        if ($user->can(PermissionVerbEnum::UPDATE->value.'.'.PermissionNounEnum::COURSE->value)) {
             return true;
         }
 
@@ -181,7 +177,7 @@ class CourseService extends BaseService implements CourseServiceInterface
     {
         // Only admin and super admin can delete courses
         return RoleHelper::isAdministrative($user) ||
-               $user->can(PermissionVerbEnum::DELETE->value . '.' . PermissionNounEnum::COURSE->value);
+               $user->can(PermissionVerbEnum::DELETE->value.'.'.PermissionNounEnum::COURSE->value);
     }
 
     /**
@@ -191,7 +187,7 @@ class CourseService extends BaseService implements CourseServiceInterface
     {
         // Only admin and super admin can restore courses
         return RoleHelper::isAdministrative($user) ||
-               $user->can(PermissionVerbEnum::RESTORE->value . '.' . PermissionNounEnum::COURSE->value);
+               $user->can(PermissionVerbEnum::RESTORE->value.'.'.PermissionNounEnum::COURSE->value);
     }
 
     /**
@@ -199,7 +195,7 @@ class CourseService extends BaseService implements CourseServiceInterface
      */
     public function getCourseWithDetails(int $courseId): ?Course
     {
-        return $this->courseRepository->getCourseWithDetails((string)$courseId);
+        return $this->courseRepository->getCourseWithDetails((string) $courseId);
     }
 
     /**
@@ -220,7 +216,7 @@ class CourseService extends BaseService implements CourseServiceInterface
             'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
             'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
             'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
-            'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)'
+            'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
         ];
 
         return $gradients[abs(crc32($course->id)) % count($gradients)];
@@ -233,14 +229,14 @@ class CourseService extends BaseService implements CourseServiceInterface
     public function getUserEnrolledCourses(string $userId, int $perPage = 8, int $page = 1): array
     {
         $user = User::find($userId);
-        
-        if (!$user) {
+
+        if (! $user) {
             return [
                 'courses' => collect(),
                 'total' => 0,
                 'current_page' => $page,
                 'per_page' => $perPage,
-                'last_page' => 0
+                'last_page' => 0,
             ];
         }
 
@@ -267,7 +263,7 @@ class CourseService extends BaseService implements CourseServiceInterface
             'total' => $total,
             'current_page' => $page,
             'per_page' => $perPage,
-            'last_page' => ceil($total / $perPage)
+            'last_page' => ceil($total / $perPage),
         ];
     }
 
@@ -278,7 +274,7 @@ class CourseService extends BaseService implements CourseServiceInterface
     {
         $query = Course::whereHas('enrollments', function ($q) use ($userId) {
             $q->where('student_id', $userId)
-              ->whereNotNull('completed_at');
+                ->whereNotNull('completed_at');
         });
 
         $total = $query->count();
@@ -292,7 +288,7 @@ class CourseService extends BaseService implements CourseServiceInterface
             'total' => $total,
             'current_page' => $page,
             'per_page' => $perPage,
-            'last_page' => ceil($total / $perPage)
+            'last_page' => ceil($total / $perPage),
         ];
     }
 
@@ -308,7 +304,7 @@ class CourseService extends BaseService implements CourseServiceInterface
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -323,7 +319,7 @@ class CourseService extends BaseService implements CourseServiceInterface
             'total' => $total,
             'current_page' => $page,
             'per_page' => $perPage,
-            'last_page' => ceil($total / $perPage)
+            'last_page' => ceil($total / $perPage),
         ];
     }
 
@@ -361,8 +357,8 @@ class CourseService extends BaseService implements CourseServiceInterface
     public function getCourseProgress(Course $course, User $user): int
     {
         $enrollment = $course->enrollments()->where('student_id', $user->id)->first();
-        
-        if (!$enrollment) {
+
+        if (! $enrollment) {
             return 0;
         }
 
@@ -373,6 +369,7 @@ class CourseService extends BaseService implements CourseServiceInterface
 
         // For now, return a basic progress based on enrollment date
         $enrolledDays = now()->diffInDays($enrollment->enrolled_at);
+
         return min(($enrolledDays * 10), 90); // Max 90% until actually completed
     }
 

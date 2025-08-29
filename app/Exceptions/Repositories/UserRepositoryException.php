@@ -17,8 +17,6 @@ class UserRepositoryException extends RepositoryException
 {
     /**
      * The default language key for user repository exceptions.
-     *
-     * @var string
      */
     protected static string $defaultKey = 'exceptions.repositories.user.user_not_found';
 
@@ -26,7 +24,6 @@ class UserRepositoryException extends RepositoryException
      * Create exception for user not found by email.
      *
      * @param  string  $email  The user email
-     * @return static
      */
     public static function userNotFoundByEmail(string $email): static
     {
@@ -41,7 +38,6 @@ class UserRepositoryException extends RepositoryException
      * Create exception for inactive user.
      *
      * @param  string|null  $userId  The user ID
-     * @return static
      */
     public static function userNotActive(?string $userId = null): static
     {
@@ -56,7 +52,6 @@ class UserRepositoryException extends RepositoryException
      * Create exception for banned user.
      *
      * @param  string|null  $userId  The user ID
-     * @return static
      */
     public static function userBanned(?string $userId = null): static
     {
@@ -71,7 +66,6 @@ class UserRepositoryException extends RepositoryException
      * Create exception for suspended user.
      *
      * @param  string|null  $userId  The user ID
-     * @return static
      */
     public static function userSuspended(?string $userId = null): static
     {
@@ -84,8 +78,6 @@ class UserRepositoryException extends RepositoryException
 
     /**
      * Create exception for invalid credentials.
-     *
-     * @return static
      */
     public static function invalidCredentials(): static
     {
@@ -100,7 +92,6 @@ class UserRepositoryException extends RepositoryException
      * Create exception for insufficient permissions.
      *
      * @param  string|null  $action  The action being attempted
-     * @return static
      */
     public static function insufficientPermissions(?string $action = null): static
     {
@@ -116,7 +107,6 @@ class UserRepositoryException extends RepositoryException
      *
      * @param  string  $userId  The user ID
      * @param  string  $courseId  The course ID
-     * @return static
      */
     public static function notEnrolledInCourse(string $userId, string $courseId): static
     {
@@ -132,7 +122,6 @@ class UserRepositoryException extends RepositoryException
      *
      * @param  string  $userId  The user ID
      * @param  string  $courseId  The course ID
-     * @return static
      */
     public static function notTeachingCourse(string $userId, string $courseId): static
     {
@@ -148,7 +137,6 @@ class UserRepositoryException extends RepositoryException
      *
      * @param  string  $userId  The user ID
      * @param  string  $courseId  The course ID
-     * @return static
      */
     public static function notManagingCourse(string $userId, string $courseId): static
     {
@@ -163,7 +151,6 @@ class UserRepositoryException extends RepositoryException
      * Create exception for avatar upload failure.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function avatarUploadFailed(?string $reason = null): static
     {
@@ -178,7 +165,6 @@ class UserRepositoryException extends RepositoryException
      * Create exception for avatar not found.
      *
      * @param  string  $userId  The user ID
-     * @return static
      */
     public static function avatarNotFound(string $userId): static
     {
@@ -193,7 +179,6 @@ class UserRepositoryException extends RepositoryException
      * Create exception for email already exists.
      *
      * @param  string  $email  The email address
-     * @return static
      */
     public static function emailAlreadyExists(string $email): static
     {
@@ -208,7 +193,6 @@ class UserRepositoryException extends RepositoryException
      * Create exception for role assignment failure.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function roleAssignmentFailed(?string $reason = null): static
     {

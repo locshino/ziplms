@@ -30,10 +30,10 @@ class UserPaginationData
         // Ensure valid pagination values
         $this->perPage = max(1, min(100, $this->perPage));
         $this->page = max(1, $this->page);
-        
+
         // Initialize filters if not provided
         if ($this->filters === null) {
-            $this->filters = new UserFilterData();
+            $this->filters = new UserFilterData;
         }
     }
 
@@ -46,7 +46,7 @@ class UserPaginationData
     {
         return [
             'per_page' => $this->perPage,
-            'page' => $this->page
+            'page' => $this->page,
         ];
     }
 
@@ -131,7 +131,7 @@ class UserPaginationData
     {
         return [
             'column' => $this->sortBy,
-            'direction' => strtolower($this->sortDirection) === 'asc' ? 'asc' : 'desc'
+            'direction' => strtolower($this->sortDirection) === 'asc' ? 'asc' : 'desc',
         ];
     }
 
@@ -173,8 +173,8 @@ class UserPaginationData
             'sort_direction' => 'sometimes|string|in:asc,desc',
             'with_trashed' => 'sometimes|boolean',
             'only_trashed' => 'sometimes|boolean',
-            'filters.status' => 'sometimes|in:' . implode(',', array_column(UserStatus::cases(), 'value')),
-            'filters.role' => 'sometimes|in:' . implode(',', array_column(RoleSystem::cases(), 'value')),
+            'filters.status' => 'sometimes|in:'.implode(',', array_column(UserStatus::cases(), 'value')),
+            'filters.role' => 'sometimes|in:'.implode(',', array_column(RoleSystem::cases(), 'value')),
             'filters.keyword' => "sometimes|string|max:{$maxKeywordLength}",
         ];
     }
@@ -182,15 +182,15 @@ class UserPaginationData
     /**
      * Create pagination data from request parameters.
      *
-     * @param array<string, mixed> $params
+     * @param  array<string, mixed>  $params
      */
     public static function fromArray(
-        array $params, 
-        int $defaultPerPage = 15, 
-        int $defaultPage = 1, 
-        array $defaultColumns = ['*'], 
-        array $defaultRelations = [], 
-        string $defaultSortBy = 'created_at', 
+        array $params,
+        int $defaultPerPage = 15,
+        int $defaultPage = 1,
+        array $defaultColumns = ['*'],
+        array $defaultRelations = [],
+        string $defaultSortBy = 'created_at',
         string $defaultSortDirection = 'desc'
     ): self {
         $filters = null;

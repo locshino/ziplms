@@ -4,14 +4,11 @@ namespace App\Filament\Resources\Users\Schemas;
 
 use App\Enums\MimeType;
 use App\Enums\Status\UserStatus;
-use App\Enums\System\RoleSystem;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 
 class UserForm
@@ -53,7 +50,7 @@ class UserForm
                     ->required(),
                 Toggle::make('force_renew_password')
                     ->label(__('resource_user.form.fields.force_renew_password'))
-                    ->visible(fn() => config('ziplms.plugins.renew_password.enabled') && (config('ziplms.plugins.renew_password.force_renew_password') == false))
+                    ->visible(fn () => config('ziplms.plugins.renew_password.enabled') && (config('ziplms.plugins.renew_password.force_renew_password') == false))
                     ->required(),
             ]);
     }

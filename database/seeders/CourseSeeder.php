@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Enums\Status\CourseStatus;
 use App\Enums\System\RoleSystem;
 use App\Models\Course;
-use App\Models\Tag;
 use App\Models\User;
 use Database\Seeders\Contracts\HasCacheSeeder;
 use Illuminate\Database\Seeder;
@@ -13,6 +12,7 @@ use Illuminate\Database\Seeder;
 class CourseSeeder extends Seeder
 {
     use HasCacheSeeder;
+
     /**
      * Run the database seeds.
      */
@@ -56,6 +56,7 @@ class CourseSeeder extends Seeder
                     $parentCourse->users()->attach($student->id);
                 }
             }
+
             return true;
         });
     }

@@ -22,6 +22,7 @@ use OwenIt\Auditing\Models\Audit as AuditingModel;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $auditable
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Audit newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Audit newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Audit query()
@@ -39,6 +40,7 @@ use OwenIt\Auditing\Models\Audit as AuditingModel;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Audit whereUserAgent($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Audit whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Audit whereUserType($value)
+ *
  * @mixin \Eloquent
  */
 class Audit extends AuditingModel

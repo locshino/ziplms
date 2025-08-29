@@ -9,18 +9,16 @@ use App\Models\Course;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\ModalTableSelect;
-use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\SpatieTagsInput;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\SpatieTagsInput;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 use Malzariey\FilamentLexicalEditor\LexicalEditor;
 
 class CourseForm
@@ -79,7 +77,7 @@ class CourseForm
                                 DateTimePicker::make('start_at')
                                     ->label('Thời gian bắt đầu')
                                     ->disabled(function (?Course $record) {
-                                        if (!$record) {
+                                        if (! $record) {
                                             return false; // Always enabled on create
                                         }
                                         // Rule 1: Disable if it's an evergreen course with students
@@ -90,25 +88,28 @@ class CourseForm
                                         if ($record->start_at && now()->between($record->start_at, $record->end_at)) {
                                             return true;
                                         }
+
                                         return false;
                                     })
                                     ->helperText(function (?Course $record) {
                                         if ($record && $record->start_at === null && $record->students()->exists()) {
                                             return 'Không thể đặt lại lịch vì khóa học đã có học viên.';
                                         }
+
                                         return null;
                                     }),
 
                                 DateTimePicker::make('end_at')
                                     ->label('Thời gian kết thúc')
                                     ->disabled(function (?Course $record) {
-                                        if (!$record) {
+                                        if (! $record) {
                                             return false;
                                         }
                                         // Rule 1: Disable if it's an evergreen course with students
                                         if ($record->start_at === null && $record->students()->exists()) {
                                             return true;
                                         }
+
                                         return false;
                                     }),
                             ]),
@@ -119,15 +120,16 @@ class CourseForm
                             ->icon('heroicon-o-calendar-days')
                             ->requiresConfirmation()
                             ->visible(function (?Course $record) {
-                                if (!$record) {
+                                if (! $record) {
                                     return false;
                                 }
+
                                 // Only show if the course is currently timed
                                 return $record->start_at !== null;
                             })
                             ->modalHeading('Xác nhận chuyển đổi sang Vô thời hạn')
                             ->modalDescription(new HtmlString(
-                                'Hành động này sẽ xóa lịch trình của khóa học. <br/><br/>' .
+                                'Hành động này sẽ xóa lịch trình của khóa học. <br/><br/>'.
                                     '<strong class="text-danger">Cảnh báo: Nếu khóa học đã có học viên, bạn sẽ không thể thiết lập lại lịch cho khóa học này nữa. Thay đổi sẽ có hiệu lực khi bấm lưu thay đổi</strong>'
                             ))
                             ->modalSubmitActionLabel('Có, tôi hiểu và xác nhận')
@@ -155,8 +157,8 @@ class CourseForm
                             ->reorderable()
                             ->downloadable()
                             ->openable()
-                            ->mediaName(fn($file) => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document')
-                            ->customProperties(fn($file) => ['title' => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document']),
+                            ->mediaName(fn ($file) => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document')
+                            ->customProperties(fn ($file) => ['title' => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document']),
                     ]),
                 Section::make('Mở rộng')
                     ->columnSpanFull()

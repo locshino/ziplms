@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\AnswerChoice|null $answerChoice
  * @property-read \App\Models\Question $question
  * @property-read \App\Models\QuizAttempt $quizAttempt
+ *
  * @method static \Database\Factories\StudentQuizAnswerFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentQuizAnswer newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentQuizAnswer newQuery()
@@ -33,6 +34,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentQuizAnswer whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentQuizAnswer withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentQuizAnswer withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class StudentQuizAnswer extends Model

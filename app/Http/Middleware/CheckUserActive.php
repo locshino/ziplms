@@ -28,10 +28,9 @@ class CheckUserActive
 
         // Cache the user's status forever until it's manually cleared
         // Observer will clear this cache when the status is updated
-        $isActiveUser = Cache::rememberForever('_user_active_' . $user->id, function () use ($userService, $user) {
+        $isActiveUser = Cache::rememberForever('_user_active_'.$user->id, function () use ($userService, $user) {
             return $userService->checkActive($user->id);
         });
-
 
         // If the user is not active, log them out
         if ($isActiveUser == false) {

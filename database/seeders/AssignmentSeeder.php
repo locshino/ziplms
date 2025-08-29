@@ -15,6 +15,7 @@ use Illuminate\Database\Seeder;
 class AssignmentSeeder extends Seeder
 {
     use HasCacheSeeder;
+
     /**
      * Run the database seeds.
      */
@@ -36,7 +37,6 @@ class AssignmentSeeder extends Seeder
                 $enrolledStudents = $course->users->filter(function ($user) {
                     return $user->hasRole(RoleSystem::STUDENT->value);
                 });
-                ;
 
                 // Create 10 assignments for each child course
                 for ($i = 1; $i <= 10; $i++) {

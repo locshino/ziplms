@@ -25,6 +25,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property-read \App\Models\BadgeHasCondition|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Badge> $badges
  * @property-read int|null $badges_count
+ *
  * @method static \Database\Factories\BadgeConditionFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition newQuery()
@@ -41,14 +42,15 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeCondition withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class BadgeCondition extends Model implements Auditable
 {
     use HasFactory,
         HasUuids,
-        SoftDeletes,
-        \OwenIt\Auditing\Auditable;
+        \OwenIt\Auditing\Auditable,
+        SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

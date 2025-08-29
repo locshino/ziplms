@@ -3,15 +3,14 @@
 namespace App\Services;
 
 use App\Exceptions\Services\QuizServiceException;
-use App\Libs\Roles\RoleHelper;
 use App\Models\Question;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Models\StudentQuizAnswer;
 use App\Repositories\Interfaces\QuizAttemptRepositoryInterface;
 use App\Repositories\Interfaces\QuizRepositoryInterface;
-use App\Services\Interfaces\QuizServiceInterface;
 use App\Services\Interfaces\QuizCacheServiceInterface;
+use App\Services\Interfaces\QuizServiceInterface;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
@@ -190,7 +189,7 @@ class QuizService extends BaseService implements QuizServiceInterface
         try {
             // Check if user exists and get user instance
             $user = \App\Models\User::find($studentId);
-            if (!$user) {
+            if (! $user) {
                 throw QuizServiceException::quizNotActive();
             }
 
@@ -200,7 +199,7 @@ class QuizService extends BaseService implements QuizServiceInterface
             }
 
             // Check if user is a student
-            if (!\App\Libs\Roles\RoleHelper::isStudent($user)) {
+            if (! \App\Libs\Roles\RoleHelper::isStudent($user)) {
                 throw QuizServiceException::quizNotActive();
             }
 
@@ -211,7 +210,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                 })
                 ->exists();
 
-            if (!$isEnrolledInQuizCourse) {
+            if (! $isEnrolledInQuizCourse) {
                 throw QuizServiceException::quizNotActive();
             }
 
@@ -249,7 +248,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                 $timeLimit = $attempt->quiz->time_limit_minutes;
                 $endTime = $startTime->copy()->addMinutes($timeLimit);
                 $now = Carbon::now();
-                
+
                 if ($now->gte($endTime)) {
                     // Auto-submit if time limit exceeded
                     try {
@@ -329,7 +328,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                 try {
                     // Get quiz questions for validation
                     $quizQuestions = $this->cacheService->getQuizQuestions($attempt->quiz_id);
-                    
+
                     // Fallback to database if cache is empty, load with answerChoices for JSON preparation
                     if (empty($quizQuestions) || $quizQuestions->isEmpty()) {
                         $quiz = Quiz::find($attempt->quiz_id);
@@ -340,7 +339,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                             ->whereIn('id', $quizQuestions->pluck('id'))
                             ->get();
                     }
-                    
+
                     $questionIds = collect($quizQuestions)->pluck('id')->toArray();
 
                     // Validate that all answers are for valid questions
@@ -611,7 +610,7 @@ class QuizService extends BaseService implements QuizServiceInterface
             // Get quiz questions with pivot data to access points from quiz_questions table
             $quiz = Quiz::with('questions')->find($attempt->quiz_id);
             $quizQuestions = $quiz->questions;
-            
+
             $totalPoints = $quizQuestions->sum('pivot.points');
             $earnedPoints = 0;
 
@@ -636,7 +635,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                 $studentIncorrectChoices = array_diff($studentChoiceIds, $correctChoiceIds);
 
                 // If student selected incorrect choices, no points
-                if (!empty($studentIncorrectChoices)) {
+                if (! empty($studentIncorrectChoices)) {
                     continue;
                 }
 
@@ -648,7 +647,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                     $earnedPoints += $question->pivot->points;
                 }
                 // If student answered partially correctly (some correct choices but not all)
-                elseif (!empty($studentCorrectChoices) && count($studentCorrectChoices) < count($correctChoiceIds)) {
+                elseif (! empty($studentCorrectChoices) && count($studentCorrectChoices) < count($correctChoiceIds)) {
                     $partialPoints = ($question->pivot->points * count($studentCorrectChoices)) / count($correctChoiceIds);
                     $earnedPoints += $partialPoints;
                 }
@@ -688,7 +687,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                 $studentIncorrectChoices = array_diff($studentChoiceIds, $correctChoiceIds);
 
                 // If student selected incorrect choices, no points
-                if (!empty($studentIncorrectChoices)) {
+                if (! empty($studentIncorrectChoices)) {
                     continue;
                 }
 
@@ -700,7 +699,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                     $earnedPoints += $question->points;
                 }
                 // If student answered partially correctly (some correct choices but not all)
-                elseif (!empty($studentCorrectChoices) && count($studentCorrectChoices) < count($correctChoiceIds)) {
+                elseif (! empty($studentCorrectChoices) && count($studentCorrectChoices) < count($correctChoiceIds)) {
                     $partialPoints = ($question->points * count($studentCorrectChoices)) / count($correctChoiceIds);
                     $earnedPoints += $partialPoints;
                 }
@@ -1126,8 +1125,8 @@ class QuizService extends BaseService implements QuizServiceInterface
      *   "answer_choice_id": string|array (string for single choice, array for multiple choices)
      * }
      *
-     * @param array $answers Student answers in format [question_id => answer_choice_id(s)]
-     * @param Collection $quizQuestions Quiz questions collection
+     * @param  array  $answers  Student answers in format [question_id => answer_choice_id(s)]
+     * @param  Collection  $quizQuestions  Quiz questions collection
      * @return array JSON formatted answers
      */
     private function prepareAnswersJson(array $answers, Collection $quizQuestions): array
@@ -1142,7 +1141,7 @@ class QuizService extends BaseService implements QuizServiceInterface
 
             // Get question details
             $question = $quizQuestions->where('id', $questionId)->first();
-            if (!$question) {
+            if (! $question) {
                 continue;
             }
 
@@ -1156,14 +1155,14 @@ class QuizService extends BaseService implements QuizServiceInterface
                 // Multiple choice answers - store as array
                 $selectedChoices = [];
                 foreach ($answerData as $choiceId) {
-                    if (!empty($choiceId)) {
+                    if (! empty($choiceId)) {
                         $selectedChoices[] = $choiceId;
                     }
                 }
                 $questionAnswer['answer_choice_id'] = $selectedChoices;
             } else {
                 // Single choice answer - store as string
-                if (!empty($answerData)) {
+                if (! empty($answerData)) {
                     $questionAnswer['answer_choice_id'] = $answerData;
                 }
             }

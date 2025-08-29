@@ -35,13 +35,13 @@ class QuizFilterService implements QuizFilterServiceInterface
             'attempts' => function ($query) use ($userId) {
                 $query->where('student_id', $userId)
                     ->orderBy('created_at', 'desc');
-            }
+            },
         ])
-        ->whereHas('courses.users', function ($q) use ($userId) {
-            $q->where('users.id', $userId);
-        })
-        ->where('status', QuizStatus::PUBLISHED)
-        ->get();
+            ->whereHas('courses.users', function ($q) use ($userId) {
+                $q->where('users.id', $userId);
+            })
+            ->where('status', QuizStatus::PUBLISHED)
+            ->get();
     }
 
     /**
@@ -56,7 +56,7 @@ class QuizFilterService implements QuizFilterServiceInterface
         return $allQuizzes->filter(function ($quiz) use ($userId) {
             // Lọc attempts của user hiện tại
             $userAttempts = $quiz->attempts->where('student_id', $userId);
-            
+
             // Nếu không có attempt nào của user này
             if ($userAttempts->isEmpty()) {
                 return $this->canTakeQuiz($quiz, $userId);
@@ -71,9 +71,9 @@ class QuizFilterService implements QuizFilterServiceInterface
             // Nếu có attempts đã completed/graded, quiz này không còn là "chưa nộp"
             $completedAttempts = $userAttempts->whereIn('status', [
                 QuizAttemptStatus::COMPLETED,
-                QuizAttemptStatus::GRADED
+                QuizAttemptStatus::GRADED,
             ]);
-            
+
             if ($completedAttempts->count() > 0) {
                 return false; // Quiz đã được nộp ít nhất 1 lần
             }
@@ -95,13 +95,13 @@ class QuizFilterService implements QuizFilterServiceInterface
         return $allQuizzes->filter(function ($quiz) use ($userId, $now) {
             // Kiểm tra thời gian kết thúc của quiz trong course
             $isOverdue = false;
-            
+
             // Duyệt qua tất cả courses mà user đã tham gia và có quiz này
             foreach ($quiz->courses as $course) {
                 // Lấy thông tin pivot của course_quiz (bảng course_quiz)
                 $courseQuizPivot = $course->pivot;
                 $endAt = $courseQuizPivot->end_at;
-                
+
                 // Nếu có thời gian kết thúc và đã quá hạn
                 if ($endAt && $now->gt($endAt)) {
                     $isOverdue = true;
@@ -114,9 +114,9 @@ class QuizFilterService implements QuizFilterServiceInterface
                 $completedAttempts = $quiz->attempts->where('student_id', $userId)
                     ->whereIn('status', [
                         QuizAttemptStatus::COMPLETED,
-                        QuizAttemptStatus::GRADED
+                        QuizAttemptStatus::GRADED,
                     ]);
-                
+
                 // Trả về true nếu chưa có attempt hoàn thành nào
                 return $completedAttempts->isEmpty();
             }
@@ -138,9 +138,9 @@ class QuizFilterService implements QuizFilterServiceInterface
             $completedAttempts = $quiz->attempts->where('student_id', $userId)
                 ->whereIn('status', [
                     QuizAttemptStatus::COMPLETED,
-                    QuizAttemptStatus::GRADED
+                    QuizAttemptStatus::GRADED,
                 ]);
-            
+
             return $completedAttempts->count() > 0;
         });
     }
@@ -151,13 +151,13 @@ class QuizFilterService implements QuizFilterServiceInterface
     public function getQuizStatistics(?User $user = null): array
     {
         $user = $user ?? Auth::user();
-        
+
         $allQuizzes = $this->getAllQuizzes($user);
         $unsubmittedQuizzes = $this->getUnsubmittedQuizzes($user);
         $overdueQuizzes = $this->getOverdueQuizzes($user);
         $submittedQuizzes = $this->getSubmittedQuizzes($user);
         $retakeableQuizzes = $this->getRetakeableQuizzes($user);
-        
+
         return [
             'total' => $allQuizzes->count(),
             'unsubmitted' => $unsubmittedQuizzes->count(),
@@ -179,17 +179,17 @@ class QuizFilterService implements QuizFilterServiceInterface
         return $allQuizzes->filter(function ($quiz) use ($userId) {
             // Lọc attempts của user hiện tại
             $userAttempts = $quiz->attempts->where('student_id', $userId);
-            
+
             // Phải có ít nhất 1 attempt completed/graded
             $completedAttempts = $userAttempts->whereIn('status', [
                 QuizAttemptStatus::COMPLETED,
-                QuizAttemptStatus::GRADED
+                QuizAttemptStatus::GRADED,
             ]);
-            
+
             if ($completedAttempts->count() === 0) {
                 return false;
             }
-            
+
             // Và còn lượt làm
             return $this->hasRemainingAttempts($quiz, $userId);
         });
@@ -229,13 +229,13 @@ class QuizFilterService implements QuizFilterServiceInterface
             $endAt = $courseQuiz->end_at;
 
             // Nếu không có giới hạn thời gian hoặc trong khoảng thời gian hợp lệ
-            if ((!$startAt || $now->gte($startAt)) && (!$endAt || $now->lte($endAt))) {
+            if ((! $startAt || $now->gte($startAt)) && (! $endAt || $now->lte($endAt))) {
                 $canTakeInAnyCourse = true;
                 break;
             }
         }
 
-        if (!$canTakeInAnyCourse) {
+        if (! $canTakeInAnyCourse) {
             return false;
         }
 
@@ -249,17 +249,17 @@ class QuizFilterService implements QuizFilterServiceInterface
     private function hasRemainingAttempts(Quiz $quiz, string $userId): bool
     {
         $maxAttempts = $quiz->max_attempts;
-        
+
         // Nếu max_attempts = 0 hoặc null, cho phép làm không giới hạn
         if ($maxAttempts === 0 || $maxAttempts === null) {
             return true;
         }
-        
+
         $usedAttempts = QuizAttempt::where('quiz_id', $quiz->id)
             ->where('student_id', $userId)
             ->whereIn('status', [QuizAttemptStatus::COMPLETED, QuizAttemptStatus::GRADED])
             ->count();
-            
+
         return $usedAttempts < $maxAttempts;
     }
 
@@ -277,7 +277,7 @@ class QuizFilterService implements QuizFilterServiceInterface
         $inProgressAttempt = $userAttempts->where('status', QuizAttemptStatus::IN_PROGRESS)->first();
         $completedAttempts = $userAttempts->whereIn('status', [
             QuizAttemptStatus::COMPLETED,
-            QuizAttemptStatus::GRADED
+            QuizAttemptStatus::GRADED,
         ]);
         $latestCompletedAttempt = $completedAttempts->sortByDesc('created_at')->first();
 
@@ -288,7 +288,7 @@ class QuizFilterService implements QuizFilterServiceInterface
 
         $isOverdue = false;
         $hasValidTiming = false;
-        
+
         foreach ($userCourses as $course) {
             $courseQuiz = $course->pivot;
             $startAt = $courseQuiz->start_at;
@@ -297,8 +297,8 @@ class QuizFilterService implements QuizFilterServiceInterface
             if ($endAt && $now->gt($endAt)) {
                 $isOverdue = true;
             }
-            
-            if ((!$startAt || $now->gte($startAt)) && (!$endAt || $now->lte($endAt))) {
+
+            if ((! $startAt || $now->gte($startAt)) && (! $endAt || $now->lte($endAt))) {
                 $hasValidTiming = true;
             }
         }
@@ -326,7 +326,7 @@ class QuizFilterService implements QuizFilterServiceInterface
      */
     public function filterByCourse($quizzes, ?string $courseId = null)
     {
-        if (!$courseId) {
+        if (! $courseId) {
             return $quizzes;
         }
 
@@ -340,12 +340,12 @@ class QuizFilterService implements QuizFilterServiceInterface
      */
     public function filterBySearch($quizzes, ?string $searchTerm = null)
     {
-        if (!$searchTerm) {
+        if (! $searchTerm) {
             return $quizzes;
         }
 
         $searchTerm = strtolower(trim($searchTerm));
-        
+
         return $quizzes->filter(function ($quiz) use ($searchTerm) {
             return str_contains(strtolower($quiz->title), $searchTerm) ||
                    str_contains(strtolower($quiz->description ?? ''), $searchTerm) ||
@@ -361,13 +361,13 @@ class QuizFilterService implements QuizFilterServiceInterface
     public function applyAllFilters($quizzes, ?string $courseId = null, ?string $searchTerm = null)
     {
         $filtered = $quizzes;
-        
+
         // Lọc theo khóa học
         $filtered = $this->filterByCourse($filtered, $courseId);
-        
+
         // Lọc theo từ khóa tìm kiếm
         $filtered = $this->filterBySearch($filtered, $searchTerm);
-        
+
         return $filtered;
     }
 
@@ -384,6 +384,7 @@ class QuizFilterService implements QuizFilterServiceInterface
             $inProgressAttempt = $quiz->attempts->where('student_id', $userId)
                 ->where('status', QuizAttemptStatus::IN_PROGRESS)
                 ->first();
+
             return $inProgressAttempt !== null;
         });
     }
@@ -409,6 +410,7 @@ class QuizFilterService implements QuizFilterServiceInterface
     public function getQuizzesByCourse(string $courseId, ?User $user = null): Collection
     {
         $allQuizzes = $this->getAllQuizzes($user);
+
         return $allQuizzes->filter(function ($quiz) use ($courseId) {
             return $quiz->courses->contains('id', $courseId);
         });
@@ -420,18 +422,20 @@ class QuizFilterService implements QuizFilterServiceInterface
     public function getQuizzesByDateRange(\Carbon\Carbon $startDate, \Carbon\Carbon $endDate, ?User $user = null): Collection
     {
         $allQuizzes = $this->getAllQuizzes($user);
+
         return $allQuizzes->filter(function ($quiz) use ($startDate, $endDate) {
             foreach ($quiz->courses as $course) {
                 $courseQuiz = $course->pivot;
                 $quizStartAt = $courseQuiz->start_at;
                 $quizEndAt = $courseQuiz->end_at;
-                
+
                 if ($quizStartAt && $quizEndAt) {
                     if ($quizStartAt >= $startDate && $quizEndAt <= $endDate) {
                         return true;
                     }
                 }
             }
+
             return false;
         });
     }
@@ -449,11 +453,12 @@ class QuizFilterService implements QuizFilterServiceInterface
             foreach ($quiz->courses as $course) {
                 $courseQuiz = $course->pivot;
                 $endAt = $courseQuiz->end_at;
-                
+
                 if ($endAt && $endAt > $now && $endAt <= $deadline) {
                     return true;
                 }
             }
+
             return false;
         });
     }
@@ -472,11 +477,11 @@ class QuizFilterService implements QuizFilterServiceInterface
                 ->whereIn('status', [QuizAttemptStatus::COMPLETED, QuizAttemptStatus::GRADED])
                 ->sortByDesc('points')
                 ->first();
-            
-            if (!$bestAttempt) {
+
+            if (! $bestAttempt) {
                 return false;
             }
-            
+
             return $bestAttempt->points >= $minScore && $bestAttempt->points <= $maxScore;
         });
     }
@@ -492,6 +497,7 @@ class QuizFilterService implements QuizFilterServiceInterface
 
         return $allQuizzes->filter(function ($quiz) use ($userId, $attemptCount) {
             $userAttemptCount = $quiz->attempts->where('student_id', $userId)->count();
+
             return $userAttemptCount == $attemptCount;
         });
     }
@@ -503,7 +509,7 @@ class QuizFilterService implements QuizFilterServiceInterface
     {
         $allQuizzes = $this->getAllQuizzes($user);
         $keyword = strtolower(trim($keyword));
-        
+
         return $allQuizzes->filter(function ($quiz) use ($keyword) {
             return str_contains(strtolower($quiz->title), $keyword) ||
                    str_contains(strtolower($quiz->description ?? ''), $keyword) ||
@@ -519,6 +525,7 @@ class QuizFilterService implements QuizFilterServiceInterface
     public function getQuizzesByDifficulty(string $difficulty, ?User $user = null): Collection
     {
         $allQuizzes = $this->getAllQuizzes($user);
+
         return $allQuizzes->filter(function ($quiz) use ($difficulty) {
             return strtolower($quiz->difficulty ?? '') === strtolower($difficulty);
         });
@@ -530,8 +537,10 @@ class QuizFilterService implements QuizFilterServiceInterface
     public function getQuizzesByDuration(int $minDuration, int $maxDuration, ?User $user = null): Collection
     {
         $allQuizzes = $this->getAllQuizzes($user);
+
         return $allQuizzes->filter(function ($quiz) use ($minDuration, $maxDuration) {
             $duration = $quiz->time_limit ?? 0;
+
             return $duration >= $minDuration && $duration <= $maxDuration;
         });
     }

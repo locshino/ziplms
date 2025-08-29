@@ -22,6 +22,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property-read int|null $audits_count
  * @property-read \App\Models\Badge $badge
  * @property-read \App\Models\User $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserBadge newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserBadge newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserBadge onlyTrashed()
@@ -36,14 +37,15 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserBadge whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserBadge withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserBadge withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class UserBadge extends Pivot implements Auditable
 {
     use HasFactory,
         HasUuids,
-        SoftDeletes,
-        \OwenIt\Auditing\Auditable;
+        \OwenIt\Auditing\Auditable,
+        SoftDeletes;
 
     /**
      * The table associated with the model.

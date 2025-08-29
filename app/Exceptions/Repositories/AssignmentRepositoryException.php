@@ -17,8 +17,6 @@ class AssignmentRepositoryException extends RepositoryException
 {
     /**
      * The default language key for assignment repository exceptions.
-     *
-     * @var string
      */
     protected static string $defaultKey = 'exceptions.repositories.assignment.assignment_not_found';
 
@@ -26,7 +24,6 @@ class AssignmentRepositoryException extends RepositoryException
      * Create exception for assignment not published.
      *
      * @param  string|null  $assignmentId  The assignment ID
-     * @return static
      */
     public static function notPublished(?string $assignmentId = null): static
     {
@@ -41,7 +38,6 @@ class AssignmentRepositoryException extends RepositoryException
      * Create exception for assignment not available.
      *
      * @param  string|null  $assignmentId  The assignment ID
-     * @return static
      */
     public static function notAvailable(?string $assignmentId = null): static
     {
@@ -56,7 +52,6 @@ class AssignmentRepositoryException extends RepositoryException
      * Create exception for assignment not started.
      *
      * @param  string|null  $assignmentId  The assignment ID
-     * @return static
      */
     public static function notStarted(?string $assignmentId = null): static
     {
@@ -71,7 +66,6 @@ class AssignmentRepositoryException extends RepositoryException
      * Create exception for assignment ended.
      *
      * @param  string|null  $assignmentId  The assignment ID
-     * @return static
      */
     public static function ended(?string $assignmentId = null): static
     {
@@ -86,7 +80,6 @@ class AssignmentRepositoryException extends RepositoryException
      * Create exception for submission not found.
      *
      * @param  string|null  $submissionId  The submission ID
-     * @return static
      */
     public static function submissionNotFound(?string $submissionId = null): static
     {
@@ -102,7 +95,6 @@ class AssignmentRepositoryException extends RepositoryException
      *
      * @param  string  $assignmentId  The assignment ID
      * @param  string  $studentId  The student ID
-     * @return static
      */
     public static function submissionAlreadyExists(string $assignmentId, string $studentId): static
     {
@@ -117,7 +109,6 @@ class AssignmentRepositoryException extends RepositoryException
      * Create exception for submission already graded.
      *
      * @param  string  $submissionId  The submission ID
-     * @return static
      */
     public static function submissionAlreadyGraded(string $submissionId): static
     {
@@ -132,7 +123,6 @@ class AssignmentRepositoryException extends RepositoryException
      * Create exception for submission not graded.
      *
      * @param  string  $submissionId  The submission ID
-     * @return static
      */
     public static function submissionNotGraded(string $submissionId): static
     {
@@ -147,7 +137,6 @@ class AssignmentRepositoryException extends RepositoryException
      * Create exception for late submission.
      *
      * @param  string  $assignmentId  The assignment ID
-     * @return static
      */
     public static function lateSubmission(string $assignmentId): static
     {
@@ -162,7 +151,6 @@ class AssignmentRepositoryException extends RepositoryException
      * Create exception for file upload failure.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function fileUploadFailed(?string $reason = null): static
     {
@@ -177,7 +165,6 @@ class AssignmentRepositoryException extends RepositoryException
      * Create exception for grading failure.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function gradingFailed(?string $reason = null): static
     {
@@ -192,7 +179,6 @@ class AssignmentRepositoryException extends RepositoryException
      * Create exception for statistics calculation failure.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function statisticsCalculationFailed(?string $reason = null): static
     {
@@ -207,7 +193,6 @@ class AssignmentRepositoryException extends RepositoryException
      * Create exception for insufficient permissions.
      *
      * @param  string|null  $action  The action being attempted
-     * @return static
      */
     public static function insufficientPermissions(?string $action = null): static
     {

@@ -6,11 +6,11 @@ use App\Enums\Status\QuizStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
-use OwenIt\Auditing\Auditable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 use Spatie\Tags\HasTags;
 
 /**
@@ -35,6 +35,7 @@ use Spatie\Tags\HasTags;
  * @property-read int|null $questions_count
  * @property \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tag> $tags
  * @property-read int|null $tags_count
+ *
  * @method static \Database\Factories\QuizFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz newQuery()
@@ -58,11 +59,12 @@ use Spatie\Tags\HasTags;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz withoutTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Quiz withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Quiz extends Model implements AuditableContract
 {
-    use HasFactory, HasTags, HasUuids, SoftDeletes, Auditable;
+    use Auditable, HasFactory, HasTags, HasUuids, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -112,6 +114,7 @@ class Quiz extends Model implements AuditableContract
     public function getCourseIdAttribute()
     {
         $firstCourse = $this->courses()->first();
+
         return $firstCourse ? $firstCourse->id : null;
     }
 
@@ -146,7 +149,7 @@ class Quiz extends Model implements AuditableContract
         $questionCount = $this->questions()->count();
         if ($questionCount > 0) {
             $pointsPerQuestion = round($totalPoints / $questionCount, 2);
-            
+
             // Update all quiz questions with distributed points
             foreach ($this->questions as $question) {
                 $this->questions()->updateExistingPivot($question->id, ['points' => $pointsPerQuestion]);
@@ -162,7 +165,7 @@ class Quiz extends Model implements AuditableContract
         $questionCount = $this->questions()->count();
         if ($questionCount > 0) {
             $pointsPerQuestion = round(10.00 / $questionCount, 2);
-            
+
             // Set default points for questions that don't have points set
             foreach ($this->questions as $question) {
                 if ($question->pivot->points == 1.00) { // Default value from migration
@@ -195,13 +198,13 @@ class Quiz extends Model implements AuditableContract
             $endAt = $courseQuiz->end_at;
 
             // If no timing restrictions, quiz is active
-            if (!$startAt && !$endAt) {
+            if (! $startAt && ! $endAt) {
                 return true;
             }
 
             // Check if current time is within the allowed period
-            $isAfterStart = !$startAt || $now->gte($startAt);
-            $isBeforeEnd = !$endAt || $now->lte($endAt);
+            $isAfterStart = ! $startAt || $now->gte($startAt);
+            $isBeforeEnd = ! $endAt || $now->lte($endAt);
 
             if ($isAfterStart && $isBeforeEnd) {
                 return true;

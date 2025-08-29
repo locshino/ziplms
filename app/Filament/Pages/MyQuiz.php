@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\Status\QuizAttemptStatus;
 use App\Enums\Status\QuizStatus;
 use App\Models\Course;
 use App\Models\Quiz;
@@ -13,8 +14,8 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use App\Enums\Status\QuizAttemptStatus;
 use Livewire\Attributes\Computed;
+
 // use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class MyQuiz extends Page
@@ -51,8 +52,6 @@ class MyQuiz extends Page
 
     public int $currentPage = 1;
 
-
-
     public function mount(): void
     {
         $this->selectedFilter = request('filter', 'all');
@@ -87,13 +86,13 @@ class MyQuiz extends Page
             $endAt = $courseQuiz->end_at;
 
             // If no timing restrictions, or within valid time range
-            if ((!$startAt || $now->gte($startAt)) && (!$endAt || $now->lte($endAt))) {
+            if ((! $startAt || $now->gte($startAt)) && (! $endAt || $now->lte($endAt))) {
                 $canTakeInAnyCourse = true;
                 break;
             }
         }
 
-        if (!$canTakeInAnyCourse) {
+        if (! $canTakeInAnyCourse) {
             return false;
         }
 
@@ -128,7 +127,7 @@ class MyQuiz extends Page
             'attempts' => function ($query) use ($userId) {
                 $query->where('student_id', $userId)
                     ->orderBy('created_at', 'desc');
-            }
+            },
         ])
             ->whereHas('courses.users', function ($q) use ($userId) {
                 $q->where('users.id', $userId);
@@ -159,6 +158,7 @@ class MyQuiz extends Page
                 }
             });
         }
+
         return $quizzes->sortByDesc('created_at');
     }
 
@@ -173,7 +173,6 @@ class MyQuiz extends Page
 
         foreach ($caseStatus as $status) {
             /** @var QuizStatus $status */
-
             $listQuizStatus[] = [
                 'value' => $status->value,
                 'label' => $status->getLabel(),
@@ -182,10 +181,7 @@ class MyQuiz extends Page
 
         $this->listQuizStatus = $listQuizStatus;
 
-        return;
     }
-
-
 
     public function updatedSelectedStatus(): void
     {
@@ -204,6 +200,7 @@ class MyQuiz extends Page
         $avgScore = $attempts->avg('points');
         $maxScore = $attempts->max('points');
         $count = $attempts->count();
+
         return [
             'attempts_count' => $count,
             'avg_score' => $avgScore,
@@ -244,6 +241,7 @@ class MyQuiz extends Page
             ->where('student_id', $userId)
             ->whereIn('status', [QuizAttemptStatus::COMPLETED->value, QuizAttemptStatus::GRADED->value])
             ->count();
+
         return max(0, $maxAttempts - $completedAttempts);
     }
 
@@ -293,6 +291,7 @@ class MyQuiz extends Page
                 $completedQuizzes->push($quiz->id);
             }
         }
+
         return $completedQuizzes->unique()->count();
     }
 
@@ -307,7 +306,7 @@ class MyQuiz extends Page
             if ($bestScore) {
                 $maxPoints = $quiz->questions->sum('pivot.points');
                 if ($maxPoints > 0) {
-                    $percentage = ((float)$bestScore / $maxPoints) * 100;
+                    $percentage = ((float) $bestScore / $maxPoints) * 100;
                     // Ensure percentage doesn't exceed 100%
                     $percentage = min($percentage, 100);
                     if ($percentage > $highestPercentage) {
@@ -316,6 +315,7 @@ class MyQuiz extends Page
                 }
             }
         }
+
         return round($highestPercentage, 1);
     }
 
@@ -336,7 +336,7 @@ class MyQuiz extends Page
             if ($bestScore !== null) {
                 $maxPoints = $quiz->questions->sum('pivot.points');
                 if ($maxPoints > 0) {
-                    $percentage = ((float)$bestScore / $maxPoints) * 100;
+                    $percentage = ((float) $bestScore / $maxPoints) * 100;
                     // Ensure percentage doesn't exceed 100%
                     $percentage = min($percentage, 100);
                     $totalPercentage += $percentage;
@@ -347,8 +347,6 @@ class MyQuiz extends Page
 
         return $completedQuizzes > 0 ? round($totalPercentage / $completedQuizzes, 1) : 0;
     }
-
-
 
     public function getQuizStatus(Quiz $quiz): array
     {
@@ -388,6 +386,7 @@ class MyQuiz extends Page
         }
         if ($remainingAttempts !== null && $remainingAttempts <= 0) {
             $label = $latestCompletedAttempt ? 'Xem đáp án' : 'Hết lượt làm bài';
+
             return [
                 'status' => 'max_attempts_reached',
                 'label' => $label,
@@ -414,14 +413,14 @@ class MyQuiz extends Page
                     $startAt = $courseQuiz->start_at;
                     $endAt = $courseQuiz->end_at;
 
-                    if ((!$startAt || $now->gte($startAt)) && (!$endAt || $now->lte($endAt))) {
+                    if ((! $startAt || $now->gte($startAt)) && (! $endAt || $now->lte($endAt))) {
                         $hasValidTiming = true;
                         break;
                     }
                 }
             }
 
-            if (!$isPublished) {
+            if (! $isPublished) {
                 return [
                     'status' => 'not_published',
                     'label' => 'Chưa được xuất bản',
@@ -429,7 +428,7 @@ class MyQuiz extends Page
                     'canTake' => false,
                     'canViewResults' => false,
                 ];
-            } elseif (!$hasValidTiming) {
+            } elseif (! $hasValidTiming) {
                 return [
                     'status' => 'time_restricted',
                     'label' => 'Chưa đến thời gian làm bài',
@@ -450,6 +449,7 @@ class MyQuiz extends Page
         if ($latestCompletedAttempt && $canTake) {
             // If user has completed but still has attempts (or unlimited), show "Làm bài" instead of "Làm lại"
             $label = ($remainingAttempts === null || $remainingAttempts > 0) ? 'Làm bài' : 'Làm lại';
+
             return [
                 'status' => 'completed',
                 'label' => $label,
@@ -459,7 +459,7 @@ class MyQuiz extends Page
                 'attempt' => $latestCompletedAttempt,
             ];
         }
-        if ($latestCompletedAttempt && !$canTake) {
+        if ($latestCompletedAttempt && ! $canTake) {
             return [
                 'status' => 'completed_no_retake',
                 'label' => 'Xem đáp án',
@@ -469,6 +469,7 @@ class MyQuiz extends Page
                 'attempt' => $latestCompletedAttempt,
             ];
         }
+
         return [
             'status' => 'available',
             'label' => 'Làm bài ngay',
@@ -535,6 +536,7 @@ class MyQuiz extends Page
                 if ($latestAttempt) {
                     $params['attempt_id'] = $latestAttempt->id;
                 }
+
                 return route('filament.app.pages.quiz-answers', $params);
             })
             ->openUrlInNewTab(false);
@@ -546,7 +548,7 @@ class MyQuiz extends Page
             ->label('Lịch sử làm bài')
             ->icon('heroicon-o-clock')
             ->color('gray')
-            ->modalHeading(fn(array $arguments) => 'Lịch sử làm bài ')
+            ->modalHeading(fn (array $arguments) => 'Lịch sử làm bài ')
             ->modalContent(function (array $arguments) {
                 $quiz = Quiz::find($arguments['quiz']);
                 $attempts = QuizAttempt::where('quiz_id', $quiz->id)
@@ -554,6 +556,7 @@ class MyQuiz extends Page
                     ->whereIn('status', [QuizAttemptStatus::COMPLETED->value, QuizAttemptStatus::GRADED->value])
                     ->orderByDesc('end_at')
                     ->get();
+
                 return view('filament.components.quiz-history-modal', [
                     'quiz' => $quiz,
                     'attempts' => $attempts,
@@ -566,7 +569,7 @@ class MyQuiz extends Page
     // Quiz taking methods
     public function initializeQuizAttempt()
     {
-        if (!$this->selectedQuiz) {
+        if (! $this->selectedQuiz) {
             return;
         }
 
@@ -577,7 +580,7 @@ class MyQuiz extends Page
                 ->where('status', QuizAttemptStatus::IN_PROGRESS->value)
                 ->first();
 
-            if (!$this->currentAttempt) {
+            if (! $this->currentAttempt) {
                 // Use QuizService to properly create attempt with all validations
                 $quizService = app(\App\Services\Interfaces\QuizServiceInterface::class);
                 $this->currentAttempt = $quizService->startQuizAttempt($this->selectedQuiz->id, Auth::id());
@@ -594,23 +597,24 @@ class MyQuiz extends Page
                 ->body($e->getMessage())
                 ->danger()
                 ->send();
+
             return;
         }
     }
 
     public function updateAnswer($questionId, $choiceId)
     {
-        if (!$this->currentAttempt) {
+        if (! $this->currentAttempt) {
             return;
         }
 
         $question = $this->selectedQuiz->questions()->find($questionId);
-        if (!$question) {
+        if (! $question) {
             return;
         }
 
         if ($question->is_multiple_response) {
-            if (!isset($this->currentAnswers[$questionId])) {
+            if (! isset($this->currentAnswers[$questionId])) {
                 $this->currentAnswers[$questionId] = [];
             }
 
@@ -628,7 +632,7 @@ class MyQuiz extends Page
 
     public function saveAnswer($questionId, $choiceId, $isMultiple = false)
     {
-        if (!$this->currentAttempt) {
+        if (! $this->currentAttempt) {
             return;
         }
 
@@ -636,7 +640,7 @@ class MyQuiz extends Page
             // For multiple choice, delete existing answers and save new ones
             $this->currentAttempt->quizAnswers()->where('question_id', $questionId)->delete();
 
-            if (isset($this->currentAnswers[$questionId]) && !empty($this->currentAnswers[$questionId])) {
+            if (isset($this->currentAnswers[$questionId]) && ! empty($this->currentAnswers[$questionId])) {
                 foreach ($this->currentAnswers[$questionId] as $choice) {
                     $this->currentAttempt->quizAnswers()->create([
                         'question_id' => $questionId,
@@ -674,7 +678,7 @@ class MyQuiz extends Page
 
     public function submitQuiz()
     {
-        if (!$this->currentAttempt || $this->submitting) {
+        if (! $this->currentAttempt || $this->submitting) {
             return;
         }
 
@@ -728,7 +732,7 @@ class MyQuiz extends Page
             $this->submitting = false;
             Notification::make()
                 ->title('Lỗi!')
-                ->body('Có lỗi xảy ra khi nộp bài: ' . $e->getMessage())
+                ->body('Có lỗi xảy ra khi nộp bài: '.$e->getMessage())
                 ->danger()
                 ->send();
         }
@@ -744,18 +748,18 @@ class MyQuiz extends Page
 
     public function getAnsweredCount()
     {
-        if (!$this->currentAnswers) {
+        if (! $this->currentAnswers) {
             return 0;
         }
 
         return count(array_filter($this->currentAnswers, function ($answer) {
-            return is_array($answer) ? !empty($answer) : $answer !== null;
+            return is_array($answer) ? ! empty($answer) : $answer !== null;
         }));
     }
 
     public function getProgressPercentage()
     {
-        if (!$this->selectedQuiz) {
+        if (! $this->selectedQuiz) {
             return 0;
         }
 
@@ -775,29 +779,29 @@ class MyQuiz extends Page
         // QuizFilterService đã được inject qua dependency injection
 
         // Nếu có bộ lọc khóa học hoặc tìm kiếm, tính toán thống kê dựa trên kết quả lọc
-        if ($this->selectedCourseId || !empty($this->searchTerm)) {
+        if ($this->selectedCourseId || ! empty($this->searchTerm)) {
             $allQuizzes = app(QuizFilterServiceInterface::class)->getAllQuizzes();
-        $filteredQuizzes = app(QuizFilterServiceInterface::class)->applyAllFilters(
-            $allQuizzes,
-            $this->selectedCourseId,
-            $this->searchTerm
-        );
+            $filteredQuizzes = app(QuizFilterServiceInterface::class)->applyAllFilters(
+                $allQuizzes,
+                $this->selectedCourseId,
+                $this->searchTerm
+            );
 
-        $unsubmittedQuizzes = app(QuizFilterServiceInterface::class)->applyAllFilters(
-            app(QuizFilterServiceInterface::class)->getUnsubmittedQuizzes(),
-            $this->selectedCourseId,
-            $this->searchTerm
-        );
-        $overdueQuizzes = app(QuizFilterServiceInterface::class)->applyAllFilters(
-            app(QuizFilterServiceInterface::class)->getOverdueQuizzes(),
-            $this->selectedCourseId,
-            $this->searchTerm
-        );
-        $submittedQuizzes = app(QuizFilterServiceInterface::class)->applyAllFilters(
-            app(QuizFilterServiceInterface::class)->getSubmittedQuizzes(),
-            $this->selectedCourseId,
-            $this->searchTerm
-        );
+            $unsubmittedQuizzes = app(QuizFilterServiceInterface::class)->applyAllFilters(
+                app(QuizFilterServiceInterface::class)->getUnsubmittedQuizzes(),
+                $this->selectedCourseId,
+                $this->searchTerm
+            );
+            $overdueQuizzes = app(QuizFilterServiceInterface::class)->applyAllFilters(
+                app(QuizFilterServiceInterface::class)->getOverdueQuizzes(),
+                $this->selectedCourseId,
+                $this->searchTerm
+            );
+            $submittedQuizzes = app(QuizFilterServiceInterface::class)->applyAllFilters(
+                app(QuizFilterServiceInterface::class)->getSubmittedQuizzes(),
+                $this->selectedCourseId,
+                $this->searchTerm
+            );
 
             return [
                 'total' => $filteredQuizzes->count(),
@@ -820,7 +824,6 @@ class MyQuiz extends Page
 
         // Lấy quiz theo trạng thái
 
-
         $quizzes = match ($this->selectedFilter) {
             'unsubmitted' => app(QuizFilterServiceInterface::class)->getUnsubmittedQuizzes(),
             'overdue' => app(QuizFilterServiceInterface::class)->getOverdueQuizzes(),
@@ -838,6 +841,7 @@ class MyQuiz extends Page
 
         // Áp dụng phân trang
         $offset = ($this->currentPage - 1) * $this->perPage;
+
         return $quizzes->skip($offset)->take($this->perPage);
     }
 
@@ -918,6 +922,7 @@ class MyQuiz extends Page
     public function getTotalPages(): int
     {
         $totalQuizzes = $this->getTotalQuizzesCount();
+
         return (int) ceil($totalQuizzes / $this->perPage);
     }
 

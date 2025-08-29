@@ -116,7 +116,7 @@ class UserProgressData
         // This would typically be calculated based on daily activity records
         // For now, return a simple calculation based on recent activities
         return count(array_filter($this->recentActivities, function ($activity) use ($streakDays) {
-            return isset($activity['date']) && 
+            return isset($activity['date']) &&
                    Carbon::parse($activity['date'])->diffInDays(now()) <= $streakDays;
         }));
     }
@@ -177,7 +177,7 @@ class UserProgressData
     public function getOverdueItemsCount(): int
     {
         return count(array_filter($this->upcomingDeadlines, function ($deadline) {
-            return isset($deadline['due_date']) && 
+            return isset($deadline['due_date']) &&
                    Carbon::parse($deadline['due_date'])->isPast();
         }));
     }
@@ -241,8 +241,8 @@ class UserProgressData
      */
     public function hasProgress(): bool
     {
-        return $this->completedLessons > 0 || 
-               $this->completedAssignments > 0 || 
+        return $this->completedLessons > 0 ||
+               $this->completedAssignments > 0 ||
                $this->completedQuizzes > 0 ||
                $this->totalBadgesEarned > 0;
     }

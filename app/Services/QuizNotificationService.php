@@ -30,7 +30,7 @@ class QuizNotificationService implements QuizNotificationServiceInterface
                 ->first();
 
             // Nếu chưa có notification thì gửi mới
-            if (!$existingNotification) {
+            if (! $existingNotification) {
                 $user->notify(new QuizInProgressNotification($attempt));
             }
         }

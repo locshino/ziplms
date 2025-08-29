@@ -21,6 +21,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property-read int|null $audits_count
  * @property-read \App\Models\Badge $badge
  * @property-read \App\Models\BadgeCondition $badgeCondition
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeHasCondition newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeHasCondition newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeHasCondition onlyTrashed()
@@ -34,14 +35,15 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeHasCondition whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeHasCondition withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BadgeHasCondition withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class BadgeHasCondition extends Pivot implements Auditable
 {
     use HasFactory,
         HasUuids,
-        SoftDeletes,
-        \OwenIt\Auditing\Auditable;
+        \OwenIt\Auditing\Auditable,
+        SoftDeletes;
 
     /**
      * The table associated with the model.

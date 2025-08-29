@@ -17,8 +17,6 @@ class BadgeRepositoryException extends RepositoryException
 {
     /**
      * The default language key for badge repository exceptions.
-     *
-     * @var string
      */
     protected static string $defaultKey = 'exceptions.repositories.badge.badge_not_found';
 
@@ -26,7 +24,6 @@ class BadgeRepositoryException extends RepositoryException
      * Create exception for badge not active.
      *
      * @param  string|null  $badgeId  The badge ID
-     * @return static
      */
     public static function notActive(?string $badgeId = null): static
     {
@@ -41,7 +38,6 @@ class BadgeRepositoryException extends RepositoryException
      * Create exception for badge not available.
      *
      * @param  string|null  $badgeId  The badge ID
-     * @return static
      */
     public static function notAvailable(?string $badgeId = null): static
     {
@@ -57,7 +53,6 @@ class BadgeRepositoryException extends RepositoryException
      *
      * @param  string  $badgeId  The badge ID
      * @param  string  $userId  The user ID
-     * @return static
      */
     public static function alreadyAwarded(string $badgeId, string $userId): static
     {
@@ -73,7 +68,6 @@ class BadgeRepositoryException extends RepositoryException
      *
      * @param  string  $badgeId  The badge ID
      * @param  string  $userId  The user ID
-     * @return static
      */
     public static function notAwarded(string $badgeId, string $userId): static
     {
@@ -90,7 +84,6 @@ class BadgeRepositoryException extends RepositoryException
      * @param  string  $badgeId  The badge ID
      * @param  string  $userId  The user ID
      * @param  array|null  $missingConditions  The missing conditions
-     * @return static
      */
     public static function conditionsNotMet(string $badgeId, string $userId, ?array $missingConditions = null): static
     {
@@ -105,7 +98,6 @@ class BadgeRepositoryException extends RepositoryException
      * Create exception for condition not found.
      *
      * @param  string|null  $conditionId  The condition ID
-     * @return static
      */
     public static function conditionNotFound(?string $conditionId = null): static
     {
@@ -120,7 +112,6 @@ class BadgeRepositoryException extends RepositoryException
      * Create exception for invalid condition type.
      *
      * @param  string  $conditionType  The invalid condition type
-     * @return static
      */
     public static function invalidConditionType(string $conditionType): static
     {
@@ -137,7 +128,6 @@ class BadgeRepositoryException extends RepositoryException
      * @param  string  $badgeId  The badge ID
      * @param  string  $userId  The user ID
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function awardingFailed(string $badgeId, string $userId, ?string $reason = null): static
     {
@@ -154,7 +144,6 @@ class BadgeRepositoryException extends RepositoryException
      * @param  string  $badgeId  The badge ID
      * @param  string  $userId  The user ID
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function revocationFailed(string $badgeId, string $userId, ?string $reason = null): static
     {
@@ -170,7 +159,6 @@ class BadgeRepositoryException extends RepositoryException
      *
      * @param  string  $conditionId  The condition ID
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function conditionEvaluationFailed(string $conditionId, ?string $reason = null): static
     {
@@ -185,7 +173,6 @@ class BadgeRepositoryException extends RepositoryException
      * Create exception for statistics calculation failure.
      *
      * @param  string|null  $reason  The failure reason
-     * @return static
      */
     public static function statisticsCalculationFailed(?string $reason = null): static
     {
@@ -200,7 +187,6 @@ class BadgeRepositoryException extends RepositoryException
      * Create exception for insufficient permissions.
      *
      * @param  string|null  $action  The action being attempted
-     * @return static
      */
     public static function insufficientPermissions(?string $action = null): static
     {

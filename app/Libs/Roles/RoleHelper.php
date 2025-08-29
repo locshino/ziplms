@@ -20,9 +20,7 @@ class RoleHelper
      * Returns -1 if userA < userB, 0 if equal, 1 if userA > userB.
      * If userB is not provided, defaults to current authenticated user.
      *
-     * @param Authenticatable|null $userA
-     * @param Authenticatable|null $userB
-     * @return int|null  -1: userA lower, 0: equal, 1: userA higher, null: cannot compare
+     * @return int|null -1: userA lower, 0: equal, 1: userA higher, null: cannot compare
      */
     public static function compareUserRoles(?Authenticatable $userA, ?Authenticatable $userB = null): ?int
     {
@@ -53,13 +51,14 @@ class RoleHelper
         if ($indexA === $indexB) {
             return 0;
         }
+
         return $indexA < $indexB ? 1 : -1;
     }
+
     /**
      * Safely resolve the user instance.
      *
      * @param  Authenticatable|null  $user  Optional user, defaults to currently authenticated user.
-     * @return Authenticatable|null
      */
     protected static function resolveUser(?Authenticatable $user = null): ?Authenticatable
     {
@@ -75,48 +74,36 @@ class RoleHelper
 
     /**
      * Check if a user has a specific role by role value.
-     *
-     * @param  string  $role
-     * @param  Authenticatable|null  $user
-     * @return bool
      */
     protected static function checkRole(string $role, ?Authenticatable $user = null): bool
     {
         $user = static::resolveUser($user);
+
         return $user && method_exists($user, 'hasRole') && $user->hasRole($role);
     }
 
     /**
      * Check if a user has any of the specified roles.
-     *
-     * @param  array|string  $roles
-     * @param  Authenticatable|null  $user
-     * @return bool
      */
     protected static function checkAnyRole(array|string $roles, ?Authenticatable $user = null): bool
     {
         $user = static::resolveUser($user);
+
         return $user && method_exists($user, 'hasAnyRole') && $user->hasAnyRole($roles);
     }
 
     /**
      * Check if a user has all of the specified roles.
-     *
-     * @param  array|string  $roles
-     * @param  Authenticatable|null  $user
-     * @return bool
      */
     protected static function checkAllRoles(array|string $roles, ?Authenticatable $user = null): bool
     {
         $user = static::resolveUser($user);
+
         return $user && method_exists($user, 'hasAllRoles') && $user->hasAllRoles($roles);
     }
 
     /**
      * Get all roles of the user.
-     *
-     * @param  Authenticatable|null  $user
-     * @return Collection
      */
     public static function getRoles(?Authenticatable $user = null): Collection
     {
@@ -124,26 +111,22 @@ class RoleHelper
          * @var \App\Models\User $user
          */
         $user = static::resolveUser($user);
+
         return $user && property_exists($user, 'roles') ? $user->roles : new Collection;
     }
 
     /**
      * Check if the user is a super admin.
-     *
-     * @param  Authenticatable|null  $user
-     * @return bool
      */
     public static function isSuperAdmin(?Authenticatable $user = null): bool
     {
         $superAdminRole = config('filament-shield.super_admin.name', RoleSystemEnum::SUPER_ADMIN->value);
+
         return static::checkRole($superAdminRole, $user);
     }
 
     /**
      * Check if the user is an admin.
-     *
-     * @param  Authenticatable|null  $user
-     * @return bool
      */
     public static function isAdmin(?Authenticatable $user = null): bool
     {
@@ -152,9 +135,6 @@ class RoleHelper
 
     /**
      * Check if the user is a manager.
-     *
-     * @param  Authenticatable|null  $user
-     * @return bool
      */
     public static function isManager(?Authenticatable $user = null): bool
     {
@@ -163,9 +143,6 @@ class RoleHelper
 
     /**
      * Check if the user is a teacher.
-     *
-     * @param  Authenticatable|null  $user
-     * @return bool
      */
     public static function isTeacher(?Authenticatable $user = null): bool
     {
@@ -174,9 +151,6 @@ class RoleHelper
 
     /**
      * Check if the user is a student.
-     *
-     * @param  Authenticatable|null  $user
-     * @return bool
      */
     public static function isStudent(?Authenticatable $user = null): bool
     {
@@ -185,10 +159,6 @@ class RoleHelper
 
     /**
      * Check if the user has any of the specified roles.
-     *
-     * @param  array|string  $roles
-     * @param  Authenticatable|null  $user
-     * @return bool
      */
     public static function hasAnyRole(array|string $roles, ?Authenticatable $user = null): bool
     {
@@ -197,10 +167,6 @@ class RoleHelper
 
     /**
      * Check if the user has all of the specified roles.
-     *
-     * @param  array|string  $roles
-     * @param  Authenticatable|null  $user
-     * @return bool
      */
     public static function hasAllRoles(array|string $roles, ?Authenticatable $user = null): bool
     {
@@ -209,10 +175,6 @@ class RoleHelper
 
     /**
      * Check if the user has a specific role.
-     *
-     * @param  string  $role
-     * @param  Authenticatable|null  $user
-     * @return bool
      */
     public static function hasRole(string $role, ?Authenticatable $user = null): bool
     {
@@ -222,9 +184,6 @@ class RoleHelper
     /**
      * Check if the user can modify system roles.
      * Only super admin can modify system roles.
-     *
-     * @param  Authenticatable|null  $user
-     * @return bool
      */
     public static function canModifySystemRoles(?Authenticatable $user = null): bool
     {
@@ -234,9 +193,6 @@ class RoleHelper
     /**
      * Check if the user has administrative privileges.
      * Includes super admin and admin roles.
-     *
-     * @param  Authenticatable|null  $user
-     * @return bool
      */
     public static function isAdministrative(?Authenticatable $user = null): bool
     {
@@ -249,9 +205,6 @@ class RoleHelper
     /**
      * Check if the user has management privileges.
      * Includes super admin, admin, and manager roles.
-     *
-     * @param  Authenticatable|null  $user
-     * @return bool
      */
     public static function isManageable(?Authenticatable $user = null): bool
     {
@@ -264,9 +217,6 @@ class RoleHelper
 
     /**
      * Check if the user is a LMS user.
-     *
-     * @param  Authenticatable|null  $user
-     * @return bool
      */
     public static function isLMSUsers(?Authenticatable $user = null): bool
     {
@@ -276,9 +226,6 @@ class RoleHelper
     /**
      * Get the user's highest role based on role hierarchy.
      * Returns the role name with the highest priority (super_admin > admin > manager > teacher > student).
-     *
-     * @param  Authenticatable|null  $user
-     * @return string|null
      */
     public static function getHighestRole(?Authenticatable $user = null): ?string
     {
@@ -310,20 +257,18 @@ class RoleHelper
 
     /**
      * Check if a role name is a system role.
-     *
-     * @param  string|null  $roleName
-     * @return bool
      */
     public static function isSystemRole(?string $roleName): bool
     {
-        if ($roleName === null) return false;
+        if ($roleName === null) {
+            return false;
+        }
+
         return in_array($roleName, static::getSystemRoles());
     }
 
     /**
      * Get all system role names.
-     *
-     * @return array
      */
     public static function getSystemRoles(): array
     {

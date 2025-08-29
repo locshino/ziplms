@@ -12,6 +12,7 @@ use Illuminate\Database\Seeder;
 class BadgeSeeder extends Seeder
 {
     use HasCacheSeeder;
+
     /**
      * Run the database seeds.
      */

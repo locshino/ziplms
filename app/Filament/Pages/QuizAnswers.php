@@ -11,6 +11,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+
 // use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class QuizAnswers extends Page
@@ -214,7 +215,7 @@ class QuizAnswers extends Page
 
     public function getTitle(): string
     {
-        return 'Đáp án: ' . ($this->quiz?->title ?? 'Quiz');
+        return 'Đáp án: '.($this->quiz?->title ?? 'Quiz');
     }
 
     public function isCorrectAnswer(string $questionId): bool

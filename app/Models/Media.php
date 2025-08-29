@@ -30,6 +30,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media as SpatieMedia;
  * @property-read mixed $original_url
  * @property-read mixed $preview_url
  * @property-read mixed $type
+ *
  * @method static \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, static> all($columns = ['*'])
  * @method static \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, static> get($columns = ['*'])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Media newModelQuery()
@@ -54,6 +55,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media as SpatieMedia;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Media whereSize($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Media whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Media whereUuid($value)
+ *
  * @mixin \Eloquent
  */
 class Media extends SpatieMedia

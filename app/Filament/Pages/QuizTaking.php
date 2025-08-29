@@ -2,8 +2,8 @@
 
 namespace App\Filament\Pages;
 
-use App\Enums\Status\QuizStatus;
 use App\Enums\Status\QuizAttemptStatus;
+use App\Enums\Status\QuizStatus;
 use App\Libs\Roles\RoleHelper;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
+
 // use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class QuizTaking extends Page
@@ -76,7 +77,7 @@ class QuizTaking extends Page
             ->findOrFail($this->quiz);
         // Check if user can take this quiz with simplified logic
         $canTake = $this->canTakeQuiz($this->quizModel);
-        if (!$canTake) {
+        if (! $canTake) {
             $errorMessage = 'Quiz này chưa đến thời gian làm bài, đã hết hạn hoặc bạn đã hết lượt làm bài.';
 
             Notification::make()
@@ -113,7 +114,7 @@ class QuizTaking extends Page
                 // Clear any previous localStorage for this quiz when starting new attempt
                 $this->dispatch('clear-previous-quiz-storage', ['quizId' => $this->quizModel->id]);
                 // Clear session for current question index to start from question 1
-                session()->forget('quiz_current_question_' . $this->quizModel->id);
+                session()->forget('quiz_current_question_'.$this->quizModel->id);
             } catch (\Exception $e) {
                 Notification::make()
                     ->title('Lỗi!')
@@ -173,6 +174,7 @@ class QuizTaking extends Page
         if ($now->gte($endTime)) {
             $this->remainingSeconds = 0;
             $this->autoSubmit();
+
             return;
         }
 
@@ -185,7 +187,7 @@ class QuizTaking extends Page
         $this->totalQuestions = $this->quizModel->questions->count();
 
         // Load current question index from session or localStorage
-        $savedIndex = session('quiz_current_question_' . $this->quizModel->id, 0);
+        $savedIndex = session('quiz_current_question_'.$this->quizModel->id, 0);
         $this->currentQuestionIndex = max(0, min($savedIndex, $this->totalQuestions - 1));
     }
 
@@ -218,7 +220,7 @@ class QuizTaking extends Page
 
     protected function saveCurrentQuestionIndex(): void
     {
-        session(['quiz_current_question_' . $this->quizModel->id => $this->currentQuestionIndex]);
+        session(['quiz_current_question_'.$this->quizModel->id => $this->currentQuestionIndex]);
     }
 
     #[Computed]
@@ -242,7 +244,7 @@ class QuizTaking extends Page
     #[Computed]
     public function questionProgress(): string
     {
-        return ($this->currentQuestionIndex + 1) . ' / ' . $this->totalQuestions;
+        return ($this->currentQuestionIndex + 1).' / '.$this->totalQuestions;
     }
 
     #[Computed]
@@ -252,7 +254,7 @@ class QuizTaking extends Page
         foreach ($this->quizModel->questions as $index => $question) {
             $isAnswered = isset($this->answers[$question->id]) &&
                 (is_array($this->answers[$question->id]) ?
-                    !empty($this->answers[$question->id]) :
+                    ! empty($this->answers[$question->id]) :
                     $this->answers[$question->id] !== null);
 
             $questions[] = [
@@ -260,9 +262,10 @@ class QuizTaking extends Page
                 'id' => $question->id,
                 'title' => $question->title,
                 'is_answered' => $isAnswered,
-                'is_current' => $index === $this->currentQuestionIndex
+                'is_current' => $index === $this->currentQuestionIndex,
             ];
         }
+
         return $questions;
     }
 
@@ -414,8 +417,6 @@ class QuizTaking extends Page
         }
     }
 
-
-
     public function showAutoSubmitNotification(): void
     {
         Notification::make()
@@ -468,7 +469,7 @@ class QuizTaking extends Page
         $userId = $user->id;
 
         // Check if user is a student
-        if (!RoleHelper::isStudent($user)) {
+        if (! RoleHelper::isStudent($user)) {
             return false;
         }
 
@@ -477,7 +478,7 @@ class QuizTaking extends Page
             ->withPivot(['start_at', 'end_at'])
             ->first();
 
-        if (!$courseQuiz) {
+        if (! $courseQuiz) {
             return false;
         }
 
@@ -498,6 +499,7 @@ class QuizTaking extends Page
 
         // Check remaining attempts
         $remainingAttempts = $this->getQuizRemainingAttempts($quiz);
+
         // If remainingAttempts is null, it means unlimited attempts
         return $remainingAttempts === null || $remainingAttempts > 0;
     }
@@ -515,7 +517,7 @@ class QuizTaking extends Page
                 'status' => 'not_published',
                 'canTake' => false,
                 'canViewResults' => false,
-                'message' => 'Quiz chưa được xuất bản'
+                'message' => 'Quiz chưa được xuất bản',
             ];
         }
 
@@ -532,7 +534,7 @@ class QuizTaking extends Page
                 'status' => 'no_access',
                 'canTake' => false,
                 'canViewResults' => false,
-                'message' => 'Bạn chưa đăng ký khóa học này'
+                'message' => 'Bạn chưa đăng ký khóa học này',
             ];
         }
 
@@ -545,24 +547,24 @@ class QuizTaking extends Page
             $endAt = $course->pivot->end_at;
 
             // If no time restrictions, allow access
-            if (!$startAt && !$endAt) {
+            if (! $startAt && ! $endAt) {
                 $canTakeInAnyCourse = true;
                 break;
             }
 
             // Check if current time is within allowed range
-            if ((!$startAt || $now->gte($startAt)) && (!$endAt || $now->lte($endAt))) {
+            if ((! $startAt || $now->gte($startAt)) && (! $endAt || $now->lte($endAt))) {
                 $canTakeInAnyCourse = true;
                 break;
             }
         }
 
-        if (!$canTakeInAnyCourse) {
+        if (! $canTakeInAnyCourse) {
             return [
                 'status' => 'time_restricted',
                 'canTake' => false,
                 'canViewResults' => false,
-                'message' => 'Chưa đến thời gian làm bài hoặc đã hết hạn'
+                'message' => 'Chưa đến thời gian làm bài hoặc đã hết hạn',
             ];
         }
 
@@ -575,7 +577,7 @@ class QuizTaking extends Page
                 'status' => 'max_attempts_reached',
                 'canTake' => false,
                 'canViewResults' => true,
-                'message' => 'Đã hết lượt làm bài'
+                'message' => 'Đã hết lượt làm bài',
             ];
         }
 
@@ -583,7 +585,7 @@ class QuizTaking extends Page
             'status' => 'available',
             'canTake' => true,
             'canViewResults' => false,
-            'message' => 'Có thể làm bài'
+            'message' => 'Có thể làm bài',
         ];
     }
 
@@ -633,7 +635,7 @@ class QuizTaking extends Page
             ->action(function () {
                 $this->submitQuiz();
             })
-            ->disabled(fn() => $this->submitting);
+            ->disabled(fn () => $this->submitting);
     }
 
     public function customBackAction(): Action

@@ -2,41 +2,29 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\Status\QuizStatus;
+use App\Models\Course;
+use App\Models\Quiz;
 use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
-use Filament\Widgets\Widget;
-use \Guava\Calendar\Filament\CalendarWidget;
-
+use Filament\Actions\Action;
+use Guava\Calendar\Filament\CalendarWidget;
+use Guava\Calendar\ValueObjects\CalendarEvent;
+use Guava\Calendar\ValueObjects\FetchInfo;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Guava\Calendar\ValueObjects\FetchInfo;
-use Guava\Calendar\Enums\CalendarViewType;
-use App\Models\Quiz;
-use App\Models\Course;
-use Guava\Calendar\ValueObjects\CalendarEvent;
-use App\Enums\Status\QuizStatus;
-use Filament\Actions\Action;
-use Guava\Calendar\ValueObjects\EventClickInfo;
-use Illuminate\Support\HtmlString;
-use Filament\Tables\Concerns\InteractsWithTable;
-
 
 class MyCalendarWidget extends CalendarWidget
 {
     use HasWidgetShield;
 
     protected bool $eventClickEnabled = true;
+
     protected ?string $defaultEventClickAction = 'viewAssignment';
-
-
-
-
 
     protected function getEvents(FetchInfo $info): Collection|array|Builder
     {
         $now = now();
         $twoMonthsLater = now()->addMonths(1);
-
-
 
         $user = auth()->user();
         $role = $user->getRoleNames()->first();
@@ -44,14 +32,12 @@ class MyCalendarWidget extends CalendarWidget
         $query = Course::query();
 
         if ($role === 'student') {
-            $query->whereHas('users', fn($q) => $q->where('users.id', $user->id));
+            $query->whereHas('users', fn ($q) => $q->where('users.id', $user->id));
         } else {
             $query->where('teacher_id', $user->id);
         }
 
         $courses = $query->with('quizzes')->get();
-
-
 
         $events = collect();
 
@@ -59,7 +45,7 @@ class MyCalendarWidget extends CalendarWidget
             foreach ($course->quizzes as $quiz) {
                 if ($quiz->status !== QuizStatus::DRAFT && $quiz->pivot->end_at >= $now && $quiz->pivot->end_at <= $twoMonthsLater) {
                     $isUpcoming = $quiz->pivot->start_at > $now;
-                    $key = $quiz->id . '-' . $course->id;
+                    $key = $quiz->id.'-'.$course->id;
                     $events->push(
                         CalendarEvent::make($quiz)
                             ->title("Quiz:{$quiz->title} \n ({$course->title})")
@@ -76,8 +62,8 @@ class MyCalendarWidget extends CalendarWidget
                                 'font-weight' => '600',
                                 'font-size' => '14px',
                                 'transition' => 'all 0.3s ease',
-                                "border-radius" => "4px",
-                                "padding" => "6px 10px",
+                                'border-radius' => '4px',
+                                'padding' => '6px 10px',
 
                             ])
                             ->action('viewAssignment')
@@ -89,7 +75,7 @@ class MyCalendarWidget extends CalendarWidget
             }
             foreach ($course->assignments as $assignment) {
 
-                # code...
+                // code...
                 if ($assignment->pivot->end_at >= $now && $assignment->pivot->end_at <= $twoMonthsLater) {
                     $isUpcoming = $assignment->pivot->start_at > $now;
 
@@ -109,8 +95,8 @@ class MyCalendarWidget extends CalendarWidget
                                 'font-weight' => '600',
                                 'font-size' => '14px',
                                 'transition' => 'all 0.3s ease',
-                                "border-radius" => "4px",
-                                "padding" => "6px 10px",
+                                'border-radius' => '4px',
+                                'padding' => '6px 10px',
                             ])
                             ->action('viewAssignment')
                             ->model(\App\Models\Assignment::class)
@@ -122,11 +108,10 @@ class MyCalendarWidget extends CalendarWidget
             }
         }
 
-
         return $events;
 
-
     }
+
     public function viewAssignment(): Action
     {
         return Action::make('viewAssignment')
@@ -140,7 +125,7 @@ class MyCalendarWidget extends CalendarWidget
 
                 $record = $modelClass && $key ? $modelClass::find($key) : null;
 
-                if (!$record) {
+                if (! $record) {
                     return new \Illuminate\Support\HtmlString(
                         '<div class="p-4 text-center text-gray-500">Không tìm thấy dữ liệu</div>'
                     );
@@ -149,6 +134,7 @@ class MyCalendarWidget extends CalendarWidget
                 if ($record instanceof \App\Models\Assignment) {
                     $max_points = $record->max_points ? $record->max_points : 'Chưa xác định';
                     $statusLabel = $record->status ? $record->status->getDescription() : 'Chưa xác định';
+
                     return new \Illuminate\Support\HtmlString("
      <div class='p-6 bg-white rounded-lg shadow-md'>
     <h2 class='text-2xl font-bold text-gray-800 mb-2'>{$record->title}</h2>
@@ -173,7 +159,8 @@ class MyCalendarWidget extends CalendarWidget
 
                 if ($record instanceof \App\Models\Quiz) {
                     $statusLabel = $record->status ? $record->status->getDescription() : 'Chưa xác định';
-                    $timeLimit = isset($record->time_limit_minutes) ? $record->time_limit_minutes . ' phút' : 'Chưa xác định';
+                    $timeLimit = isset($record->time_limit_minutes) ? $record->time_limit_minutes.' phút' : 'Chưa xác định';
+
                     return new \Illuminate\Support\HtmlString("
 <div class='p-6 bg-white rounded-lg shadow-md'>
     <h2 class='text-2xl font-bold text-gray-800 mb-2'>{$record->title}</h2>
@@ -198,12 +185,6 @@ class MyCalendarWidget extends CalendarWidget
                 return null;
             })
             ->modalSubmitAction(false)
-            ->modalCancelAction(false)
-
-        ;
+            ->modalCancelAction(false);
     }
-
-
-
-
 }

@@ -23,15 +23,11 @@ class MediaService extends BaseService implements MediaServiceInterface
 {
     /**
      * The media repository instance.
-     *
-     * @var MediaRepositoryInterface
      */
     protected MediaRepositoryInterface $mediaRepository;
 
     /**
      * MediaService constructor.
-     *
-     * @param MediaRepositoryInterface $mediaRepository
      */
     public function __construct(MediaRepositoryInterface $mediaRepository)
     {
@@ -82,7 +78,7 @@ class MediaService extends BaseService implements MediaServiceInterface
 
             return false;
         } catch (\Exception $e) {
-            throw new MediaServiceException('Failed to check download permission: ' . $e->getMessage());
+            throw new MediaServiceException('Failed to check download permission: '.$e->getMessage());
         }
     }
 
@@ -92,17 +88,18 @@ class MediaService extends BaseService implements MediaServiceInterface
     public function downloadMedia(Media $media, User $user): BinaryFileResponse
     {
         // Check download permission
-        if (!$this->canUserDownloadMedia($media, $user)) {
+        if (! $this->canUserDownloadMedia($media, $user)) {
             throw MediaServiceException::accessDenied('download');
         }
 
         // Validate file exists
-        if (!$this->validateMediaFileExists($media)) {
+        if (! $this->validateMediaFileExists($media)) {
             throw MediaServiceException::fileNotFound($media->file_name);
         }
 
         try {
             $filePath = $media->getPath();
+
             return response()->download($filePath, $media->file_name);
         } catch (\Exception $e) {
             throw MediaServiceException::downloadFailed($e->getMessage());
@@ -122,7 +119,7 @@ class MediaService extends BaseService implements MediaServiceInterface
                 return $this->canUserViewMedia($media, $user);
             });
         } catch (\Exception $e) {
-            throw new MediaServiceException('Failed to get accessible media: ' . $e->getMessage());
+            throw new MediaServiceException('Failed to get accessible media: '.$e->getMessage());
         }
     }
 
@@ -169,7 +166,7 @@ class MediaService extends BaseService implements MediaServiceInterface
 
             return false;
         } catch (\Exception $e) {
-            throw new MediaServiceException('Failed to check view permission: ' . $e->getMessage());
+            throw new MediaServiceException('Failed to check view permission: '.$e->getMessage());
         }
     }
 
@@ -216,7 +213,7 @@ class MediaService extends BaseService implements MediaServiceInterface
 
             return false;
         } catch (\Exception $e) {
-            throw new MediaServiceException('Failed to check stream permission: ' . $e->getMessage());
+            throw new MediaServiceException('Failed to check stream permission: '.$e->getMessage());
         }
     }
 
@@ -228,7 +225,7 @@ class MediaService extends BaseService implements MediaServiceInterface
         try {
             return $this->mediaRepository->mediaFileExists($media);
         } catch (\Exception $e) {
-            throw new MediaServiceException('Failed to validate media file existence: ' . $e->getMessage());
+            throw new MediaServiceException('Failed to validate media file existence: '.$e->getMessage());
         }
     }
 }

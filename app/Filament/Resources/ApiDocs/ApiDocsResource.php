@@ -8,8 +8,9 @@ use ZPMLabs\FilamentApiDocsBuilder\Filament\Resources\ApiDocsResource\ApiDocsRes
 class ApiDocsResource extends FilamentApiDocsResource
 {
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedCodeBracket;
+
     public static function getNavigationGroup(): ?string
     {
-        return "System";
+        return 'System';
     }
 }

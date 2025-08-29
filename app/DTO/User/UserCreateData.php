@@ -29,7 +29,7 @@ class UserCreateData
     ) {
         // Set default status if not provided
         $this->status = $status ?? UserStatus::ACTIVE;
-        
+
         // Set default role if not provided
         $this->role = $role ?? RoleSystem::STUDENT;
     }
@@ -65,9 +65,9 @@ class UserCreateData
      * @return array<string, string|array>
      */
     public function getValidationRules(
-        int $maxNameLength = 255, 
-        int $maxEmailLength = 255, 
-        int $minPasswordLength = 8, 
+        int $maxNameLength = 255,
+        int $maxEmailLength = 255,
+        int $minPasswordLength = 8,
         int $maxAvatarSize = 2048,
         string $avatarMimeTypes = 'jpeg,png,jpg,gif'
     ): array {
@@ -75,8 +75,8 @@ class UserCreateData
             'name' => "required|string|max:{$maxNameLength}",
             'email' => "required|email|unique:users,email|max:{$maxEmailLength}",
             'password' => "required|string|min:{$minPasswordLength}|confirmed",
-            'status' => 'sometimes|in:' . implode(',', array_column(UserStatus::cases(), 'value')),
-            'role' => 'sometimes|in:' . implode(',', array_column(RoleSystem::cases(), 'value')),
+            'status' => 'sometimes|in:'.implode(',', array_column(UserStatus::cases(), 'value')),
+            'role' => 'sometimes|in:'.implode(',', array_column(RoleSystem::cases(), 'value')),
             'avatar' => "sometimes|image|mimes:{$avatarMimeTypes}|max:{$maxAvatarSize}",
         ];
     }

@@ -3,8 +3,8 @@
 namespace App\Policies;
 
 use App\Libs\Roles\RoleHelper;
-use App\Models\User;
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class RolePolicy
@@ -33,6 +33,7 @@ class RolePolicy
     public function create(User $user): bool
     {
         $isCanCreateRole = $user->can('create_roles::role');
+
         return false; // Prevent creation of roles through the UI
     }
 
@@ -50,7 +51,10 @@ class RolePolicy
     public function delete(User $user, Role $role): bool
     {
         $isCanDelete = $user->can('delete_roles::role');
-        if (RoleHelper::isSystemRole($role->name)) return false;
+        if (RoleHelper::isSystemRole($role->name)) {
+            return false;
+        }
+
         return $isCanDelete;
     }
 
@@ -68,7 +72,10 @@ class RolePolicy
     public function forceDelete(User $user, Role $role): bool
     {
         $isCanForceDelete = $user->can('{{ ForceDelete }}');
-        if (RoleHelper::isSystemRole($role->name)) return false;
+        if (RoleHelper::isSystemRole($role->name)) {
+            return false;
+        }
+
         return $$isCanForceDelete;
     }
 
@@ -102,7 +109,10 @@ class RolePolicy
     public function replicate(User $user, Role $role): bool
     {
         $isCanReplicate = $user->can('{{ Replicate }}');
-        if (RoleHelper::isSystemRole($role->name)) return false;
+        if (RoleHelper::isSystemRole($role->name)) {
+            return false;
+        }
+
         return $isCanReplicate;
     }
 
