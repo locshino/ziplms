@@ -27,6 +27,21 @@ class AnswerChoiceResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    public static function getModelLabel(): string
+    {
+        return __('resource_answer_choice.resource.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('resource_answer_choice.resource.plural_label');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('resource_answer_choice.resource.navigation_label');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return AnswerChoiceForm::configure($schema);
@@ -39,7 +54,7 @@ class AnswerChoiceResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Quiz Management';
+        return __('resource_answer_choice.resource.navigation_group');
     }
 
     public static function getRelations(): array

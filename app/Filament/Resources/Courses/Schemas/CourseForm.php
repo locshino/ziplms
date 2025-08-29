@@ -32,7 +32,7 @@ class CourseForm
                     ->collapsible()
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('course_cover')
-                            ->label('Hình ảnh khóa học')
+                            ->label(__('resource_course.form.fields.course_cover'))
                             ->collection('course_cover')
                             ->image()
                             ->multiple(false)
@@ -44,6 +44,7 @@ class CourseForm
                             ->acceptedFileTypes(MimeType::images())
                             ->columnSpanFull(),
                         TextInput::make('title')
+                            ->label(__('resource_course.form.fields.title'))
                             ->required()
                             ->live(onBlur: true)
                             ->afterStateUpdated(function ($state, callable $set, $get) {
@@ -59,14 +60,16 @@ class CourseForm
                             ->columns(3)
                             ->schema([
                                 ModalTableSelect::make('teacher_id')
+                                    ->label(__('resource_course.form.fields.teacher_id'))
                                     ->relationship('teacher', 'name')
                                     ->tableConfiguration(TeachersTable::class)
                                     ->required(),
                                 Select::make('status')
+                                    ->label(__('resource_course.form.fields.status'))
                                     ->options(CourseStatus::class)
                                     ->required(),
                                 SpatieTagsInput::make('tags')
-                                    ->label('Phân loại')
+                                    ->label(__('resource_course.form.fields.tags'))
                                     ->type(Course::class),
                             ]),
 
@@ -75,7 +78,7 @@ class CourseForm
                             ->columns(2)
                             ->schema([
                                 DateTimePicker::make('start_at')
-                                    ->label('Thời gian bắt đầu')
+                                    ->label(__('resource_course.form.fields.start_at'))
                                     ->disabled(function (?Course $record) {
                                         if (! $record) {
                                             return false; // Always enabled on create
@@ -100,7 +103,7 @@ class CourseForm
                                     }),
 
                                 DateTimePicker::make('end_at')
-                                    ->label('Thời gian kết thúc')
+                                    ->label(__('resource_course.form.fields.end_at'))
                                     ->disabled(function (?Course $record) {
                                         if (! $record) {
                                             return false;
@@ -129,7 +132,7 @@ class CourseForm
                             })
                             ->modalHeading('Xác nhận chuyển đổi sang Vô thời hạn')
                             ->modalDescription(new HtmlString(
-                                'Hành động này sẽ xóa lịch trình của khóa học. <br/><br/>'.
+                                'Hành động này sẽ xóa lịch trình của khóa học. <br/><br/>' .
                                     '<strong class="text-danger">Cảnh báo: Nếu khóa học đã có học viên, bạn sẽ không thể thiết lập lại lịch cho khóa học này nữa. Thay đổi sẽ có hiệu lực khi bấm lưu thay đổi</strong>'
                             ))
                             ->modalSubmitActionLabel('Có, tôi hiểu và xác nhận')
@@ -144,7 +147,7 @@ class CourseForm
                     ->collapsible()
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('course_documents')
-                            ->label('Tài liệu khóa học')
+                            ->label(__('resource_course.form.fields.course_documents'))
                             ->collection('course_documents')
                             ->multiple()
                             ->acceptedFileTypes([
@@ -157,14 +160,15 @@ class CourseForm
                             ->reorderable()
                             ->downloadable()
                             ->openable()
-                            ->mediaName(fn ($file) => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document')
-                            ->customProperties(fn ($file) => ['title' => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document']),
+                            ->mediaName(fn($file) => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document')
+                            ->customProperties(fn($file) => ['title' => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document']),
                     ]),
                 Section::make('Mở rộng')
                     ->columnSpanFull()
                     ->collapsible()
                     ->schema([
                         TextInput::make('slug')
+                            ->label(__('resource_course.form.fields.slug'))
                             ->unique(ignoreRecord: true)
                             ->rules(['regex:/^[a-z0-9-]+$/'])
                             ->reactive()
@@ -172,11 +176,14 @@ class CourseForm
                                 $set('slug', Str::slug($state));
                             }),
                         TextInput::make('price')
+                            ->label(__('resource_course.form.fields.price'))
                             ->numeric()
                             ->prefix(config('ziplms.currency.default')),
                         Toggle::make('is_featured')
+                            ->label(__('resource_course.form.fields.is_featured'))
                             ->required(),
                         LexicalEditor::make('description')
+                            ->label(__('resource_course.form.fields.description'))
                             ->columnSpanFull(),
                     ]),
 

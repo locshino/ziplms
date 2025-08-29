@@ -15,14 +15,19 @@ class BadgeConditionForm
         return $schema
             ->components([
                 TextInput::make('title')
+                    ->label(__('resource_badge_condition.form.fields.title'))
                     ->required(),
                 Textarea::make('description')
+                    ->label(__('resource_badge_condition.form.fields.description'))
                     ->columnSpanFull(),
                 TextInput::make('condition_type')
+                    ->label(__('resource_badge_condition.form.fields.condition_type'))
                     ->required(),
                 Textarea::make('condition_data')
+                    ->label(__('resource_badge_condition.form.fields.condition_data'))
                     ->columnSpanFull(),
                 Select::make('status')
+                    ->label(__('resource_badge_condition.form.fields.status'))
                     ->options(BadgeConditionStatus::class)
                     ->required(),
             ]);

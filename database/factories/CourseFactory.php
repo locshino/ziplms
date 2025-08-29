@@ -20,18 +20,21 @@ class CourseFactory extends Factory
      */
     public function definition(): array
     {
-        $title = $this->faker->sentence(3);
+        $title = $this->faker->unique()->sentence(3);
 
+        // Generate start_at first
+        $startAt = $this->faker->dateTimeBetween('-1 month', '+1 month');
+        
         return [
             'title' => $title,
             'slug' => Str::slug($title),
-            'description' => $this->faker->paragraph(3),
-            'price' => $this->faker->randomFloat(2, 0, 999.99),
-            'is_featured' => $this->faker->boolean(20), // 20% chance of being featured
+            'description' => $this->faker->paragraph(5),
+            'price' => $this->faker->randomElement([null, $this->faker->randomFloat(2, 10, 500)]),
+            'is_featured' => $this->faker->boolean(15), // 15% chance of being featured
             'teacher_id' => User::factory(),
-            'start_at' => $this->faker->dateTimeBetween('now', '+1 month'),
-            'end_at' => $this->faker->dateTimeBetween('+1 month', '+6 months'),
-            'status' => CourseStatus::PUBLISHED->value,
+            'start_at' => $startAt,
+            'end_at' => $this->faker->dateTimeInInterval($startAt->format('Y-m-d H:i:s'), '+8 months'),
+            'status' => $this->faker->randomElement(CourseStatus::cases())->value,
         ];
     }
 
@@ -40,7 +43,7 @@ class CourseFactory extends Factory
      */
     public function featured(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'is_featured' => true,
         ]);
     }
@@ -50,7 +53,7 @@ class CourseFactory extends Factory
      */
     public function withStatus(CourseStatus $status): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'status' => $status->value,
         ]);
     }

@@ -1,0 +1,15 @@
+{
+    "A failed login to your account": "Đăng nhập thất bại vào tài khoản của bạn",
+    "Account:": "Tài khoản:",
+    "Browser:": "Trình duyệt:",
+    "Hello!": "Xin chào!",
+    "If this was you, you can ignore this alert. If you suspect any suspicious activity on your account, please change your password.": "Nếu đây là bạn, bạn có thể bỏ qua cảnh báo này. Nếu bạn nghi ngờ bất kỳ hoạt động đáng ngờ nào trên tài khoản của mình, vui lòng thay đổi mật khẩu.",
+    "IP Address:": "Địa chỉ IP:",
+    "Location:": "Vị trí:",
+    "Regards,": "Trân trọng,",
+    "There has been a failed login attempt to your :app account.": "Đã có một nỗ lực đăng nhập không thành công vào tài khoản :app của bạn.",
+    "Time:": "Thời gian:",
+    "Unknown City": "Thành phố không xác định",
+    "Unknown State": "Tiểu bang không xác định",
+    "Your :app account logged in from a new device.": "Tài khoản :app của bạn đã đăng nhập từ một thiết bị mới."
+}

@@ -12,15 +12,21 @@ class BadgeInfolist
         return $schema
             ->components([
                 TextEntry::make('id')
-                    ->label('ID'),
-                TextEntry::make('title'),
-                TextEntry::make('slug'),
-                TextEntry::make('status'),
+                    ->label(__('resource_badge.infolist.entries.id')),
+                TextEntry::make('title')
+                    ->label(__('resource_badge.infolist.entries.title')),
+                TextEntry::make('slug')
+                    ->label(__('resource_badge.infolist.entries.slug')),
+                TextEntry::make('status')
+                    ->label(__('resource_badge.infolist.entries.status')),
                 TextEntry::make('created_at')
+                    ->label(__('resource_badge.infolist.entries.created_at'))
                     ->dateTime(),
                 TextEntry::make('updated_at')
+                    ->label(__('resource_badge.infolist.entries.updated_at'))
                     ->dateTime(),
                 TextEntry::make('deleted_at')
+                    ->label(__('resource_badge.infolist.entries.deleted_at'))
                     ->dateTime(),
             ]);
     }

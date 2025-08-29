@@ -26,6 +26,21 @@ class BadgeResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
+    public static function getModelLabel(): string
+    {
+        return __('resource_badge.resource.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('resource_badge.resource.plural_label');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('resource_badge.resource.navigation_label');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return BadgeForm::configure($schema);
@@ -43,7 +58,7 @@ class BadgeResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Gamification';
+        return __('resource_badge.resource.navigation_group');
     }
 
     public static function getRelations(): array

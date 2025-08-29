@@ -280,4 +280,44 @@ class RoleHelper
             RoleSystemEnum::STUDENT->value,
         ];
     }
+
+    /**
+     * Get all system role names without super admin.
+     */
+    public static function getBaseSystemRoles($allowGetRoleHigher = false): array
+    {
+        $baseRoles = [
+            RoleSystemEnum::ADMIN->value,
+            RoleSystemEnum::MANAGER->value,
+            RoleSystemEnum::TEACHER->value,
+            RoleSystemEnum::STUDENT->value,
+        ];
+
+        if ($allowGetRoleHigher === false) {
+            $user = static::resolveUser();
+            if (! $user) {
+                return [];
+            }
+
+            $userHighestRole = static::getHighestRole($user);
+            if (! $userHighestRole || $userHighestRole === 'custom') {
+                return [];
+            }
+
+            $roleHierarchy = static::getSystemRoles();
+            $userRoleIndex = array_search($userHighestRole, $roleHierarchy);
+
+            if ($userRoleIndex === false) {
+                return [];
+            }
+
+            return array_values(array_filter($baseRoles, function ($role) use ($roleHierarchy, $userRoleIndex) {
+                $roleIndex = array_search($role, $roleHierarchy);
+
+                return $roleIndex !== false && $roleIndex >= $userRoleIndex;
+            }));
+        }
+
+        return $baseRoles;
+    }
 }

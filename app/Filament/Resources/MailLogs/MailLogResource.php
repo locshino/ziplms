@@ -14,6 +14,21 @@ class MailLogResource extends FilamentMailLogResource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Logs';
+        return __('resource_mail_log.resource.navigation_group');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('resource_mail_log.resource.navigation_label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('resource_mail_log.resource.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('resource_mail_log.resource.plural_label');
     }
 }

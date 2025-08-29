@@ -12,29 +12,29 @@ class QuizAttemptInfolist
         return $schema
             ->components([
                 TextEntry::make('quiz.title')
-                    ->label('Quiz'),
+                    ->label(__('resource_quiz_attempt.infolist.entries.quiz.title')),
                 TextEntry::make('student.name')
-                    ->label('Student'),
+                    ->label(__('resource_quiz_attempt.infolist.entries.student.name')),
                 TextEntry::make('points')
                     ->numeric()
-                    ->label('Points'),
+                    ->label(__('resource_quiz_attempt.infolist.entries.points')),
                 TextEntry::make('status')
-                    ->label('Status'),
+                    ->label(__('resource_quiz_attempt.infolist.entries.status')),
                 TextEntry::make('start_at')
                     ->dateTime()
-                    ->label('Start At'),
+                    ->label(__('resource_quiz_attempt.infolist.entries.start_at')),
                 TextEntry::make('end_at')
                     ->dateTime()
-                    ->label('End At'),
+                    ->label(__('resource_quiz_attempt.infolist.entries.end_at')),
                 // Hiển thị phần Answers bằng Livewire component (nếu hỗ trợ trong Infolist)
                 // Nếu không hỗ trợ, có thể dùng TextEntry hoặc custom component
-                \Filament\Schemas\Components\Section::make('Answers')
+                \Filament\Schemas\Components\Section::make(__('resource_quiz_attempt.infolist.entries.answers'))
                     ->columnSpanFull()
                     ->collapsed()
                     ->lazy()
                     ->schema([
                         \Filament\Schemas\Components\Livewire::make(\App\Livewire\ShowQuizAnswers::class)
-                            ->key(fn ($record) => $record?->id),
+                            ->key(fn($record) => $record?->id),
                     ]),
             ]);
     }

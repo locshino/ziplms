@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users\Schemas;
 
 use App\Enums\MimeType;
 use App\Enums\Status\UserStatus;
+use App\Libs\Roles\RoleHelper;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
@@ -40,7 +41,7 @@ class UserForm
                 Select::make('roles')
                     ->label(__('resource_user.form.fields.roles'))
                     ->relationship('roles', 'name')
-                    ->options(Role::all()->pluck('name', 'name'))
+                    ->options(RoleHelper::getBaseSystemRoles())
                     ->multiple()
                     ->preload()
                     ->searchable(),
@@ -50,7 +51,7 @@ class UserForm
                     ->required(),
                 Toggle::make('force_renew_password')
                     ->label(__('resource_user.form.fields.force_renew_password'))
-                    ->visible(fn () => config('ziplms.plugins.renew_password.enabled') && (config('ziplms.plugins.renew_password.force_renew_password') == false))
+                    ->visible(fn() => config('ziplms.plugins.renew_password.enabled') && (config('ziplms.plugins.renew_password.force_renew_password') == false))
                     ->required(),
             ]);
     }

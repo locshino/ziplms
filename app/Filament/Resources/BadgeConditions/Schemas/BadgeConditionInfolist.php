@@ -12,15 +12,21 @@ class BadgeConditionInfolist
         return $schema
             ->components([
                 TextEntry::make('id')
-                    ->label('ID'),
-                TextEntry::make('title'),
-                TextEntry::make('condition_type'),
-                TextEntry::make('status'),
+                    ->label(__('resource_badge_condition.infolist.entries.id')),
+                TextEntry::make('title')
+                    ->label(__('resource_badge_condition.infolist.entries.title')),
+                TextEntry::make('condition_type')
+                    ->label(__('resource_badge_condition.infolist.entries.condition_type')),
+                TextEntry::make('status')
+                    ->label(__('resource_badge_condition.infolist.entries.status')),
                 TextEntry::make('created_at')
+                    ->label(__('resource_badge_condition.infolist.entries.created_at'))
                     ->dateTime(),
                 TextEntry::make('updated_at')
+                    ->label(__('resource_badge_condition.infolist.entries.updated_at'))
                     ->dateTime(),
                 TextEntry::make('deleted_at')
+                    ->label(__('resource_badge_condition.infolist.entries.deleted_at'))
                     ->dateTime(),
             ]);
     }

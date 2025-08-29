@@ -19,8 +19,8 @@ class AnswerChoiceFactory extends Factory
     {
         return [
             'question_id' => Question::factory(),
-            'title' => $this->faker->sentence(3),
-            'description' => $this->faker->optional()->paragraph(1),
+            'title' => $this->faker->unique()->words(rand(1, 5), true),
+            'description' => $this->faker->optional()->sentence(),
             'is_correct' => false,
         ];
     }
@@ -30,7 +30,7 @@ class AnswerChoiceFactory extends Factory
      */
     public function correct(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'is_correct' => true,
         ]);
     }
@@ -40,7 +40,7 @@ class AnswerChoiceFactory extends Factory
      */
     public function incorrect(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'is_correct' => false,
         ]);
     }

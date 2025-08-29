@@ -23,26 +23,31 @@ class AssignmentForm
                     ->columnSpanFull()
                     ->components([
                         TextInput::make('title')
+                            ->label(__('resource_assignment.form.fields.title'))
                             ->required(),
                         LexicalEditor::make('description')
+                            ->label(__('resource_assignment.form.fields.description'))
                             ->columnSpanFull(),
                         Section::make('Thiết lập')
                             ->columns(4)
                             ->components([
                                 TextInput::make('max_points')
+                                    ->label(__('resource_assignment.form.fields.max_points'))
                                     ->required()
                                     ->numeric()
                                     ->default(10),
                                 TextInput::make('max_attempts')
+                                    ->label(__('resource_assignment.form.fields.max_attempts'))
                                     ->minValue(0)
                                     ->numeric(),
                                 Select::make('status')
+                                    ->label(__('resource_assignment.form.fields.status'))
                                     ->options(AssignmentStatus::class)
                                     ->required(),
                             ]),
 
                         SpatieTagsInput::make('tags')
-                            ->label('Phân loại')
+                            ->label(__('resource_assignment.form.fields.tags'))
                             ->type(Assignment::class),
                     ]),
 
@@ -51,7 +56,7 @@ class AssignmentForm
                     ->collapsible()
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('course_documents')
-                            ->label('Tài liệu bài tập')
+                            ->label(__('resource_assignment.form.fields.course_documents'))
                             ->collection('assignment_documents')
                             ->multiple()
                             ->preserveFilenames()
@@ -65,7 +70,7 @@ class AssignmentForm
                             ->reorderable()
                             ->downloadable()
                             ->openable()
-                            ->customProperties(fn ($file) => ['title' => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document']),
+                            ->customProperties(fn($file) => ['title' => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document']),
                     ]),
             ]);
     }

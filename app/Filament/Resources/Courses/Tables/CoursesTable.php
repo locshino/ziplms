@@ -27,44 +27,55 @@ class CoursesTable
         return $table
             ->columns([
                 TextColumn::make('id')
-                    ->label('ID')
+                    ->label(__('resource_course.table.columns.id'))
                     ->copyable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('title')
+                    ->label(__('resource_course.table.columns.title'))
                     ->searchable(),
                 TextColumn::make('slug')
+                    ->label(__('resource_course.table.columns.slug'))
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('teacher.name')
+                    ->label(__('resource_course.table.columns.teacher.name'))
                     ->searchable(),
                 TextColumn::make('start_at')
+                    ->label(__('resource_course.table.columns.start_at'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('end_at')
+                    ->label(__('resource_course.table.columns.end_at'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('status')
+                    ->label(__('resource_course.table.columns.status'))
                     ->searchable(),
                 TextColumn::make('price')
+                    ->label(__('resource_course.table.columns.price'))
                     ->money(currency: config('ziplms.currency.default'))
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable(),
                 IconColumn::make('is_featured')
+                    ->label(__('resource_course.table.columns.is_featured'))
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->boolean(),
                 SpatieTagsColumn::make('tags')
-                    ->label('Phân loại')
+                    ->label(__('resource_course.table.columns.tags'))
                     ->type(Course::class)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
+                    ->label(__('resource_course.table.columns.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(__('resource_course.table.columns.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('deleted_at')
+                    ->label(__('resource_course.table.columns.deleted_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

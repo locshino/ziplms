@@ -19,12 +19,12 @@ class QuizFactory extends Factory
     public function definition(): array
     {
         return [
-            'title' => $this->faker->sentence(3),
-            'description' => $this->faker->paragraph(2),
-            'max_attempts' => $this->faker->numberBetween(1, 3),
-            'is_single_session' => $this->faker->boolean(70), // 70% chance of single session
-            'time_limit_minutes' => $this->faker->randomElement([30, 45, 60, 90, 120]),
-            'status' => QuizStatus::PUBLISHED->value,
+            'title' => $this->faker->unique()->sentence(4),
+            'description' => $this->faker->paragraph(3),
+            'max_attempts' => $this->faker->randomElement([1, 2, 3, null]),
+            'is_single_session' => $this->faker->boolean(80), // 80% chance of single session
+            'time_limit_minutes' => $this->faker->randomElement([15, 30, 45, 60, 90]),
+            'status' => $this->faker->randomElement(QuizStatus::cases())->value,
         ];
     }
 
@@ -33,7 +33,7 @@ class QuizFactory extends Factory
      */
     public function withStatus(QuizStatus $status): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'status' => $status->value,
         ]);
     }
@@ -67,7 +67,7 @@ class QuizFactory extends Factory
      */
     public function multipleSession(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'is_single_session' => false,
         ]);
     }

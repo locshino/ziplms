@@ -22,22 +22,27 @@ class QuestionsTable
         return $table
             ->columns([
                 TextColumn::make('id')
-                    ->label('ID')
+                    ->label(__('resource_question.table.columns.id'))
                     ->copyable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('title')
+                    ->label(__('resource_question.table.columns.title'))
                     ->searchable(),
-                TextColumn::make('status'),
+                TextColumn::make('status')
+                    ->label(__('resource_question.table.columns.status')),
                 TextColumn::make('created_at')
+                    ->label(__('resource_question.table.columns.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(__('resource_question.table.columns.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('deleted_at')
+                    ->label(__('resource_question.table.columns.deleted_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
