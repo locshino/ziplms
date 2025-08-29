@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 class MyCourse extends Page
 {
     protected string $view = 'filament.pages.my-course';
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-book-open';
 
     public Collection|EloquentCollection $ongoingCourses;
     public Collection|EloquentCollection $completedCourses;
@@ -33,12 +33,13 @@ class MyCourse extends Page
 
         if ($user->hasRole('student')) {
             $enrolledCourses = $this->getEnrolledCourses();
-        } elseif ($user->hasRole('teacher')) {
+
+        } else {
             $enrolledCourses = $this->getTeachingCourses();
+
         }
         $ongoingCourses = collect();
         $completedCourses = collect();
-
         foreach ($enrolledCourses as $course) {
             $pivot = $course->pivot;
 
@@ -100,19 +101,17 @@ class MyCourse extends Page
         $now = now();
 
         return Course::query()
-            ->where('teacher_id', $user->id)   // lọc theo giáo viên dạy
+            ->where('teacher_id', $user->id)  // lọc theo giáo viên dạy
             ->where('status', CourseStatus::PUBLISHED)
-            ->where(function ($query) use ($now) {
-                $query->whereNull('start_at')
-                    ->orWhere('start_at', '<=', $now);
-            })
+            ->whereDate('start_at', '<=', $now) // Đã đến ngày bắt đầu
             ->where(function ($query) use ($now) {
                 $query->whereNull('end_at')
-                    ->orWhere('end_at', '>=', $now);
+                    ->orWhereDate('end_at', '>=', $now); // Chưa kết thúc
             })
             ->with(['users', 'media', 'tags'])
             ->orderBy('created_at', 'asc')
-            ->paginate(10);
+            ->get();
+
     }
 
 
@@ -120,8 +119,15 @@ class MyCourse extends Page
     {
         $ongoingCourses = collect();
         $closedCourses = collect();
+        $user = Auth::user();
+        if ($user->hasRole('student')) {
+            $enrolledCourses = $this->getEnrolledCourses();
 
-        $enrolledCourses = $this->getEnrolledCourses();
+        } else {
+            $enrolledCourses = $this->getTeachingCourses();
+
+        }
+
 
         foreach ($enrolledCourses as $course) {
 
@@ -150,8 +156,14 @@ class MyCourse extends Page
         $ongoingCourses = collect();
         $closedCourses = collect();
 
-        $enrolledCourses = $this->getEnrolledCourses(); // Lấy danh sách các course mà user đã tham gia
+        $user = Auth::user();
+        if ($user->hasRole('student')) {
+            $enrolledCourses = $this->getEnrolledCourses();
 
+        } else {
+            $enrolledCourses = $this->getTeachingCourses();
+
+        }
         foreach ($enrolledCourses as $course) {
             if ($course->status !== CourseStatus::PUBLISHED) {
                 $closedCourses->push($course);
@@ -181,7 +193,14 @@ class MyCourse extends Page
         $closedCourses = collect();
         $this->selectedTag = $tag; // lưu tag đã chọn
 
-        $enrolledCourses = $this->getEnrolledCourses(); // tất cả course người dùng đăng ký
+        $user = Auth::user();
+        if ($user->hasRole('student')) {
+            $enrolledCourses = $this->getEnrolledCourses();
+
+        } else {
+            $enrolledCourses = $this->getTeachingCourses();
+
+        }
 
         foreach ($enrolledCourses as $course) {
 
@@ -211,7 +230,14 @@ class MyCourse extends Page
         $closedCourses = collect();
         $this->selectedTeacher = $teacherId;
 
-        $enrolledCourses = $this->getEnrolledCourses();
+        $user = Auth::user();
+        if ($user->hasRole('student')) {
+            $enrolledCourses = $this->getEnrolledCourses();
+
+        } else {
+            $enrolledCourses = $this->getTeachingCourses();
+
+        }
 
         foreach ($enrolledCourses as $course) {
 
