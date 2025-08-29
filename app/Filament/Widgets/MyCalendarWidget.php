@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\Widget;
 use \Guava\Calendar\Filament\CalendarWidget;
 
@@ -21,7 +22,7 @@ use Filament\Tables\Concerns\InteractsWithTable;
 
 class MyCalendarWidget extends CalendarWidget
 {
-
+    use HasWidgetShield;
 
     protected bool $eventClickEnabled = true;
     protected ?string $defaultEventClickAction = 'viewAssignment';
@@ -68,7 +69,7 @@ class MyCalendarWidget extends CalendarWidget
                             ->textColor('#1976d2')
                             ->allDay(true)
                             ->styles([
-                                'border' => $isUpcoming ? '2px dashed #3c97f2ff' : '2px solid #1976d2',
+                                'border' => $isUpcoming ? '2px dashed #e50d0dff' : '2px solid #1976d2',
                                 'border-radius' => '12px',
                                 'box-shadow' => '0 4px 12px rgba(0,0,0,0.15)',
                                 'padding' => '6px 12px',
@@ -101,7 +102,7 @@ class MyCalendarWidget extends CalendarWidget
                             ->textColor('#4caf50')
                             ->allDay(true)
                             ->styles([
-                                'border' => $isUpcoming ? '2px dashed #33691e' : '2px solid #4caf50',
+                                'border' => $isUpcoming ? '2px dashed #e50d0dff' : '2px solid #4caf50',
                                 'border-radius' => '12px',
                                 'box-shadow' => '0 4px 12px rgba(0,0,0,0.15)',
                                 'padding' => '6px 12px',
@@ -156,6 +157,7 @@ class MyCalendarWidget extends CalendarWidget
     <p class='text-gray-700 mb-4'>{$record->description}</p>
    <div class='text-sm text-gray-500 mb-4'>
         <span class='font-semibold'>Điểm tối đa:</span> {$max_points}
+       
     </div>
 
     <div class='flex items-center space-x-2'>
@@ -180,6 +182,7 @@ class MyCalendarWidget extends CalendarWidget
     <p class='text-gray-700 mb-4'>{$record->description}</p>
    <div class='text-sm text-gray-500 mb-4'>
         <span class='font-semibold'>Time limit:</span>  {$timeLimit}
+       
     </div>
     <div class='flex items-center space-x-2'>
       
