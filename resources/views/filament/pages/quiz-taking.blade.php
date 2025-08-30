@@ -395,9 +395,11 @@
                 </div>
             </div>
         </div>
-        <script>
-            // Javascript không thay đổi
-            function quizTakingApp() {
+    @endif
+
+    <script>
+        // Javascript không thay đổi
+        function quizTakingApp() {
                 return {
                     remainingSeconds: @js($this->remainingSeconds),
                     isUnlimited: @js($this->isUnlimited),
@@ -406,35 +408,98 @@
                     quizId: @js($this->quizModel->id),
                     attemptId: @js($this->attempt->id ?? null),
                     timer: null,
+                    quizModel: {
+                        time_limit_minutes: @js($this->quizModel->time_limit_minutes)
+                    },
 
                     init() {
-                        this.timeWarning = this.remainingSeconds <= 300;
-                        this.loadFromStorage();
-                        this.startTimer();
-                        this.bindAnswerEvents();
-                        this.loadCurrentQuestionIndex();
+                        // Initialize basic watchers first
                         this.$watch('$wire.submitting', (value) => {
                             this.submitting = value;
                         });
+                        
+                        // Add window focus event to sync time when user returns
+                        window.addEventListener('focus', () => {
+                            if (this.attemptId && !this.isUnlimited) {
+                                this.$wire.call('syncTime').then((result) => {
+                                    this.remainingSeconds = result.remainingSeconds;
+                                    this.isUnlimited = result.isUnlimited;
+                                    this.timeWarning = result.timeWarning;
+                                    
+                                    if (this.remainingSeconds <= 0) {
+                                        this.autoSubmit();
+                                    }
+                                });
+                            }
+                        });
+                        
+                        // Only initialize timer and storage if we have an attempt
+                        if (this.attemptId) {
+                            // Use setTimeout to defer heavy initialization
+                            setTimeout(() => {
+                                this.timeWarning = this.remainingSeconds <= 300;
+                                this.loadFromStorage();
+                                this.startTimer();
+                                this.bindAnswerEvents();
+                                this.loadCurrentQuestionIndex();
+                            }, 0);
+                        }
 
                         // Listen for question navigation events
                         this.$wire.on('question-changed', () => {
                             this.saveCurrentQuestionIndex();
                         });
 
-                        // Listen for answers loaded event
-                        this.$wire.on('answers-loaded', () => {
-                            this.updateCheckboxStates();
-                        });
+                        // Note: answers-loaded event removed for performance optimization
 
                         // Listen for clear storage event
                         this.$wire.on('clear-quiz-storage', () => {
                             this.clearStorage();
                         });
 
-                        // Listen for clear previous quiz storage event
-                        this.$wire.on('clear-previous-quiz-storage', (data) => {
-                            this.clearPreviousQuizStorage(data.quizId);
+                        // Listen for quiz start button click to immediately start timer
+                        this.$wire.on('quiz-starting', () => {
+                            // Start immediate timer with estimated time from quiz model
+                            if (!this.isUnlimited && this.quizModel?.time_limit_minutes) {
+                                this.remainingSeconds = this.quizModel.time_limit_minutes * 60;
+                                this.timeWarning = this.remainingSeconds <= 300;
+                                this.startTimer();
+                            }
+                        });
+
+                        // Optimized single event handler for quiz start
+                        this.$wire.on('quiz-started', (data) => {
+                            // Clear previous storage if needed
+                            if (data.shouldClearStorage) {
+                                this.clearPreviousQuizStorage(data.quizId);
+                            }
+                            
+                            // Update attempt ID and sync with accurate server time
+                            this.attemptId = data.attemptId;
+                            
+                            // Sync with accurate server time immediately
+                            this.$wire.call('syncTime').then((result) => {
+                                this.remainingSeconds = result.remainingSeconds;
+                                this.isUnlimited = result.isUnlimited;
+                                this.timeWarning = result.timeWarning;
+                                
+                                // Restart timer with accurate time
+                                this.startTimer();
+                                
+                                if (this.remainingSeconds <= 0) {
+                                    this.autoSubmit();
+                                }
+                            });
+                            
+                            // Load answers and initialize components if needed
+                            if (data.shouldLoadAnswers) {
+                                this.loadFromStorage();
+                                this.updateCheckboxStates();
+                            }
+                            
+                            // Bind events
+                            this.bindAnswerEvents();
+                            this.loadCurrentQuestionIndex();
                         });
                     },
 
@@ -444,8 +509,11 @@
                         if (savedAnswers) {
                             try {
                                 const answers = JSON.parse(savedAnswers);
-                                this.$wire.set('answers', answers, false);
-                                this.updateProgressFromStorage(answers);
+                                // Use requestAnimationFrame for smooth UI updates
+                                requestAnimationFrame(() => {
+                                    this.$wire.set('answers', answers, false);
+                                    this.updateProgressFromStorage(answers);
+                                });
                             } catch (e) {
                                 console.error('Error loading saved answers:', e);
                             }
@@ -504,21 +572,33 @@
 
                     updateCheckboxStates() {
                         const answers = this.$wire.answers;
-
-                        // Update all checkboxes based on current answers
-                        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                            const questionId = checkbox.name.match(/answers_(\d+)/)?.[1];
-                            const choiceId = parseInt(checkbox.value);
-
-                            if (questionId && answers[questionId] && Array.isArray(answers[questionId])) {
-                                checkbox.checked = answers[questionId].includes(choiceId);
-                            } else {
-                                checkbox.checked = false;
-                            }
+                        
+                        // Batch DOM updates for better performance
+                        requestAnimationFrame(() => {
+                            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                            const updates = [];
+                            
+                            // Prepare all updates first
+                            checkboxes.forEach(checkbox => {
+                                const questionId = checkbox.name.match(/answers_(\d+)/)?.[1];
+                                const choiceId = parseInt(checkbox.value);
+                                const shouldBeChecked = questionId && answers[questionId] && Array.isArray(answers[questionId]) 
+                                    ? answers[questionId].includes(choiceId) 
+                                    : false;
+                                    
+                                if (checkbox.checked !== shouldBeChecked) {
+                                    updates.push({ checkbox, checked: shouldBeChecked });
+                                }
+                            });
+                            
+                            // Apply all updates at once
+                            updates.forEach(({ checkbox, checked }) => {
+                                checkbox.checked = checked;
+                            });
+                            
+                            // Update progress after state update
+                            this.updateProgressFromStorage(answers);
                         });
-
-                        // Update progress after state update
-                        this.updateProgressFromStorage(answers);
                     },
 
                     clearStorage() {
@@ -539,7 +619,7 @@
                     },
 
                     startTimer() {
-                        if (this.isUnlimited) return;
+                        if (this.isUnlimited || this.remainingSeconds === null || this.remainingSeconds === undefined) return;
 
                         // Clear any existing timer to prevent multiple timers
                         if (this.timer) {
@@ -552,15 +632,44 @@
                             return;
                         }
 
+                        // Real-time server-synced timer with smooth local countdown
+                        let syncCounter = 0;
+                        
                         this.timer = setInterval(() => {
+                            syncCounter++;
+                            
+                            // Sync with server every 10 seconds for accuracy (reduced frequency for better performance)
+                            if (this.attemptId && syncCounter % 10 === 0) {
+                                this.$wire.call('syncTime').then((result) => {
+                                    // Only update if there's a significant difference (more than 2 seconds)
+                                    const timeDiff = Math.abs(this.remainingSeconds - result.remainingSeconds);
+                                    if (timeDiff > 2) {
+                                        this.remainingSeconds = result.remainingSeconds;
+                                    }
+                                    this.isUnlimited = result.isUnlimited;
+                                    this.timeWarning = result.timeWarning;
+                                    
+                                    if (this.remainingSeconds <= 0) {
+                                        clearInterval(this.timer);
+                                        this.timer = null;
+                                        this.autoSubmit();
+                                    }
+                                }).catch(() => {
+                                    // Continue with local countdown if server sync fails
+                                    console.warn('Timer sync failed, continuing with local countdown');
+                                });
+                            }
+                            
+                            // Always do local countdown for smooth display
                             this.remainingSeconds--;
                             this.timeWarning = this.remainingSeconds <= 300;
+                            
                             if (this.remainingSeconds <= 0) {
                                 clearInterval(this.timer);
                                 this.timer = null;
                                 this.autoSubmit();
                             }
-                        }, 1000);
+                        }, 1000); // Update every second
                     },
 
                     formatTime(seconds) {
@@ -590,11 +699,15 @@
                         this.clearStorage();
                         this.$wire.mountAction('customSubmit');
                     }
-                }
+                };
             }
-        </script>
+
+        // Register Alpine.js component
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('quizTakingApp', quizTakingApp);
+        });
+    </script>
     </div>
-    @endif
 
     <x-filament-actions::modals />
 </x-filament-panels::page>
