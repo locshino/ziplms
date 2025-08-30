@@ -87,9 +87,32 @@
                 </div>
             </div>
 
-            <div class="flex flex-col lg:flex-row gap-6">
-                <div class="flex-1 lg:order-1 order-2 space-y-6">
-                    @if($this->currentQuestion)
+            @if(!$this->attempt)
+                <!-- Start Quiz Section -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 lg:p-8 text-center">
+                    <div class="mb-6">
+                        <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Sẵn sàng làm bài?</h2>
+                        <p class="text-gray-600 dark:text-gray-400">Nhấn nút bên dưới để bắt đầu làm bài quiz này.</p>
+                    </div>
+                    
+                    <button wire:click="startQuiz" 
+                        class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Bắt đầu làm bài
+                    </button>
+                </div>
+            @else
+                <!-- Quiz Content -->
+                <div class="flex flex-col lg:flex-row gap-6">
+                    <div class="flex-1 lg:order-1 order-2 space-y-6">
+                        @if($this->currentQuestion)
                         <div
                             class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 lg:p-6">
                             <div
@@ -571,6 +594,7 @@
             }
         </script>
     </div>
+    @endif
 
     <x-filament-actions::modals />
 </x-filament-panels::page>

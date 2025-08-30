@@ -90,43 +90,64 @@ class QuizTaking extends Page
             return;
         }
 
-        $this->initializeQuizAttempt();
-        $this->loadExistingAnswers();
-        $this->calculateRemainingTime();
-        $this->initializePagination();
-
-        // Force Livewire to re-render after loading answers
-        $this->dispatch('answers-loaded');
-    }
-
-    protected function initializeQuizAttempt(): void
-    {
-        // Check for existing in-progress attempt
-        $this->attempt = QuizAttempt::where('quiz_id', $this->quizModel->id)
+        // Only initialize if there's an existing IN_PROGRESS attempt
+        $existingAttempt = QuizAttempt::where('quiz_id', $this->quizModel->id)
             ->where('student_id', Auth::id())
             ->where('status', QuizAttemptStatus::IN_PROGRESS->value)
             ->first();
 
-        // If no existing attempt, create new one
-        if (! $this->attempt) {
-            try {
-                $this->attempt = $this->quizService->startQuizAttempt($this->quizModel->id, Auth::id());
-                // Clear any previous localStorage for this quiz when starting new attempt
-                $this->dispatch('clear-previous-quiz-storage', ['quizId' => $this->quizModel->id]);
-                // Clear session for current question index to start from question 1
-                session()->forget('quiz_current_question_'.$this->quizModel->id);
-            } catch (\Exception $e) {
-                Notification::make()
-                    ->title('Lỗi!')
-                    ->body($e->getMessage())
-                    ->danger()
-                    ->send();
-                // Sửa lại route cho đúng panel 'app'
-                $this->redirect(route('filament.app.pages.my-quiz'));
-
-                return;
-            }
+        if ($existingAttempt) {
+            // Continue existing attempt
+            $this->attempt = $existingAttempt;
+            $this->loadExistingAnswers();
+            $this->calculateRemainingTime();
+            $this->initializePagination();
+            
+            // Force Livewire to re-render after loading answers
+            $this->dispatch('answers-loaded');
         }
+        // If no existing attempt, wait for user to click "Start Quiz" button
+    }
+
+    public function startQuiz(): void
+    {
+        try {
+            $this->attempt = $this->quizService->startQuizAttempt($this->quizModel->id, Auth::id());
+            // Clear any previous localStorage for this quiz when starting new attempt
+            $this->dispatch('clear-previous-quiz-storage', ['quizId' => $this->quizModel->id]);
+            // Clear session for current question index to start from question 1
+            session()->forget('quiz_current_question_'.$this->quizModel->id);
+            
+            // Initialize quiz after starting
+            $this->loadExistingAnswers();
+            $this->calculateRemainingTime();
+            $this->initializePagination();
+            
+            // Force Livewire to re-render after loading answers
+            $this->dispatch('answers-loaded');
+            
+            Notification::make()
+                ->title('Bắt đầu làm bài!')
+                ->body('Chúc bạn làm bài tốt!')
+                ->success()
+                ->send();
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Lỗi!')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+
+    protected function initializeQuizAttempt(): void
+    {
+        // This method is now only used for continuing existing attempts
+        // New attempts are created via startQuiz() method
+        $this->attempt = QuizAttempt::where('quiz_id', $this->quizModel->id)
+            ->where('student_id', Auth::id())
+            ->where('status', QuizAttemptStatus::IN_PROGRESS->value)
+            ->first();
     }
 
     protected function loadExistingAnswers(): void
