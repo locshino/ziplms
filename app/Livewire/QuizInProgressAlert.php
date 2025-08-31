@@ -4,26 +4,27 @@ namespace App\Livewire;
 
 use App\Enums\Status\QuizAttemptStatus;
 use App\Models\QuizAttempt;
+use Filament\Notifications\Notification;
+use Filament\Actions\Action;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class QuizInProgressAlert extends Component
 {
-    public $inProgressQuizzes = [];
+    public bool $hasSentThisPageLoad = false;
 
-    public $showAlert = false;
-
-    protected $listeners = ['refreshAlert' => 'loadInProgressQuizzes'];
-
-    public function mount()
+    public function mount(): void
     {
         $this->loadInProgressQuizzes();
-        $this->checkCurrentPage();
     }
 
-    public function loadInProgressQuizzes()
+    public function loadInProgressQuizzes(): void
     {
-        if (! Auth::check()) {
+        if (!Auth::check()) {
+            return;
+        }
+
+        if (session()->get('dismissed_quiz_notification_' . Auth::id())) {
             return;
         }
 
@@ -32,51 +33,77 @@ class QuizInProgressAlert extends Component
             ->where('status', QuizAttemptStatus::IN_PROGRESS)
             ->get();
 
-        // Clean up orphaned attempts (where quiz has been deleted)
         $orphanedAttempts = $attempts->whereNull('quiz');
-        if ($orphanedAttempts->count() > 0) {
+        if ($orphanedAttempts->isNotEmpty()) {
             QuizAttempt::whereIn('id', $orphanedAttempts->pluck('id'))
                 ->update(['status' => QuizAttemptStatus::ABANDONED]);
         }
 
-        $this->inProgressQuizzes = $attempts
-            ->whereNotNull('quiz')
-            ->map(function ($attempt) {
-                return [
-                    'id' => $attempt->id,
-                    'quiz_id' => $attempt->quiz_id,
-                    'quiz_title' => $attempt->quiz->title,
-                    'started_at' => $attempt->start_at,
-                    'url' => route('filament.app.pages.quiz-taking', ['quiz' => $attempt->quiz_id]),
-                ];
-            })
-            ->toArray();
+        $validAttempts = $attempts->whereNotNull('quiz');
 
-        $this->showAlert = count($this->inProgressQuizzes) > 0;
-        $this->checkCurrentPage();
-    }
-
-    public function refreshAlert()
-    {
-        $this->loadInProgressQuizzes();
-    }
-
-    public function dismissAlert()
-    {
-        $this->showAlert = false;
-    }
-
-    public function checkCurrentPage()
-    {
-        // Ẩn thông báo nếu đang ở trang quiz-taking hoặc my-quiz (lịch sử quiz)
-        $currentUrl = request()->url();
-        if (str_contains($currentUrl, '/quiz-taking') || str_contains($currentUrl, '/my-quiz')) {
-            $this->showAlert = false;
+        if ($validAttempts->isNotEmpty() && $this->shouldShowNotification() && !$this->hasSentThisPageLoad) {
+            $this->showFilamentNotification($validAttempts);
+            $this->hasSentThisPageLoad = true;
         }
+    }
+
+    public function dismissNotification(): void
+    {
+        session()->put('dismissed_quiz_notification_' . Auth::id(), true);
+    }
+
+    public function showFilamentNotification($attempts): void
+    {
+        $count = $attempts->count();
+        $notificationId = 'quiz_in_progress_' . Auth::id();
+
+        $notificationBuilder = Notification::make($notificationId)
+            ->warning()
+            ->persistent();
+
+        if ($count === 1) {
+            $attempt = $attempts->first();
+            $startedAt = \Carbon\Carbon::parse($attempt->start_at)->format('d/m/Y H:i');
+
+            $notificationBuilder
+                ->title('Bạn đang làm dở quiz')
+                ->body("Quiz: {$attempt->quiz->title}\nBắt đầu: {$startedAt}")
+                ->actions([
+                    Action::make('continue')
+                        ->label('Tiếp tục làm bài')
+                        ->button()
+                        ->url(route('filament.app.pages.quiz-taking', ['quiz' => $attempt->quiz_id])),
+
+                ]);
+        } else {
+            $quizTitles = $attempts->pluck('quiz.title')->take(3)->implode(', ');
+            $moreText = $count > 3 ? "... và " . ($count - 3) . " quiz khác" : "";
+
+            $notificationBuilder
+                ->title("Bạn đang làm dở {$count} quiz")
+                ->body("Các quiz: {$quizTitles}{$moreText}")
+                ->actions([
+                    Action::make('view_all')
+                        ->label('Xem tất cả')
+                        ->button()
+                        ->url(route('filament.app.pages.my-quiz')),
+
+                ]);
+        }
+
+        $notificationBuilder->send();
+    }
+
+    public function shouldShowNotification(): bool
+    {
+        $currentUrl = request()->url();
+        return !str_contains($currentUrl, '/quiz-taking') && !str_contains($currentUrl, '/my-quiz');
     }
 
     public function render()
     {
-        return view('livewire.quiz-in-progress-alert');
+        return <<<'HTML'
+            <div></div>
+        HTML;
     }
 }
