@@ -16,23 +16,25 @@ use Illuminate\Support\Collection;
 class MyCalendarWidget extends CalendarWidget
 {
     use HasWidgetShield;
-
+    // Cho phép click vào event
     protected bool $eventClickEnabled = true;
-
+    // Action mặc định khi click event
     protected ?string $defaultEventClickAction = 'viewAssignment';
-
+    /**
+     * Lấy danh sách events để hiển thị trên calendar
+     */
     protected function getEvents(FetchInfo $info): Collection|array|Builder
     {
         $now = now();
-        $twoMonthsLater = now()->addMonths(1);
+        $twoMonthsLater = now()->addMonths(1); // khoảng thời gian hiển thị 2 tháng tới
 
         $user = auth()->user();
-        $role = $user->getRoleNames()->first();
+        $role = $user->getRoleNames()->first(); // lấy role đầu tiên của user
 
         $query = Course::query();
-
+        // Nếu là student: chỉ lấy các khóa học mà user đã đăng ký
         if ($role === 'student') {
-            $query->whereHas('users', fn ($q) => $q->where('users.id', $user->id));
+            $query->whereHas('users', fn($q) => $q->where('users.id', $user->id));
         } else {
             $query->where('teacher_id', $user->id);
         }
@@ -40,12 +42,17 @@ class MyCalendarWidget extends CalendarWidget
         $courses = $query->with('quizzes')->get();
 
         $events = collect();
-
+        // Duyệt từng course
         foreach ($courses as $course) {
+            // Duyệt quizzes
             foreach ($course->quizzes as $quiz) {
-                if ($quiz->status !== QuizStatus::DRAFT && $quiz->pivot->end_at >= $now && $quiz->pivot->end_at <= $twoMonthsLater) {
-                    $isUpcoming = $quiz->pivot->start_at > $now;
-                    $key = $quiz->id.'-'.$course->id;
+                $hasAttempt = \App\Models\QuizAttempt::where('quiz_id', $quiz->id)
+                    ->where('student_id', $user->id)
+                    ->exists();
+                // Kiểm tra điều kiện hiển thị event
+                if (!$hasAttempt && $quiz->status !== QuizStatus::DRAFT && $quiz->pivot->end_at >= $now && $quiz->pivot->end_at->between($now, $twoMonthsLater)) {
+                    $isUpcoming = $quiz->pivot->start_at < $now && $quiz->pivot->end_at < $now;
+                    $key = $quiz->id . '-' . $course->id;
                     $events->push(
                         CalendarEvent::make($quiz)
                             ->title("Quiz:{$quiz->title} \n ({$course->title})")
@@ -73,11 +80,16 @@ class MyCalendarWidget extends CalendarWidget
                 }
 
             }
+            // Duyệt assignments
             foreach ($course->assignments as $assignment) {
 
-                // code...
-                if ($assignment->pivot->end_at >= $now && $assignment->pivot->end_at <= $twoMonthsLater) {
-                    $isUpcoming = $assignment->pivot->start_at > $now;
+                $hasSubmission = \App\Models\Submission::query()
+                    ->where('assignment_id', $assignment->id)
+                    ->where('student_id', $user->id)
+                    ->exists();
+                // Kiểm tra điều kiện hiển thị event
+                if (!$hasSubmission && $assignment->pivot->end_at >= $now && $assignment->pivot->end_at->between($now, $twoMonthsLater)) {
+                    $isUpcoming = $assignment->pivot->start_at > $now && $assignment->pivot->end_at > $now;
 
                     $events->push(
                         CalendarEvent::make($assignment)
@@ -111,7 +123,9 @@ class MyCalendarWidget extends CalendarWidget
         return $events;
 
     }
-
+    /**
+     * Action khi click vào event: mở modal chi tiết
+     */
     public function viewAssignment(): Action
     {
         return Action::make('viewAssignment')
@@ -125,12 +139,12 @@ class MyCalendarWidget extends CalendarWidget
 
                 $record = $modelClass && $key ? $modelClass::find($key) : null;
 
-                if (! $record) {
+                if (!$record) {
                     return new \Illuminate\Support\HtmlString(
                         '<div class="p-4 text-center text-gray-500">Không tìm thấy dữ liệu</div>'
                     );
                 }
-
+                // Hiển thị chi tiết Assignment
                 if ($record instanceof \App\Models\Assignment) {
                     $max_points = $record->max_points ? $record->max_points : 'Chưa xác định';
                     $statusLabel = $record->status ? $record->status->getDescription() : 'Chưa xác định';
@@ -156,10 +170,10 @@ class MyCalendarWidget extends CalendarWidget
 </div>
     ");
                 }
-
+                // Hiển thị chi tiết Quiz
                 if ($record instanceof \App\Models\Quiz) {
                     $statusLabel = $record->status ? $record->status->getDescription() : 'Chưa xác định';
-                    $timeLimit = isset($record->time_limit_minutes) ? $record->time_limit_minutes.' phút' : 'Chưa xác định';
+                    $timeLimit = isset($record->time_limit_minutes) ? $record->time_limit_minutes . ' phút' : 'Chưa xác định';
 
                     return new \Illuminate\Support\HtmlString("
 <div class='p-6 bg-white rounded-lg shadow-md'>
