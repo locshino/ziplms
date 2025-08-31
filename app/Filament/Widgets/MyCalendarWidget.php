@@ -12,7 +12,7 @@ use Guava\Calendar\ValueObjects\CalendarEvent;
 use Guava\Calendar\ValueObjects\FetchInfo;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-
+use App\Enums\Status\AssignmentStatus;
 class MyCalendarWidget extends CalendarWidget
 {
     use HasWidgetShield;
@@ -50,7 +50,7 @@ class MyCalendarWidget extends CalendarWidget
                     ->where('student_id', $user->id)
                     ->exists();
                 // Kiểm tra điều kiện hiển thị event
-                if (!$hasAttempt && ($quiz->status == QuizStatus::PUBLISHED || $quiz->status == QuizStatus::ARCHIVED) && $quiz->pivot->end_at >= $now && $quiz->pivot->end_at->between($now, $twoMonthsLater)) {
+                if (!$hasAttempt && $quiz->status == QuizStatus::PUBLISHED && $quiz->pivot->end_at >= $now && $quiz->pivot->end_at->between($now, $twoMonthsLater)) {
                     $isUpcoming = $quiz->pivot->start_at < $now && $quiz->pivot->end_at < $now;
                     $key = $quiz->id . '-' . $course->id;
                     $events->push(
@@ -88,7 +88,7 @@ class MyCalendarWidget extends CalendarWidget
                     ->where('student_id', $user->id)
                     ->exists();
                 // Kiểm tra điều kiện hiển thị event
-                if (!$hasSubmission && $assignment->pivot->end_at >= $now && $assignment->pivot->end_at->between($now, $twoMonthsLater)) {
+                if (!$hasSubmission && $assignment->status == AssignmentStatus::PUBLISHED && $assignment->pivot->end_at >= $now && $assignment->pivot->end_at->between($now, $twoMonthsLater)) {
                     $isUpcoming = $assignment->pivot->start_at > $now && $assignment->pivot->end_at > $now;
 
                     $events->push(
