@@ -50,12 +50,12 @@ class MyCalendarWidget extends CalendarWidget
                     ->where('student_id', $user->id)
                     ->exists();
                 // Kiểm tra điều kiện hiển thị event
-                if (!$hasAttempt && $quiz->status !== QuizStatus::DRAFT && $quiz->pivot->end_at >= $now && $quiz->pivot->end_at->between($now, $twoMonthsLater)) {
+                if (!$hasAttempt && ($quiz->status == QuizStatus::PUBLISHED || $quiz->status == QuizStatus::ARCHIVED) && $quiz->pivot->end_at >= $now && $quiz->pivot->end_at->between($now, $twoMonthsLater)) {
                     $isUpcoming = $quiz->pivot->start_at < $now && $quiz->pivot->end_at < $now;
                     $key = $quiz->id . '-' . $course->id;
                     $events->push(
                         CalendarEvent::make($quiz)
-                            ->title("Quiz:{$quiz->title} \n ({$course->title})")
+                            ->title("Quiz:{$quiz->title} ")
                             ->start($quiz->pivot->start_at ?? $course->start_at)
                             ->end($quiz->pivot->end_at ?? $course->end_at)
                             ->backgroundColor('#ffffffff')
@@ -93,7 +93,7 @@ class MyCalendarWidget extends CalendarWidget
 
                     $events->push(
                         CalendarEvent::make($assignment)
-                            ->title("Assignment: {$assignment->title}\n({$course->title})")
+                            ->title("Assignment: {$assignment->title}")
                             ->start($assignment->pivot->start_at)
                             ->end($assignment->pivot->end_at)
                             ->backgroundColor('#ffffff')
@@ -148,19 +148,20 @@ class MyCalendarWidget extends CalendarWidget
                 if ($record instanceof \App\Models\Assignment) {
                     $max_points = $record->max_points ? $record->max_points : 'Chưa xác định';
                     $statusLabel = $record->status ? $record->status->getDescription() : 'Chưa xác định';
-
+                    $courseName = $record->courses->pluck('title')->first() ?? 'Chưa xác định';
                     return new \Illuminate\Support\HtmlString("
      <div class='p-6 bg-white rounded-lg shadow-md'>
     <h2 class='text-2xl font-bold text-gray-800 mb-2'>{$record->title}</h2>
 
     
     <p class='text-gray-700 mb-4'>{$record->description}</p>
+     <div class='text-sm text-gray-500 mb-2'>
+                <span class='font-semibold'>Môn học:</span> {$courseName}
+            </div>
    <div class='text-sm text-gray-500 mb-4'>
         <span class='font-semibold'>Điểm tối đa:</span> {$max_points}
        
     </div>
-
-    <div class='flex items-center space-x-2'>
       
         <!-- Nếu muốn thêm trạng thái -->
         <span class='inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium'>
@@ -174,6 +175,18 @@ class MyCalendarWidget extends CalendarWidget
                 if ($record instanceof \App\Models\Quiz) {
                     $statusLabel = $record->status ? $record->status->getDescription() : 'Chưa xác định';
                     $timeLimit = isset($record->time_limit_minutes) ? $record->time_limit_minutes . ' phút' : 'Chưa xác định';
+                    $user = auth()->user();
+
+                    // Lấy tất cả course liên quan đến Assignment hoặc Quiz
+                    $courses = $record->courses;
+
+                    // Lọc lại chỉ lấy các course mà user hiện tại tham gia (tồn tại trong course_user)
+                    $userCourses = $courses->filter(function ($course) use ($user) {
+                        return $course->users->contains($user->id);
+                    });
+
+                    $courseNames = $userCourses->pluck('title')->implode(', ');
+                    $courseName = $courseNames ?: 'Chưa xác định';
 
                     return new \Illuminate\Support\HtmlString("
 <div class='p-6 bg-white rounded-lg shadow-md'>
@@ -181,6 +194,9 @@ class MyCalendarWidget extends CalendarWidget
 
     
     <p class='text-gray-700 mb-4'>{$record->description}</p>
+     <div class='text-sm text-gray-500 mb-2'>
+                <span class='font-semibold'>Môn học:</span> {$courseName}
+            </div>
    <div class='text-sm text-gray-500 mb-4'>
         <span class='font-semibold'>Time limit:</span>  {$timeLimit}
        

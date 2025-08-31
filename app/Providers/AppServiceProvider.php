@@ -5,7 +5,7 @@ namespace App\Providers;
 use App\Providers\Concerns\HasRegisterClass;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\DB;
+
 class AppServiceProvider extends ServiceProvider
 {
     use HasRegisterClass;
@@ -26,16 +26,6 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
         $this->registerObservers();
-        // Lấy các thông báo trong bảng 'notifications' mà được tạo trước hơn 1 tuần
-        DB::table('notifications')
-            ->whereDate('created_at', '<', now()->subWeek()) // chỉ lấy thông báo cũ hơn 1 tuần
-            ->chunkById(1000, function ($notifications) {
-                // xử lý theo từng chunk 1000 bản ghi để tránh lỗi bộ nhớ
-                foreach ($notifications as $notification) {
-                    // Xóa từng thông báo dựa trên id
-                    DB::table('notifications')->where('id', $notification->id)->delete();
-                }
-            });
     }
 
     /**
@@ -105,7 +95,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::guessPolicyNamesUsing(function (string $modelClass) {
             // 'App\Models\User' -> 'App\Policies\UserPolicy'
-            return str_replace('Models', 'Policies', $modelClass) . 'Policy';
+            return str_replace('Models', 'Policies', $modelClass).'Policy';
         });
     }
 }

@@ -7,9 +7,12 @@ use Filament\Notifications\Notification;
 use Carbon\Carbon;
 use Auth;
 use App\Models\Course;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
 
-class SendLoginNotification
+class SendLoginNotification implements ShouldQueue
 {
+    use InteractsWithQueue;
     public function __construct()
     {
         //
@@ -65,10 +68,12 @@ class SendLoginNotification
             ;
         }
         // Chỉ xử lý thông báo cho teacher hoặc student
-        if ($user->hasRole('teacher') || $user->hasRole('student'))
+        if ($user->hasRole('teacher') || $user->hasRole('student')) {
+            // lưu các thông báo deadline sắp tới
+            $messages = [];
             foreach ($courses as $course) {
-                // lưu các thông báo deadline sắp tới
-                $messages = [];
+
+
 
 
                 // Kiểm tra quiz gần hết hạn
@@ -81,13 +86,25 @@ class SendLoginNotification
                     // Nếu chưa attempt và quiz có end_at trong 7 ngày tới
                     if (
                         !$hasAttempt &&
+                        $quiz->pivot->start_at &&
                         $quiz->pivot->end_at &&
                         $quiz->pivot->end_at->between(
                             Carbon::now(),
                             Carbon::now()->addWeek()
                         )
                     ) {
-                        $messages[] = "Quiz **{$quiz->title}** (hạn: {$quiz->pivot->end_at->format('d/m/Y')})";
+                        $endAt = $quiz->pivot->end_at;
+
+                        $diffInDays = round(now()->diffInDays($endAt, false));
+                        $diffInHours = round(now()->diffInHours($endAt, false));
+
+                        if ($diffInDays < 1) {
+                            $timeLeft = "còn {$diffInHours} giờ";
+                        } else {
+                            $timeLeft = "còn {$diffInDays} ngày";
+
+                        }
+                        $messages[] = "<strong>Quiz:</strong> {$quiz->title} (hạn: {$endAt->format('d/m/Y')} - {$timeLeft})";
                     }
                 }
 
@@ -98,6 +115,7 @@ class SendLoginNotification
                         ->where('assignment_id', $assignment->id)
                         ->where('student_id', $user->id)
                         ->exists();
+                    $endAt = $assignment->pivot->end_at;
                     // Nếu chưa submit và end_at trong 7 ngày tới
                     if (
                         !$hasSubmission &&
@@ -107,24 +125,35 @@ class SendLoginNotification
                             Carbon::now()->addWeek()
                         )
                     ) {
-                        $messages[] = "Assignment **{$assignment->title}** (hạn: {$assignment->pivot->end_at->format('d/m/Y')})";
+
+                        $diffInDays = round(now()->diffInDays($endAt, false));
+                        $diffInHours = round(now()->diffInHours($endAt, false));
+
+                        if ($diffInDays < 1) {
+                            $timeLeft = "còn {$diffInHours} giờ";
+                        } else {
+                            $timeLeft = "còn {$diffInDays} ngày";
+
+                        }
+
+                        $messages[] = "<strong>Assignment:</strong> {$assignment->title} (hạn: {$endAt->format('d/m/Y')} - {$timeLeft})";
                     }
                 }
 
-
-                // Nếu có bất kỳ deadline nào sắp tới, gửi thông báo duy nhất
-                if (!empty($messages)) {
-                    $body = implode("\n", $messages);
-
-                    Notification::make()
-                        ->title('📌 Các deadline sắp tới trong 7 ngày')
-                        ->body($body)
-                        ->success()
-                        ->send()// gửi notification trực tiếp
-                        ->sendToDatabase($user);// lưu vào database cho user
-                }
             }
+            // Nếu có bất kỳ deadline nào sắp tới, gửi thông báo duy nhất
+            if (!empty($messages)) {
+                $body = implode("<br>", $messages);
 
+                Notification::make()
+                    ->title('📌 Các deadline sắp tới trong 7 ngày')
+                    ->body($body)
+                    ->success()
+                    ->send()// gửi notification trực tiếp
+                    ->sendToDatabase($user);// lưu vào database cho user
+
+            }
+        }
 
     }
 }
