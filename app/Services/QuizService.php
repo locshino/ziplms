@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\Status\QuizAttemptStatus;
 use App\Exceptions\Services\QuizServiceException;
 use App\Models\Question;
 use App\Models\Quiz;
@@ -415,7 +416,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                     // Update attempt
                     $this->quizAttemptRepository->updateById($attemptId, [
                         'points' => $score,
-                        'status' => 'completed',
+                        'status' => QuizAttemptStatus::COMPLETED,
                         'end_at' => Carbon::now(),
                         'answers' => $answersJson,
                     ]);

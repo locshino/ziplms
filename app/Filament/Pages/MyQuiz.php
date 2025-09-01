@@ -710,7 +710,7 @@ class MyQuiz extends Page
 
             // Update attempt
             $this->currentAttempt->update([
-                'status' => QuizAttemptStatus::COMPLETED->value,
+                'status' => QuizAttemptStatus::COMPLETED,
                 'end_at' => now(),
                 'points' => $totalScore,
                 'max_points' => $maxScore,

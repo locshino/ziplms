@@ -5,8 +5,8 @@ namespace App\Services;
 use App\Enums\Status\QuizAttemptStatus;
 use App\Models\QuizAttempt;
 use App\Models\User;
-use App\Notifications\QuizInProgressNotification;
 use App\Services\Interfaces\QuizNotificationServiceInterface;
+use Illuminate\Support\Facades\Auth;
 
 class QuizNotificationService implements QuizNotificationServiceInterface
 {
@@ -15,24 +15,10 @@ class QuizNotificationService implements QuizNotificationServiceInterface
      */
     public function checkAndNotifyInProgressQuizzes(User $user): void
     {
-        // Lấy tất cả quiz attempts đang IN_PROGRESS của user
-        $inProgressAttempts = QuizAttempt::with('quiz')
-            ->where('student_id', $user->id)
-            ->where('status', QuizAttemptStatus::IN_PROGRESS)
-            ->get();
-
-        // Gửi notification cho từng quiz attempt
-        foreach ($inProgressAttempts as $attempt) {
-            // Kiểm tra xem đã có notification cho quiz attempt này chưa
-            $existingNotification = $user->notifications()
-                ->where('type', QuizInProgressNotification::class)
-                ->where('data->quiz_attempt_id', $attempt->id)
-                ->first();
-
-            // Nếu chưa có notification thì gửi mới
-            if (! $existingNotification) {
-                $user->notify(new QuizInProgressNotification($attempt));
-            }
+        // Chỉ gửi notification cho user hiện tại đang đăng nhập
+        if (Auth::check() && Auth::id() === $user->id) {
+            $notificationService = app(QuizFilamentNotificationService::class);
+            $notificationService->sendMultipleInProgressNotification();
         }
     }
 
@@ -41,9 +27,11 @@ class QuizNotificationService implements QuizNotificationServiceInterface
      */
     public function clearInProgressNotifications(User $user): void
     {
-        $user->notifications()
-            ->where('type', QuizInProgressNotification::class)
-            ->delete();
+        // Với Filament notifications, chỉ cần clear session dismiss flag
+        if (Auth::check() && Auth::id() === $user->id) {
+            $notificationService = app(QuizFilamentNotificationService::class);
+            $notificationService->clearDismissedNotifications();
+        }
     }
 
     /**
@@ -51,10 +39,8 @@ class QuizNotificationService implements QuizNotificationServiceInterface
      */
     public function clearNotificationForAttempt(User $user, string $attemptId): void
     {
-        $user->notifications()
-            ->where('type', QuizInProgressNotification::class)
-            ->where('data->quiz_attempt_id', $attemptId)
-            ->delete();
+        // Với Filament notifications, không cần xóa thủ công
+        // Notifications sẽ tự động biến mất hoặc được dismiss bởi user
     }
 
     /**
