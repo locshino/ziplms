@@ -31,6 +31,7 @@ class MyCourse extends Page
 
     public function mount(): void
     {
+
         /** @var User $user */
         $now = now();
         $user = Auth::user();
@@ -69,11 +70,17 @@ class MyCourse extends Page
         // Lấy tất cả tag từ các khóa học
 
         foreach ($enrolledCourses as $course) {
-            $this->tags = $course->tags()->pluck('name')->unique()->toArray();
+            $this->tags = $enrolledCourses->flatMap(function ($course) {
+                return $course->tags->pluck('name');
+            })->unique()->values()->all();
         }
         // Lấy tất cả giáo viên của các khóa học
         foreach ($enrolledCourses as $course) {
-            $this->teachers = User::where('id', $course->teacher_id)->get();
+            // Lấy tất cả ID giáo viên duy nhất từ các khóa học
+            $teacherIds = $enrolledCourses->pluck('teacher_id')->unique();
+
+            // Lấy thông tin của tất cả giáo viên đó trong một câu truy vấn
+            $this->teachers = User::whereIn('id', $teacherIds)->get();
         }
         $this->ongoingCourses = $ongoingCourses;
         $this->completedCourses = $completedCourses;
@@ -246,10 +253,10 @@ class MyCourse extends Page
     // Lọc khóa học theo teacher
     public function filterCoursesByTeacher($teacherId)
     {
+
         $ongoingCourses = collect();
         $closedCourses = collect();
         $this->selectedTeacher = $teacherId;
-
         $user = Auth::user();
         if ($user->hasRole('teacher')) {
 
