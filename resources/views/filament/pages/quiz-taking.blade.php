@@ -237,28 +237,6 @@
                     <div
                         class="lg:hidden bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                         <div class="space-y-3">
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="text-sm text-gray-600 dark:text-gray-400">
-                                    <span class="font-medium text-gray-900 dark:text-white">Tiến độ:</span>
-                                    <span
-                                        class="ml-1 font-semibold text-blue-600 dark:text-blue-400">{{ $this->answeredCount }}</span>
-                                    <span class="text-gray-500 dark:text-gray-400">/</span>
-                                    <span
-                                        class="font-semibold text-gray-700 dark:text-gray-300">{{ $this->totalQuestions }}</span>
-                                    <span class="text-gray-500 dark:text-gray-400">câu</span>
-                                </div>
-                                <div class="text-xs px-2 py-1 rounded-full
-                                    @if($this->progressPercentage >= 100)
-                                        bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300
-                                    @elseif($this->progressPercentage >= 50)
-                                        bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300
-                                    @else
-                                        bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400
-                                    @endif">
-                                    {{ $this->progressPercentage }}%
-                                </div>
-                            </div>
-
                             <div class="flex items-center justify-between gap-4">
                                 {{ $this->customSubmitAction }}
 
@@ -398,6 +376,8 @@
     @endif
 
     <script>
+
+
         // Javascript không thay đổi
         function quizTakingApp() {
                 return {
@@ -512,7 +492,6 @@
                                 // Use requestAnimationFrame for smooth UI updates
                                 requestAnimationFrame(() => {
                                     this.$wire.set('answers', answers, false);
-                                    this.updateProgressFromStorage(answers);
                                 });
                             } catch (e) {
                                 console.error('Error loading saved answers:', e);
@@ -523,19 +502,7 @@
                         this.loadCurrentQuestionIndex();
                     },
 
-                    updateProgressFromStorage(answers) {
-                        const totalQuestions = {{ $this->quizModel->questions->count() }};
-                        const answeredCount = Object.values(answers).filter(a => Array.isArray(a) ? a.length > 0 : a !== null).length;
-                        const percentage = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
 
-                        const progressBar = document.querySelector('.bg-blue-500');
-                        const progressText = document.querySelector('.text-gray-600');
-                        const progressPercentage = document.querySelector('.font-semibold');
-
-                        if (progressBar) progressBar.style.width = percentage + '%';
-                        if (progressText) progressText.textContent = `Tiến độ: ${answeredCount}/${totalQuestions} câu`;
-                        if (progressPercentage) progressPercentage.textContent = percentage + '%';
-                    },
 
                     bindAnswerEvents() {
                         this.$watch('$wire.answers', (newAnswers) => {
@@ -547,7 +514,6 @@
                     saveToStorage(answers) {
                         const storageKey = `quiz_${this.quizId}_attempt_${this.attemptId}`;
                         localStorage.setItem(storageKey, JSON.stringify(answers));
-                        this.updateProgressFromStorage(answers);
                     },
 
                     saveCurrentQuestionIndex() {

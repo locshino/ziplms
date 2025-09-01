@@ -8,6 +8,10 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\DatabaseMessage;
 use Illuminate\Notifications\Notification;
 
+/**
+ * @deprecated Không còn sử dụng - đã chuyển sang QuizFilamentNotificationService
+ * Class này được giữ lại để tránh lỗi nếu có database notifications cũ
+ */
 class QuizInProgressNotification extends Notification implements ShouldQueue
 {
     use Queueable;
