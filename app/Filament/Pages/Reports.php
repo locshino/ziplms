@@ -23,11 +23,12 @@ use Malzariey\FilamentDaterangepickerFilter\Filters\DateRangeFilter;
 use pxlrbt\FilamentExcel\Actions\ExportBulkAction;
 use pxlrbt\FilamentExcel\Columns\Column;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class Reports extends Page implements Tables\Contracts\HasTable
 {
     use Tables\Concerns\InteractsWithTable;
-    // use HasPageShield;
+    use HasPageShield;
 
     protected string $view = 'filament.pages.reports';
 
@@ -223,9 +224,9 @@ class Reports extends Page implements Tables\Contracts\HasTable
                         Column::make('updated_at'),
                     ])
                         // Optional: you can customize the filename
-                        ->withFilename('quiz_point&report_'.now()),
+                        ->withFilename('quiz_point&report_' . now()),
                 ]),
-            ])->query(fn () => $query);
+            ])->query(fn() => $query);
     }
 
     public function submission($table)
@@ -334,10 +335,10 @@ class Reports extends Page implements Tables\Contracts\HasTable
                             Column::make('updated_at'),
                         ])
                             // Optional: you can customize the filename
-                            ->withFilename('assignment&report_'.now()),
+                            ->withFilename('assignment&report_' . now()),
                     ]),
             ])
-            ->query(fn () => $query);
+            ->query(fn() => $query);
 
     }
 }
