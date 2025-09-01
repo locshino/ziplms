@@ -10,7 +10,7 @@ use App\Models\Course;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-class SendLoginNotification implements ShouldQueue
+class ActivityReminderListener implements ShouldQueue
 {
     use InteractsWithQueue;
     public function __construct()

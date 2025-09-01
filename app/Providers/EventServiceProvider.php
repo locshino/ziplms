@@ -16,7 +16,7 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Login::class => [
             CheckInProgressQuizzesOnLogin::class,
-            \App\Listeners\SendLoginNotification::class,
+            \App\Listeners\ActivityReminderListener::class,
         ],
     ];
 
