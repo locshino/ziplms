@@ -69,16 +69,19 @@
                         $submissions = $assignment->submissions;
                         $submissionCount = $submissions->count();
                         $lastSubmission = $submissions->first();
+                        $status = $lastSubmission?->status;
 
                         $maxAttempts = $assignment->max_attempts;
                         $canSubmit = ($maxAttempts === null || $maxAttempts === 0) || ($submissionCount < $maxAttempts);
 
-                        $isGraded = $lastSubmission && in_array($lastSubmission->status, [\App\Enums\Status\SubmissionStatus::GRADED, \App\Enums\Status\SubmissionStatus::RETURNED]);
+                        // FIX 2: Redefined status variables for clarity and correctness
+                        $isFinallyGraded = $status === \App\Enums\Status\SubmissionStatus::GRADED;
+                        $isReturnedForRevision = $status === \App\Enums\Status\SubmissionStatus::RETURNED;
                         $isSubmitted = $submissionCount > 0;
                         $deadlineHasPassed = $courseAssignment->end_submission_at?->isPast();
                         $isOverdue = !$isSubmitted && $deadlineHasPassed;
 
-                        $showSubmitButton = !$isGraded && !$deadlineHasPassed && $canSubmit;
+                        $showSubmitButton = !$isFinallyGraded && !$deadlineHasPassed && $canSubmit;
                         $hasDocuments = $assignment->hasMedia('assignment_documents');
                     @endphp
                     <div wire:key="{{ $courseAssignment->id }}" class="flex flex-col lg:flex-row lg:items-stretch bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
@@ -118,9 +121,14 @@
                         <div class="p-6 bg-slate-50 dark:bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-700 flex flex-col justify-center gap-4 lg:w-80 lg:flex-shrink-0">
                             
                             <div class="flex justify-start w-full">
-                                @if($isGraded)
+                                {{-- FIX 2: Updated status badge logic --}}
+                                @if($isFinallyGraded)
                                     <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
                                         <x-heroicon-s-academic-cap class="w-4 h-4" /> Đã chấm
+                                    </span>
+                                @elseif($isReturnedForRevision)
+                                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200">
+                                        <x-heroicon-s-arrow-uturn-left class="w-4 h-4" /> Cần nộp lại
                                     </span>
                                 @elseif($isSubmitted)
                                     <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
@@ -136,105 +144,66 @@
                                     </span>
                                 @endif
                             </div>
-                            <div class="grid grid-cols-2 gap-2 w-full">
-                                @if($deadlineHasPassed)
-                                    @if($hasDocuments)
-                                        <button
-                                            type="button"
-                                            wire:click="openDocumentsModal('{{ $courseAssignment->id }}')"
-                                            class="w-full font-semibold px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-800 dark:hover:text-slate-100 hover:-translate-y-0.5 hover:shadow-lg col-span-2"
-                                        >
-                                            <x-heroicon-o-arrow-down-tray class="w-5 h-5" />
-                                            <span>Tải tài liệu</span>
-                                        </button>
-                                    @endif
-                                    @if($isSubmitted)
-                                        <button
-                                            type="button"
-                                            wire:click="openSubmissionHistoryModal('{{ $courseAssignment->id }}')"
-                                            class="w-full font-semibold px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-800 dark:hover:text-slate-100 hover:-translate-y-0.5 hover:shadow-lg col-span-2"
-                                        >
-                                            <x-heroicon-o-clock class="w-5 h-5" />
-                                            <span>Lịch sử</span>
-                                        </button>
-                                    @endif
-                                    @if($isGraded)
-                                        <button
-                                            type="button"
-                                            wire:click="openGradingResultModal('{{ $courseAssignment->id }}')"
-                                            class="w-full font-semibold px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-transparent bg-purple-500 text-white hover:bg-purple-600 hover:-translate-y-0.5 hover:shadow-lg col-span-2"
-                                        >
-                                            <x-heroicon-o-eye class="w-5 h-5" />
-                                            <span>Xem điểm</span>
-                                        </button>
-                                    @endif
-                                    @if(!$hasDocuments && !$isSubmitted && !$isGraded)
-                                        <button disabled class="w-full font-semibold px-4 py-3 rounded-lg bg-slate-200 dark:bg-slate-600 text-slate-400 dark:text-slate-500 cursor-not-allowed pointer-events-none flex items-center justify-center gap-2 col-span-2">
-                                            <x-heroicon-o-x-circle class="w-5 h-5" />
-                                            <span>Đã quá hạn</span>
-                                        </button>
-                                    @endif
-                                @else
-                                    <button
-                                        type="button"
-                                        wire:click="openInstructionsModal('{{ $courseAssignment->id }}')"
-                                        class="w-full font-semibold px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-800 dark:hover:text-slate-100 hover:-translate-y-0.5 hover:shadow-lg @if(!$hasDocuments) col-span-2 @endif"
-                                    >
+                            <div class="flex flex-col gap-2 w-full">
+                                {{-- FIX 2: Restructured button logic for clarity and correctness --}}
+                                
+                                {{-- General Buttons (Always visible if applicable) --}}
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button type="button" wire:click="openInstructionsModal('{{ $courseAssignment->id }}')"
+                                            class="w-full font-semibold px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-800 dark:hover:text-slate-100 hover:-translate-y-0.5 hover:shadow-lg @if(!$hasDocuments) col-span-2 @endif">
                                         <x-heroicon-o-document-text class="w-5 h-5" />
                                         <span>Hướng dẫn</span>
                                     </button>
                                     @if($hasDocuments)
-                                        <button
-                                            type="button"
-                                            wire:click="openDocumentsModal('{{ $courseAssignment->id }}')"
-                                            class="w-full font-semibold px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-800 dark:hover:text-slate-100 hover:-translate-y-0.5 hover:shadow-lg"
-                                        >
+                                        <button type="button" wire:click="openDocumentsModal('{{ $courseAssignment->id }}')"
+                                                class="w-full font-semibold px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-800 dark:hover:text-slate-100 hover:-translate-y-0.5 hover:shadow-lg">
                                             <x-heroicon-o-arrow-down-tray class="w-5 h-5" />
-                                            <span>Tải tài liệu</span>
+                                            <span>Tài liệu</span>
                                         </button>
                                     @endif
+                                </div>
 
-                                    @if($isSubmitted)
-                                        <button
-                                            type="button"
-                                            wire:click="openSubmissionHistoryModal('{{ $courseAssignment->id }}')"
-                                            class="w-full font-semibold px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-800 dark:hover:text-slate-100 hover:-translate-y-0.5 hover:shadow-lg col-span-2"
-                                        >
-                                            <x-heroicon-o-clock class="w-5 h-5" />
-                                            <span>Lịch sử</span>
-                                        </button>
-                                    @endif
+                                @if($isSubmitted)
+                                    <button type="button" wire:click="openSubmissionHistoryModal('{{ $courseAssignment->id }}')"
+                                            class="w-full font-semibold px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-800 dark:hover:text-slate-100 hover:-translate-y-0.5 hover:shadow-lg">
+                                        <x-heroicon-o-clock class="w-5 h-5" />
+                                        <span>Lịch sử nộp</span>
+                                    </button>
+                                @endif
 
-                                    @if($isGraded)
-                                        <button
-                                            type="button"
-                                            wire:click="openGradingResultModal('{{ $courseAssignment->id }}')"
-                                            class="w-full font-semibold px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-transparent bg-purple-500 text-white hover:bg-purple-600 hover:-translate-y-0.5 hover:shadow-lg col-span-2"
-                                        >
-                                            <x-heroicon-o-eye class="w-5 h-5" />
-                                            <span>Xem điểm</span>
-                                        </button>
-                                    @elseif($showSubmitButton)
-                                        <button
-                                            type="button"
-                                            wire:click="openSubmissionModal('{{ $courseAssignment->id }}')"
-                                            class="w-full font-semibold px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-transparent bg-blue-500 text-white hover:bg-blue-600 hover:-translate-y-0.5 hover:shadow-lg col-span-2"
-                                        >
-                                            <x-heroicon-o-arrow-up-tray class="w-5 h-5" />
-                                            <span>
-                                                @if($submissionCount > 0)
-                                                    Nộp lại
-                                                @else
-                                                    Nộp bài
-                                                @endif
-                                            </span>
-                                        </button>
-                                    @elseif(!$canSubmit)
-                                        <button disabled class="w-full font-semibold px-4 py-3 rounded-lg bg-slate-200 dark:bg-slate-600 text-slate-400 dark:text-slate-500 cursor-not-allowed pointer-events-none flex items-center justify-center gap-2 col-span-2">
-                                            <x-heroicon-o-no-symbol class="w-5 h-5" />
-                                            <span>Hết lượt nộp</span>
-                                        </button>
-                                    @endif
+                                {{-- Conditional Action Buttons --}}
+                                @if($isFinallyGraded || $isReturnedForRevision)
+                                    <button type="button" wire:click="openGradingResultModal('{{ $courseAssignment->id }}')"
+                                            class="w-full font-semibold px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-transparent bg-purple-500 text-white hover:bg-purple-600 hover:-translate-y-0.5 hover:shadow-lg">
+                                        <x-heroicon-o-eye class="w-5 h-5" />
+                                        <span>Xem kết quả</span>
+                                    </button>
+                                @endif
+
+                                @if($showSubmitButton)
+                                    <button type="button" wire:click="openSubmissionModal('{{ $courseAssignment->id }}')"
+                                            class="w-full font-semibold px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-transparent bg-blue-500 text-white hover:bg-blue-600 hover:-translate-y-0.5 hover:shadow-lg">
+                                        <x-heroicon-o-arrow-up-tray class="w-5 h-5" />
+                                        <span>
+                                            @if($isReturnedForRevision)
+                                                Nộp lại bài đã sửa
+                                            @elseif($submissionCount > 0)
+                                                Nộp lại
+                                            @else
+                                                Nộp bài
+                                            @endif
+                                        </span>
+                                    </button>
+                                @elseif($deadlineHasPassed && !$isSubmitted)
+                                    <button disabled class="w-full font-semibold px-4 py-3 rounded-lg bg-slate-200 dark:bg-slate-600 text-slate-400 dark:text-slate-500 cursor-not-allowed pointer-events-none flex items-center justify-center gap-2">
+                                        <x-heroicon-o-x-circle class="w-5 h-5" />
+                                        <span>Đã quá hạn</span>
+                                    </button>
+                                @elseif(!$canSubmit && !$isFinallyGraded)
+                                    <button disabled class="w-full font-semibold px-4 py-3 rounded-lg bg-slate-200 dark:bg-slate-600 text-slate-400 dark:text-slate-500 cursor-not-allowed pointer-events-none flex items-center justify-center gap-2">
+                                        <x-heroicon-o-no-symbol class="w-5 h-5" />
+                                        <span>Hết lượt nộp</span>
+                                    </button>
                                 @endif
                             </div>
                         </div>
@@ -306,9 +275,9 @@
                     </button>
                 </div>
 
-                <div class="px-6 py-4 overflow-y-auto flex-grow">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div class="md:col-span-2">
+                <div class="px-6 py-4 overflow-y-auto flex-grow min-h-0">
+                    <div class="flex flex-col lg:flex-row gap-8">
+                        <div class="w-full lg:flex-1">
                             <div class="mb-6">
                                 <label class="block mb-3 text-sm font-medium text-slate-800 dark:text-slate-100">Phương thức nộp bài</label>
                                 <div class="flex gap-6">
@@ -341,7 +310,7 @@
                                     Đang tải lên...
                                 </div>
                                 <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                                    Dung lượng tệp tối đa: 100MB.
+                                    Dung lượng tệp tối đa: 25MB.
                                 </p>
                             </div>
 
@@ -353,12 +322,12 @@
 
                             <div class="mb-6">
                                 <label for="notes" class="block mb-3 text-sm font-medium text-slate-800 dark:text-slate-100">Ghi chú (tùy chọn)</label>
-                                <textarea wire:model.defer="notes" id="notes" rows="4" class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 px-3 py-2 resize-vertical min-h-[6rem] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"></textarea>
+                                <textarea wire:model.defer="notes" id="notes" rows="4" class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 px-3 py-2 resize-vertical min-h-[6rem] max-h-60 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"></textarea>
                                 @error('notes') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                             </div>
                         </div>
 
-                        <div class="md:col-span-1">
+                        <div class="w-full lg:w-80 lg:flex-shrink-0">
                             <div class="bg-slate-100 dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
                                 <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 pb-4 border-b border-slate-200 dark:border-slate-700 mb-4">Thông tin</h3>
                                 <dl class="flex flex-col gap-3">
@@ -420,7 +389,6 @@
 
                 <div class="text-center text-sm text-slate-600 dark:text-slate-400 space-y-1">
                     <p><strong class="font-semibold text-slate-700 dark:text-slate-300">Người chấm:</strong> {{ $selectedSubmission->grader->name ?? 'N/A' }}</p>
-                    <p><strong class="font-semibold text-slate-700 dark:text-slate-300">Ngày chấm:</strong> {{ $selectedSubmission->graded_at?->format('d/m/Y H:i') ?? 'N/A' }}</p>
                 </div>
 
                 @if($selectedSubmission->feedback)
