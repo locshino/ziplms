@@ -38,6 +38,8 @@ class CourseDetail extends Page
     public $quizTags;
     public $sortBy = 'newest';
     public $selectedTag;
+    public Collection $missedQuizzes;
+    public Collection $missedAssignments;
 
     public function mount($course = null): void
     {
@@ -86,19 +88,21 @@ class CourseDetail extends Page
     {
         $ongoingQuizzes = collect();
         $completedQuizzes = collect();
-        $completedQuizzess = collect();
+        $this->hasAttempted = collect();
+        $this->isOngoingPeriod = collect();
+        $this->missedQuizzes = collect(); // Khởi tạo collection
 
         $now = now();
         $user = auth()->user();
 
         $quizzes = $this->course->quizzes;
 
-        // Lọc theo search
+        // ... (phần code lọc theo search và tag đã có)
         if ($this->search) {
             $quizzes = $quizzes->filter(fn($quiz) => str_contains(strtolower($quiz->title), strtolower($this->search)));
         }
 
-        // Lọc theo tag
+        // Filter by tag
         if ($this->selectedTag) {
             $tag = $this->selectedTag;
             $quizzes = $quizzes->filter(fn($quiz) => $quiz->tags->contains('name', $tag));
@@ -106,27 +110,31 @@ class CourseDetail extends Page
         $this->hasAttempted = collect();
         $this->isOngoingPeriod = collect();
         foreach ($quizzes as $quiz) {
-
             $start = $quiz->pivot?->start_at;
             $end = $quiz->pivot?->end_at;
             $isPublished = $quiz->status === QuizStatus::PUBLISHED;
 
-            $isOngoingPeriod = $isPublished && $start && (!$end || $now->between($start, $end));
+            $isOngoingPeriod = $isPublished && (!$start || $now->gte($start)) && (!$end || $now->lte($end));
+            $hasAttempted = $quiz->attempts()->where('student_id', $user->id)->exists();
+
+            if ($hasAttempted) {
+                $this->hasAttempted->push($quiz);
+            }
+
+            // START: Logic cập nhật
+            if (!$isOngoingPeriod && !$hasAttempted) {
+                $this->missedQuizzes->push($quiz); // Bài đã hết hạn VÀ chưa làm -> Bỏ lỡ
+            }
+            // END: Logic cập nhật
+
             if (!$isOngoingPeriod) {
                 $this->isOngoingPeriod->push($quiz);
             }
-            if ($user->hasRole('student') || $user->hasRole('manager')) {
-                // Kiểm tra user đã attempt quiz chưa
-                $hasAttempted = $quiz->attempts()->where('student_id', $user->id)->exists();
 
-                if ($hasAttempted) {
-                    $this->hasAttempted->push($quiz);
-                }
+            if ($user->hasRole('student') || $user->hasRole('manager')) {
                 if ($isOngoingPeriod && !$hasAttempted) {
                     $ongoingQuizzes->push($quiz);
-
                 } else {
-
                     if (!$isOngoingPeriod || $hasAttempted || in_array($quiz->status, [QuizStatus::CLOSED, QuizStatus::ARCHIVED])) {
                         $completedQuizzes->push($quiz);
                     }
@@ -144,7 +152,6 @@ class CourseDetail extends Page
 
         $this->ongoingQuizzes = $this->sortCollection($ongoingQuizzes);
         $this->completedQuizzes = $this->sortCollection($completedQuizzes);
-        $this->completedQuizzess = $this->sortCollection($completedQuizzess);
     }
 
     /**
@@ -154,17 +161,21 @@ class CourseDetail extends Page
     {
         $ongoingAssignments = collect();
         $closedAssignments = collect();
+        $this->hasSubmitted = collect();
+        $this->isSubmitted = collect(); // Tên biến này có nghĩa là "đã hết hạn"
+        $this->missedAssignments = collect(); // Khởi tạo collection
+
         $now = now();
         $user = auth()->user();
 
         $assignments = $this->course->assignments;
 
-        // Lọc theo search
+        // Filter by search term
         if ($this->search) {
             $assignments = $assignments->filter(fn($assignment) => str_contains(strtolower($assignment->title), strtolower($this->search)));
         }
 
-        // Lọc theo tag
+        // Filter by tag
         if ($this->selectedTag) {
             $tag = $this->selectedTag;
             $assignments = $assignments->filter(fn($assignment) => $assignment->tags->contains('name', $tag));
@@ -172,25 +183,30 @@ class CourseDetail extends Page
         $this->hasSubmitted = collect();
         $this->isSubmitted = collect();
         foreach ($assignments as $assignment) {
-            // Bỏ qua draft với student
-            if ($assignment->status === AssignmentStatus::DRAFT && $user->hasRole('student')) {
-                continue;
-            }
+            // ... (phần code bỏ qua DRAFT cho student)
 
             $start = $assignment->pivot?->start_at;
-            $end = $assignment->pivot?->end_at;
+            $end = $assignment->pivot?->end_submission_at; // Sử dụng end_submission_at cho assignment
             $isPublished = $assignment->status === AssignmentStatus::PUBLISHED;
-            $isOngoingPeriod = $isPublished && $start && (!$end || $now->between($start, $end));
+            $isOngoingPeriod = $isPublished && (!$start || $now->gte($start)) && (!$end || $now->lte($end));
+
+            $hasSubmitted = $assignment->submissions()->where('student_id', $user->id)->exists();
+
+            if ($hasSubmitted) {
+                $this->hasSubmitted->push($assignment);
+            }
+
+            // START: Logic cập nhật
+            if (!$isOngoingPeriod && !$hasSubmitted && $isPublished) {
+                $this->missedAssignments->push($assignment); // Bài đã hết hạn VÀ chưa nộp -> Bỏ lỡ
+            }
+            // END: Logic cập nhật
 
             if (!$isOngoingPeriod) {
                 $this->isSubmitted->push($assignment);
             }
+
             if ($user->hasRole('student') || $user->hasRole('manager')) {
-                // Kiểm tra user đã submit assignment chưa
-                $hasSubmitted = $assignment->submissions()->where('student_id', $user->id)->exists();
-                if ($hasSubmitted) {
-                    $this->hasSubmitted->push($assignment);
-                }
                 if ($isOngoingPeriod && !$hasSubmitted) {
                     $ongoingAssignments->push($assignment);
                 } else {
