@@ -24,7 +24,7 @@ class CheckInProgressQuizzesOnLogin implements ShouldQueue
     public function handle(Login $event): void
     {
         // Chỉ kiểm tra và gửi notification cho user có role student
-        if (! RoleHelper::isStudent($event->user)) {
+        if (!RoleHelper::isStudent($event->user)) {
             return;
         }
 

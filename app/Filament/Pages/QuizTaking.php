@@ -90,6 +90,9 @@ class QuizTaking extends Page
             return;
         }
 
+        // Initialize time information regardless of attempt status
+        $this->initializeTimeInformation();
+
         // Only initialize if there's an existing IN_PROGRESS attempt
         $existingAttempt = QuizAttempt::where('quiz_id', $this->quizModel->id)
             ->where('student_id', Auth::id())
@@ -100,7 +103,7 @@ class QuizTaking extends Page
             // Continue existing attempt
             $this->attempt = $existingAttempt;
             $this->loadExistingAnswers();
-            $this->calculateRemainingTime();
+            $this->calculateRemainingTime(); // Recalculate with actual attempt
             $this->initializePagination();
             
             // Force Livewire to re-render after loading answers
@@ -112,9 +115,11 @@ class QuizTaking extends Page
     public function startQuiz(): void
     {
         try {
+            // Dispatch quiz-starting event immediately to start timer
+            $this->dispatch('quiz-starting');
+            
             $this->attempt = $this->quizService->startQuizAttempt($this->quizModel->id, Auth::id());
-            // Clear any previous localStorage for this quiz when starting new attempt
-            $this->dispatch('clear-previous-quiz-storage', ['quizId' => $this->quizModel->id]);
+            
             // Clear session for current question index to start from question 1
             session()->forget('quiz_current_question_'.$this->quizModel->id);
             
@@ -123,8 +128,15 @@ class QuizTaking extends Page
             $this->calculateRemainingTime();
             $this->initializePagination();
             
-            // Force Livewire to re-render after loading answers
-            $this->dispatch('answers-loaded');
+            // Single optimized event dispatch with all necessary data
+            $this->dispatch('quiz-started', [
+                'attemptId' => $this->attempt->id,
+                'remainingSeconds' => $this->remainingSeconds,
+                'isUnlimited' => $this->isUnlimited,
+                'quizId' => $this->quizModel->id,
+                'shouldClearStorage' => true,
+                'shouldLoadAnswers' => true
+            ]);
             
             Notification::make()
                 ->title('Bắt đầu làm bài!')
@@ -175,6 +187,22 @@ class QuizTaking extends Page
 
             $this->answers = $existingAnswers;
             $this->updateAnsweredCount();
+        }
+    }
+
+    protected function initializeTimeInformation(): void
+    {
+        if (! $this->quizModel->time_limit_minutes) {
+            $this->isUnlimited = true;
+            $this->remainingSeconds = null;
+            return;
+        }
+
+        $this->isUnlimited = false;
+        // If no attempt yet, show full time limit
+        if (! $this->attempt) {
+            $this->remainingSeconds = $this->quizModel->time_limit_minutes * 60; // Convert to seconds
+            $this->timeWarning = false;
         }
     }
 
@@ -468,6 +496,18 @@ class QuizTaking extends Page
         }
 
         return sprintf('%02d:%02d', $minutes, $seconds);
+    }
+
+    public function syncTime(): array
+    {
+        // Recalculate remaining time from server
+        $this->calculateRemainingTime();
+        
+        return [
+            'remainingSeconds' => $this->remainingSeconds,
+            'isUnlimited' => $this->isUnlimited,
+            'timeWarning' => $this->timeWarning
+        ];
     }
 
     #[Computed]

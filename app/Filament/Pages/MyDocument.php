@@ -16,6 +16,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 class MyDocument extends Page
 {
     // use HasPageShield;
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
 
