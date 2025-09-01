@@ -54,7 +54,7 @@ class QuizAttemptForm
                     ->schema([
                         // The Livewire component will only be mounted when the Accordion is opened
                         Livewire::make(ShowQuizAnswers::class)
-                            ->key(fn(?QuizAttempt $record) => $record?->id),
+                            ->key(fn (?QuizAttempt $record) => $record?->id),
                     ]),
             ]);
     }

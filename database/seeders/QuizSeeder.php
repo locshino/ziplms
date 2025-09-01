@@ -11,14 +11,11 @@ use App\Models\Question;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Models\User;
-use Database\Seeders\Contracts\HasCacheSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
 
 class QuizSeeder extends Seeder
 {
-    use HasCacheSeeder;
-
     private array $quizzesData = [];
 
     private array $questionsData = [];
@@ -33,57 +30,48 @@ class QuizSeeder extends Seeder
      */
     public function run(): void
     {
-        // Skip if quizzes already exist and cache is valid
-        if ($this->shouldSkipSeeding('quizzes', 'quizzes')) {
-            return;
-        }
 
-        // Get or create quizzes with caching
-        $this->getCachedData('quizzes', function () {
-            $courses = Course::with('tags')->get();
-            $teachers = User::role(RoleSystem::TEACHER->value)->get();
+        $courses = Course::with('tags')->get();
+        $teachers = User::role(RoleSystem::TEACHER->value)->get();
 
-            foreach ($courses as $course) {
-                $enrolledStudents = $course->students;
-                $courseTags = $course->tags->pluck('name')->toArray();
+        foreach ($courses as $course) {
+            $enrolledStudents = $course->students;
+            $courseTags = $course->tags->pluck('name')->toArray();
 
-                // Find relevant quizzes based on course tags
-                $relevantQuizKeys = collect($this->quizzesData)
-                    ->filter(fn($quiz) => ! empty(array_intersect($courseTags, $quiz['tags'])))
-                    ->keys()
-                    ->toArray();
+            // Find relevant quizzes based on course tags
+            $relevantQuizKeys = collect($this->quizzesData)
+                ->filter(fn ($quiz) => ! empty(array_intersect($courseTags, $quiz['tags'])))
+                ->keys()
+                ->toArray();
 
-                // Create 2-3 quizzes for each course
-                $selectedQuizKeys = Arr::random($relevantQuizKeys, min(count($relevantQuizKeys), rand(2, 3)));
+            // Create 2-3 quizzes for each course
+            $selectedQuizKeys = Arr::random($relevantQuizKeys, min(count($relevantQuizKeys), rand(2, 3)));
 
-                foreach ($selectedQuizKeys as $key) {
-                    $quizData = $this->quizzesData[$key];
-                    $quiz = Quiz::factory()->create([
-                        'title' => $quizData['title'],
-                        'description' => $quizData['description'],
-                        'status' => QuizStatus::PUBLISHED->value,
-                    ]);
+            foreach ($selectedQuizKeys as $key) {
+                $quizData = $this->quizzesData[$key];
+                $quiz = Quiz::factory()->create([
+                    'title' => $quizData['title'],
+                    'description' => $quizData['description'],
+                    'status' => QuizStatus::PUBLISHED->value,
+                ]);
 
-                    // Attach quiz to the course with random start/end dates
-                    $startAt = fake()->dateTimeBetween('-1 month', '+1 week');
-                    $endAt = fake()->dateTimeInInterval($startAt->format('Y-m-d H:i:s'), '+2 months');
-                    $course->quizzes()->attach($quiz->id, [
-                        'start_at' => $startAt,
-                        'end_at' => $endAt,
-                    ]);
+                // Attach quiz to the course with random start/end dates
+                $startAt = fake()->dateTimeBetween('-1 month', '+1 week');
+                $endAt = fake()->dateTimeInInterval($startAt->format('Y-m-d H:i:s'), '+2 months');
+                $course->quizzes()->attach($quiz->id, [
+                    'start_at' => $startAt,
+                    'end_at' => $endAt,
+                ]);
 
-                    // Create questions and answers for this quiz
-                    $this->createQuestionsAndAnswers($quiz, $quizData['tags']);
+                // Create questions and answers for this quiz
+                $this->createQuestionsAndAnswers($quiz, $quizData['tags']);
 
-                    // Create quiz attempts
-                    if ($enrolledStudents->isNotEmpty()) {
-                        $this->createQuizAttempts($quiz, $enrolledStudents);
-                    }
+                // Create quiz attempts
+                if ($enrolledStudents->isNotEmpty()) {
+                    $this->createQuizAttempts($quiz, $enrolledStudents);
                 }
             }
-
-            return true;
-        });
+        }
     }
 
     /**
@@ -92,7 +80,7 @@ class QuizSeeder extends Seeder
     private function createQuestionsAndAnswers(Quiz $quiz, array $tags): void
     {
         $relevantQuestions = collect($this->questionsData)
-            ->filter(fn($question) => ! empty(array_intersect($tags, $question['tags'])))
+            ->filter(fn ($question) => ! empty(array_intersect($tags, $question['tags'])))
             ->toArray();
 
         $selectedQuestions = Arr::random($relevantQuestions, min(count($relevantQuestions), rand(5, 10)));

@@ -79,12 +79,10 @@ class ManagersRelationManager extends RelationManager
                     ->searchable(),
                 TextColumn::make('pivot.start_at')
                     ->label('Start At')
-                    ->dateTime()
-                    ->sortable(),
+                    ->dateTime(),
                 TextColumn::make('pivot.end_at')
                     ->label('End At')
-                    ->dateTime()
-                    ->sortable(),
+                    ->dateTime(),
                 TextColumn::make('created_at')
                     ->label(__('resource_user.table.columns.created_at'))
                     ->dateTime()
@@ -106,9 +104,9 @@ class ManagersRelationManager extends RelationManager
                 SelectFilter::make('status')
                     ->options(UserStatus::class)
                     ->label(__('resource_user.table.filters.status')),
-                DateRangeFilter::make('pivot.start_at')
+                DateRangeFilter::make('course_user.start_at')
                     ->label('Start At'),
-                DateRangeFilter::make('pivot.end_at')
+                DateRangeFilter::make('course_user.end_at')
                     ->label('End At'),
             ])
             ->headerActions([

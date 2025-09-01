@@ -6,6 +6,7 @@ use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Services\Interfaces\QuizServiceInterface;
 use BackedEnum;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Pages\Page;
@@ -14,16 +15,24 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\WithPagination;
 
-// use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-
 class QuizResults extends Page
 {
+    use HasPageShield;
     use WithPagination;
-    // use HasPageShield;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar';
 
     protected string $view = 'filament.pages.quiz-results';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('pages.quiz_results');
+    }
+
+    public function getTitle(): string
+    {
+        return __('pages.quiz_results');
+    }
 
     protected static ?string $title = 'Kết quả Quiz';
 

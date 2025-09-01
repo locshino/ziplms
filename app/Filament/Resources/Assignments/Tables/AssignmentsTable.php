@@ -3,12 +3,14 @@
 namespace App\Filament\Resources\Assignments\Tables;
 
 use App\Enums\Status\AssignmentStatus;
+use App\Filament\Imports\AssignmentImporter;
 use App\Filament\Tables\Filters\SelectTagsFilter;
 use App\Models\Assignment;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\ImportAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\SpatieTagsColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -70,6 +72,13 @@ class AssignmentsTable
             ])
             ->recordActions([
                 EditAction::make(),
+            ])
+            ->headerActions([
+                ImportAction::make('Import')
+                    ->importer(AssignmentImporter::class)
+                    ->options([
+                        'default_status' => AssignmentStatus::PUBLISHED->value,
+                    ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

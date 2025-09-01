@@ -70,7 +70,7 @@ class AssignmentForm
                             ->reorderable()
                             ->downloadable()
                             ->openable()
-                            ->customProperties(fn($file) => ['title' => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document']),
+                            ->customProperties(fn ($file) => ['title' => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document']),
                     ]),
             ]);
     }

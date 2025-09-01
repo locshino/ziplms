@@ -2,12 +2,15 @@
 
 namespace App\Filament\Resources\Quizzes\Tables;
 
+use App\Enums\Status\QuizStatus;
+use App\Filament\Imports\QuizImporter;
 use App\Filament\Tables\Filters\SelectTagsFilter;
 use App\Models\Quiz;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\ImportAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
@@ -73,6 +76,13 @@ class QuizzesTable
             ->recordActions([
                 // ViewAction::make(),
                 EditAction::make(),
+            ])
+            ->headerActions([
+                ImportAction::make('Import')
+                    ->importer(QuizImporter::class)
+                    ->options([
+                        'default_status' => QuizStatus::PUBLISHED->value,
+                    ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

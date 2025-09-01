@@ -3,47 +3,73 @@
 namespace App\Filament\Pages;
 
 use App\Enums\Status\AssignmentStatus;
-use App\Enums\Status\QuizAttemptStatus;
 use App\Enums\Status\QuizStatus;
 use App\Libs\Roles\RoleHelper;
 use App\Models\Course;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Pages\Page;
 use Illuminate\Support\Collection;
 
 class CourseDetail extends Page
 {
+    use HasPageShield;
+
     // Blade view liên kết
     protected string $view = 'filament.pages.course-detail';
+
     // Không hiển thị navigation tự động
     protected static bool $shouldRegisterNavigation = false;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('pages.course_detail');
+    }
+
     // Course hiện tại
     public ?Course $course = null;
+
     // Media / tài liệu
     public $documents;
+
     // Quizzes
     public $ongoingQuizzes;
+
     public $completedQuizzes = [];
+
     public $completedQuizzess = [];
+
     // Assignments
     public $ongoingAssignments;
+
     public $closedAssignments;
+
     // Tracking user actions
     public Collection $hasAttempted;
+
     public Collection $hasSubmitted;
+
     public $isOngoingPeriod;
+
     public $isSubmitted;
+
     public $assignment;
+
     public $search = '';
+
     public $courseTags;
+
     public $quizTags;
+
     public $sortBy = 'newest';
+
     public $selectedTag;
+
     public Collection $missedQuizzes;
+
     public Collection $missedAssignments;
 
     public function mount($course = null): void
     {
-
 
         // Lấy identifier từ argument hoặc route hoặc request
         $identifier = $course ?? request()->route('course') ?? request()->get('course');
@@ -59,8 +85,7 @@ class CourseDetail extends Page
                 ->first();
         }
 
-
-        if (!$this->course) {
+        if (! $this->course) {
             abort(404);
         }
         // Lấy media / documents
@@ -70,12 +95,12 @@ class CourseDetail extends Page
         $this->processAssignments();
         // Lấy danh sách tags duy nhất
         $this->courseTags = $this->course->assignments
-            ->flatMap(fn($assignment) => $assignment->tags->pluck('name'))
+            ->flatMap(fn ($assignment) => $assignment->tags->pluck('name'))
             ->unique()
             ->values()
             ->toArray();
         $this->quizTags = $this->course->quizzes
-            ->flatMap(fn($quiz) => $quiz->tags->pluck('name'))
+            ->flatMap(fn ($quiz) => $quiz->tags->pluck('name'))
             ->unique()
             ->values()
             ->toArray();
@@ -99,13 +124,13 @@ class CourseDetail extends Page
 
         // ... (phần code lọc theo search và tag đã có)
         if ($this->search) {
-            $quizzes = $quizzes->filter(fn($quiz) => str_contains(strtolower($quiz->title), strtolower($this->search)));
+            $quizzes = $quizzes->filter(fn ($quiz) => str_contains(strtolower($quiz->title), strtolower($this->search)));
         }
 
         // Filter by tag
         if ($this->selectedTag) {
             $tag = $this->selectedTag;
-            $quizzes = $quizzes->filter(fn($quiz) => $quiz->tags->contains('name', $tag));
+            $quizzes = $quizzes->filter(fn ($quiz) => $quiz->tags->contains('name', $tag));
         }
         $this->hasAttempted = collect();
         $this->isOngoingPeriod = collect();
@@ -114,7 +139,7 @@ class CourseDetail extends Page
             $end = $quiz->pivot?->end_at;
             $isPublished = $quiz->status === QuizStatus::PUBLISHED;
 
-            $isOngoingPeriod = $isPublished && (!$start || $now->gte($start)) && (!$end || $now->lte($end));
+            $isOngoingPeriod = $isPublished && (! $start || $now->gte($start)) && (! $end || $now->lte($end));
             $hasAttempted = $quiz->attempts()->where('student_id', $user->id)->exists();
 
             if ($hasAttempted) {
@@ -122,20 +147,20 @@ class CourseDetail extends Page
             }
 
             // START: Logic cập nhật
-            if (!$isOngoingPeriod && !$hasAttempted) {
+            if (! $isOngoingPeriod && ! $hasAttempted) {
                 $this->missedQuizzes->push($quiz); // Bài đã hết hạn VÀ chưa làm -> Bỏ lỡ
             }
             // END: Logic cập nhật
 
-            if (!$isOngoingPeriod) {
+            if (! $isOngoingPeriod) {
                 $this->isOngoingPeriod->push($quiz);
             }
 
             if ($user->hasRole('student') || $user->hasRole('manager')) {
-                if ($isOngoingPeriod && !$hasAttempted) {
+                if ($isOngoingPeriod && ! $hasAttempted) {
                     $ongoingQuizzes->push($quiz);
                 } else {
-                    if (!$isOngoingPeriod || $hasAttempted || in_array($quiz->status, [QuizStatus::CLOSED, QuizStatus::ARCHIVED])) {
+                    if (! $isOngoingPeriod || $hasAttempted || in_array($quiz->status, [QuizStatus::CLOSED, QuizStatus::ARCHIVED])) {
                         $completedQuizzes->push($quiz);
                     }
                 }
@@ -172,13 +197,13 @@ class CourseDetail extends Page
 
         // Filter by search term
         if ($this->search) {
-            $assignments = $assignments->filter(fn($assignment) => str_contains(strtolower($assignment->title), strtolower($this->search)));
+            $assignments = $assignments->filter(fn ($assignment) => str_contains(strtolower($assignment->title), strtolower($this->search)));
         }
 
         // Filter by tag
         if ($this->selectedTag) {
             $tag = $this->selectedTag;
-            $assignments = $assignments->filter(fn($assignment) => $assignment->tags->contains('name', $tag));
+            $assignments = $assignments->filter(fn ($assignment) => $assignment->tags->contains('name', $tag));
         }
         $this->hasSubmitted = collect();
         $this->isSubmitted = collect();
@@ -188,7 +213,7 @@ class CourseDetail extends Page
             $start = $assignment->pivot?->start_at;
             $end = $assignment->pivot?->end_submission_at; // Sử dụng end_submission_at cho assignment
             $isPublished = $assignment->status === AssignmentStatus::PUBLISHED;
-            $isOngoingPeriod = $isPublished && (!$start || $now->gte($start)) && (!$end || $now->lte($end));
+            $isOngoingPeriod = $isPublished && (! $start || $now->gte($start)) && (! $end || $now->lte($end));
 
             $hasSubmitted = $assignment->submissions()->where('student_id', $user->id)->exists();
 
@@ -197,20 +222,20 @@ class CourseDetail extends Page
             }
 
             // START: Logic cập nhật
-            if (!$isOngoingPeriod && !$hasSubmitted && $isPublished) {
+            if (! $isOngoingPeriod && ! $hasSubmitted && $isPublished) {
                 $this->missedAssignments->push($assignment); // Bài đã hết hạn VÀ chưa nộp -> Bỏ lỡ
             }
             // END: Logic cập nhật
 
-            if (!$isOngoingPeriod) {
+            if (! $isOngoingPeriod) {
                 $this->isSubmitted->push($assignment);
             }
 
             if ($user->hasRole('student') || $user->hasRole('manager')) {
-                if ($isOngoingPeriod && !$hasSubmitted) {
+                if ($isOngoingPeriod && ! $hasSubmitted) {
                     $ongoingAssignments->push($assignment);
                 } else {
-                    if (!$isOngoingPeriod || $hasSubmitted || $assignment->status === AssignmentStatus::CLOSED) {
+                    if (! $isOngoingPeriod || $hasSubmitted || $assignment->status === AssignmentStatus::CLOSED) {
                         $closedAssignments->push($assignment);
                     }
                 }
@@ -265,6 +290,7 @@ class CourseDetail extends Page
         $this->search = ''; // Reset search when filtering by tag
         $this->processAssignments();
     }
+
     /**
      * Sắp xếp collection theo created_at hoặc end_at
      */
@@ -273,14 +299,14 @@ class CourseDetail extends Page
         return match ($this->sortBy) {
             'newest' => $collection->sortByDesc('created_at')->values(),
             'oldest' => $collection->sortBy('created_at')->values(),
-            'end_at' => $collection->sortBy(fn($item) => $item->pivot?->end_at ?? now())->values(),
+            'end_at' => $collection->sortBy(fn ($item) => $item->pivot?->end_at ?? now())->values(),
             default => $collection,
         };
     }
 
     public function getTitle(): string
     {
-        return $this->course?->title ?? 'Course Details';
+        return $this->course?->title ?? __('pages.course_detail');
     }
 
     public static function canAccess(): bool

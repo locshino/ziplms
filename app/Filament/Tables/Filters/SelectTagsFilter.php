@@ -29,6 +29,16 @@ class SelectTagsFilter extends SelectFilter
         $this->searchable();
         $this->multiple();
         $this->preload();
+
+        // FIX: Add this method to handle validation with searchable()
+        $this->getOptionLabelsUsing(function (array $values): array {
+            $type = $this->getWithType();
+
+            return Tag::getWithType($type)
+                ->whereIn('name', $values) // Query only the selected values
+                ->pluck('name', 'name')
+                ->all();
+        });
     }
 
     public function getWithType(): ?string

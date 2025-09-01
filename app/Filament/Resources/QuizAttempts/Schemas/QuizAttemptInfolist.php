@@ -34,7 +34,7 @@ class QuizAttemptInfolist
                     ->lazy()
                     ->schema([
                         \Filament\Schemas\Components\Livewire::make(\App\Livewire\ShowQuizAnswers::class)
-                            ->key(fn($record) => $record?->id),
+                            ->key(fn ($record) => $record?->id),
                     ]),
             ]);
     }

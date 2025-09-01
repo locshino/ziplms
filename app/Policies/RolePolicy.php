@@ -24,6 +24,10 @@ class RolePolicy
      */
     public function view(User $user, Role $role): bool
     {
+        if (RoleHelper::isSuperAdminRole($role->name)) {
+            return false;
+        }
+
         return $user->can('view_roles::role');
     }
 
@@ -42,6 +46,10 @@ class RolePolicy
      */
     public function update(User $user, Role $role): bool
     {
+        if (RoleHelper::isSuperAdminRole($role->name)) {
+            return false;
+        }
+
         return $user->can('update_roles::role');
     }
 

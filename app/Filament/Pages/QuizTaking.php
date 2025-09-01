@@ -9,6 +9,7 @@ use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Services\Interfaces\QuizServiceInterface;
 use BackedEnum;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -18,20 +19,26 @@ use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 
-// use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-
 class QuizTaking extends Page
 {
-    // use HasPageShield;
+    use HasPageShield;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-academic-cap';
 
     // [SỬA LỖI 1] - Trỏ đến đúng file view, không phải tên route
     protected string $view = 'filament.pages.quiz-taking';
 
-    protected static ?string $title = 'Làm bài Quiz';
-
     protected static bool $shouldRegisterNavigation = false;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('pages.quiz_taking');
+    }
+
+    public function getTitle(): string
+    {
+        return __('pages.quiz_taking');
+    }
 
     #[Url]
     public string|int|null $quiz = null;
@@ -105,7 +112,7 @@ class QuizTaking extends Page
             $this->loadExistingAnswers();
             $this->calculateRemainingTime(); // Recalculate with actual attempt
             $this->initializePagination();
-            
+
             // Force Livewire to re-render after loading answers
             $this->dispatch('answers-loaded');
         }
@@ -117,17 +124,17 @@ class QuizTaking extends Page
         try {
             // Dispatch quiz-starting event immediately to start timer
             $this->dispatch('quiz-starting');
-            
+
             $this->attempt = $this->quizService->startQuizAttempt($this->quizModel->id, Auth::id());
-            
+
             // Clear session for current question index to start from question 1
             session()->forget('quiz_current_question_'.$this->quizModel->id);
-            
+
             // Initialize quiz after starting
             $this->loadExistingAnswers();
             $this->calculateRemainingTime();
             $this->initializePagination();
-            
+
             // Single optimized event dispatch with all necessary data
             $this->dispatch('quiz-started', [
                 'attemptId' => $this->attempt->id,
@@ -135,9 +142,9 @@ class QuizTaking extends Page
                 'isUnlimited' => $this->isUnlimited,
                 'quizId' => $this->quizModel->id,
                 'shouldClearStorage' => true,
-                'shouldLoadAnswers' => true
+                'shouldLoadAnswers' => true,
             ]);
-            
+
             Notification::make()
                 ->title('Bắt đầu làm bài!')
                 ->body('Chúc bạn làm bài tốt!')
@@ -195,6 +202,7 @@ class QuizTaking extends Page
         if (! $this->quizModel->time_limit_minutes) {
             $this->isUnlimited = true;
             $this->remainingSeconds = null;
+
             return;
         }
 
@@ -502,11 +510,11 @@ class QuizTaking extends Page
     {
         // Recalculate remaining time from server
         $this->calculateRemainingTime();
-        
+
         return [
             'remainingSeconds' => $this->remainingSeconds,
             'isUnlimited' => $this->isUnlimited,
-            'timeWarning' => $this->timeWarning
+            'timeWarning' => $this->timeWarning,
         ];
     }
 

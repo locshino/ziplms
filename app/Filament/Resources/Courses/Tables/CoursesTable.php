@@ -3,12 +3,14 @@
 namespace App\Filament\Resources\Courses\Tables;
 
 use App\Enums\Status\CourseStatus;
+use App\Filament\Imports\CourseImporter;
 use App\Filament\Tables\Filters\SelectTagsFilter;
 use App\Models\Course;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\ImportAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\SpatieTagsColumn;
@@ -96,6 +98,13 @@ class CoursesTable
             ])
             ->recordActions([
                 EditAction::make(),
+            ])
+            ->headerActions([
+                ImportAction::make('Import')
+                    ->importer(CourseImporter::class)
+                    ->options([
+                        'default_status' => CourseStatus::DRAFT->value,
+                    ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

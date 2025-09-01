@@ -32,7 +32,7 @@ class AssignmentFactory extends Factory
      */
     public function withStatus(AssignmentStatus $status): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => $status->value,
         ]);
     }

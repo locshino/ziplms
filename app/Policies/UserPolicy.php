@@ -16,11 +16,9 @@ class UserPolicy
      */
     public function viewAny(User $user): bool
     {
-        if (app('impersonate')->isImpersonating()) {
-            return true;
-        }
+        $isCanViewAny = $user->can('view_any_users::user');
 
-        return $user->can('view_any_users::user');
+        return $isCanViewAny;
     }
 
     /**
@@ -29,7 +27,12 @@ class UserPolicy
     public function view(User $user, User $userRecord): bool
     {
         $isCanView = $user->can('view_users::user');
+
         if ($isCanView == false) {
+            return false;
+        }
+
+        if (RoleHelper::isSuperAdmin($userRecord)) {
             return false;
         }
 
@@ -95,7 +98,12 @@ class UserPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_users::user');
+        $isCanDeleteAny = $user->can('delete_any_users::user');
+        if (app('impersonate')->isImpersonating()) {
+            return false;
+        }
+
+        return $isCanDeleteAny;
     }
 
     /**
@@ -106,6 +114,10 @@ class UserPolicy
         $isCanForceDelete = $user->can('force_delete_users::user');
 
         if ($isCanForceDelete == false) {
+            return false;
+        }
+
+        if (app('impersonate')->isImpersonating()) {
             return false;
         }
 
@@ -130,6 +142,10 @@ class UserPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
+        if (app('impersonate')->isImpersonating()) {
+            return false;
+        }
+
         return $user->can('force_delete_any_users::user');
     }
 

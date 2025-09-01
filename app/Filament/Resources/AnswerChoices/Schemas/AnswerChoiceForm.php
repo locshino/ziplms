@@ -43,7 +43,7 @@ class AnswerChoiceForm
                         Toggle::make('is_correct')
                             ->label(__('resource_answer_choice.form.fields.is_correct'))
                             ->reactive()
-                            ->fixIndistinctState(fn($get) => ! ($get('../../is_multi_choice'))),
+                            ->fixIndistinctState(fn ($get) => ! ($get('../../is_multi_choice'))),
                     ])
                     ->defaultItems(4),
             ]);

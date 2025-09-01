@@ -6,6 +6,7 @@ use App\Enums\Status\CourseStatus;
 use App\Models\Course;
 use App\Models\User;
 use BackedEnum;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
@@ -13,13 +14,27 @@ use Illuminate\Support\Facades\Auth;
 
 class MyCourse extends Page
 {
+    use HasPageShield;
+
     protected string $view = 'filament.pages.my-course';
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-book-open';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('pages.my_course');
+    }
+
+    public function getTitle(): string
+    {
+        return __('pages.my_course');
+    }
+
     // Danh sách khóa học đang học / đã hoàn thành
     public Collection|EloquentCollection $ongoingCourses;
 
     public Collection|EloquentCollection $completedCourses;
+
     // Search và lọc
     public string $searchCourse;
 
@@ -42,8 +57,6 @@ class MyCourse extends Page
             $enrolledCourses = $this->getTeachingCourses();
         } else {
             $enrolledCourses = $this->getEnrolledCourses();
-
-
         }
         $ongoingCourses = collect();
         $completedCourses = collect();
@@ -53,14 +66,14 @@ class MyCourse extends Page
             // student mới có pivot
 
             if ($pivot) {
-                if (!$pivot->end_at || $pivot->end_at->isAfter($now)) {
+                if (! $pivot->end_at || $pivot->end_at->isAfter($now)) {
                     $ongoingCourses->push($course);
                 } elseif ($pivot->end_at && $pivot->end_at->isBefore($now)) {
                     $completedCourses->push($course);
                 }
             } else {
                 // teacher: dùng start/end của course trực tiếp
-                if (!$course->end_at || $course->end_at->isAfter($now)) {
+                if (! $course->end_at || $course->end_at->isAfter($now)) {
                     $ongoingCourses->push($course);
                 } elseif ($course->end_at && $course->end_at->isBefore($now)) {
                     $completedCourses->push($course);
@@ -85,11 +98,13 @@ class MyCourse extends Page
         $this->ongoingCourses = $ongoingCourses;
         $this->completedCourses = $completedCourses;
     }
+
     // Lấy link chi tiết course
     public function getLinkToCourseDetail(Course $course): string
     {
         return \App\Filament\Pages\CourseDetail::getUrl(['course' => $course->id]);
     }
+
     // Lấy khóa học student đang tham gia
     public function getEnrolledCourses()
     {
@@ -111,6 +126,7 @@ class MyCourse extends Page
             ->orderBy('courses.created_at', 'asc')
             ->paginate(10);
     }
+
     // Lấy khóa học teacher đang dạy
     public function getTeachingCourses()
     {
@@ -129,7 +145,6 @@ class MyCourse extends Page
             ->with(['users', 'media', 'tags'])
             ->orderBy('created_at', 'asc')
             ->get();
-
     }
     // Tìm kiếm khóa học
 
@@ -143,14 +158,12 @@ class MyCourse extends Page
             $enrolledCourses = $this->getTeachingCourses();
         } else {
             $enrolledCourses = $this->getEnrolledCourses();
-
-
         }
 
         foreach ($enrolledCourses as $course) {
             // Bỏ qua nếu không match search
 
-            if ($this->searchCourse !== '' && !str_contains(strtolower($course->title), strtolower($this->searchCourse))) {
+            if ($this->searchCourse !== '' && ! str_contains(strtolower($course->title), strtolower($this->searchCourse))) {
                 continue;
             }
 
@@ -165,12 +178,14 @@ class MyCourse extends Page
         $this->ongoingCourses = $ongoingCourses;
         $this->closedCourses = $closedCourses;
     }
+
     // Sắp xếp khóa học
     public function sortCourses(string $sort)
     {
         $this->sortBy = $sort;
         $this->filterCourses();
     }
+
     // Lọc khóa học (dùng cho sorting)
     protected function filterCourses()
     {
@@ -183,8 +198,6 @@ class MyCourse extends Page
             $enrolledCourses = $this->getTeachingCourses();
         } else {
             $enrolledCourses = $this->getEnrolledCourses();
-
-
         }
         foreach ($enrolledCourses as $course) {
             if ($course->status !== CourseStatus::PUBLISHED) {
@@ -201,16 +214,18 @@ class MyCourse extends Page
         $this->ongoingCourses = $this->sortCollection($ongoingCourses);
         $this->closedCourses = $this->sortCollection($closedCourses);
     }
+
     // Hàm sắp xếp collection theo created_at hoặc end_at
     protected function sortCollection($collection)
     {
         return match ($this->sortBy) {
             'newest' => $collection->sortByDesc('created_at')->values(),
             'oldest' => $collection->sortBy('created_at')->values(),
-            'end_at' => $collection->sortBy(fn($q) => $q->pivot?->end_at ?? now())->values(),
+            'end_at' => $collection->sortBy(fn ($q) => $q->pivot?->end_at ?? now())->values(),
             default => $collection,
         };
     }
+
     // Lọc khóa học theo tag
     public function filterCoursesByTag($tag = null)
     {
@@ -224,8 +239,6 @@ class MyCourse extends Page
             $enrolledCourses = $this->getTeachingCourses();
         } else {
             $enrolledCourses = $this->getEnrolledCourses();
-
-
         }
 
         foreach ($enrolledCourses as $course) {
@@ -234,7 +247,7 @@ class MyCourse extends Page
             $hasSelectedTag = $this->selectedTag
                 ? $course->tags->contains('name', $this->selectedTag)
                 : true;
-            if (!$hasSelectedTag) {
+            if (! $hasSelectedTag) {
                 continue;
             }
             if ($course->status !== CourseStatus::PUBLISHED) {
@@ -250,6 +263,7 @@ class MyCourse extends Page
         $this->ongoingCourses = $ongoingCourses;
         $this->closedCourses = $closedCourses;
     }
+
     // Lọc khóa học theo teacher
     public function filterCoursesByTeacher($teacherId)
     {
@@ -263,8 +277,6 @@ class MyCourse extends Page
             $enrolledCourses = $this->getTeachingCourses();
         } else {
             $enrolledCourses = $this->getEnrolledCourses();
-
-
         }
 
         foreach ($enrolledCourses as $course) {
@@ -273,7 +285,7 @@ class MyCourse extends Page
                 ? $course->teacher_id == $this->selectedTeacher
                 : true;
 
-            if (!$hasSelectedTeacher) {
+            if (! $hasSelectedTeacher) {
                 continue;
             }
 

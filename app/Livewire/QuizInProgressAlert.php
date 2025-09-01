@@ -18,7 +18,7 @@ class QuizInProgressAlert extends Component
 
     public function loadInProgressQuizzes(): void
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return;
         }
 
@@ -27,7 +27,7 @@ class QuizInProgressAlert extends Component
             return; // Không hiển thị notification khi đang làm bài
         }
 
-        if (!$this->hasSentThisPageLoad) {
+        if (! $this->hasSentThisPageLoad) {
             $notificationService = app(QuizFilamentNotificationService::class);
             $notificationService->sendInProgressNotifications();
             $this->hasSentThisPageLoad = true;
@@ -40,6 +40,7 @@ class QuizInProgressAlert extends Component
     private function isOnQuizTakingPage(): bool
     {
         $currentRoute = Route::currentRouteName();
+
         return $currentRoute === 'filament.app.pages.quiz-taking';
     }
 
