@@ -267,6 +267,24 @@ class RoleHelper
         return in_array($roleName, static::getSystemRoles());
     }
 
+    public static function isSuperAdminRole(?string $roleName): bool
+    {
+        if ($roleName === null) {
+            return false;
+        }
+
+        return $roleName === RoleSystemEnum::SUPER_ADMIN->value;
+    }
+
+    public static function isAdminRole(?string $roleName): bool
+    {
+        if ($roleName === null) {
+            return false;
+        }
+
+        return $roleName === RoleSystemEnum::ADMIN->value;
+    }
+
     /**
      * Get all system role names.
      */
@@ -287,37 +305,64 @@ class RoleHelper
     public static function getBaseSystemRoles($allowGetRoleHigher = false): array
     {
         $baseRoles = [
-            RoleSystemEnum::ADMIN->value,
-            RoleSystemEnum::MANAGER->value,
-            RoleSystemEnum::TEACHER->value,
-            RoleSystemEnum::STUDENT->value,
+            RoleSystemEnum::ADMIN->value => RoleSystemEnum::ADMIN->getLabel(),
+            RoleSystemEnum::MANAGER->value => RoleSystemEnum::MANAGER->getLabel(),
+            RoleSystemEnum::TEACHER->value => RoleSystemEnum::TEACHER->getLabel(),
+            RoleSystemEnum::STUDENT->value => RoleSystemEnum::STUDENT->getLabel(),
         ];
 
-        if ($allowGetRoleHigher === false) {
-            $user = static::resolveUser();
-            if (! $user) {
-                return [];
-            }
+        // if ($allowGetRoleHigher === false) {
+        //     $user = static::resolveUser();
+        //     if (! $user) {
+        //         return [];
+        //     }
 
-            $userHighestRole = static::getHighestRole($user);
-            if (! $userHighestRole || $userHighestRole === 'custom') {
-                return [];
-            }
+        //     $userHighestRole = static::getHighestRole($user);
+        //     if (! $userHighestRole || $userHighestRole === 'custom') {
+        //         return [];
+        //     }
 
-            $roleHierarchy = static::getSystemRoles();
-            $userRoleIndex = array_search($userHighestRole, $roleHierarchy);
+        //     $roleHierarchy = static::getSystemRoles();
+        //     $userRoleIndex = array_search($userHighestRole, $roleHierarchy);
 
-            if ($userRoleIndex === false) {
-                return [];
-            }
+        //     if ($userRoleIndex === false) {
+        //         return [];
+        //     }
 
-            return array_values(array_filter($baseRoles, function ($role) use ($roleHierarchy, $userRoleIndex) {
-                $roleIndex = array_search($role, $roleHierarchy);
+        //     return array_values(array_filter($baseRoles, function ($role) use ($roleHierarchy, $userRoleIndex) {
+        //         $roleIndex = array_search($role, $roleHierarchy);
 
-                return $roleIndex !== false && $roleIndex >= $userRoleIndex;
-            }));
-        }
+        //         return $roleIndex !== false && $roleIndex >= $userRoleIndex;
+        //     }));
+        // }
 
         return $baseRoles;
+    }
+
+    /**
+     * Get all roles higher than the user's highest role.
+     */
+    public static function getHigherRoles(?Authenticatable $user = null): array
+    {
+        $user = static::resolveUser($user);
+        if (! $user) {
+            return [];
+        }
+
+        $userHighestRole = static::getHighestRole($user);
+        if (! $userHighestRole || $userHighestRole === 'custom') {
+            return [];
+        }
+
+        $roleHierarchy = static::getSystemRoles();
+        $userRoleIndex = array_search($userHighestRole, $roleHierarchy);
+
+        if ($userRoleIndex === false) {
+            return [];
+        }
+
+        return array_filter($roleHierarchy, function ($role, $index) use ($userRoleIndex) {
+            return $index < $userRoleIndex;
+        }, ARRAY_FILTER_USE_BOTH);
     }
 }

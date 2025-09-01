@@ -18,7 +18,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\HtmlString;
-use Illuminate\Support\Str;
 use Malzariey\FilamentLexicalEditor\LexicalEditor;
 
 class CourseForm
@@ -45,16 +44,7 @@ class CourseForm
                             ->columnSpanFull(),
                         TextInput::make('title')
                             ->label(__('resource_course.form.fields.title'))
-                            ->required()
-                            ->live(onBlur: true)
-                            ->afterStateUpdated(function ($state, callable $set, $get) {
-                                $baseSlug = Str::slug($state);
-                                $randomNumber = mt_rand(1000, 9999);
-                                $slug = "{$baseSlug}-{$randomNumber}";
-
-                                $set('slug', $slug);
-                            }),
-
+                            ->required(),
                         Section::make('Thiết lập')
                             ->columnSpanFull()
                             ->columns(3)
@@ -132,7 +122,7 @@ class CourseForm
                             })
                             ->modalHeading('Xác nhận chuyển đổi sang Vô thời hạn')
                             ->modalDescription(new HtmlString(
-                                'Hành động này sẽ xóa lịch trình của khóa học. <br/><br/>' .
+                                'Hành động này sẽ xóa lịch trình của khóa học. <br/><br/>'.
                                     '<strong class="text-danger">Cảnh báo: Nếu khóa học đã có học viên, bạn sẽ không thể thiết lập lại lịch cho khóa học này nữa. Thay đổi sẽ có hiệu lực khi bấm lưu thay đổi</strong>'
                             ))
                             ->modalSubmitActionLabel('Có, tôi hiểu và xác nhận')
@@ -160,8 +150,8 @@ class CourseForm
                             ->reorderable()
                             ->downloadable()
                             ->openable()
-                            ->mediaName(fn($file) => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document')
-                            ->customProperties(fn($file) => ['title' => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document']),
+                            ->mediaName(fn ($file) => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document')
+                            ->customProperties(fn ($file) => ['title' => $file ? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) : 'document']),
                     ]),
                 Section::make('Mở rộng')
                     ->columnSpanFull()
@@ -170,11 +160,7 @@ class CourseForm
                         TextInput::make('slug')
                             ->label(__('resource_course.form.fields.slug'))
                             ->unique(ignoreRecord: true)
-                            ->rules(['regex:/^[a-z0-9-]+$/'])
-                            ->reactive()
-                            ->afterStateUpdated(function ($state, callable $set) {
-                                $set('slug', Str::slug($state));
-                            }),
+                            ->rules(['regex:/^[a-z0-9-]+$/']),
                         TextInput::make('price')
                             ->label(__('resource_course.form.fields.price'))
                             ->numeric()

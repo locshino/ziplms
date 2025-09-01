@@ -9,6 +9,8 @@ use Illuminate\Queue\InteractsWithQueue;
 
 class SendGradingNotification implements ShouldQueue
 {
+    use InteractsWithQueue;
+
     /**
      * Create the event listener.
      */

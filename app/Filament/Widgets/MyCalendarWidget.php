@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\Status\AssignmentStatus;
 use App\Enums\Status\QuizStatus;
 use App\Models\Course;
 use App\Models\Quiz;
@@ -12,29 +13,46 @@ use Guava\Calendar\ValueObjects\CalendarEvent;
 use Guava\Calendar\ValueObjects\FetchInfo;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use App\Enums\Status\AssignmentStatus;
+use Illuminate\Support\Facades\Cache;
+
 class MyCalendarWidget extends CalendarWidget
 {
     use HasWidgetShield;
+
     // Cho phép click vào event
     protected bool $eventClickEnabled = true;
+
     // Action mặc định khi click event
     protected ?string $defaultEventClickAction = 'viewAssignment';
+
     /**
      * Lấy danh sách events để hiển thị trên calendar
      */
     protected function getEvents(FetchInfo $info): Collection|array|Builder
     {
+        $user = auth()->user();
+        $cacheKey = "calendar_events_user_{$user->id}";
+
+        // Cache dữ liệu trong 5 phút
+        return Cache::remember($cacheKey, 300, function () use ($user) {
+            return $this->fetchCalendarEvents($user);
+        });
+    }
+
+    /**
+     * Lấy dữ liệu events từ database
+     */
+    private function fetchCalendarEvents($user): Collection
+    {
         $now = now();
         $twoMonthsLater = now()->addMonths(1); // khoảng thời gian hiển thị 2 tháng tới
 
-        $user = auth()->user();
         $role = $user->getRoleNames()->first(); // lấy role đầu tiên của user
 
         $query = Course::query();
         // Nếu là student: chỉ lấy các khóa học mà user đã đăng ký
         if ($role === 'student') {
-            $query->whereHas('users', fn($q) => $q->where('users.id', $user->id));
+            $query->whereHas('users', fn ($q) => $q->where('users.id', $user->id));
         } else {
             $query->where('teacher_id', $user->id);
         }
@@ -50,9 +68,9 @@ class MyCalendarWidget extends CalendarWidget
                     ->where('student_id', $user->id)
                     ->exists();
                 // Kiểm tra điều kiện hiển thị event
-                if (!$hasAttempt && $quiz->status == QuizStatus::PUBLISHED && $quiz->pivot->end_at >= $now && $quiz->pivot->end_at->between($now, $twoMonthsLater)) {
+                if (! $hasAttempt && $quiz->status == QuizStatus::PUBLISHED && $quiz->pivot->end_at >= $now && $quiz->pivot->end_at->between($now, $twoMonthsLater)) {
                     $isUpcoming = $quiz->pivot->start_at > $now && $quiz->pivot->end_at > $now;
-                    $key = $quiz->id . '-' . $course->id;
+                    $key = $quiz->id.'-'.$course->id;
                     $events->push(
                         CalendarEvent::make($quiz)
                             ->title("Quiz:{$quiz->title} ")
@@ -78,7 +96,6 @@ class MyCalendarWidget extends CalendarWidget
                             ->key($quiz->getKey())
                     );
                 }
-
             }
             // Duyệt assignments
             foreach ($course->assignments as $assignment) {
@@ -88,7 +105,7 @@ class MyCalendarWidget extends CalendarWidget
                     ->where('student_id', $user->id)
                     ->exists();
                 // Kiểm tra điều kiện hiển thị event
-                if (!$hasSubmission && $assignment->status == AssignmentStatus::PUBLISHED && $assignment->pivot->end_at >= $now && $assignment->pivot->end_at->between($now, $twoMonthsLater)) {
+                if (! $hasSubmission && $assignment->status == AssignmentStatus::PUBLISHED && $assignment->pivot->end_at >= $now && $assignment->pivot->end_at->between($now, $twoMonthsLater)) {
                     $isUpcoming = $assignment->pivot->start_at > $now && $assignment->pivot->end_at > $now;
 
                     $events->push(
@@ -116,13 +133,31 @@ class MyCalendarWidget extends CalendarWidget
 
                     );
                 }
-
             }
         }
 
         return $events;
-
     }
+
+    /**
+     * Xóa cache calendar cho user hiện tại
+     */
+    public function clearCalendarCache(): void
+    {
+        $user = auth()->user();
+        $cacheKey = "calendar_events_user_{$user->id}";
+        Cache::forget($cacheKey);
+    }
+
+    /**
+     * Xóa cache calendar cho user cụ thể
+     */
+    public static function clearUserCalendarCache($userId): void
+    {
+        $cacheKey = "calendar_events_user_{$userId}";
+        Cache::forget($cacheKey);
+    }
+
     /**
      * Action khi click vào event: mở modal chi tiết
      */
@@ -139,7 +174,7 @@ class MyCalendarWidget extends CalendarWidget
 
                 $record = $modelClass && $key ? $modelClass::find($key) : null;
 
-                if (!$record) {
+                if (! $record) {
                     return new \Illuminate\Support\HtmlString(
                         '<div class="p-4 text-center text-gray-500">Không tìm thấy dữ liệu</div>'
                     );
@@ -149,6 +184,7 @@ class MyCalendarWidget extends CalendarWidget
                     $max_points = $record->max_points ? $record->max_points : 'Chưa xác định';
                     $statusLabel = $record->status ? $record->status->getDescription() : 'Chưa xác định';
                     $courseName = $record->courses->pluck('title')->first() ?? 'Chưa xác định';
+
                     return new \Illuminate\Support\HtmlString("
      <div class='p-6 bg-white rounded-lg shadow-md'>
     <h2 class='text-2xl font-bold text-gray-800 mb-2'>{$record->title}</h2>
@@ -174,7 +210,7 @@ class MyCalendarWidget extends CalendarWidget
                 // Hiển thị chi tiết Quiz
                 if ($record instanceof \App\Models\Quiz) {
                     $statusLabel = $record->status ? $record->status->getDescription() : 'Chưa xác định';
-                    $timeLimit = isset($record->time_limit_minutes) ? $record->time_limit_minutes . ' phút' : 'Chưa xác định';
+                    $timeLimit = isset($record->time_limit_minutes) ? $record->time_limit_minutes.' phút' : 'Chưa xác định';
                     $user = auth()->user();
 
                     // Lấy tất cả course liên quan đến Assignment hoặc Quiz

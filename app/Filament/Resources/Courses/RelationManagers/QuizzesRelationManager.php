@@ -20,6 +20,8 @@ class QuizzesRelationManager extends RelationManager
 {
     protected static string $relationship = 'quizzes';
 
+    protected static ?string $recordTitleAttribute = 'title';
+
     // protected static ?string $relatedResource = QuizResource::class;
 
     public function form(Schema $form): Schema
@@ -63,12 +65,10 @@ class QuizzesRelationManager extends RelationManager
                     ->searchable(),
                 TextColumn::make('pivot.start_at')
                     ->label('Start At')
-                    ->dateTime()
-                    ->sortable(),
+                    ->dateTime(),
                 TextColumn::make('pivot.end_at')
                     ->label('End At')
-                    ->dateTime()
-                    ->sortable(),
+                    ->dateTime(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

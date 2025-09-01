@@ -61,7 +61,7 @@ class SubmissionFactory extends Factory
      */
     public function late(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'submitted_at' => $this->faker->dateTimeBetween('now', '+1 week'),
         ]);
     }
@@ -71,7 +71,7 @@ class SubmissionFactory extends Factory
      */
     public function onTime(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'submitted_at' => $this->faker->dateTimeBetween('-1 week', 'now'),
         ]);
     }

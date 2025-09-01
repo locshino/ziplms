@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Sluggable\HasSlug;
+use Spatie\Sluggable\SlugOptions;
 use Spatie\Tags\HasTags;
 
 /**
@@ -79,6 +81,7 @@ use Spatie\Tags\HasTags;
 class Course extends Model implements Auditable, Eventable, HasMedia
 {
     use HasFactory,
+        HasSlug,
         HasTags,
         HasUuids,
         InteractsWithMedia,
@@ -116,6 +119,26 @@ class Course extends Model implements Auditable, Eventable, HasMedia
             'end_at' => 'datetime',
             'status' => CourseStatus::class,
         ];
+    }
+
+    /**
+     * Get the options for generating the slug.
+     */
+    public function getSlugOptions(): SlugOptions
+    {
+        return SlugOptions::create()
+            ->generateSlugsFrom('title')
+            ->saveSlugsTo('slug');
+    }
+
+    /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    public function getRouteKeyName()
+    {
+        return 'slug';
     }
 
     // Teacher relationship

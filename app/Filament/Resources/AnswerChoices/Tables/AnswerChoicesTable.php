@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\AnswerChoices\Tables;
 
+use App\Filament\Imports\AnswerChoiceImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\ImportAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -67,6 +69,10 @@ class AnswerChoicesTable
                         \Filament\Forms\Components\Toggle::make('is_correct')
                             ->label(__('resource_answer_choice.table.columns.is_correct')),
                     ]),
+            ])
+            ->headerActions([
+                ImportAction::make('Import')
+                    ->importer(AnswerChoiceImporter::class),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

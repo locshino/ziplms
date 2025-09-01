@@ -9,14 +9,11 @@ use App\Models\Assignment;
 use App\Models\Course;
 use App\Models\Submission;
 use App\Models\User;
-use Database\Seeders\Contracts\HasCacheSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
 
 class AssignmentSeeder extends Seeder
 {
-    use HasCacheSeeder;
-
     private array $assignmentsData = [];
 
     public function __construct()
@@ -29,60 +26,50 @@ class AssignmentSeeder extends Seeder
      */
     public function run(): void
     {
-        // Skip if assignments already exist and cache is valid
-        if ($this->shouldSkipSeeding('assignments', 'assignments')) {
-            return;
-        }
+        $courses = Course::with('tags')->get();
+        $teachers = User::role(RoleSystem::TEACHER->value)->get();
 
-        // Get or create assignments with caching
-        $this->getCachedData('assignments', function () {
-            $courses = Course::with('tags')->get();
-            $teachers = User::role(RoleSystem::TEACHER->value)->get();
+        foreach ($courses as $course) {
+            $enrolledStudents = $course->students;
+            $courseTags = $course->tags->pluck('name')->toArray();
 
-            foreach ($courses as $course) {
-                $enrolledStudents = $course->students;
-                $courseTags = $course->tags->pluck('name')->toArray();
+            // Find relevant assignments based on course tags
+            $relevantAssignmentKeys = collect($this->assignmentsData)
+                ->filter(fn ($assignment) => ! empty(array_intersect($courseTags, $assignment['tags'])))
+                ->keys()
+                ->toArray();
 
-                // Find relevant assignments based on course tags
-                $relevantAssignmentKeys = collect($this->assignmentsData)
-                    ->filter(fn($assignment) => !empty(array_intersect($courseTags, $assignment['tags'])))
-                    ->keys()
-                    ->toArray();
+            // Create 1-2 assignments for each course
+            $selectedAssignmentKeys = Arr::random($relevantAssignmentKeys, min(count($relevantAssignmentKeys), rand(1, 2)));
 
-                // Create 1-2 assignments for each course
-                $selectedAssignmentKeys = Arr::random($relevantAssignmentKeys, min(count($relevantAssignmentKeys), rand(1, 2)));
+            foreach ($selectedAssignmentKeys as $key) {
+                $assignmentData = $this->assignmentsData[$key];
+                $assignment = Assignment::factory()->create([
+                    'title' => $assignmentData['title'],
+                    'description' => $assignmentData['description'],
+                    'status' => AssignmentStatus::PUBLISHED->value,
+                ]);
 
-                foreach ($selectedAssignmentKeys as $key) {
-                    $assignmentData = $this->assignmentsData[$key];
-                    $assignment = Assignment::factory()->create([
-                        'title' => $assignmentData['title'],
-                        'description' => $assignmentData['description'],
-                        'status' => AssignmentStatus::PUBLISHED->value,
-                    ]);
+                // Generate valid and sequential date ranges
+                $startAt = fake()->dateTimeBetween('-2 months', 'now -1 week');
+                $endSubmissionAt = fake()->dateTimeBetween($startAt, (clone $startAt)->add(new \DateInterval('P3M')));
+                $startGradingAt = fake()->dateTimeBetween($endSubmissionAt, (clone $endSubmissionAt)->add(new \DateInterval('P1D')));
+                $endAt = fake()->dateTimeBetween($startGradingAt, (clone $startGradingAt)->add(new \DateInterval('P2W')));
 
-                    // Generate valid and sequential date ranges
-                    $startAt = fake()->dateTimeBetween('-2 months', 'now -1 week');
-                    $endSubmissionAt = fake()->dateTimeBetween($startAt, (clone $startAt)->add(new \DateInterval('P3M')));
-                    $startGradingAt = fake()->dateTimeBetween($endSubmissionAt, (clone $endSubmissionAt)->add(new \DateInterval('P1D')));
-                    $endAt = fake()->dateTimeBetween($startGradingAt, (clone $startGradingAt)->add(new \DateInterval('P2W')));
+                // Attach assignment to the course with all pivot data
+                $course->assignments()->attach($assignment->id, [
+                    'start_at' => $startAt,
+                    'end_submission_at' => $endSubmissionAt,
+                    'start_grading_at' => $startGradingAt,
+                    'end_at' => $endAt,
+                ]);
 
-                    // Attach assignment to the course with all pivot data
-                    $course->assignments()->attach($assignment->id, [
-                        'start_at' => $startAt,
-                        'end_submission_at' => $endSubmissionAt,
-                        'start_grading_at' => $startGradingAt,
-                        'end_at' => $endAt,
-                    ]);
-
-                    // Create submissions
-                    if ($enrolledStudents->isNotEmpty()) {
-                        $this->createSubmissions($assignment, $enrolledStudents, $startAt, $endSubmissionAt, $teachers);
-                    }
+                // Create submissions
+                if ($enrolledStudents->isNotEmpty()) {
+                    $this->createSubmissions($assignment, $enrolledStudents, $startAt, $endSubmissionAt, $teachers);
                 }
             }
-
-            return true;
-        });
+        }
     }
 
     /**
@@ -99,7 +86,7 @@ class AssignmentSeeder extends Seeder
 
         foreach ($studentsToSubmit as $student) {
             // 80% chance to submit
-            if (!fake()->boolean(80)) {
+            if (! fake()->boolean(80)) {
                 continue;
             }
 
@@ -143,7 +130,7 @@ class AssignmentSeeder extends Seeder
                     'points' => $points,
                     'graded_by' => $teachers->random()->id,
                     'graded_at' => $gradedAt,
-                    'feedback' => fake()->paragraph(2) . ($isLate ? ' (Đã trừ điểm nộp muộn)' : ''),
+                    'feedback' => fake()->paragraph(2).($isLate ? ' (Đã trừ điểm nộp muộn)' : ''),
                 ]);
             }
         }

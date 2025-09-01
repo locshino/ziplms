@@ -5,24 +5,32 @@ namespace App\Filament\Pages;
 use App\Models\Assignment;
 use App\Models\Course;
 use BackedEnum;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-// use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-
 class MyDocument extends Page
 {
-    // use HasPageShield;
+    use HasPageShield;
+
     protected static bool $shouldRegisterNavigation = false;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
 
     protected string $view = 'filament.pages.my-document';
 
-    protected static ?string $navigationLabel = 'Tài liệu của tôi';
+    public static function getNavigationLabel(): string
+    {
+        return __('pages.my_document');
+    }
+
+    public function getTitle(): string
+    {
+        return __('pages.my_document');
+    }
 
     protected static ?string $title = 'Tài liệu của tôi';
 

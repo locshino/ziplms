@@ -7,30 +7,17 @@ use App\Models\Badge;
 use App\Models\BadgeCondition;
 use App\Models\QuizAttempt;
 use App\Models\StudentQuizAnswer;
-use Database\Seeders\Contracts\HasCacheSeeder;
 use Illuminate\Database\Seeder;
 
 class AdditionalDataSeeder extends Seeder
 {
-    use HasCacheSeeder;
-
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        // Skip if badge conditions already exist and cache is valid
-        if ($this->shouldSkipSeeding('badge_conditions', 'badge_conditions')) {
-            return;
-        }
-
-        // Get or create badge conditions with caching
-        $this->getCachedData('badge_conditions', function () {
-            $this->createBadgeConditions();
-            $this->createStudentQuizAnswers();
-
-            return true;
-        });
+        $this->createBadgeConditions();
+        $this->createStudentQuizAnswers();
     }
 
     /**
