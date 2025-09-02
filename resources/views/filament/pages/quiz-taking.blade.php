@@ -1,3 +1,4 @@
+@if(isset($this) && $this->quizModel)
 <x-filament-panels::page>
     <style>
         /* Custom radio button styling */
@@ -674,6 +675,40 @@
         });
     </script>
     </div>
-
+    
     <x-filament-actions::modals />
 </x-filament-panels::page>
+@else
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Không thể truy cập quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+    <!-- Error state when quiz cannot be accessed -->
+    <div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+        <div class="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
+            <div class="mb-4">
+                <svg class="mx-auto h-16 w-16 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Không thể truy cập quiz</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                Quiz này chưa đến thời gian làm bài, đã hết hạn hoặc bạn đã hết lượt làm bài.
+            </p>
+            <a href="{{ route('filament.app.pages.my-quiz') }}" 
+               class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Quay lại danh sách quiz
+            </a>
+        </div>
+    </div>
+</body>
+</html>
+@endif

@@ -82,9 +82,8 @@ class QuizTaking extends Page
         // Sử dụng findOrFail để tìm bằng ID (có thể là int hoặc UUID string)
         $this->quizModel = Quiz::with(['courses', 'questions.answerChoices'])
             ->findOrFail($this->quiz);
-        // Check if user can take this quiz with simplified logic
         $canTake = $this->canTakeQuiz($this->quizModel);
-        if (! $canTake) {
+        if (!$canTake) {
             $errorMessage = 'Quiz này chưa đến thời gian làm bài, đã hết hạn hoặc bạn đã hết lượt làm bài.';
 
             Notification::make()
@@ -576,7 +575,7 @@ class QuizTaking extends Page
         // Check if there's an existing IN_PROGRESS attempt
         $inProgressAttempt = QuizAttempt::where('quiz_id', $quiz->id)
             ->where('student_id', $userId)
-            ->where('status', QuizAttemptStatus::IN_PROGRESS)
+            ->where('status', QuizAttemptStatus::IN_PROGRESS->value)
             ->first();
 
         // If there's an IN_PROGRESS attempt, allow access to continue

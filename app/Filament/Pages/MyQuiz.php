@@ -500,7 +500,7 @@ class MyQuiz extends Page
                 $quiz = Quiz::find($arguments['quiz']);
 
                 // Check if user can take the quiz before redirecting
-                if (! $this->canTakeQuiz($quiz)) {
+                if (!$this->canTakeQuiz($quiz)) {
                     $quizStatus = $this->getQuizStatus($quiz);
                     $message = match ($quizStatus['status']) {
                         'not_published' => 'Quiz chưa được xuất bản.',
@@ -510,13 +510,13 @@ class MyQuiz extends Page
                     };
 
                     // Show notification and return current page
-                    Notification::make()
-                        ->title('Không thể làm bài')
-                        ->body($message)
-                        ->danger()
-                        ->send();
+                    // Notification::make()
+                    //     ->title('Không thể làm bài')
+                    //     ->body($message)
+                    //     ->danger()
+                    //     ->send();
 
-                    return null; // Stay on current page
+                    // return null; // Stay on current page
                 }
 
                 return route('filament.app.pages.quiz-taking', ['quiz' => $arguments['quiz']]);

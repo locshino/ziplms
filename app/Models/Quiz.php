@@ -134,6 +134,14 @@ class Quiz extends Model implements AuditableContract
     }
 
     /**
+     * Get name attribute (alias for title)
+     */
+    public function getNameAttribute()
+    {
+        return $this->title;
+    }
+
+    /**
      * Get max points calculated from quiz questions
      */
     public function getMaxPointsAttribute()

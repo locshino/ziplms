@@ -18,7 +18,7 @@ class QuizNotificationService implements QuizNotificationServiceInterface
         // Chỉ gửi notification cho user hiện tại đang đăng nhập
         if (Auth::check() && Auth::id() === $user->id) {
             $notificationService = app(QuizFilamentNotificationService::class);
-            $notificationService->sendMultipleInProgressNotification();
+            $notificationService->sendInProgressNotifications();
         }
     }
 
