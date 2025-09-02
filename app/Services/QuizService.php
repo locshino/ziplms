@@ -654,7 +654,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                 }
             }
 
-            return $totalPoints > 0 ? ($earnedPoints / $totalPoints) * 100 : 0;
+            return $earnedPoints;
         } catch (Exception $e) {
             Log::error('Failed to calculate quiz score', [
                 'attempt_id' => $attempt->id,
@@ -706,7 +706,7 @@ class QuizService extends BaseService implements QuizServiceInterface
                 }
             }
 
-            return $totalPoints > 0 ? ($earnedPoints / $totalPoints) * 100 : 0;
+            return $earnedPoints;
         } catch (Exception $e) {
             Log::error('Failed to calculate quiz score (legacy method)', [
                 'attempt_id' => $attempt->id,

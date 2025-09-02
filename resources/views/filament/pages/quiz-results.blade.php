@@ -654,7 +654,7 @@
             <div class="overview-grid">
                 <div class="overview-stats-column">
                     <div class="percentage-card">
-                        <div class="percentage-card-label">Tỷ lệ đúng</div>
+                        <div class="percentage-card-label">Tỷ lệ điểm</div>
                         <div class="percentage-card-value">{{ number_format($this->percentage, 1) }}%</div>
                         <div class="percentage-card-points">
                             {{ $this->attemptModel->points }}/{{ $this->quiz->questions->sum('pivot.points') }} điểm

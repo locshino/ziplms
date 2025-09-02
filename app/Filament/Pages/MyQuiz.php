@@ -216,17 +216,29 @@ class MyQuiz extends Page
     /**
      * Get student's best score for a specific quiz
      */
-    public function getStudentQuizBestScore(Quiz $quiz): ?float
+    public function getStudentQuizBestScore(Quiz $quiz): ?array
     {
         $userId = Auth::id();
 
         // Get the max score from the database (could be a string or null)
-        $maxScore = QuizAttempt::where('quiz_id', $quiz->id)
+        $maxPoints = QuizAttempt::where('quiz_id', $quiz->id)
             ->where('student_id', Auth::id())
             ->max('points');
 
-        // If a score was found, cast it to a float. Otherwise, return null.
-        return $maxScore === null ? null : (float) $maxScore;
+        if ($maxPoints === null) {
+            return null;
+        }
+
+        // Get total possible points for this quiz
+        $totalPoints = $quiz->questions->sum('pivot.points');
+        $percentage = $totalPoints > 0 ? (((float) $maxPoints / $totalPoints) * 100) : 0;
+        $percentage = min($percentage, 100); // Ensure it doesn't exceed 100%
+
+        return [
+            'points' => (float) $maxPoints,
+            'total_points' => $totalPoints,
+            'percentage' => round($percentage, 1)
+        ];
     }
 
     /**

@@ -130,8 +130,11 @@
                                 @if($isCompleted && $bestScore !== null)
                                     <div class="text-center">
                                         <p class="text-sm text-slate-600 dark:text-slate-400 mb-1">Điểm cao nhất</p>
-                                        <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                                            {{ number_format($bestScore, 1) }}%
+                                        <div class="text-lg font-bold text-blue-600 dark:text-blue-400">
+                                            {{ number_format($bestScore['points'], 1) }}/{{ $bestScore['total_points'] }}
+                                        </div>
+                                        <div class="text-sm text-slate-500 dark:text-slate-400">
+                                            ({{ $bestScore['percentage'] }}%)
                                         </div>
                                     </div>
                                 @endif
