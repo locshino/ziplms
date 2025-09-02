@@ -10,6 +10,7 @@ use App\Models\Course;
 use App\Models\QuizAttempt;
 use App\Models\Submission;
 use BackedEnum;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\ViewAction;
 use Filament\Pages\Page;
 use Filament\Tables;
@@ -26,12 +27,22 @@ use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class Reports extends Page implements Tables\Contracts\HasTable
 {
+    use HasPageShield;
     use Tables\Concerns\InteractsWithTable;
-    // use HasPageShield;
 
     protected string $view = 'filament.pages.reports';
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-chart-bar';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('pages.reports');
+    }
+
+    public function getTitle(): string
+    {
+        return __('pages.reports');
+    }
 
     public $courses = [];
 
@@ -78,7 +89,6 @@ class Reports extends Page implements Tables\Contracts\HasTable
             $this->courses = Course::where('teacher_id', $teacherId)
                 ->pluck('title', 'id')
                 ->toArray();
-
         } else {
             $this->courses = Course::whereHas('users', function ($query) use ($teacherId) {
                 $query->where('users.id', $teacherId);
@@ -86,7 +96,6 @@ class Reports extends Page implements Tables\Contracts\HasTable
         }
         $this->closedQuizzes = collect();
         $this->closedAssignments = collect();
-
     }
 
     /**
@@ -115,7 +124,6 @@ class Reports extends Page implements Tables\Contracts\HasTable
         }
 
         return $this->submission($table);
-
     }
 
     public function quiz($table)
@@ -135,7 +143,6 @@ class Reports extends Page implements Tables\Contracts\HasTable
                         $subQuery->where('users.id', $teacherId);
                     });
                 });
-
         }
         $query->when($this->selectedCourseId, function ($q) {
             $q->whereHas('quiz.courses', function ($q) {
@@ -338,6 +345,5 @@ class Reports extends Page implements Tables\Contracts\HasTable
                     ]),
             ])
             ->query(fn () => $query);
-
     }
 }

@@ -34,7 +34,7 @@ class QuizAttemptObserver
             'attempt_id' => $quizAttempt->id,
             'old_status' => $quizAttempt->getOriginal('status'),
             'new_status' => $quizAttempt->status->value,
-            'is_dirty' => $quizAttempt->isDirty('status')
+            'is_dirty' => $quizAttempt->isDirty('status'),
         ]);
         // Kiểm tra nếu status thay đổi thành IN_PROGRESS
         if ($quizAttempt->isDirty('status') && $quizAttempt->status === QuizAttemptStatus::IN_PROGRESS) {

@@ -1,7 +1,7 @@
 <x-filament-panels::page>
 
-    <div class="min-h-screen bg-slate-100 dark:bg-slate-900" 
-         x-data="{}" 
+    <div class="min-h-screen bg-slate-100 dark:bg-slate-900"
+         x-data="{}"
          x-on:refresh-assignments.window="$wire.$refresh()"
     >
         <div class="max-w-7xl mx-auto px-4 py-8">
@@ -228,7 +228,7 @@
                 </div>
             </div>
 
-            @if ($isGradingExpired)
+            @if ($this->isGradingExpired)
                 <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-slate-700 dark:text-red-400" role="alert">
                     <span class="font-medium">Đã hết hạn chấm bài!</span> Bạn không thể thay đổi điểm sau ngày {{ $selectedCourseAssignment->end_at->format('d/m/Y H:i') }}.
                 </div>
@@ -265,6 +265,7 @@
                                             @php
                                                 $media = $submission->getFirstMedia('submission_documents');
                                                 $link = Str::of($submission->content)->match('/(https?:\/\/[^\s]+)/');
+                                                $note = Str::of($submission->content)->before('Submitted via link:')->trim();
                                             @endphp
                                             @if($media)
                                                 <p><strong>Bài nộp:</strong></p>
@@ -281,8 +282,9 @@
                                                     Mở liên kết
                                                 </a>
                                             @endif
-                                            @if($submission->content)
-                                                <p class="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700"><strong>Ghi chú:</strong><br>{{ nl2br(e(Str::of($submission->content)->before('Submitted via link:')->trim())) }}</p>
+                                            {{-- FIX 3: Only show note if it exists and is not just the link itself --}}
+                                            @if($note->isNotEmpty() && (string) $note !== (string) $link)
+                                                <p class="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700"><strong>Ghi chú:</strong><br>{{ nl2br(e($note)) }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -293,20 +295,20 @@
                                                 <input type="number" id="points-{{ $submission->id }}"
                                                        wire:model="points.{{ $submission->id }}"
                                                        step="0.1" min="0" max="{{ $selectedCourseAssignment->assignment->max_points }}"
-                                                       @if($isGradingExpired) disabled @endif
+                                                       @if($this->isGradingExpired) disabled @endif
                                                        class="fi-input mt-1 block w-full" placeholder="VD: 8.5">
                                             </div>
                                             <div class="sm:col-span-2 md:col-span-1">
                                                 <label for="feedback-{{ $submission->id }}" class="text-sm font-medium">Phản hồi</label>
                                                 <textarea id="feedback-{{ $submission->id }}"
                                                           wire:model="feedback.{{ $submission->id }}"
-                                                          @if($isGradingExpired) disabled @endif
+                                                          @if($this->isGradingExpired) disabled @endif
                                                           class="fi-input mt-1 block w-full" rows="2" placeholder="Nhập phản hồi..."></textarea>
                                             </div>
                                             <div class="sm:col-span-3 md:col-span-1">
                                                 <button type="button" wire:click="saveGrade('{{ $submission->id }}')"
                                                         wire:loading.attr="disabled" wire:target="saveGrade('{{ $submission->id }}')"
-                                                        @if($isGradingExpired) disabled @endif
+                                                        @if($this->isGradingExpired) disabled @endif
                                                         class="fi-btn fi-btn-color-primary w-full">
                                                     Lưu điểm
                                                 </button>
@@ -364,7 +366,7 @@
     @endif
     
     @if($showDocumentsModal && $selectedCourseAssignment)
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/75" 
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/75"
          wire:click.self="closeDocumentsModal"
     >
         <div class="relative w-full max-w-2xl bg-white dark:bg-slate-800 rounded-xl shadow-xl transform scale-100 transition-all duration-300 mx-4 max-h-[90vh] flex flex-col" wire:click.stop>

@@ -53,6 +53,7 @@
         "spatie/laravel-activitylog": "^4.10",
         "spatie/laravel-medialibrary": "^11.13",
         "spatie/laravel-permission": "^6.21",
+        "spatie/laravel-sluggable": "^3.7",
         "spatie/laravel-tags": "^4.10",
         "stechstudio/filament-impersonate": "^4.0",
         "stephenjude/filament-two-factor-authentication": "^3.0",

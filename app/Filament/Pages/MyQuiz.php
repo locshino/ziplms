@@ -9,6 +9,7 @@ use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Services\Interfaces\QuizFilterServiceInterface;
 use BackedEnum;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -16,18 +17,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Computed;
 
-// use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-
 class MyQuiz extends Page
 {
-    // use HasPageShield;
+    use HasPageShield;
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-academic-cap';
 
     protected string $view = 'filament.pages.my-quiz';
-
-    protected static ?string $navigationLabel = 'Quiz của tôi';
-
-    protected static ?string $title = 'Quiz của tôi';
 
     public ?array $currentAnswers = [];
 
@@ -51,6 +47,16 @@ class MyQuiz extends Page
     public int $perPage = 10;
 
     public int $currentPage = 1;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('pages.my_quiz');
+    }
+
+    public function getTitle(): string
+    {
+        return __('pages.my_quiz');
+    }
 
     public function mount(): void
     {
@@ -180,7 +186,6 @@ class MyQuiz extends Page
         }
 
         $this->listQuizStatus = $listQuizStatus;
-
     }
 
     public function updatedSelectedStatus(): void

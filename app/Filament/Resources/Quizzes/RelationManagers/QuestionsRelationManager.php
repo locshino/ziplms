@@ -24,6 +24,8 @@ class QuestionsRelationManager extends RelationManager
 {
     protected static string $relationship = 'questions';
 
+    protected static ?string $recordTitleAttribute = 'title';
+
     // protected static ?string $relatedResource = QuestionResource::class;
 
     public function form(Schema $forms): Schema

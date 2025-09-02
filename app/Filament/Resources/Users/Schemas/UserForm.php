@@ -10,7 +10,8 @@ use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
-use Spatie\Permission\Models\Role;
+use Filament\Support\Enums\Operation;
+use Illuminate\Database\Eloquent\Builder;
 
 class UserForm
 {
@@ -38,10 +39,20 @@ class UserForm
                     ->label(__('resource_user.form.fields.email'))
                     ->email()
                     ->required(),
+                TextInput::make('password')
+                    ->password()
+                    ->autocomplete('new-password')
+                    ->revealable()
+                    ->required()
+                    ->visibleOn(Operation::Create),
                 Select::make('roles')
                     ->label(__('resource_user.form.fields.roles'))
-                    ->relationship('roles', 'name')
-                    ->options(RoleHelper::getBaseSystemRoles())
+                    ->relationship(
+                        name: 'roles',
+                        titleAttribute: 'name',
+                        modifyQueryUsing: fn (Builder $query) => $query
+                            ->whereNotIn('name', RoleHelper::getHigherRoles())
+                    )
                     ->multiple()
                     ->preload()
                     ->searchable(),
@@ -51,7 +62,7 @@ class UserForm
                     ->required(),
                 Toggle::make('force_renew_password')
                     ->label(__('resource_user.form.fields.force_renew_password'))
-                    ->visible(fn() => config('ziplms.plugins.renew_password.enabled') && (config('ziplms.plugins.renew_password.force_renew_password') == false))
+                    ->visible(fn () => config('ziplms.plugins.renew_password.enabled') && (config('ziplms.plugins.renew_password.force_renew_password') == false))
                     ->required(),
             ]);
     }

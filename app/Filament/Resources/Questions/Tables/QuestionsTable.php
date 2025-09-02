@@ -3,10 +3,12 @@
 namespace App\Filament\Resources\Questions\Tables;
 
 use App\Enums\Status\QuestionStatus;
+use App\Filament\Imports\QuestionImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\ImportAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -55,6 +57,13 @@ class QuestionsTable
             ->recordActions([
                 // ViewAction::make(),
                 EditAction::make(),
+            ])
+            ->headerActions([
+                ImportAction::make('Import')
+                    ->importer(QuestionImporter::class)
+                    ->options([
+                        'default_status' => QuestionStatus::PUBLISHED->value,
+                    ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

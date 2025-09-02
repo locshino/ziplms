@@ -59,20 +59,16 @@ class AssignmentsRelationManager extends RelationManager
                     ->searchable(),
                 TextColumn::make('pivot.start_at')
                     ->label('Start At')
-                    ->dateTime()
-                    ->sortable(),
+                    ->dateTime(),
                 TextColumn::make('pivot.end_submission_at')
                     ->label('End Submission At')
-                    ->dateTime()
-                    ->sortable(),
+                    ->dateTime(),
                 TextColumn::make('pivot.start_grading_at')
                     ->label('Start Grading At')
-                    ->dateTime()
-                    ->sortable(),
+                    ->dateTime(),
                 TextColumn::make('pivot.end_at')
                     ->label('End At')
-                    ->dateTime()
-                    ->sortable(),
+                    ->dateTime(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -90,13 +86,13 @@ class AssignmentsRelationManager extends RelationManager
                 TrashedFilter::make(),
                 SelectFilter::make('status')
                     ->options(AssignmentStatus::class),
-                DateRangeFilter::make('pivot.start_at')
+                DateRangeFilter::make('course_assignments.start_at')
                     ->label('Start At'),
-                DateRangeFilter::make('pivot.end_submission_at')
+                DateRangeFilter::make('course_assignments.end_submission_at')
                     ->label('End Submission At'),
-                DateRangeFilter::make('pivot.start_grading_at')
+                DateRangeFilter::make('course_assignments.start_grading_at')
                     ->label('Start Grading At'),
-                DateRangeFilter::make('pivot.end_at')
+                DateRangeFilter::make('course_assignments.end_at')
                     ->label('End At'),
             ])
             ->recordActions([

@@ -106,7 +106,7 @@ class QuizAttemptsTable
                         Column::make('updated_at'),
                     ])
                         // Optional: you can customize the filename
-                        ->withFilename(fn($resource) => $resource::getModelLabel() . '-' . date('Y-m-d')),
+                        ->withFilename(fn ($resource) => $resource::getModelLabel().'-'.date('Y-m-d')),
                 ]),
             ]);
     }

@@ -34,7 +34,7 @@ class BadgeFactory extends Factory
      */
     public function withStatus(BadgeStatus $status): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => $status->value,
         ]);
     }
@@ -44,7 +44,7 @@ class BadgeFactory extends Factory
      */
     public function active(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => BadgeStatus::ACTIVE->value,
         ]);
     }
@@ -54,7 +54,7 @@ class BadgeFactory extends Factory
      */
     public function inactive(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => BadgeStatus::INACTIVE->value,
         ]);
     }

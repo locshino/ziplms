@@ -19,7 +19,7 @@ class QuizFilamentNotificationService
      */
     public function sendInProgressNotifications(): void
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return;
         }
 
@@ -90,12 +90,12 @@ class QuizFilamentNotificationService
      */
     public function clearDismissedNotifications(): void
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return;
         }
 
         $user = Auth::user();
-        $notificationId = 'quiz_in_progress_' . $attemptId;
+        $notificationId = 'quiz_in_progress_'.$attemptId;
 
         // Xóa thông báo cho attempt cụ thể này
         $deletedCount = $this->deleteNotificationById($user, $notificationId);
@@ -103,7 +103,7 @@ class QuizFilamentNotificationService
         Log::info('Cleared notification for a specific attempt', [
             'user_id' => $user->id,
             'attempt_id' => $attemptId,
-            'count' => $deletedCount
+            'count' => $deletedCount,
         ]);
 
         // KHÔNG gọi lại sendInProgressNotifications() để tránh gửi lại notifications
@@ -120,7 +120,7 @@ class QuizFilamentNotificationService
      */
     private function sendSingleNotification(User $user, QuizAttempt $attempt): void
     {
-        $notificationId = 'quiz_in_progress_' . $attempt->id;
+        $notificationId = 'quiz_in_progress_'.$attempt->id;
         $startedAt = Carbon::parse($attempt->start_at)->format('d/m/Y H:i');
 
         Notification::make($notificationId)
@@ -147,11 +147,11 @@ class QuizFilamentNotificationService
     private function sendMultipleNotification(User $user, $attempts): void
     {
         $count = $attempts->count();
-        $notificationId = 'quiz_in_progress_multiple_' . $user->id;
+        $notificationId = 'quiz_in_progress_multiple_'.$user->id;
 
         // Lấy 3 tiêu đề đầu tiên để hiển thị
         $quizTitles = $attempts->pluck('quiz.title')->take(3)->implode(', ');
-        $moreText = $count > 3 ? "... và " . ($count - 3) . " bài khác" : "";
+        $moreText = $count > 3 ? '... và '.($count - 3).' bài khác' : '';
 
         Notification::make($notificationId)
             ->warning()
@@ -178,7 +178,7 @@ class QuizFilamentNotificationService
     {
         $deletedCount = $user->notifications()
             ->where('type', 'Filament\\Notifications\\DatabaseNotification')
-            ->where(function ($query) use ($user) {
+            ->where(function ($query) {
                 $query->where('data->id', 'like', 'quiz_in_progress_%');
             })
             ->delete();
@@ -186,7 +186,7 @@ class QuizFilamentNotificationService
         if ($deletedCount > 0) {
             Log::info('Cleared all in-progress notifications for user', [
                 'user_id' => $user->id,
-                'count' => $deletedCount
+                'count' => $deletedCount,
             ]);
         }
     }

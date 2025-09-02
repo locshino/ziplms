@@ -6,5 +6,8 @@ use Yebor974\Filament\RenewPassword\Pages\Auth\RenewPassword as BaseRenewPasswor
 
 class RenewPassword extends BaseRenewPassword
 {
-    //
+    public function getTitle(): string
+    {
+        return __('pages.renew_password');
+    }
 }

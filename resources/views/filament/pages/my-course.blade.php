@@ -83,7 +83,7 @@
                                             Tất cả giáo viên
                                         </a>
                                         @foreach($this->teachers as $teacher)
-                                            <a href="#" wire:click.prevent="filterCoursesByTeacher({{ $teacher->id }})"
+                                            <a href="#" wire:click.prevent="filterCoursesByTeacher('{{ $teacher->id }}')"
                                                 class="block px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
                                                 {{ $teacher->name }}
                                             </a>

@@ -48,7 +48,7 @@ class QuizAttemptFactory extends Factory
      */
     public function withStatus(QuizAttemptStatus $status): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => $status->value,
         ]);
     }

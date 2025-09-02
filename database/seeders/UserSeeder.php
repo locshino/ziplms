@@ -6,13 +6,10 @@ use App\Enums\Status\UserStatus;
 use App\Enums\System\RoleSystem;
 use App\Models\Role;
 use App\Models\User;
-use Database\Seeders\Contracts\HasCacheSeeder;
 use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
 {
-    use HasCacheSeeder;
-
     /**
      * Run the database seeds.
      */
@@ -21,25 +18,14 @@ class UserSeeder extends Seeder
         // Create roles first (always check, not cached separately)
         $this->createRoles();
 
-        // Skip if users already exist and cache is valid
-        if ($this->shouldSkipSeeding('users', 'users')) {
-            return;
+        foreach ($this->getDefaultUsers() as $userInfo) {
+            $this->createDefaultUser($userInfo['name'], $userInfo['email'], $userInfo['role']);
         }
 
-        // Get or create users with caching
-        $this->getCachedData('users', function () {
-            // Create default users from the list
-            foreach ($this->getDefaultUsers() as $userInfo) {
-                $this->createDefaultUser($userInfo['name'], $userInfo['email'], $userInfo['role']);
-            }
-
-            // Create additional random users for each role
-            $this->createRandomUsers(RoleSystem::MANAGER, 9);
-            $this->createRandomUsers(RoleSystem::TEACHER, 29);
-            $this->createRandomUsers(RoleSystem::STUDENT, 599);
-
-            return true;
-        });
+        // Create additional random users for each role
+        $this->createRandomUsers(RoleSystem::MANAGER, 9);
+        $this->createRandomUsers(RoleSystem::TEACHER, 29);
+        $this->createRandomUsers(RoleSystem::STUDENT, 599);
     }
 
     /**

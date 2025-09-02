@@ -30,7 +30,7 @@ class AnswerChoiceFactory extends Factory
      */
     public function correct(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'is_correct' => true,
         ]);
     }
@@ -40,7 +40,7 @@ class AnswerChoiceFactory extends Factory
      */
     public function incorrect(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'is_correct' => false,
         ]);
     }

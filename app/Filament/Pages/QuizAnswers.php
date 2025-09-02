@@ -7,22 +7,26 @@ namespace App\Filament\Pages;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use BackedEnum;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
-// use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-
 class QuizAnswers extends Page
 {
-    // use HasPageShield;
+    use HasPageShield;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-academic-cap';
 
     protected string $view = 'filament.pages.quiz-answers';
 
     protected static bool $shouldRegisterNavigation = false;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('pages.quiz_answers');
+    }
 
     // --- Properties for Quiz Data ---
     public ?Quiz $quiz = null;
@@ -215,7 +219,7 @@ class QuizAnswers extends Page
 
     public function getTitle(): string
     {
-        return 'Đáp án: '.($this->quiz?->title ?? 'Quiz');
+        return __('pages.quiz_answers').': '.($this->quiz?->title ?? 'Quiz');
     }
 
     public function isCorrectAnswer(string $questionId): bool

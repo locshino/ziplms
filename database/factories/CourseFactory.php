@@ -24,7 +24,7 @@ class CourseFactory extends Factory
 
         // Generate start_at first
         $startAt = $this->faker->dateTimeBetween('-1 month', '+1 month');
-        
+
         return [
             'title' => $title,
             'slug' => Str::slug($title),
@@ -43,7 +43,7 @@ class CourseFactory extends Factory
      */
     public function featured(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'is_featured' => true,
         ]);
     }
@@ -53,7 +53,7 @@ class CourseFactory extends Factory
      */
     public function withStatus(CourseStatus $status): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => $status->value,
         ]);
     }

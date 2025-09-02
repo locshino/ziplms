@@ -33,7 +33,7 @@ class QuizFactory extends Factory
      */
     public function withStatus(QuizStatus $status): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => $status->value,
         ]);
     }
@@ -67,7 +67,7 @@ class QuizFactory extends Factory
      */
     public function multipleSession(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'is_single_session' => false,
         ]);
     }
