@@ -69,6 +69,8 @@ class CourseForm
                             ->schema([
                                 DateTimePicker::make('start_at')
                                     ->label(__('resource_course.form.fields.start_at'))
+                                    ->required()
+                                    ->before('end_at')
                                     ->disabled(function (?Course $record) {
                                         if (! $record) {
                                             return false; // Always enabled on create
@@ -94,6 +96,8 @@ class CourseForm
 
                                 DateTimePicker::make('end_at')
                                     ->label(__('resource_course.form.fields.end_at'))
+                                    ->required()
+                                    ->after('start_at')
                                     ->disabled(function (?Course $record) {
                                         if (! $record) {
                                             return false;
@@ -107,29 +111,29 @@ class CourseForm
                                     }),
                             ]),
 
-                        Action::make('setEvergreen')
-                            ->label('Chuyển sang Vô thời hạn')
-                            ->color('info')
-                            ->icon('heroicon-o-calendar-days')
-                            ->requiresConfirmation()
-                            ->visible(function (?Course $record) {
-                                if (! $record) {
-                                    return false;
-                                }
+                        // Action::make('setEvergreen')
+                        //     ->label('Chuyển sang Vô thời hạn')
+                        //     ->color('info')
+                        //     ->icon('heroicon-o-calendar-days')
+                        //     ->requiresConfirmation()
+                        //     ->visible(function (?Course $record) {
+                        //         if (! $record) {
+                        //             return false;
+                        //         }
 
-                                // Only show if the course is currently timed
-                                return $record->start_at !== null;
-                            })
-                            ->modalHeading('Xác nhận chuyển đổi sang Vô thời hạn')
-                            ->modalDescription(new HtmlString(
-                                'Hành động này sẽ xóa lịch trình của khóa học. <br/><br/>'.
-                                    '<strong class="text-danger">Cảnh báo: Nếu khóa học đã có học viên, bạn sẽ không thể thiết lập lại lịch cho khóa học này nữa. Thay đổi sẽ có hiệu lực khi bấm lưu thay đổi</strong>'
-                            ))
-                            ->modalSubmitActionLabel('Có, tôi hiểu và xác nhận')
-                            ->action(function (Set $set) {
-                                $set('start_at', null);
-                                $set('end_at', null);
-                            }),
+                        //         // Only show if the course is currently timed
+                        //         return $record->start_at !== null;
+                        //     })
+                        //     ->modalHeading('Xác nhận chuyển đổi sang Vô thời hạn')
+                        //     ->modalDescription(new HtmlString(
+                        //         'Hành động này sẽ xóa lịch trình của khóa học. <br/><br/>'.
+                        //             '<strong class="text-danger">Cảnh báo: Nếu khóa học đã có học viên, bạn sẽ không thể thiết lập lại lịch cho khóa học này nữa. Thay đổi sẽ có hiệu lực khi bấm lưu thay đổi</strong>'
+                        //     ))
+                        //     ->modalSubmitActionLabel('Có, tôi hiểu và xác nhận')
+                        //     ->action(function (Set $set) {
+                        //         $set('start_at', null);
+                        //         $set('end_at', null);
+                        //     }),
                     ]),
 
                 Section::make('Tài liệu')
@@ -157,10 +161,6 @@ class CourseForm
                     ->columnSpanFull()
                     ->collapsible()
                     ->schema([
-                        TextInput::make('slug')
-                            ->label(__('resource_course.form.fields.slug'))
-                            ->unique(ignoreRecord: true)
-                            ->rules(['regex:/^[a-z0-9-]+$/']),
                         TextInput::make('price')
                             ->label(__('resource_course.form.fields.price'))
                             ->numeric()

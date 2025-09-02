@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Quizzes;
 
+use App\Filament\RelationManagers\AuditsRelationManager;
 use App\Filament\Resources\Quizzes\Pages\CreateQuiz;
 use App\Filament\Resources\Quizzes\Pages\EditQuiz;
 use App\Filament\Resources\Quizzes\Pages\ListQuizzes;
@@ -18,7 +19,6 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 
 class QuizResource extends Resource
 {

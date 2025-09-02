@@ -88,7 +88,7 @@ class UsersTable
                         name: 'roles',
                         titleAttribute: 'name',
                         modifyQueryUsing: fn (Builder $query) => $query
-                            ->whereNotIn('name', RoleHelper::getHigherRoles())
+                            ->whereIn('name', RoleHelper::getLowerRoles())
                     )
                     ->label(__('resource_user.table.filters.roles'))
                     ->multiple()

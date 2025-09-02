@@ -46,10 +46,10 @@ use OwenIt\Auditing\Contracts\Auditable;
  */
 class CourseAssignment extends Pivot implements Auditable
 {
-    use HasFactory,
-        HasUuids,
+    use HasUuids,
         \OwenIt\Auditing\Auditable,
-        SoftDeletes;
+        // SoftDeletes
+        HasFactory;
 
     /**
      * The table associated with the model.

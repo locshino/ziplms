@@ -245,16 +245,34 @@ class PermissionSeeder extends Seeder
 
         // Manager: Chỉ có thể sửa và xem khóa học, xem báo cáo
         $managerPermissions = [
+            'view_users::user',
+            'view_any_users::user',
+
+            'view_submissions::submission',
+            'view_any_submissions::submission',
+
+            'view_quizzes::quiz',
+            'view_any_quizzes::quiz',
+
+            'view_assignments::assignment',
+            'view_any_assignments::assignment',
+
+            'view_answer::choices::answer::choice',
+            'view_any_answer::choices::answer::choice',
+
             'view_courses::course',
             'view_any_courses::course',
             'update_courses::course',
             'page_Reports',
+            'page_CourseDetail',
             'page_MyCourse',
             'widget_MyCalendarWidget',
         ];
 
         // Teacher: Chấm bài (submissions) và xem báo cáo
         $teacherPermissions = [
+            'page_CourseDetail',
+            'page_MyCourse',
             'page_Reports',
             'page_GradingPage',
             'page_MyAssignmentsPage',
