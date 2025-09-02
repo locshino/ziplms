@@ -26,12 +26,35 @@ class QuizFilamentNotificationService
         $user = Auth::user();
 
         // Lấy tất cả các lần làm bài đang dang dở của user
-        // Eager load 'quiz' để tránh truy vấn N+1
-        $inProgressAttempts = QuizAttempt::with('quiz')
+        // Eager load 'quiz' và 'quiz.courses' để tránh truy vấn N+1
+        $inProgressAttempts = QuizAttempt::with(['quiz', 'quiz.courses'])
             ->where('student_id', $user->id)
             ->where('status', QuizAttemptStatus::IN_PROGRESS)
             ->whereHas('quiz') // Chỉ lấy những attempt có quiz còn tồn tại
-            ->get();
+            ->get()
+            ->filter(function ($attempt) use ($user) {
+                // Kiểm tra xem quiz có còn trong thời gian cho phép không
+                $quiz = $attempt->quiz;
+                $now = \Carbon\Carbon::now();
+                
+                // Kiểm tra tất cả các khóa học mà user đã tham gia và có quiz này
+                $userCourses = $quiz->courses()->whereHas('users', function ($q) use ($user) {
+                    $q->where('users.id', $user->id);
+                })->get();
+                
+                foreach ($userCourses as $course) {
+                    $courseQuiz = $course->pivot;
+                    $endAt = $courseQuiz->end_at;
+                    
+                    // Nếu quiz vẫn còn trong thời gian cho phép (chưa hết hạn)
+                    if (!$endAt || $now->lte($endAt)) {
+                        return true; // Quiz vẫn còn hiệu lực
+                    }
+                }
+                
+                // Nếu tất cả các course đều đã hết hạn, không hiển thị thông báo
+                return false;
+            });
 
         // Dọn dẹp trước: Xóa tất cả các thông báo quiz cũ
         $this->clearAllInProgressNotificationsForUser($user);
@@ -65,7 +88,7 @@ class QuizFilamentNotificationService
      * Xóa thông báo cho một lần làm bài cụ thể khi nó hoàn thành hoặc bị hủy.
      * Sau khi xóa, sẽ kiểm tra và gửi lại thông báo tổng hợp nếu cần.
      */
-    public function clearNotificationForAttempt(int $attemptId): void
+    public function clearDismissedNotifications(): void
     {
         if (!Auth::check()) {
             return;
@@ -83,9 +106,9 @@ class QuizFilamentNotificationService
             'count' => $deletedCount
         ]);
 
-        // Sau khi xóa một thông báo, hãy chạy lại logic chính để đảm bảo
-        // hệ thống hiển thị đúng thông báo tổng hợp cho các quiz còn lại.
-        $this->sendInProgressNotifications();
+        // KHÔNG gọi lại sendInProgressNotifications() để tránh gửi lại notifications
+        // cho các quiz đã completed. Notifications sẽ được cập nhật tự động
+        // khi user reload trang hoặc khi có quiz attempt mới được tạo.
     }
 
     // =========================================================================
@@ -119,6 +142,7 @@ class QuizFilamentNotificationService
 
     /**
      * Gửi thông báo cho TRƯỜNG HỢP CÓ NHIỀU QUIZ dang dở.
+     * Gửi thông báo riêng biệt cho từng quiz thay vì một thông báo tổng hợp.
      */
     private function sendMultipleNotification(User $user, $attempts): void
     {

@@ -534,31 +534,49 @@ class QuizTaking extends Page
             return false;
         }
 
-        // Check if quiz exists in course_quizzes table with valid time restrictions
-        $courseQuiz = $quiz->courses()
+        // Check if user is enrolled in any course that has this quiz with valid time restrictions
+        $userCourses = $quiz->courses()
+            ->whereHas('users', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
             ->withPivot(['start_at', 'end_at'])
+            ->get();
+
+        if ($userCourses->isEmpty()) {
+            return false;
+        }
+
+        // Check time restrictions for any enrolled course
+        $now = now();
+        $canTakeInAnyCourse = false;
+
+        foreach ($userCourses as $course) {
+            $startAt = $course->pivot->start_at;
+            $endAt = $course->pivot->end_at;
+
+            // If no time restrictions, or within valid time range
+            if ((!$startAt || $now->gte($startAt)) && (!$endAt || $now->lte($endAt))) {
+                $canTakeInAnyCourse = true;
+                break;
+            }
+        }
+
+        if (!$canTakeInAnyCourse) {
+            return false;
+        }
+
+        // Check if there's an existing IN_PROGRESS attempt
+        $inProgressAttempt = QuizAttempt::where('quiz_id', $quiz->id)
+            ->where('student_id', $userId)
+            ->where('status', QuizAttemptStatus::IN_PROGRESS)
             ->first();
 
-        if (! $courseQuiz) {
-            return false;
+        // If there's an IN_PROGRESS attempt, allow access to continue
+        if ($inProgressAttempt) {
+            return true;
         }
 
-        // Check time restrictions
-        $now = now();
-        $startAt = $courseQuiz->pivot->start_at;
-        $endAt = $courseQuiz->pivot->end_at;
-
-        // If start_at is set and current time is before start time
-        if ($startAt && $now->lt($startAt)) {
-            return false;
-        }
-
-        // If end_at is set and current time is after end time
-        if ($endAt && $now->gt($endAt)) {
-            return false;
-        }
-
-        // Check remaining attempts
+        // Check remaining attempts for new attempts
         $remainingAttempts = $this->getQuizRemainingAttempts($quiz);
 
         // If remainingAttempts is null, it means unlimited attempts
