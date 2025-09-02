@@ -11,7 +11,9 @@ use App\Models\QuizAttempt;
 use App\Models\Submission;
 use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
+use Carbon\Carbon; // Thêm dòng này
 use Filament\Actions\ViewAction;
+use Filament\Notifications\Notification; // Thêm dòng này
 use Filament\Pages\Page;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -45,32 +47,18 @@ class Reports extends Page implements Tables\Contracts\HasTable
     }
 
     public $courses = [];
-
     public $totalCourse = [];
-
     public $selectedCourseId = null;
-
     public string $activeTab = 'quizzes';
-
     public $startDate;
-
     public $endDate;
-
     public Collection $publishedQuizzes;
-
     public Collection $publishedAssignments;
-
     public Collection $closedQuizzes;
-
     public Collection $closedAssignments;
-
     public Collection $totalQuizzes;
-
     public Collection $totalAssignments;
 
-    /**
-     * Hàm mount để khởi tạo dữ liệu ban đầu.
-     */
     public function mount()
     {
         $teacherId = auth()->id();
@@ -79,11 +67,6 @@ class Reports extends Page implements Tables\Contracts\HasTable
         $this->publishedAssignments = collect();
         $this->totalQuizzes = collect();
         $this->totalAssignments = collect();
-
-        // Danh sách khóa học theo giáo viên
-        $this->courses = Course::where('teacher_id', $teacherId)
-            ->pluck('title', 'id')
-            ->toArray();
 
         if (Auth::user()->hasRole('teacher')) {
             $this->courses = Course::where('teacher_id', $teacherId)
@@ -98,9 +81,6 @@ class Reports extends Page implements Tables\Contracts\HasTable
         $this->closedAssignments = collect();
     }
 
-    /**
-     * Hàm xử lý khi thay đổi tab hoặc chọn khóa học.
-     */
     public function updated($property)
     {
         if (in_array($property, ['activeTab', 'selectedCourseId'])) {
@@ -108,17 +88,37 @@ class Reports extends Page implements Tables\Contracts\HasTable
         }
     }
 
+    /**
+     * Hàm xử lý khi nhấn nút lọc, có thêm validation ngày tháng.
+     */
     public function applyFilters()
     {
-        $this->resetTable(); // nếu có method này dùng để reload lại table theo filter
+        // Kiểm tra nếu cả hai ngày đều được chọn
+        if ($this->startDate && $this->endDate) {
+            $start = Carbon::parse($this->startDate);
+            $end = Carbon::parse($this->endDate);
+
+            // Nếu ngày kết thúc nhỏ hơn hoặc bằng ngày bắt đầu
+            if ($end->lte($start)) {
+                // Gửi thông báo lỗi
+                Notification::make()
+                    ->title('Lỗi lọc ngày tháng')
+                    ->body('Ngày kết thúc phải lớn hơn ngày bắt đầu.')
+                    ->danger()
+                    ->send();
+
+                // Dừng thực thi để không làm mới bảng
+                return;
+            }
+        }
+
+        // Nếu ngày tháng hợp lệ, làm mới bảng
+        $this->resetTable();
     }
 
-    /**
-     * Định nghĩa bảng tương ứng theo tab.
-     */
+
     public function table(Table $table): Table
     {
-
         if ($this->activeTab === 'quizzes') {
             return $this->quiz($table);
         }
@@ -126,6 +126,7 @@ class Reports extends Page implements Tables\Contracts\HasTable
         return $this->submission($table);
     }
 
+    // ... các phương thức quiz() và submission() không thay đổi
     public function quiz($table)
     {
         $teacherId = auth()->id();
@@ -214,7 +215,7 @@ class Reports extends Page implements Tables\Contracts\HasTable
                 TrashedFilter::make(),
             ])
             ->recordActions([
-                ViewAction::make(),
+
             ])
             ->toolbarActions([
                 ExportBulkAction::make()->exports([
@@ -230,9 +231,9 @@ class Reports extends Page implements Tables\Contracts\HasTable
                         Column::make('updated_at'),
                     ])
                         // Optional: you can customize the filename
-                        ->withFilename('quiz_point&report_'.now()),
+                        ->withFilename('quiz_point&report_' . now()),
                 ]),
-            ])->query(fn () => $query);
+            ])->query(fn() => $query);
     }
 
     public function submission($table)
@@ -326,7 +327,7 @@ class Reports extends Page implements Tables\Contracts\HasTable
                     ->options(SubmissionStatus::class),
             ])
             ->recordActions([
-                ViewAction::make(),
+
             ])
             ->toolbarActions([
                 ExportBulkAction::make()
@@ -341,9 +342,9 @@ class Reports extends Page implements Tables\Contracts\HasTable
                             Column::make('updated_at'),
                         ])
                             // Optional: you can customize the filename
-                            ->withFilename('assignment&report_'.now()),
+                            ->withFilename('assignment&report_' . now()),
                     ]),
             ])
-            ->query(fn () => $query);
+            ->query(fn() => $query);
     }
 }

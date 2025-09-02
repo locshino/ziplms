@@ -30,275 +30,149 @@ class MyCourse extends Page
         return __('pages.my_course');
     }
 
-    // Danh sách khóa học đang học / đã hoàn thành
+    // Danh sách khóa học
     public Collection|EloquentCollection $ongoingCourses;
-
     public Collection|EloquentCollection $completedCourses;
 
-    // Search và lọc
-    public string $searchCourse;
-
+    // Thuộc tính cho việc lọc và tìm kiếm
+    public string $searchCourse = '';
     public array $tags = [];
-
-    public $teachers = [];
-
+    public Collection $teachers;
     public $selectedTeacher;
+    public $sortBy = 'newest';
+    public $selectedTag;
 
     public function mount(): void
     {
-
         /** @var User $user */
-        $now = now();
         $user = Auth::user();
-        $enrolledCourses = collect();
-        // Nếu là teacher: lấy khóa học đang dạy
-        if ($user->hasRole('teacher')) {
+        $allEnrolledCourses = $this->getBaseQuery();
 
-            $enrolledCourses = $this->getTeachingCourses();
-        } else {
-            $enrolledCourses = $this->getEnrolledCourses();
-        }
-        $ongoingCourses = collect();
-        $completedCourses = collect();
-        // Phân loại ongoing / completed
-        foreach ($enrolledCourses as $course) {
-            $pivot = $course->pivot;
-            // student mới có pivot
-
-            if ($pivot) {
-                if (! $pivot->end_at || $pivot->end_at->isAfter($now)) {
-                    $ongoingCourses->push($course);
-                } elseif ($pivot->end_at && $pivot->end_at->isBefore($now)) {
-                    $completedCourses->push($course);
-                }
-            } else {
-                // teacher: dùng start/end của course trực tiếp
-                if (! $course->end_at || $course->end_at->isAfter($now)) {
-                    $ongoingCourses->push($course);
-                } elseif ($course->end_at && $course->end_at->isBefore($now)) {
-                    $completedCourses->push($course);
-                }
-            }
-        }
-        // Lấy tất cả tag từ các khóa học
-
-        foreach ($enrolledCourses as $course) {
-            $this->tags = $enrolledCourses->flatMap(function ($course) {
-                return $course->tags->pluck('name');
-            })->unique()->values()->all();
-        }
-        // Lấy tất cả giáo viên của các khóa học
-        foreach ($enrolledCourses as $course) {
-            // Lấy tất cả ID giáo viên duy nhất từ các khóa học
-            $teacherIds = $enrolledCourses->pluck('teacher_id')->unique();
-
-            // Lấy thông tin của tất cả giáo viên đó trong một câu truy vấn
+        // Lấy danh sách tags và teachers từ tất cả khóa học của user trước khi lọc
+        if ($allEnrolledCourses->isNotEmpty()) {
+            $this->tags = $allEnrolledCourses->flatMap(fn($course) => $course->tags->pluck('name'))->unique()->values()->all();
+            $teacherIds = $allEnrolledCourses->pluck('teacher_id')->unique();
             $this->teachers = User::whereIn('id', $teacherIds)->get();
+        } else {
+            $this->teachers = collect();
         }
-        $this->ongoingCourses = $ongoingCourses;
-        $this->completedCourses = $completedCourses;
+
+        // Tải và phân loại khóa học lần đầu
+        $this->filterAndSortCourses();
     }
 
-    // Lấy link chi tiết course
-    public function getLinkToCourseDetail(Course $course): string
-    {
-        return \App\Filament\Pages\CourseDetail::getUrl(['course' => $course->id]);
-    }
-
-    // Lấy khóa học student đang tham gia
-    public function getEnrolledCourses()
+    /**
+     * Lấy query cơ sở cho các khóa học của user (chưa lọc, chưa sắp xếp)
+     */
+    private function getBaseQuery(): Collection|EloquentCollection
     {
         /** @var User $user */
         $user = Auth::user();
-        $now = now();
+
+        if ($user->hasRole('teacher')) {
+            return Course::query()
+                ->where('teacher_id', $user->id)
+                ->where('status', CourseStatus::PUBLISHED)
+                ->with(['users', 'media', 'tags'])
+                ->get();
+        }
 
         return $user->courses()
             ->where('courses.status', CourseStatus::PUBLISHED)
-            ->where(function ($query) use ($now) {
-                $query->whereNull('course_user.start_at')
-                    ->orWhere('course_user.start_at', '<=', $now);
-            })
-            ->where(function ($query) use ($now) {
-                $query->whereNull('course_user.end_at')
-                    ->orWhere('course_user.end_at', '>=', $now);
-            })
             ->with(['teacher', 'media', 'tags'])
-            ->orderBy('courses.created_at', 'asc')
-            ->paginate(10);
+            ->get(); // Sửa từ paginate() thành get() là quan trọng nhất
     }
 
-    // Lấy khóa học teacher đang dạy
-    public function getTeachingCourses()
+
+    /**
+     * Hàm trung tâm để áp dụng tất cả các bộ lọc và sắp xếp
+     */
+    protected function filterAndSortCourses()
     {
-        /** @var User $user */
-        $user = Auth::user();
         $now = now();
+        $queryResult = $this->getBaseQuery();
 
-        return Course::query()
-            ->where('teacher_id', $user->id)  // lọc theo giáo viên dạy
-            ->where('status', CourseStatus::PUBLISHED)
-            ->whereDate('start_at', '<=', $now) // Đã đến ngày bắt đầu
-            ->where(function ($query) use ($now) {
-                $query->whereNull('end_at')
-                    ->orWhereDate('end_at', '>=', $now); // Chưa kết thúc
-            })
-            ->with(['users', 'media', 'tags'])
-            ->orderBy('created_at', 'asc')
-            ->get();
-    }
-    // Tìm kiếm khóa học
-
-    public function searchCourses()
-    {
-        $ongoingCourses = collect();
-        $closedCourses = collect();
-        $user = Auth::user();
-        if ($user->hasRole('teacher')) {
-
-            $enrolledCourses = $this->getTeachingCourses();
-        } else {
-            $enrolledCourses = $this->getEnrolledCourses();
+        // 1. Áp dụng tìm kiếm
+        if (!empty($this->searchCourse)) {
+            $queryResult = $queryResult->filter(
+                fn($course) => str_contains(strtolower($course->title), strtolower($this->searchCourse))
+            );
         }
 
-        foreach ($enrolledCourses as $course) {
-            // Bỏ qua nếu không match search
+        // 2. Áp dụng lọc theo tag
+        if (!empty($this->selectedTag)) {
+            $queryResult = $queryResult->filter(
+                fn($course) => $course->tags->contains('name', $this->selectedTag)
+            );
+        }
 
-            if ($this->searchCourse !== '' && ! str_contains(strtolower($course->title), strtolower($this->searchCourse))) {
-                continue;
+        // 3. Áp dụng lọc theo giáo viên
+        if (!empty($this->selectedTeacher)) {
+            $queryResult = $queryResult->filter(
+                fn($course) => $course->teacher_id == $this->selectedTeacher
+            );
+        }
+
+        // 4. Phân loại thành ongoing và completed
+        $ongoing = collect();
+        $completed = collect();
+
+        foreach ($queryResult as $course) {
+            $endDate = $course->pivot->end_at ?? $course->end_at;
+            if (!$endDate || $endDate->isAfter($now)) {
+                $ongoing->push($course);
+            } else {
+                $completed->push($course);
             }
-
-            if ($course->status !== CourseStatus::PUBLISHED) {
-                $closedCourses->push($course);
-
-                continue;
-            }
-            $ongoingCourses->push($course);
         }
 
-        $this->ongoingCourses = $ongoingCourses;
-        $this->closedCourses = $closedCourses;
+        // 5. Sắp xếp các collection đã phân loại
+        $this->ongoingCourses = $this->sortCollection($ongoing);
+        $this->completedCourses = $this->sortCollection($completed);
     }
 
-    // Sắp xếp khóa học
-    public function sortCourses(string $sort)
-    {
-        $this->sortBy = $sort;
-        $this->filterCourses();
-    }
-
-    // Lọc khóa học (dùng cho sorting)
-    protected function filterCourses()
-    {
-        $ongoingCourses = collect();
-        $closedCourses = collect();
-
-        $user = Auth::user();
-        if ($user->hasRole('teacher')) {
-
-            $enrolledCourses = $this->getTeachingCourses();
-        } else {
-            $enrolledCourses = $this->getEnrolledCourses();
-        }
-        foreach ($enrolledCourses as $course) {
-            if ($course->status !== CourseStatus::PUBLISHED) {
-                $closedCourses->push($course);
-
-                continue;
-            }
-
-            // Course ongoing
-            $ongoingCourses->push($course);
-        }
-
-        // Áp dụng sắp xếp
-        $this->ongoingCourses = $this->sortCollection($ongoingCourses);
-        $this->closedCourses = $this->sortCollection($closedCourses);
-    }
-
-    // Hàm sắp xếp collection theo created_at hoặc end_at
+    /**
+     * Hàm sắp xếp một collection dựa trên thuộc tính sortBy
+     */
     protected function sortCollection($collection)
     {
         return match ($this->sortBy) {
             'newest' => $collection->sortByDesc('created_at')->values(),
             'oldest' => $collection->sortBy('created_at')->values(),
-            'end_at' => $collection->sortBy(fn ($q) => $q->pivot?->end_at ?? now())->values(),
+            'end_at' => $collection->sortBy(fn($q) => $q->pivot?->end_at ?? $q->end_at ?? now())->values(),
             default => $collection,
         };
     }
 
-    // Lọc khóa học theo tag
-    public function filterCoursesByTag($tag = null)
+    /**
+     * Lấy link chi tiết course
+     */
+    public function getLinkToCourseDetail(Course $course): string
     {
-        $ongoingCourses = collect();
-        $closedCourses = collect();
-        $this->selectedTag = $tag; // lưu tag đã chọn
-
-        $user = Auth::user();
-        if ($user->hasRole('teacher')) {
-
-            $enrolledCourses = $this->getTeachingCourses();
-        } else {
-            $enrolledCourses = $this->getEnrolledCourses();
-        }
-
-        foreach ($enrolledCourses as $course) {
-
-            // Kiểm tra tag
-            $hasSelectedTag = $this->selectedTag
-                ? $course->tags->contains('name', $this->selectedTag)
-                : true;
-            if (! $hasSelectedTag) {
-                continue;
-            }
-            if ($course->status !== CourseStatus::PUBLISHED) {
-                $closedCourses->push($course);
-
-                continue;
-            }
-
-            // Course ongoing
-            $ongoingCourses->push($course);
-        }
-
-        $this->ongoingCourses = $ongoingCourses;
-        $this->closedCourses = $closedCourses;
+        return \App\Filament\Pages\CourseDetail::getUrl(['course' => $course->id]);
     }
 
-    // Lọc khóa học theo teacher
+    // Các hàm này sẽ được gọi từ view (thông qua wire:model, wire:click)
+    public function searchCourses()
+    {
+        $this->filterAndSortCourses();
+    }
+
+    public function sortCourses(string $sort)
+    {
+        $this->sortBy = $sort;
+        $this->filterAndSortCourses();
+    }
+
+    public function filterCoursesByTag($tag = null)
+    {
+        $this->selectedTag = $tag;
+        $this->filterAndSortCourses();
+    }
+
     public function filterCoursesByTeacher($teacherId)
     {
-
-        $ongoingCourses = collect();
-        $closedCourses = collect();
         $this->selectedTeacher = $teacherId;
-        $user = Auth::user();
-        if ($user->hasRole('teacher')) {
-
-            $enrolledCourses = $this->getTeachingCourses();
-        } else {
-            $enrolledCourses = $this->getEnrolledCourses();
-        }
-
-        foreach ($enrolledCourses as $course) {
-
-            $hasSelectedTeacher = $this->selectedTeacher
-                ? $course->teacher_id == $this->selectedTeacher
-                : true;
-
-            if (! $hasSelectedTeacher) {
-                continue;
-            }
-
-            if ($course->status !== CourseStatus::PUBLISHED) {
-                $closedCourses->push($course);
-
-                continue;
-            }
-
-            $ongoingCourses->push($course);
-        }
-
-        $this->ongoingCourses = $ongoingCourses;
-        $this->closedCourses = $closedCourses;
+        $this->filterAndSortCourses();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Enums\Status\CourseStatus; // Thêm dòng này
 use App\Models\Course;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
@@ -25,43 +26,54 @@ class ActivityReminderListener implements ShouldQueue
     public function handle(Login $event): void
     {
         Log::info('ActivityReminderListener triggered.');
+        if (session()->pull('login_notification_sent', false)) {
+            return;
+        }
+        session()->put('login_notification_sent', true);
 
-        // Lấy user từ sự kiện Login
         $user = $event->user;
-        if (! $user) {
+        if (!$user) {
             Log::warning('No authenticated user found in Login event.');
-
             return;
         }
 
         Log::info('Authenticated user found.', ['user_id' => $user->id, 'roles' => $user->getRoleNames()]);
 
-        // thời điểm hiện tại
         $now = now();
-        Log::info('Current time:', ['now' => $now]);
+        $courses = collect(); // Khởi tạo collection rỗng
 
         // Lấy danh sách khóa học tùy role
         if ($user->hasRole('teacher')) {
             Log::info('User is a teacher. Fetching courses.');
             $courses = Course::where('teacher_id', $user->id)
+                // *** FIX: THÊM ĐIỀU KIỆN LỌC KHÓA HỌC ***
+                ->where('status', CourseStatus::PUBLISHED)
+                ->where(function ($query) use ($now) {
+                    $query->whereNull('end_at')->orWhere('end_at', '>=', $now);
+                })
                 ->with([
                     'quizzes' => function ($query) use ($now) {
                         $query->wherePivot('end_at', '>=', $now);
                     },
                     'assignments' => function ($query) use ($now) {
-                        $query->wherePivot('end_at', '>=', $now);
+                        $query->wherePivot('end_submission_at', '>=', $now);
                     },
                 ])
                 ->get();
-        } else {
+        } elseif ($user->hasRole('student')) { // Sử dụng elseif để rõ ràng hơn
             Log::info('User is a student. Fetching courses.');
             $courses = $user->courses()
+                // *** FIX: THÊM ĐIỀU KIỆN LỌC KHÓA HỌC ***
+                ->where('courses.status', CourseStatus::PUBLISHED)
+                ->where(function ($query) use ($now) {
+                    $query->whereNull('courses.end_at')->orWhere('courses.end_at', '>=', $now);
+                })
                 ->with([
                     'quizzes' => function ($query) use ($now) {
                         $query->wherePivot('end_at', '>=', $now);
                     },
                     'assignments' => function ($query) use ($now) {
-                        $query->wherePivot('end_at', '>=', $now);
+                        $query->wherePivot('end_submission_at', '>=', $now);
                     },
                 ])
                 ->get();
@@ -69,87 +81,60 @@ class ActivityReminderListener implements ShouldQueue
 
         Log::info('Courses fetched.', ['course_count' => $courses->count()]);
 
-        // Chỉ xử lý thông báo cho teacher hoặc student
+        // Phần còn lại của logic không cần thay đổi vì đã có kiểm tra hasAttempt/hasSubmission
         if ($user->hasRole('teacher') || $user->hasRole('student')) {
-            Log::info('User has a valid role for notifications.');
-
             $messages = [];
             foreach ($courses as $course) {
-                Log::info('Processing course.', ['course_id' => $course->id]);
-
-                // Kiểm tra quiz gần hết hạn
+                // Kiểm tra quiz gần hết hạn (logic "chưa làm" đã có sẵn)
                 foreach ($course->quizzes as $quiz) {
                     $hasAttempt = \App\Models\QuizAttempt::where('quiz_id', $quiz->id)
                         ->where('student_id', $user->id)
                         ->exists();
 
                     if (
-                        ! $hasAttempt &&
-                        $quiz->pivot->start_at &&
+                        !$hasAttempt &&
                         $quiz->pivot->end_at &&
-                        $quiz->pivot->end_at->between(
-                            Carbon::now(),
-                            Carbon::now()->addWeek()
-                        )
+                        $quiz->pivot->end_at->between(Carbon::now(), Carbon::now()->addWeek())
                     ) {
-                        Log::info('Upcoming quiz deadline.', ['quiz_id' => $quiz->id]);
-
                         $endAt = $quiz->pivot->end_at;
                         $diffInDays = round(now()->diffInDays($endAt, false));
                         $diffInHours = round(now()->diffInHours($endAt, false));
-
                         $timeLeft = $diffInDays < 1 ? "còn {$diffInHours} giờ" : "còn {$diffInDays} ngày";
                         $messages[] = "<strong>Quiz:</strong> {$quiz->title} (hạn: {$endAt->format('d/m/Y')} - {$timeLeft})";
                     }
                 }
 
-                // Kiểm tra assignment gần hết hạn
+                // Kiểm tra assignment gần hết hạn (logic "chưa làm" đã có sẵn)
                 foreach ($course->assignments as $assignment) {
                     $hasSubmission = \App\Models\Submission::query()
                         ->where('assignment_id', $assignment->id)
                         ->where('student_id', $user->id)
                         ->exists();
 
-                    $endAt = $assignment->pivot->end_at;
-                    Log::info('Checking assignment.', ['assignment_id' => $assignment->id, 'end_at' => $endAt]);
+                    $endAt = $assignment->pivot->end_submission_at;
 
                     if (
-                        ! $hasSubmission &&
-                        $assignment->pivot->end_at &&
-                        $assignment->pivot->end_at->between(
-                            Carbon::now(),
-                            Carbon::now()->addWeek()
-                        )
+                        !$hasSubmission &&
+                        $endAt &&
+                        $endAt->between(Carbon::now(), Carbon::now()->addWeek())
                     ) {
-                        Log::info('Upcoming assignment deadline.', ['assignment_id' => $assignment->id]);
-
                         $diffInDays = round(now()->diffInDays($endAt, false));
                         $diffInHours = round(now()->diffInHours($endAt, false));
-
                         $timeLeft = $diffInDays < 1 ? "còn {$diffInHours} giờ" : "còn {$diffInDays} ngày";
                         $messages[] = "<strong>Assignment:</strong> {$assignment->title} (hạn: {$endAt->format('d/m/Y')} - {$timeLeft})";
                     }
                 }
             }
 
-            Log::info('Messages to notify:', ['messages' => $messages]);
-
-            if (! empty($messages)) {
-                Log::info('Sending notifications.', ['message_count' => count($messages)]);
-
+            if (!empty($messages)) {
                 $body = implode('<br>', $messages);
-
                 Notification::make()
                     ->title('📌 Các deadline sắp tới trong 7 ngày')
                     ->body($body)
                     ->success()
                     ->send()
                     ->sendToDatabase($user);
-            } else {
-                Log::info('No upcoming deadlines found.');
             }
-        } else {
-            Log::info('User does not have a valid role for notifications.');
         }
     }
 }
