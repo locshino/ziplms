@@ -49,7 +49,6 @@ class QuizzesRelationManager extends RelationManager
                 TextColumn::make('id')
                     ->label('ID')
                     ->copyable()
-                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('title')
                     ->searchable(),

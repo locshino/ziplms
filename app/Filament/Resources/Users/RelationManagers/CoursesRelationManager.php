@@ -32,7 +32,6 @@ class CoursesRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
-                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('title')
                     ->searchable(),
