@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Enums\Status\CourseStatus; // Thêm dòng này
+use App\Libs\Roles\RoleHelper;
 use App\Models\Course;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
@@ -34,6 +35,10 @@ class ActivityReminderListener implements ShouldQueue
         $user = $event->user;
         if (!$user) {
             Log::warning('No authenticated user found in Login event.');
+            return;
+        }
+
+         if (! RoleHelper::isStudent($user)) {
             return;
         }
 
