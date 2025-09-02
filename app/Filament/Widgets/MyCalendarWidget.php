@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\Status\AssignmentStatus;
+use App\Enums\Status\CourseStatus; // Thêm dòng này
 use App\Enums\Status\QuizStatus;
 use App\Models\Assignment;
 use App\Models\Course;
@@ -45,6 +46,14 @@ class MyCalendarWidget extends CalendarWidget
         } else {
             $query->where('teacher_id', $user->id);
         }
+
+        // *** THÊM ĐIỀU KIỆN LỌC KHÓA HỌC ***
+        // Chỉ lấy các khóa học đang hoạt động (published) và chưa hết hạn.
+        $query->where('status', CourseStatus::PUBLISHED)
+            ->where(function ($q) use ($now) {
+                $q->whereNull('end_at')->orWhere('end_at', '>=', $now);
+            });
+        // ************************************
 
         $courses = $query->with(['quizzes', 'assignments'])->get();
 
@@ -91,25 +100,21 @@ class MyCalendarWidget extends CalendarWidget
                     ->where('student_id', $user->id)
                     ->exists();
 
-                // *** FIX 1: SỬ DỤNG ĐÚNG TRƯỜNG DỮ LIỆU NGÀY HẾT HẠN ***
                 $submissionDeadline = $assignment->pivot->end_submission_at;
 
                 // Kiểm tra điều kiện hiển thị event
                 if (!$hasSubmission && $assignment->status == AssignmentStatus::PUBLISHED && $submissionDeadline && $submissionDeadline >= $now && $submissionDeadline->between($now, $twoMonthsLater)) {
-
-                    // *** FIX 2: SỬA LẠI LOGIC KIỂM TRA SẮP DIỄN RA ***
                     $isUpcoming = $assignment->pivot->start_at > $now;
 
                     $events->push(
                         CalendarEvent::make($assignment)
                             ->title("Assignment: {$assignment->title}")
                             ->start($assignment->pivot->start_at)
-                            ->end($submissionDeadline) // Sử dụng biến đã sửa
+                            ->end($submissionDeadline)
                             ->backgroundColor('#ffffff')
                             ->textColor('#4caf50')
                             ->allDay(true)
                             ->styles([
-                                // Đồng bộ style: dashed cho sắp diễn ra, solid cho đang diễn ra
                                 'border' => $isUpcoming ? '2px dashed #d21919ff' : '2px solid #4caf50',
                                 'border-radius' => '12px',
                                 'box-shadow' => '0 4px 12px rgba(0,0,0,0.15)',
