@@ -43,9 +43,9 @@ use OwenIt\Auditing\Contracts\Auditable;
 class CourseUser extends Pivot implements Auditable
 {
     use HasFactory,
-        HasUuids,
+        // SoftDeletes,
         \OwenIt\Auditing\Auditable,
-        SoftDeletes;
+        HasUuids;
 
     protected $table = 'course_user';
 

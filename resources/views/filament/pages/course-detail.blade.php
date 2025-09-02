@@ -9,16 +9,16 @@
         <!-- Dashboard Tổng quan -->
         <div class="grid md:grid-cols-3 sm:grid-cols-1 gap-4">
             <div
-                class="relative bg-white rounded-2xl shadow-md p-5 h-52 flex flex-col justify-between transition-transform duration-300 hover:-translate-y-2 hover:shadow-lg">
+                class="fi-section relative rounded-2xl p-5 h-52 flex flex-col justify-between transition-transform duration-300 hover:-translate-y-2 hover:shadow-lg">
                 <div class="flex justify-between items-center">
                     <div>
-                        <h3 class="text-gray-800 font-semibold text-lg">Quiz</h3>
-                        <span class="text-gray-900 font-bold text-2xl">
+                        <h3 class="fi-section-header-heading">Quiz</h3>
+                        <span class="text-gray-900 dark:text-white font-bold text-2xl">
                             {{ $this->course->quizzes->count() }}
                         </span>
                     </div>
-                    <div class="w-14 h-14 flex items-center justify-center bg-blue-100 rounded-full shadow-sm">
-                        <x-heroicon-o-academic-cap class="w-7 h-7 text-blue-600" />
+                    <div class="w-14 h-14 flex items-center justify-center fi-color-primary-100 dark:fi-color-primary-800 rounded-full shadow-sm">
+                        <x-heroicon-o-academic-cap class="w-7 h-7 fi-color-primary-600 dark:fi-color-primary-400" />
                     </div>
                 </div>
 
@@ -28,7 +28,7 @@
                 @endphp
                 <div class="absolute top-4 right-4 w-16 h-16">
                     <svg viewBox="0 0 36 36" class="w-full h-full">
-                        <circle class="text-gray-200" stroke-width="4" stroke="currentColor" fill="none" cx="18" cy="18"
+                        <circle class="text-gray-200 dark:text-gray-700" stroke-width="4" stroke="currentColor" fill="none" cx="18" cy="18"
                             r="16" />
                         <circle class="text-green-400" stroke-width="4"
                             stroke-dasharray="{{ $completedQuizPercentage }} {{ 100 - $completedQuizPercentage }}"
@@ -53,16 +53,16 @@
             </div>
 
             <div
-                class="relative bg-white rounded-2xl shadow-md p-5 h-52 flex flex-col justify-between transition-transform duration-300 hover:-translate-y-2 hover:shadow-lg">
+                class="fi-section relative rounded-2xl p-5 h-52 flex flex-col justify-between transition-transform duration-300 hover:-translate-y-2 hover:shadow-lg">
                 <div class="flex justify-between items-center">
                     <div>
-                        <h3 class="text-gray-800 font-semibold text-lg">Assignment</h3>
-                        <span class="text-gray-900 font-bold text-2xl">
+                        <h3 class="fi-section-header-heading">Assignment</h3>
+                        <span class="text-gray-900 dark:text-white font-bold text-2xl">
                             {{ $this->course->assignments->count() }}
                         </span>
                     </div>
-                    <div class="w-14 h-14 flex items-center justify-center bg-purple-100 rounded-full shadow-sm">
-                        <x-heroicon-o-clipboard-document-check class="w-7 h-7 text-purple-600" />
+                    <div class="w-14 h-14 flex items-center justify-center fi-color-purple-100 dark:fi-color-purple-800 rounded-full shadow-sm">
+                        <x-heroicon-o-clipboard-document-check class="w-7 h-7 fi-color-purple-600 dark:fi-color-purple-400" />
                     </div>
                 </div>
 
@@ -72,7 +72,7 @@
                 @endphp
                 <div class="absolute top-4 right-4 w-16 h-16">
                     <svg viewBox="0 0 36 36" class="w-full h-full">
-                        <circle class="text-gray-200" stroke-width="4" stroke="currentColor" fill="none" cx="18" cy="18"
+                        <circle class="text-gray-200 dark:text-gray-700" stroke-width="4" stroke="currentColor" fill="none" cx="18" cy="18"
                             r="16" />
                         <circle class="text-purple-400" stroke-width="4"
                             stroke-dasharray="{{ $submittedPercentage }} {{ 100 - $submittedPercentage }}"
@@ -97,23 +97,23 @@
             </div>
 
             <div
-                class="relative bg-white rounded-2xl shadow-md p-5 h-52 flex flex-col justify-between transition-transform duration-300 hover:-translate-y-2 hover:shadow-lg">
+                class="fi-section relative rounded-2xl p-5 h-52 flex flex-col justify-between transition-transform duration-300 hover:-translate-y-2 hover:shadow-lg">
 
                 <div class="flex justify-between items-center">
                     <div>
-                        <h3 class="text-gray-800 font-semibold text-lg">Documents</h3>
-                        <span class="text-gray-900 font-bold text-2xl">
+                        <h3 class="fi-section-header-heading">Documents</h3>
+                        <span class="text-gray-900 dark:text-white font-bold text-2xl">
                             {{ $this->documents->count() }}
                         </span>
                     </div>
-                    <div class="w-14 h-14 flex items-center justify-center bg-yellow-100 rounded-full shadow-sm">
-                        <x-heroicon-o-document-text class="w-7 h-7 text-yellow-600" />
+                    <div class="w-14 h-14 flex items-center justify-center fi-color-yellow-100 dark:fi-color-yellow-800 rounded-full shadow-sm">
+                        <x-heroicon-o-document-text class="w-7 h-7 fi-color-yellow-600 dark:fi-color-yellow-400" />
                     </div>
                 </div>
 
                 <div class="absolute top-4 right-4 w-16 h-16">
                     <svg viewBox="0 0 36 36" class="w-full h-full">
-                        <circle class="text-gray-200" stroke-width="4" stroke="currentColor" fill="none" cx="18" cy="18"
+                        <circle class="text-gray-200 dark:text-gray-700" stroke-width="4" stroke="currentColor" fill="none" cx="18" cy="18"
                             r="16" />
                         <circle class="text-yellow-400" stroke-width="4" stroke-dasharray="0 100" stroke-dashoffset="25"
                             stroke-linecap="round" fill="none" cx="18" cy="18" r="16" />
@@ -150,9 +150,7 @@
                             <div x-data="{ open: false }" class="relative inline-block text-left">
                                 <!-- Button -->
                                 <button @click="open = !open"
-                                    class="inline-flex items-center rounded-full px-4 py-2 shadow-sm bg-gray-800 text-white font-medium
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           transition-transform duration-200">
+                                    class="fi-btn fi-btn-primary">
                                     Bộ lọc Tag
                                     <svg class="ml-2 h-4 w-4 transform transition-transform duration-200"
                                         :class="{ 'rotate-180': open }" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -170,19 +168,19 @@
                                     x-transition:leave="transition ease-in duration-150"
                                     x-transition:leave-start="opacity-100 translate-y-0"
                                     x-transition:leave-end="opacity-0 translate-y-1"
-                                    class="absolute left-0 mt-2 w-56 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-10 z-20">
+                                    class="fi-dropdown-panel absolute left-0 mt-2 w-56 rounded-lg shadow-lg z-20">
 
                                     <div class="py-1 max-h-60 overflow-y-auto">
                                         <!-- Tất cả tag -->
                                         <a href="#" wire:click.prevent="filterQuizzesByTag(null)"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            class="fi-dropdown-list-item">
                                             Tất cả tag
                                         </a>
 
                                         <!-- Lặp qua danh sách tag -->
                                         @foreach($this->quizTags as $tag)
                                             <a href="#" wire:click.prevent="filterQuizzesByTag('{{ $tag }}')"
-                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                class="fi-dropdown-list-item">
                                                 {{ $tag }}
                                             </a>
                                         @endforeach
@@ -199,9 +197,7 @@
                             <div x-data="{ open: false }" class="relative inline-block text-left">
                                 <!-- Button -->
                                 <button @click="open = !open"
-                                    class="inline-flex items-center rounded-full px-4 py-2 bg-gray-800 text-white font-medium
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   transition-transform duration-200">
+                                    class="fi-btn fi-btn-secondary">
                                     Sắp xếp
                                     <svg class="ml-2 h-4 w-4 transform transition-transform duration-200"
                                         :class="{ 'rotate-180': open }" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -219,18 +215,18 @@
                                     x-transition:leave="transition ease-in duration-150"
                                     x-transition:leave-start="opacity-100 translate-y-0"
                                     x-transition:leave-end="opacity-0 translate-y-1"
-                                    class="absolute left-0 mt-2 w-56 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-10 z-20">
+                                    class="fi-dropdown-panel absolute left-0 mt-2 w-56 rounded-lg shadow-lg z-20">
                                     <div class="py-1">
                                         <a href="#" wire:click.prevent="sortQuizzes('newest')"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            class="fi-dropdown-list-item">
                                             Mới nhất
                                         </a>
                                         <a href="#" wire:click.prevent="sortQuizzes('oldest')"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            class="fi-dropdown-list-item">
                                             Cũ nhất
                                         </a>
                                         <a href="#" wire:click.prevent="sortQuizzes('end_at')"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            class="fi-dropdown-list-item">
                                             Ngày kết thúc gần nhất
                                         </a>
                                     </div>
@@ -245,19 +241,16 @@
                             <!-- Input tìm kiếm -->
                             <div class="relative flex-1">
                                 <input type="text" wire:model="search" placeholder="Tìm kiếm..."
-                                    class="w-full pl-12 pr-4 py-2.5 rounded-3xl border border-gray-300 dark:border-gray-600
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-md
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   focus:outline-none focus:ring-4 focus:ring-indigo-400 focus:border-indigo-500
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   transition-all duration-300" />
-                                <div class="absolute inset-y-0 left-0 flex items-center pl-4 cursor-pointer"
+                                    class="fi-input w-full" />
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 cursor-pointer"
                                     wire:click="searchQuizzes">
-                                    <x-heroicon-s-magnifying-glass class="w-5 h-5 text-indigo-500" />
+                                    <x-heroicon-s-magnifying-glass class="w-5 h-5 fi-color-primary-500" />
                                 </div>
                             </div>
 
                             <!-- Nút Load lại -->
                             <button onclick="window.location.reload()"
-                                class="p-2 text-green-500 hover:text-green-700 focus:outline-none">
+                                class="fi-btn fi-btn-gray">
                                 <x-heroicon-s-arrow-path class="w-6 h-6 animate-spin-slow" />
                             </button>
                         </div>
@@ -313,18 +306,9 @@
                                     </span>
                                     <div class="flex flex-wrap gap-2 mt-3">
                                         @foreach($quiz->tags as $tag)
-                                            <span
-                                                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   text-white shadow-md hover:shadow-xl
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   transition-all duration-300 ease-in-out
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   hover:scale-105 animate-gradient-x cursor-default relative overflow-hidden">
-
-                                                <!-- Hiệu ứng viền sáng -->
-                                                <span class="absolute inset-0 rounded-full bg-white/10 blur-sm opacity-40"></span>
-
-                                                <x-heroicon-o-tag class="w-3 h-3 mr-1 relative z-10" />
-                                                <span class="relative z-10">{{ $tag->name }}</span>
+                                            <span class="fi-badge fi-badge-primary">
+                                                <x-heroicon-o-tag class="w-3 h-3 mr-1" />
+                                                <span>{{ $tag->name }}</span>
                                             </span>
                                         @endforeach
                                     </div>
@@ -355,15 +339,14 @@
                         <div class="flex items-center space-x-2">
                             <x-heroicon-o-academic-cap class="w-6 h-6 text-green-600" />
                             <span
-                                class="bg-green-100 rounded-full px-4 py-1 text-sm font-semibold text-green-700 shadow-md">
+                                class="fi-badge fi-badge-success">
                                 Đã kết thúc/hoàn tất
                             </span>
                         </div>
 
 
                         <div
-                            class="flex-1 h-1 ml-4 rounded-full 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            bg-gradient-to-r from-green-400 via-gray-300 to-gray-400 opacity-80">
+                            class="flex-1 h-1 ml-4 rounded-full bg-gradient-to-r from-green-400 via-gray-300 to-gray-400 opacity-80 dark:from-green-600 dark:via-gray-700 dark:to-gray-800">
                         </div>
                     </div>
 
@@ -450,18 +433,9 @@
                                     @endif
                                     <div class="flex flex-wrap gap-2"> <!-- Thêm flex-wrap và gap -->
                                         @foreach($quiz->tags as $tag)
-                                            <span
-                                                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               text-white shadow-md hover:shadow-xl
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               transition-all duration-300 ease-in-out
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               hover:scale-105 animate-gradient-x cursor-default relative overflow-hidden">
-
-                                                <!-- Hiệu ứng viền sáng -->
-                                                <span class="absolute inset-0 rounded-full bg-white/10 blur-sm opacity-40"></span>
-
-                                                <x-heroicon-o-tag class="w-3 h-3 mr-1 relative z-10" />
-                                                <span class="relative z-10">{{ $tag->name }}</span>
+                                            <span class="fi-badge fi-badge-primary">
+                                                <x-heroicon-o-tag class="w-3 h-3 mr-1" />
+                                                <span>{{ $tag->name }}</span>
                                             </span>
                                         @endforeach
                                     </div>
@@ -495,10 +469,7 @@
                         <!-- Nút Bộ Lọc Tag -->
                         <div x-data="{ open: false }" class="relative inline-block text-left">
                             <button @click="open = !open"
-                                class="inline-flex items-center rounded-full px-5 py-2 shadow-md text-white font-medium
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   border border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-400
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   transition-transform duration-200">
+                                class="fi-btn fi-btn-success">
                                 Bộ lọc Tag
                                 <svg class="ml-2 h-5 w-5 transform transition-transform duration-200"
                                     :class="{ 'rotate-180': open }" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -516,19 +487,19 @@
                                 x-transition:leave="transition ease-in duration-150"
                                 x-transition:leave-start="opacity-100 translate-y-0"
                                 x-transition:leave-end="opacity-0 translate-y-1"
-                                class="absolute left-0 mt-2 w-56 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-20">
+                                class="fi-dropdown-panel absolute left-0 mt-2 w-56 rounded-lg shadow-lg z-20">
 
                                 <div class="py-1 max-h-60 overflow-y-auto">
                                     <!-- Tất cả tag -->
                                     <a href="#" wire:click.prevent="filterAssignmentsByTag(null)"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        class="fi-dropdown-list-item">
                                         Tất cả tag
                                     </a>
 
                                     <!-- Lặp qua danh sách tag -->
                                     @foreach($this->courseTags as $tag)
                                         <a href="#" wire:click.prevent="filterAssignmentsByTag('{{ $tag }}')"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            class="fi-dropdown-list-item">
                                             {{ $tag }}
                                         </a>
                                     @endforeach
@@ -543,10 +514,7 @@
                         <!-- Nút Sắp Xếp -->
                         <div x-data="{ open: false }" class="relative inline-block text-left">
                             <button @click="open = !open"
-                                class="inline-flex items-center rounded-full px-5 py-2 shadow-md text-white font-medium
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     border border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     transition-transform duration-200">
+                                class="fi-btn fi-btn-info">
                                 Sắp xếp
                                 <svg class="ml-2 h-5 w-5 transform transition-transform duration-200"
                                     :class="{ 'rotate-180': open }" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -564,16 +532,16 @@
                                 x-transition:leave="transition ease-in duration-150"
                                 x-transition:leave-start="opacity-100 translate-y-0"
                                 x-transition:leave-end="opacity-0 translate-y-1"
-                                class="absolute left-0 mt-2 w-56 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-20">
+                                class="fi-dropdown-panel absolute left-0 mt-2 w-56 rounded-lg shadow-lg z-20">
                                 <div class="py-1">
                                     <a href="#" wire:click.prevent="sortAssignments('newest')"
-                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Mới
+                                        class="fi-dropdown-list-item">Mới
                                         nhất</a>
                                     <a href="#" wire:click.prevent="sortAssignments('oldest')"
-                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Cũ
+                                        class="fi-dropdown-list-item">Cũ
                                         nhất</a>
                                     <a href="#" wire:click.prevent="sortAssignments('end_at')"
-                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Ngày
+                                        class="fi-dropdown-list-item">Ngày
                                         kết thúc gần nhất</a>
                                 </div>
                             </div>
@@ -586,19 +554,16 @@
                         <!-- Input tìm kiếm -->
                         <div class="relative flex-1">
                             <input type="text" wire:model="search" placeholder="Tìm kiếm..."
-                                class="w-full pl-12 pr-4 py-2.5 rounded-3xl border border-gray-300 dark:border-gray-600
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-md
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   focus:outline-none focus:ring-4 focus:ring-indigo-400 focus:border-indigo-500
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   transition-all duration-300" />
-                            <div class="absolute inset-y-0 left-0 flex items-center pl-4 cursor-pointer"
+                                class="fi-input w-full" />
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 cursor-pointer"
                                 wire:click="searchAssignments">
-                                <x-heroicon-s-magnifying-glass class="w-5 h-5 text-indigo-500" />
+                                <x-heroicon-s-magnifying-glass class="w-5 h-5 fi-color-primary-500" />
                             </div>
                         </div>
 
                         <!-- Nút Load lại -->
                         <button onclick="window.location.reload()"
-                            class="p-2 text-green-500 hover:text-green-700 focus:outline-none">
+                            class="fi-btn fi-btn-gray">
                             <x-heroicon-s-arrow-path class="w-6 h-6 animate-spin-slow" />
                         </button>
                     </div>
@@ -650,15 +615,9 @@
                                 <!-- Tags -->
                                 <div class="flex flex-wrap gap-2 mt-3">
                                     @foreach($assignment->tags as $tag)
-                                        <span
-                                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     text-white shadow-md hover:shadow-xl
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     transition-all duration-300 ease-in-out
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     hover:scale-105 animate-gradient-x cursor-default relative overflow-hidden">
-                                            <span class="absolute inset-0 rounded-full bg-white/10 blur-sm opacity-40"></span>
-                                            <x-heroicon-o-tag class="w-3 h-3 mr-1 relative z-10" />
-                                            <span class="relative z-10">{{ $tag->name }}</span>
+                                        <span class="fi-badge fi-badge-primary">
+                                            <x-heroicon-o-tag class="w-3 h-3 mr-1" />
+                                            <span>{{ $tag->name }}</span>
                                         </span>
                                     @endforeach
                                 </div>
@@ -687,15 +646,14 @@
                         <div class="flex items-center space-x-2">
                             <x-heroicon-o-academic-cap class="w-6 h-6 text-green-600" />
                             <span
-                                class="bg-green-100 rounded-full px-4 py-1 text-sm font-semibold text-green-700 shadow-md">
+                                class="fi-badge fi-badge-success">
                                 Đã kết thúc/hoàn tất
                             </span>
                         </div>
 
 
                         <div
-                            class="flex-1 h-1 ml-4 rounded-full 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                bg-gradient-to-r from-green-400 via-gray-300 to-gray-400 opacity-80">
+                            class="flex-1 h-1 ml-4 rounded-full bg-gradient-to-r from-green-400 via-gray-300 to-gray-400 opacity-80 dark:from-green-600 dark:via-gray-700 dark:to-gray-800">
                         </div>
                     </div>
 
@@ -734,9 +692,7 @@
 
                                 <div class="flex flex-wrap gap-2 mt-3">
                                     @foreach($closedassignment->tags as $tag)
-                                        <span
-                                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         bg-gray-400 text-white shadow-md cursor-not-allowed">
+                                        <span class="fi-badge fi-badge-gray">
                                             <x-heroicon-o-tag class="w-3 h-3 mr-1" />
                                             {{ $tag->name }}
                                         </span>
@@ -776,7 +732,7 @@
                                 </div>
                                 <div class="mt-3">
                                     <a href="{{ $doc->getUrl() }}" download
-                                        class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg text-white bg-sky-600 hover:bg-sky-700 transition">
+                                        class="fi-btn fi-btn-info">
                                         <x-heroicon-o-arrow-down-tray class="w-5 h-5" />
                                         <span>Tải về</span>
                                     </a>
@@ -785,7 +741,7 @@
                         </div>
                     @empty
                         <div
-                            class="col-span-full flex flex-col items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm p-12 text-center">
+                            class="fi-section col-span-full flex flex-col items-center justify-center rounded-xl p-12 text-center">
                             <div
                                 class="flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 mb-6">
                                 <svg class="w-10 h-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none"

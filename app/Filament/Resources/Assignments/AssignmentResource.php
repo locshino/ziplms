@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Assignments;
 
+use App\Filament\RelationManagers\AuditsRelationManager;
 use App\Filament\Resources\Assignments\Pages\CreateAssignment;
 use App\Filament\Resources\Assignments\Pages\EditAssignment;
 use App\Filament\Resources\Assignments\Pages\ListAssignments;
@@ -64,7 +65,7 @@ class AssignmentResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            AuditsRelationManager::class,
         ];
     }
 

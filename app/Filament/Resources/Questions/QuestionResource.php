@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Questions;
 
+use App\Filament\RelationManagers\AuditsRelationManager;
 use App\Filament\Resources\Questions\Pages\CreateQuestion;
 use App\Filament\Resources\Questions\Pages\EditQuestion;
 use App\Filament\Resources\Questions\Pages\ListQuestions;
@@ -66,6 +67,7 @@ class QuestionResource extends Resource
     {
         return [
             AnswerChoicesRelationManager::class,
+            AuditsRelationManager::class,
         ];
     }
 

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users;
 
 use App\Enums\System\RoleSystem;
+use App\Filament\RelationManagers\AuditsRelationManager;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
@@ -22,7 +23,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
-use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 use Tapp\FilamentAuthenticationLog\RelationManagers\AuthenticationLogsRelationManager;
 
 class UserResource extends Resource
@@ -92,10 +92,32 @@ class UserResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            // Exclude users with the SUPER_ADMIN role
             ->whereDoesntHave('roles', function ($query) {
                 $query->where('name', RoleSystem::SUPER_ADMIN->value);
             })
-            ->where('id', '!=', Auth::id());
+            // Exclude the currently authenticated user
+            ->where('id', '!=', Auth::id())
+
+            // Exclude users with higher or equal roles compared to the current user
+            ->where(function ($query) {
+                $currentUser = Auth::user();
+
+                // Get the highest role of the current user
+                $currentUserHighestRole = \App\Libs\Roles\RoleHelper::getHighestRole($currentUser);
+
+                // Get all roles higher than the current user's highest role
+                $higherRoles = \App\Libs\Roles\RoleHelper::getHigherRoles($currentUser);
+
+                $query->whereDoesntHave('roles', function ($roleQuery) use ($currentUserHighestRole, $higherRoles) {
+                    $rolesToExclude = array_merge(
+                        (array) $higherRoles, // Ensure $higherRoles is an array
+                        (array) $currentUserHighestRole // Ensure $currentUserHighestRole is an array
+                    );
+
+                    $roleQuery->whereIn('name', $rolesToExclude);
+                });
+            });
     }
 
     public static function getRecordRouteBindingEloquentQuery(): Builder

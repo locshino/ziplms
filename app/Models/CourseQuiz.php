@@ -43,9 +43,9 @@ use OwenIt\Auditing\Contracts\Auditable;
 class CourseQuiz extends Pivot implements Auditable
 {
     use HasFactory,
-        HasUuids,
+        // SoftDeletes,
         \OwenIt\Auditing\Auditable,
-        SoftDeletes;
+        HasUuids;
 
     /**
      * The table associated with the model.

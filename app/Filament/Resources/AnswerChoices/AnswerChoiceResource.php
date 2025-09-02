@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AnswerChoices;
 
+use App\Filament\RelationManagers\AuditsRelationManager;
 use App\Filament\Resources\AnswerChoices\Pages\CreateAnswerChoice;
 use App\Filament\Resources\AnswerChoices\Pages\EditAnswerChoice;
 use App\Filament\Resources\AnswerChoices\Pages\ListAnswerChoices;
@@ -15,7 +16,6 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 
 class AnswerChoiceResource extends Resource
 {

@@ -104,7 +104,7 @@ class StudentsRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    ->schema(fn(AttachAction $action): array => [
+                    ->schema(fn (AttachAction $action): array => [
                         $action->getRecordSelect(),
                         ...$this->getTimeCoursePicker(),
                     ])

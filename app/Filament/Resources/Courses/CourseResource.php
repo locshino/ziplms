@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Courses;
 
+use App\Filament\RelationManagers\AuditsRelationManager;
 use App\Filament\Resources\Courses\Pages\CreateCourse;
 use App\Filament\Resources\Courses\Pages\EditCourse;
 use App\Filament\Resources\Courses\Pages\ListCourses;
@@ -11,6 +12,7 @@ use App\Filament\Resources\Courses\RelationManagers\QuizzesRelationManager;
 use App\Filament\Resources\Courses\RelationManagers\StudentsRelationManager;
 use App\Filament\Resources\Courses\Schemas\CourseForm;
 use App\Filament\Resources\Courses\Tables\CoursesTable;
+use App\Libs\Roles\RoleHelper;
 use App\Models\Course;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -19,7 +21,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
+use Illuminate\Support\Facades\Auth;
 
 class CourseResource extends Resource
 {
@@ -85,5 +87,18 @@ class CourseResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $q = parent::getEloquentQuery();
+
+        // Handle Manager role
+        if (RoleHelper::isManager()) {
+            $q->whereHas('managers', fn ($query) => $query->where('users.id', Auth::id())
+            );
+        }
+
+        return $q;
     }
 }
