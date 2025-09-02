@@ -56,7 +56,6 @@ class QuestionsRelationManager extends RelationManager
                 TextColumn::make('id')
                     ->label('ID')
                     ->copyable()
-                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('title')
                     ->searchable(),
@@ -81,7 +80,7 @@ class QuestionsRelationManager extends RelationManager
                 CreateAction::make(),
                 AttachAction::make()
                     // ->multiple()
-                    ->schema(fn (AttachAction $action) => [
+                    ->schema(fn(AttachAction $action) => [
                         $action->getRecordSelect(),
                         ModalTableSelect::make('recordId')
                             ->label('Question')

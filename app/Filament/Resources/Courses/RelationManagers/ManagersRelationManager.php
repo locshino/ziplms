@@ -59,7 +59,6 @@ class ManagersRelationManager extends RelationManager
                     ->toggleable(),
                 TextColumn::make('id')
                     ->label(__('resource_user.table.columns.id'))
-                    ->searchable()
                     ->copyable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('name')

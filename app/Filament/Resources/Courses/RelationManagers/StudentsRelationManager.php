@@ -53,7 +53,6 @@ class StudentsRelationManager extends RelationManager
                     ->toggleable(),
                 TextColumn::make('id')
                     ->label(__('resource_user.table.columns.id'))
-                    ->searchable()
                     ->copyable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('name')
@@ -105,7 +104,7 @@ class StudentsRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    ->schema(fn (AttachAction $action): array => [
+                    ->schema(fn(AttachAction $action): array => [
                         $action->getRecordSelect(),
                         ...$this->getTimeCoursePicker(),
                     ])
