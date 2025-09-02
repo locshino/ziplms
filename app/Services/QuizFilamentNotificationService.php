@@ -201,4 +201,48 @@ class QuizFilamentNotificationService
             ->where('data->id', $notificationId)
             ->delete();
     }
+
+    /**
+     * Xóa notification cho một quiz attempt cụ thể khi quiz hoàn thành.
+     */
+    public function clearNotificationForAttempt(int $attemptId): void
+    {
+        // Tìm quiz attempt để lấy thông tin user
+        $attempt = QuizAttempt::find($attemptId);
+        if (!$attempt || !$attempt->user) {
+            Log::warning('Cannot clear notification: attempt or user not found', ['attempt_id' => $attemptId]);
+            return;
+        }
+
+        $user = $attempt->user;
+        $notificationId = 'quiz_in_progress_' . $attemptId;
+
+        // Xóa notification cụ thể cho attempt này
+        $deletedCount = $this->deleteNotificationById($user, $notificationId);
+
+        if ($deletedCount > 0) {
+            Log::info('Cleared notification for completed quiz attempt', [
+                'user_id' => $user->id,
+                'attempt_id' => $attemptId,
+                'notification_id' => $notificationId
+            ]);
+        }
+
+        // Kiểm tra xem còn quiz nào đang in-progress không
+        $remainingAttempts = QuizAttempt::where('user_id', $user->id)
+            ->where('status', 'in_progress')
+            ->where('id', '!=', $attemptId)
+            ->with('quiz')
+            ->get();
+
+        // Nếu còn quiz đang làm dở, gửi lại notification cho các quiz còn lại
+        if ($remainingAttempts->isNotEmpty()) {
+            $this->clearAllInProgressNotificationsForUser($user);
+            $this->sendInProgressNotifications($user, $remainingAttempts);
+        } else {
+            // Nếu không còn quiz nào đang làm dở, xóa tất cả notification multiple
+            $multipleNotificationId = 'quiz_in_progress_multiple_' . $user->id;
+            $this->deleteNotificationById($user, $multipleNotificationId);
+        }
+    }
 }
