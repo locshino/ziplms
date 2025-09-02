@@ -80,12 +80,12 @@ class QuestionsRelationManager extends RelationManager
                 CreateAction::make(),
                 AttachAction::make()
                     // ->multiple()
-                    ->schema(fn(AttachAction $action) => [
+                    ->schema(fn (AttachAction $action) => [
                         $action->getRecordSelect(),
-                        ModalTableSelect::make('recordId')
-                            ->label('Question')
-                            ->relationship('quizzes', 'title')
-                            ->tableConfiguration(QuestionsTable::class),
+                        // ModalTableSelect::make('recordId')
+                        //     ->label('Question')
+                        //     ->relationship('quizzes', 'title')
+                        //     ->tableConfiguration(QuestionsTable::class),
                         TextInput::make('points')
                             ->label('Points')
                             ->numeric()

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\QuizAttempts;
 
+use App\Filament\RelationManagers\AuditsRelationManager;
 use App\Filament\Resources\QuizAttempts\Pages\CreateQuizAttempt;
 use App\Filament\Resources\QuizAttempts\Pages\EditQuizAttempt;
 use App\Filament\Resources\QuizAttempts\Pages\ListQuizAttempts;
@@ -62,7 +63,7 @@ class QuizAttemptResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            AuditsRelationManager::class,
         ];
     }
 

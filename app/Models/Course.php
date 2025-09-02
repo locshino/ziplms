@@ -106,6 +106,20 @@ class Course extends Model implements Auditable, Eventable, HasMedia
     ];
 
     /**
+     * The Eager Loading paths.
+     *
+     * @var array
+     */
+    protected $auditEvents = [
+        'created',
+        'updated',
+        'deleted',
+        'restored',
+        'pivotAttached',
+        'pivotDetached',
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

@@ -14,10 +14,8 @@
                     <!-- Nút Bộ Lọc -->
                     <div x-data="{ open: false, openTag: false, openTeacher: false }"
                         class="relative inline-block text-left">
-                        <button @click="open = !open" class="inline-flex items-center rounded-full px-5 py-2 shadow-md text-white font-medium
-               bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600
-               border border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-400
-               transition-transform duration-200">
+                        <button @click="open = !open"
+                        class="fi-btn fi-btn-primary inline-flex items-center rounded-lg px-4 py-2 font-semibold">
                             Bộ lọc
                             <svg class="ml-2 h-5 w-5 transform transition-transform duration-200"
                                 :class="{ 'rotate-180': open }" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -35,7 +33,7 @@
                             x-transition:leave="transition ease-in duration-150"
                             x-transition:leave-start="opacity-100 translate-y-0"
                             x-transition:leave-end="opacity-0 translate-y-1"
-                            class="absolute left-0 mt-2 w-64 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-20">
+                            class="absolute left-0 mt-2 w-64 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-gray-950/5 dark:ring-white/20 z-20">
 
                             <div class="py-2 max-h-72 overflow-y-auto">
 
@@ -100,10 +98,8 @@
 
                     <!-- Nút Sắp xếp -->
                     <div x-data="{ open: false }" class="relative inline-block text-left">
-                        <button @click="open = !open" class="inline-flex items-center rounded-full px-5 py-2 shadow-md text-white font-medium
-                                   bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600
-                                   border border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400
-                                   transition-transform duration-200">
+                        <button @click="open = !open"
+                            class="fi-btn fi-btn-secondary inline-flex items-center rounded-lg px-4 py-2 font-semibold">
                             Sắp xếp
                             <svg class="ml-2 h-5 w-5 transform transition-transform duration-200"
                                 :class="{ 'rotate-180': open }" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -119,7 +115,7 @@
                             x-transition:leave="transition ease-in duration-150"
                             x-transition:leave-start="opacity-100 translate-y-0"
                             x-transition:leave-end="opacity-0 translate-y-1"
-                            class="absolute left-0 mt-2 w-56 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-20">
+                            class="absolute left-0 mt-2 w-56 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-gray-950/5 dark:ring-white/20 z-20">
                             <div class="py-1">
                                 <a href="#" wire:click.prevent="sortCourses('newest')"
                                     class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Mới
@@ -138,18 +134,16 @@
                 <!-- Thanh tìm kiếm + nút Load lại -->
                 <div class="w-full md:w-1/2 lg:w-1/3 flex items-center space-x-2">
                     <div class="relative flex-1">
-                        <input type="text" wire:model="searchCourse" placeholder="Tìm kiếm..." class="w-full pl-12 pr-4 py-2.5 rounded-3xl border border-gray-300 dark:border-gray-600
-                                   bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-md
-                                   focus:outline-none focus:ring-4 focus:ring-indigo-400 focus:border-indigo-500
-                                   transition-all duration-300" />
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-4 cursor-pointer"
+                        <input type="text" wire:model="searchCourse" placeholder="Tìm kiếm..."
+                            class="w-full pl-10 pr-4 py-2 rounded-lg fi-input" />
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 cursor-pointer"
                             wire:click="searchCourses">
-                            <x-heroicon-s-magnifying-glass class="w-5 h-5 text-indigo-500" />
+                            <x-heroicon-s-magnifying-glass class="w-5 h-5 text-gray-400" />
                         </div>
                     </div>
                     <button onclick="window.location.reload()"
-                        class="p-2 text-green-500 hover:text-green-700 focus:outline-none">
-                        <x-heroicon-s-arrow-path class="w-6 h-6 animate-spin-slow" />
+                        class="fi-btn fi-btn-gray p-2">
+                        <x-heroicon-s-arrow-path class="w-5 h-5" />
                     </button>
 
 
