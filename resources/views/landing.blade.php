@@ -2,273 +2,127 @@
 <html lang="vi">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ZipLMS - Nền tảng quản lý học tập hiện đại</title>
-  <link rel="preconnect" href="https://fonts.bunny.net">
-  <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
-  <style>
-    body {
-      /* Generated a subtle striped background using CSS gradients.
-         - background-color: A dark gray base.
-         - background-image: Two repeating linear gradients to create a subtle, cross-hatched pattern of white lines.
-      */
-      background-color: #1a1a1a;
-      /* Dark gray base color */
-      background-image:
-        repeating-linear-gradient(45deg,
-          transparent,
-          transparent 30px,
-          rgba(255, 255, 255, 0.05) 30px,
-          rgba(255, 255, 255, 0.05) 31px),
-        repeating-linear-gradient(-45deg,
-          transparent,
-          transparent 30px,
-          rgba(255, 255, 255, 0.05) 30px,
-          rgba(255, 255, 255, 0.05) 31px);
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-      color: #fff;
-      font-family: 'Instrument Sans', sans-serif;
-      min-height: 100vh;
-      margin: 0;
+    <!-- ================== SEO Meta Tags ================== -->
+    <title>ZipLMS - Hệ thống LMS Mã nguồn mở miễn phí cho Quiz & Bài tập</title>
+    <meta name="description"
+        content="ZipLMS là hệ thống LMS mã nguồn mở miễn phí, giúp các trung tâm và doanh nghiệp nhỏ tạo, quản lý và chấm điểm các bài quiz và bài tập một cách hiệu quả.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ config('app.url') }}">
+
+    <!-- ================== Favicon Tags ================== -->
+    <link rel="icon" href="{{ asset('images/favicon.ico') }}" type="image/x-icon">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/favicon-16x16.png') }}">
+
+    <!-- ================== Social Media Meta Tags ================== -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ config('app.url') }}">
+    <meta property="og:title" content="ZipLMS - LMS Mã nguồn mở miễn phí cho Quiz & Bài tập">
+    <meta property="og:description"
+        content="Giải pháp đơn giản, miễn phí để tạo và quản lý bài kiểm tra trực tuyến cho các trung tâm và doanh nghiệp nhỏ.">
+    <meta property="og:image" content="{{ config('app.url') }}/images/social-preview.jpg">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ config('app.url') }}">
+    <meta property="twitter:title" content="ZipLMS - LMS Mã nguồn mở miễn phí cho Quiz & Bài tập">
+    <meta property="twitter:description"
+        content="Giải pháp đơn giản, miễn phí để tạo và quản lý bài kiểm tra trực tuyến cho các trung tâm và doanh nghiệp nhỏ.">
+    <meta property="twitter:image" content="{{ config('app.url') }}/images/social-preview.jpg">
+
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+
+    {{-- CSS is now loaded via Vite from resources/css/landing.css --}}
+    @vite(['resources/css/landing.css'])
+
+    <!-- ================== SEO: Structured Data (Schema.org) ================== -->
+    @verbatim
+        <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "ZipLMS",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web",
+      "description": "ZipLMS là một hệ thống LMS mã nguồn mở và miễn phí, tập trung vào việc giúp các trung tâm và doanh nghiệp nhỏ tạo, quản lý và chấm điểm các bài quiz và bài tập.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "VND"
+      },
+      "softwareHelp": {
+        "@type": "CreativeWork",
+        "url": "https://github.com/locshino/ziplms"
+      },
+      "codeRepository": "https://github.com/locshino/ziplms"
     }
-
-    .center {
-      /* Added a semi-transparent overlay to the main container to improve text readability */
-      background-color: rgba(0, 0, 0, 0.4);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 2rem 1rem;
-      /* Added padding for better spacing on small screens */
-    }
-
-    .gradient-title {
-      font-size: clamp(2.8rem, 1.5vw, 3rem);
-      font-weight: bold;
-      font-size: 12rem;
-      margin: 5px;
-      background: linear-gradient(to right,
-          #c169e4ff 20%,
-          #00affa 30%,
-          #5bb2d7ff 70%,
-          #e155c2ff 80%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-fill-color: transparent;
-      background-size: 500% auto;
-      animation: textShine 5s ease-in-out infinite alternate;
-    }
-
-    @keyframes textShine {
-      0% {
-        background-position: 0% 50%;
-      }
-
-      100% {
-        background-position: 100% 50%;
-      }
-    }
-
-    .gradient-title:hover {
-      font-variation-settings: "wght" 100, "ital" 0;
-      text-shadow: none;
-    }
-
-    .subtitle {
-      font-size: 2rem;
-      font-weight: 500;
-      margin-top: 12px;
-      margin-bottom: 18px;
-      text-align: center;
-    }
-
-    .desc {
-      font-size: 1.1rem;
-      max-width: 540px;
-      text-align: center;
-      margin-bottom: 32px;
-      color: #cfcfcf;
-    }
-
-    .access-btn {
-      background: linear-gradient(90deg, #7F56D9, #FF6B6B);
-      color: #fff;
-      font-size: 1.3rem;
-      font-weight: 700;
-      padding: 18px 54px;
-      border: none;
-      border-radius: 32px;
-      box-shadow: 0 0 32px 8px #7F56D980;
-      cursor: pointer;
-      margin-top: 36px;
-      margin-bottom: 48px;
-      transition: background 0.2s, transform 0.2s;
-    }
-
-    .access-btn:hover {
-      background: linear-gradient(90deg, #FF6B6B, #7F56D9);
-      transform: scale(1.07);
-      box-shadow: 0 0 48px 12px #FF6B6B80;
-    }
-
-    .timeline {
-      width: 100%;
-      max-width: 700px;
-      margin: 0 auto 48px auto;
-      position: relative;
-    }
-
-    .timeline-step {
-      display: flex;
-      align-items: flex-start;
-      margin-bottom: 48px;
-      position: relative;
-    }
-
-    .timeline-dot {
-      min-width: 44px;
-      min-height: 44px;
-      background: linear-gradient(135deg, #FF6B6B, #7F56D9);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #fff;
-      box-shadow: 0 0 18px 4px #7F56D980;
-      margin-right: 24px;
-      z-index: 1;
-      /* Ensure dot is above the line */
-    }
-
-    .timeline-content {
-      flex: 1;
-      background: rgba(255, 255, 255, 0.04);
-      border-radius: 16px;
-      padding: 18px 24px;
-      box-shadow: 0 2px 16px rgba(127, 86, 217, 0.10);
-      backdrop-filter: blur(5px);
-      /* Added blur effect for content boxes */
-    }
-
-    .timeline-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-
-    .timeline-desc {
-      font-size: 1rem;
-      color: #cfcfcf;
-    }
-
-    .timeline::before {
-      content: '';
-      position: absolute;
-      left: 22px;
-      top: 44px;
-      width: 4px;
-      height: calc(100% - 44px);
-      background: linear-gradient(180deg, #7F56D9 0%, #FF6B6B 100%);
-      border-radius: 2px;
-      z-index: 0;
-    }
-
-    .footer {
-      text-align: center;
-      color: #aaa;
-      font-size: 0.95rem;
-      margin-top: 64px;
-      margin-bottom: 16px;
-    }
-
-    @media (max-width: 600px) {
-      .gradient-title {
-        font-size: 2.8rem;
-      }
-
-      .subtitle {
-        font-size: 1.2rem;
-      }
-
-      .timeline-step {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .timeline-dot {
-        margin-bottom: 12px;
-        margin-right: 0;
-      }
-
-      .timeline-content {
-        padding: 14px 10px;
-      }
-    }
-  </style>
+    </script>
+    @endverbatim
 </head>
 
 <body>
-  <div class="center">
-    <h1 class="gradient-title">ZipLMS</h1>
-    <div class="subtitle">Nền tảng quản lý học tập hiện đại</div>
-    <div class="desc">
-      ZipLMS giúp tổ chức giáo dục và doanh nghiệp quản lý, phân phối, kiểm tra và mở rộng hoạt động học tập trực tuyến một cách bảo mật, hiệu quả và dễ dàng.
-    </div>
-    <a href="/app">
-      <button class="access-btn">Truy cập</button>
-    </a>
-    <div class="timeline">
-      <div class="timeline-step">
-        <div class="timeline-dot">1</div>
-        <div class="timeline-content">
-          <div class="timeline-title">Quản lý khóa học & bài kiểm tra</div>
-          <div class="timeline-desc">Tạo, phân phối, và theo dõi tiến độ học tập dễ dàng cho mọi đối tượng.</div>
-        </div>
-      </div>
-      <div class="timeline-step">
-        <div class="timeline-dot">2</div>
-        <div class="timeline-content">
-          <div class="timeline-title">Phân quyền vai trò linh hoạt</div>
-          <div class="timeline-desc">Quản trị viên, giáo viên, học sinh với quyền truy cập và chức năng riêng biệt.</div>
-        </div>
-      </div>
-      <div class="timeline-step">
-        <div class="timeline-dot">3</div>
-        <div class="timeline-content">
-          <div class="timeline-title">Giao diện quản trị Filament</div>
-          <div class="timeline-desc">Tùy chỉnh, trực quan, dễ sử dụng cho quản lý dữ liệu và báo cáo.</div>
-        </div>
-      </div>
-      <div class="timeline-step">
-        <div class="timeline-dot">4</div>
-        <div class="timeline-content">
-          <div class="timeline-title">Kiểm thử & bảo mật</div>
-          <div class="timeline-desc">Kiểm thử tự động, phân quyền, bảo vệ dữ liệu người dùng và hệ thống.</div>
-        </div>
-      </div>
-      <div class="timeline-step">
-        <div class="timeline-dot">5</div>
-        <div class="timeline-content">
-          <div class="timeline-title">Đa ngôn ngữ & thông báo</div>
-          <div class="timeline-desc">Hỗ trợ nhiều ngôn ngữ, gửi thông báo và sự kiện cho người dùng.</div>
-        </div>
-      </div>
-      <div class="timeline-step">
-        <div class="timeline-dot">6</div>
-        <div class="timeline-content">
-          <div class="timeline-title">Hỗ trợ mở rộng</div>
-          <div class="timeline-desc">Tích hợp các package, dễ dàng nâng cấp và mở rộng tính năng.</div>
-        </div>
-      </div>
-    </div>
-    <div class="footer">© 2025 ZipLMS. All rights reserved.</div>
-  </div>
+    <main class="container">
+        <header>
+            <h1 class="gradient-title">ZipLMS</h1>
+            <p class="subtitle">Hệ thống LMS mã nguồn mở & miễn phí</p>
+        </header>
+
+        <p class="desc">
+            Giải pháp đơn giản, dành cho các trung tâm và doanh nghiệp nhỏ cần một công cụ hiệu quả để tạo, quản lý và
+            chấm điểm các bài **quiz** và **bài tập** trực tuyến.
+        </p>
+
+        <a href="/app" class="access-btn">Truy cập nhanh</a>
+
+        <section class="timeline">
+            <div class="timeline-step">
+                <div class="timeline-dot">1</div>
+                <div class="timeline-content">
+                    <h2 class="timeline-title">Tạo Quiz và Bài tập Nhanh chóng</h2>
+                    <p class="timeline-desc">Xây dựng các bài kiểm tra trắc nghiệm, tự luận và bài tập thực hành một
+                        cách trực quan.</p>
+                </div>
+            </div>
+            <div class="timeline-step">
+                <div class="timeline-dot">2</div>
+                <div class="timeline-content">
+                    <h2 class="timeline-title">Quản lý Học viên & Lớp học</h2>
+                    <p class="timeline-desc">Dễ dàng thêm học viên, phân chia theo lớp và chỉ định bài tập cho từng
+                        nhóm.</p>
+                </div>
+            </div>
+            <div class="timeline-step">
+                <div class="timeline-dot">3</div>
+                <div class="timeline-content">
+                    <h2 class="timeline-title">Hệ thống Chấm điểm & Theo dõi Kết quả</h2>
+                    <p class="timeline-desc">Tự động chấm điểm trắc nghiệm và cung cấp công cụ để giáo viên chấm bài tự
+                        luận hiệu quả.</p>
+                </div>
+            </div>
+            <div class="timeline-step">
+                <div class="timeline-dot">4</div>
+                <div class="timeline-content">
+                    <h2 class="timeline-title">Mã nguồn mở & Tự do Tùy chỉnh</h2>
+                    <p class="timeline-desc">Xây dựng trên Laravel & Filament. Bạn toàn quyền sở hữu, tùy chỉnh và mở
+                        rộng hệ thống.</p>
+                </div>
+            </div>
+            <div class="timeline-step">
+                <div class="timeline-dot">5</div>
+                <div class="timeline-content">
+                    <h2 class="timeline-title">Miễn phí và Dễ dàng Triển khai</h2>
+                    <p class="timeline-desc">Không chi phí bản quyền. Bạn có thể tự triển khai trên hosting của mình chỉ
+                        trong vài bước.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">© 2025 ZipLMS - Một sản phẩm mã nguồn mở.</footer>
+    </main>
 </body>
 
 </html>
