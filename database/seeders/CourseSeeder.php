@@ -7,6 +7,7 @@ use App\Enums\System\RoleSystem;
 use App\Models\Course;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 
 class CourseSeeder extends Seeder
 {
@@ -15,82 +16,33 @@ class CourseSeeder extends Seeder
      */
     public function run(): void
     {
-
-        // Get teachers, managers, students
+        // Get users by role
         $teachers = User::role(RoleSystem::TEACHER->value)->get();
         $managers = User::role(RoleSystem::MANAGER->value)->get();
         $students = User::role(RoleSystem::STUDENT->value)->get();
 
-        $coursesData = [
-            [
-                'title' => 'PHP cơ bản cho người mới bắt đầu',
-                'description' => 'Khóa học này cung cấp kiến thức nền tảng về ngôn ngữ lập trình PHP, giúp bạn xây dựng các trang web động đầu tiên. Chúng ta sẽ tìm hiểu về biến, kiểu dữ liệu, câu lệnh điều khiển, hàm, và cách tương tác với cơ sở dữ liệu MySQL.',
-                'tags' => ['Programming', 'Web Development', 'PHP', 'MySQL'],
-            ],
-            [
-                'title' => 'Laravel Framework từ A-Z',
-                'description' => 'Trở thành chuyên gia Laravel qua khóa học toàn diện này. Bạn sẽ học cách xây dựng một ứng dụng web hoàn chỉnh từ đầu, bao gồm routing, Eloquent ORM, Blade templating, authentication, và triển khai ứng dụng.',
-                'tags' => ['Web Development', 'Laravel', 'PHP', 'Framework'],
-            ],
-            [
-                'title' => 'JavaScript nâng cao và ES6+',
-                'description' => 'Đi sâu vào các khái niệm nâng cao của JavaScript như closures, prototypes, async/await, và các tính năng mới trong ES6+. Khóa học dành cho những ai muốn làm chủ JavaScript và viết code hiệu quả hơn.',
-                'tags' => ['Programming', 'Web Development', 'JavaScript', 'ES6'],
-            ],
-            [
-                'title' => 'Xây dựng giao diện với ReactJS và Redux',
-                'description' => 'Học cách xây dựng giao diện người dùng hiện đại và có khả năng mở rộng với ReactJS. Khóa học bao gồm component, state, props, hooks, và quản lý state phức tạp với Redux.',
-                'tags' => ['Web Development', 'JavaScript', 'ReactJS', 'UI/UX Design'],
-            ],
-            [
-                'title' => 'Lập trình Backend với Node.js và Express',
-                'description' => 'Xây dựng các API RESTful mạnh mẽ và nhanh chóng bằng Node.js và framework Express. Bạn sẽ học cách xử lý request, middleware, kết nối database, và xác thực người dùng.',
-                'tags' => ['Programming', 'Web Development', 'Node.js', 'API'],
-            ],
-            [
-                'title' => 'Quản trị Cơ sở dữ liệu MySQL',
-                'description' => 'Khóa học này dạy bạn cách thiết kế, triển khai và quản trị cơ sở dữ liệu MySQL. Nội dung bao gồm thiết kế lược đồ, viết truy vấn SQL phức tạp, tối ưu hóa hiệu năng và bảo mật.',
-                'tags' => ['Database', 'MySQL', 'SQL', 'System Administration'],
-            ],
-            [
-                'title' => 'Nhập môn Khoa học Dữ liệu với Python',
-                'description' => 'Bắt đầu hành trình vào thế giới khoa học dữ liệu. Bạn sẽ học cách sử dụng các thư viện Python phổ biến như Pandas, NumPy, và Matplotlib để phân tích, xử lý và trực quan hóa dữ liệu.',
-                'tags' => ['Data Science', 'Python', 'Pandas', 'NumPy'],
-            ],
-            [
-                'title' => 'Học máy cho người bắt đầu',
-                'description' => 'Tìm hiểu các khái niệm cơ bản của học máy và xây dựng các mô hình dự đoán đầu tiên của bạn. Khóa học bao gồm hồi quy, phân loại, và gom cụm bằng thư viện Scikit-learn.',
-                'tags' => ['Machine Learning', 'Artificial Intelligence', 'Python', 'Scikit-learn'],
-            ],
-            [
-                'title' => 'Thiết kế UI/UX cho ứng dụng Web',
-                'description' => 'Học các nguyên tắc cơ bản của thiết kế giao diện và trải nghiệm người dùng. Bạn sẽ thực hành với các công cụ như Figma để tạo ra các wireframe, mockup, và prototype cho dự án web.',
-                'tags' => ['UI/UX Design', 'Design', 'Figma'],
-            ],
-            [
-                'title' => 'DevOps Essentials: CI/CD với Docker và Jenkins',
-                'description' => 'Tìm hiểu về văn hóa DevOps và cách tự động hóa quy trình phát triển và triển khai phần mềm. Khóa học tập trung vào việc sử dụng Docker để container hóa ứng dụng và Jenkins để xây dựng pipeline CI/CD.',
-                'tags' => ['DevOps', 'Cloud Computing', 'Docker', 'CI/CD'],
-            ],
-        ];
+        if ($teachers->isEmpty() || $students->isEmpty()) {
+            $this->command->warn('Cannot seed courses without teachers and students.');
+
+            return;
+        }
+
+        $coursesData = $this->getCoursesData();
 
         foreach ($coursesData as $index => $courseData) {
-            // Create courses with different time periods
+            // Create courses with varied and logical time periods
             if ($index < 3) {
-                // Past courses (finished)
-                $startDate = now()->subMonths(rand(3, 12));
-                $durationWeeks = rand(4, 12);
-                $endDate = $startDate->copy()->addWeeks($durationWeeks);
-            } elseif ($index < 6) {
-                // Ongoing courses (currently active)
-                $startDate = now()->subWeeks(rand(1, 8));
-                $durationWeeks = rand(4, 12);
-                $endDate = $startDate->copy()->addWeeks($durationWeeks);
+                // 3 Past courses (already finished)
+                $startDate = now()->subMonths(rand(4, 12));
+                $endDate = $startDate->copy()->addWeeks(rand(8, 12));
+            } elseif ($index < 7) {
+                // 4 Ongoing courses (currently active, centered around now)
+                $startDate = now()->subWeeks(rand(2, 4));
+                $endDate = now()->addWeeks(rand(4, 8));
             } else {
-                // Future courses (not started yet)
-                $startDate = now()->addDays(rand(7, 180));
-                $durationWeeks = rand(4, 12);
-                $endDate = $startDate->copy()->addWeeks($durationWeeks);
+                // 3 Future courses (not started yet)
+                $startDate = now()->addDays(rand(14, 90));
+                $endDate = $startDate->copy()->addWeeks(rand(8, 12));
             }
 
             $course = Course::factory()->create([
@@ -102,34 +54,89 @@ class CourseSeeder extends Seeder
                 'end_at' => $endDate,
             ]);
 
-            // Attach tags
+            // Attach tags to the course
             $course->syncTags($courseData['tags']);
 
-            // Assign 2 managers to each course with enrollment dates
-            $courseManagers = $managers->random(min(2, $managers->count()));
-            foreach ($courseManagers as $manager) {
-                // Managers usually join before or at course start
-                $managerStartDate = $startDate->copy()->subDays(rand(1, 30));
-                $managerEndDate = $endDate->copy()->addDays(rand(0, 30)); // May stay longer for course management
-
-                $course->users()->attach($manager->id, [
-                    'start_at' => $managerStartDate,
-                    'end_at' => $managerEndDate,
-                ]);
-            }
-
-            // Assign students to the course with enrollment dates
-            $courseStudents = $students->random(min(30, $students->count()));
-            foreach ($courseStudents as $student) {
-                // Students can join before, at, or slightly after course start
-                $studentStartDate = $startDate->copy()->addDays(rand(-14, 7));
-                $studentEndDate = $endDate; // Students finish with the course
-
-                $course->users()->attach($student->id, [
-                    'start_at' => $studentStartDate,
-                    'end_at' => $studentEndDate,
-                ]);
-            }
+            // Enroll managers and students
+            $this->enrollUsers($course, $managers, 2, $startDate, $endDate);
+            $this->enrollUsers($course, $students, 30, $startDate, $endDate);
         }
+    }
+
+    /**
+     * Enroll a random set of users into a course.
+     */
+    private function enrollUsers(Course $course, Collection $users, int $count, \DateTime $courseStart, \DateTime $courseEnd): void
+    {
+        $enrolledUsers = $users->random(min($count, $users->count()));
+
+        foreach ($enrolledUsers as $user) {
+            $enrollmentStart = $courseStart->copy()->subDays(rand(1, 14));
+            $enrollmentEnd = $courseEnd;
+
+            $course->users()->attach($user->id, [
+                'start_at' => $enrollmentStart,
+                'end_at' => $enrollmentEnd,
+            ]);
+        }
+    }
+
+    /**
+     * Get the course data.
+     */
+    private function getCoursesData(): array
+    {
+        return [
+            [
+                'title' => 'PHP cơ bản cho người mới bắt đầu',
+                'description' => 'Khóa học này cung cấp kiến thức nền tảng về ngôn ngữ lập trình PHP, giúp bạn xây dựng các trang web động đầu tiên.',
+                'tags' => ['Programming', 'Web Development', 'PHP', 'MySQL'],
+            ],
+            [
+                'title' => 'Laravel Framework từ A-Z',
+                'description' => 'Trở thành chuyên gia Laravel qua khóa học toàn diện này. Bạn sẽ học cách xây dựng một ứng dụng web hoàn chỉnh từ đầu.',
+                'tags' => ['Web Development', 'Laravel', 'PHP', 'Framework'],
+            ],
+            [
+                'title' => 'JavaScript nâng cao và ES6+',
+                'description' => 'Đi sâu vào các khái niệm nâng cao của JavaScript như closures, prototypes, async/await, và các tính năng mới trong ES6+.',
+                'tags' => ['Programming', 'Web Development', 'JavaScript', 'ES6'],
+            ],
+            [
+                'title' => 'Xây dựng giao diện với ReactJS và Redux',
+                'description' => 'Học cách xây dựng giao diện người dùng hiện đại và có khả năng mở rộng với ReactJS, bao gồm hooks và Redux.',
+                'tags' => ['Web Development', 'JavaScript', 'ReactJS', 'UI/UX Design'],
+            ],
+            [
+                'title' => 'Lập trình Backend với Node.js và Express',
+                'description' => 'Xây dựng các API RESTful mạnh mẽ và nhanh chóng bằng Node.js và framework Express.',
+                'tags' => ['Programming', 'Web Development', 'Node.js', 'API'],
+            ],
+            [
+                'title' => 'Quản trị Cơ sở dữ liệu MySQL',
+                'description' => 'Khóa học này dạy bạn cách thiết kế, triển khai và quản trị cơ sở dữ liệu MySQL cho các ứng dụng lớn.',
+                'tags' => ['Database', 'MySQL', 'SQL', 'System Administration'],
+            ],
+            [
+                'title' => 'Nhập môn Khoa học Dữ liệu với Python',
+                'description' => 'Bắt đầu hành trình vào thế giới khoa học dữ liệu. Bạn sẽ học cách sử dụng Pandas, NumPy, và Matplotlib.',
+                'tags' => ['Data Science', 'Python', 'Pandas', 'NumPy'],
+            ],
+            [
+                'title' => 'Học máy cho người bắt đầu',
+                'description' => 'Tìm hiểu các khái niệm cơ bản của học máy và xây dựng các mô hình dự đoán đầu tiên bằng Scikit-learn.',
+                'tags' => ['Machine Learning', 'AI', 'Python', 'Scikit-learn'],
+            ],
+            [
+                'title' => 'Thiết kế UI/UX cho ứng dụng Web',
+                'description' => 'Học các nguyên tắc cơ bản của thiết kế giao diện và trải nghiệm người dùng với công cụ Figma.',
+                'tags' => ['UI/UX Design', 'Design', 'Figma'],
+            ],
+            [
+                'title' => 'DevOps Essentials: CI/CD với Docker và Jenkins',
+                'description' => 'Tìm hiểu về văn hóa DevOps và cách tự động hóa quy trình phát triển và triển khai phần mềm.',
+                'tags' => ['DevOps', 'Cloud Computing', 'Docker', 'CI/CD'],
+            ],
+        ];
     }
 }
