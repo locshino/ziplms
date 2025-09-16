@@ -65,4 +65,9 @@ class QuizServiceException extends Exception
     {
         return new self('Database error'.($msg ? ": $msg" : ''));
     }
+
+    public static function cacheError($msg = null): self
+    {
+        return new self('Cache error'.($msg ? ": $msg" : ''));
+    }
 }
