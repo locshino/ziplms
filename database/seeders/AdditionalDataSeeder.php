@@ -2,12 +2,16 @@
 
 namespace Database\Seeders;
 
-use App\Enums\Status\BadgeConditionStatus;
-use App\Models\Badge;
-use App\Models\BadgeCondition;
+use App\Enums\Status\SubmissionStatus;
+use App\Models\Assignment;
+use App\Models\Course;
+use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Models\StudentQuizAnswer;
+use App\Models\Submission;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class AdditionalDataSeeder extends Seeder
 {
@@ -16,104 +20,120 @@ class AdditionalDataSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->createBadgeConditions();
+        // This seeder should run after all main data has been created.
+        $this->command->info('Running additional data seeder...');
+
+        $this->seedDefaultUserExperience();
         $this->createStudentQuizAnswers();
+
+        $this->command->info('Additional data seeding completed.');
     }
 
     /**
-     * Create badge conditions and link them to badges.
+     * Create a realistic testing scenario for default user accounts.
+     * This method enrolls default users into an active course and creates
+     * submissions/attempts for them, making it easy to test role-specific workflows.
      */
-    private function createBadgeConditions(): void
+    private function seedDefaultUserExperience(): void
     {
-        $badges = Badge::all();
+        $this->command->info('Seeding default user experience...');
 
-        // Create badge conditions
-        $conditions = collect();
+        $student = User::where('email', 'student@example.com')->first();
+        $teacher = User::where('email', 'teacher@example.com')->first();
+        $manager = User::where('email', 'manager@example.com')->first();
 
-        // Course completion conditions
-        for ($i = 0; $i < 3; $i++) {
-            $condition = BadgeCondition::factory()->create([
-                'title' => 'Complete '.fake()->numberBetween(1, 5).' Courses',
-                'condition_type' => 'course_completion',
-                'status' => BadgeConditionStatus::ACTIVE->value,
-            ]);
-            $conditions->push($condition);
+        if (! $student || ! $teacher || ! $manager) {
+            $this->command->warn('Default users not found. Skipping user experience seeding.');
+
+            return;
         }
 
-        // Quiz score conditions
-        for ($i = 0; $i < 3; $i++) {
-            $condition = BadgeCondition::factory()->create([
-                'title' => 'Score '.fake()->numberBetween(80, 100).'% on Quizzes',
-                'condition_type' => 'quiz_score',
-                'status' => BadgeConditionStatus::ACTIVE->value,
-            ]);
-            $conditions->push($condition);
+        // Find an ongoing course to use as a testing ground
+        $testCourse = Course::where('start_at', '<', now())
+            ->where('end_at', '>', now())
+            ->has('assignments')
+            ->has('quizzes')
+            ->first();
+
+        if (! $testCourse) {
+            $this->command->warn('No suitable ongoing course found for default users.');
+
+            return;
         }
 
-        // Assignment submission conditions
-        for ($i = 0; $i < 2; $i++) {
-            $condition = BadgeCondition::factory()->create([
-                'title' => 'Submit '.fake()->numberBetween(5, 20).' Assignments',
-                'condition_type' => 'assignment_submission',
-                'status' => BadgeConditionStatus::ACTIVE->value,
-            ]);
-            $conditions->push($condition);
-        }
+        // 1. Assign the default teacher to the course
+        $testCourse->update(['teacher_id' => $teacher->id]);
 
-        // Login streak conditions
-        $condition = BadgeCondition::factory()->create([
-            'title' => 'Login for '.fake()->numberBetween(7, 30).' Consecutive Days',
-            'condition_type' => 'login_streak',
-            'status' => BadgeConditionStatus::ACTIVE->value,
+        // 2. Enroll the default student and manager
+        $enrollmentData = [
+            'start_at' => $testCourse->start_at,
+            'end_at' => $testCourse->end_at,
+        ];
+        $testCourse->users()->syncWithoutDetaching([
+            $student->id => $enrollmentData,
+            $manager->id => $enrollmentData,
         ]);
-        $conditions->push($condition);
 
-        // Points earned conditions
-        $condition = BadgeCondition::factory()->create([
-            'title' => 'Earn '.fake()->numberBetween(100, 1000).' Points',
-            'condition_type' => 'points_earned',
-            'status' => BadgeConditionStatus::ACTIVE->value,
-        ]);
-        $conditions->push($condition);
-
-        // Link conditions to badges
-        foreach ($badges as $badge) {
-            $badgeConditions = $conditions->random(fake()->numberBetween(1, 3));
-            foreach ($badgeConditions as $condition) {
-                $badge->conditions()->attach($condition->id, [
-                    'status' => BadgeConditionStatus::ACTIVE->value,
-                ]);
-            }
+        // 3. Create a submission for the default student that needs grading
+        $assignment = $testCourse->assignments()->wherePivot('start_at', '<', now())->first();
+        if ($assignment) {
+            Submission::factory()->create([
+                'assignment_id' => $assignment->id,
+                'student_id' => $student->id,
+                'status' => SubmissionStatus::SUBMITTED->value,
+                'submitted_at' => now()->subDay(),
+                'content' => 'Đây là bài nộp của học sinh mặc định để giáo viên kiểm tra.',
+            ]);
         }
+
+        // 4. Create a completed quiz attempt for the default student
+        $quiz = $testCourse->quizzes()->wherePivot('start_at', '<', now())->first();
+        if ($quiz) {
+            QuizAttempt::factory()->create([
+                'quiz_id' => $quiz->id,
+                'student_id' => $student->id,
+                'start_at' => now()->subHours(2),
+                'end_at' => now()->subHours(1), // Completed
+                'points' => null, // Not yet graded
+            ]);
+        }
+
+        $this->command->info("Default users have been assigned to course '{$testCourse->title}'.");
     }
 
     /**
      * Create student quiz answers for completed quiz attempts.
+     * This populates the details of what a student answered in a quiz.
      */
     private function createStudentQuizAnswers(): void
     {
-        // Get completed and graded quiz attempts
-        $quizAttempts = QuizAttempt::whereIn('status', ['completed', 'graded'])->get();
+        $this->command->info('Creating student answers for quiz attempts...');
 
-        foreach ($quizAttempts as $attempt) {
-            $quiz = $attempt->quiz;
-            $questions = $quiz->questions;
+        // Get completed attempts that don't have answers yet
+        $attempts = QuizAttempt::whereNotNull('end_at')
+            ->whereDoesntHave('studentAnswers')
+            ->with('quiz.questions.answerChoices')
+            ->get();
 
-            foreach ($questions as $question) {
-                // 70% chance of correct answer, 30% chance of incorrect
-                $isCorrect = fake()->boolean(70);
+        foreach ($attempts as $attempt) {
+            foreach ($attempt->quiz->questions as $question) {
+                // 75% chance of answering correctly
+                $isCorrect = fake()->boolean(75);
+                $choices = $question->answerChoices;
 
-                if ($isCorrect) {
-                    $answerChoice = $question->answerChoices()->where('is_correct', true)->first();
-                } else {
-                    $answerChoice = $question->answerChoices()->where('is_correct', false)->first();
+                if ($choices->isEmpty()) {
+                    continue;
                 }
 
-                if ($answerChoice) {
-                    StudentQuizAnswer::factory()->create([
+                $chosenAnswer = $choices->where('is_correct', $isCorrect)->first()
+                    ?? $choices->where('is_correct', ! $isCorrect)->first();
+
+                if ($chosenAnswer) {
+                    // Create each answer individually to allow the model to generate UUIDs
+                    StudentQuizAnswer::create([
                         'quiz_attempt_id' => $attempt->id,
                         'question_id' => $question->id,
-                        'answer_choice_id' => $answerChoice->id,
+                        'answer_choice_id' => $chosenAnswer->id,
                     ]);
                 }
             }

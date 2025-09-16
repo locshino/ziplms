@@ -15,9 +15,10 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create roles first (always check, not cached separately)
+        // Create roles first
         $this->createRoles();
 
+        // Create a default user for each role for easy testing
         foreach ($this->getDefaultUsers() as $userInfo) {
             $this->createDefaultUser($userInfo['name'], $userInfo['email'], $userInfo['role']);
         }
@@ -33,12 +34,16 @@ class UserSeeder extends Seeder
      */
     private function createDefaultUser(string $name, string $email, string $role): void
     {
-        $user = User::factory()->create([
-            'name' => $name,
-            'email' => $email,
-            'email_verified_at' => now(),
-            'status' => UserStatus::ACTIVE->value,
-        ]);
+        // Use updateOrCreate to avoid duplication issues on re-seeding
+        $user = User::updateOrCreate(
+            ['email' => $email],
+            [
+                'name' => $name,
+                'email_verified_at' => now(),
+                'status' => UserStatus::ACTIVE->value,
+                'password' => bcrypt('password'), // Set a default password
+            ]
+        );
         $user->assignRole($role);
     }
 
@@ -52,6 +57,7 @@ class UserSeeder extends Seeder
             'status' => UserStatus::ACTIVE->value,
         ]);
 
+        // Use mass assignment for better performance
         foreach ($users as $user) {
             $user->assignRole($role->value);
         }
