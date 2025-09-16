@@ -21,7 +21,9 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Malzariey\FilamentDaterangepickerFilter\Filters\DateRangeFilter;
-use pxlrbt\FilamentExcel\Actions\ExportBulkAction;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+use pxlrbt\FilamentExcel\Columns\Column;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class CoursesTable
 {
@@ -114,7 +116,28 @@ class CoursesTable
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                 ]),
-                ExportBulkAction::make(),
+                ExportBulkAction::make()->exports([
+                    ExcelExport::make()->withColumns([
+                        Column::make('title')
+                            ->heading(__('resource_course.table.columns.title')),
+                        Column::make('teacher.name')
+                            ->heading(__('resource_course.table.columns.teacher.name')),
+                        Column::make('start_at')
+                            ->heading(__('resource_course.table.columns.start_at')),
+                        Column::make('end_at')
+                            ->heading(__('resource_course.table.columns.end_at')),
+                        Column::make('status')
+                            ->heading(__('resource_course.table.columns.status')),
+                        Column::make('price')
+                            ->heading(__('resource_course.table.columns.price')),
+                        Column::make('created_at')
+                            ->heading(__('resource_course.table.columns.created_at')),
+                    ])
+                        ->askForFilename()
+                        ->askForWriterType()
+                        ->queue()
+                        ->withChunkSize(100),
+                ]),
             ]);
     }
 }
